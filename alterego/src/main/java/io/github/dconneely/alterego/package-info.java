@@ -1,0 +1,2 @@
+/** Deterministic pseudonymisation: the public API and built-in transformations. */
+package io.github.dconneely.alterego;
