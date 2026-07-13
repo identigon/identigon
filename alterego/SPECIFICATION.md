@@ -571,7 +571,11 @@ Scotland, `NI...` is Northern Ireland). Record coherence lets related fields agr
 ### 6.1 RecordScope
 
 A `RecordScope` bounds one record's transformation. It is created per record, used from a single
-thread, and closed when the record is done (its attributes are then discarded):
+thread, and closed when the record is done (its attributes are then discarded). A single thread is
+not an arbitrary restriction: first-touch-wins (section 6.2) only has one deterministic winner if
+"first" is well-defined, and it is not across threads, which race. A parallel *stream of records*
+is fine — each element gets its own scope, and each scope still sees only one thread — but never
+share one `RecordScope` instance across threads:
 
 ```java
 try (RecordScope rec = alterego.record()) {          // or: alterego.record("case-12345")

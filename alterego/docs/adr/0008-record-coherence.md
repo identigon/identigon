@@ -40,5 +40,7 @@ Outside any scope, the same strategy code runs unchanged: `get` is empty, `set` 
 - Stored/unique mappings predate record attributes and are returned as-is; strict coherence
   plus persistent mappings requires the caller to scope the store deliberately. Documented
   caveat.
-- Scopes are single-threaded and per-record; parallel record streams create one scope per
-  element.
+- A `RecordScope` instance must be used from one thread only: first-touch-wins has exactly one
+  deterministic winner only if "first" is well-defined, which requires a single thread — across
+  threads it is a race, and the whole point of `RecordScope` is deterministic coherence. This is
+  cheap to satisfy: a parallel stream of records just gives each element its own scope.
