@@ -14,7 +14,7 @@ import java.util.Map;
  * Generates the frozen conformance vector fixtures under {@code src/test/resources/vectors/}
  * from this milestone's implementation of Appendix A. Run once via {@code main}; the output is
  * reviewed by hand (see the human review gate in {@code docs/tasks/M1.md}) and then never
- * regenerated (CLAUDE.md invariant 2).
+ * regenerated.
  */
 final class VectorGenerator {
 

@@ -185,7 +185,7 @@ AlterEgo alterego = AlterEgo.builder()
   rejects them). Accepted as `byte[]` or `char[]`; a `char[]` is converted via UTF-8.
 - **Locale**: defaults to the fixed constant `Locale.UK` (`en-GB`) — this library's primary
   deployment. A *fixed* default is deterministic on every machine; what remains banned is
-  `Locale.getDefault()`, which would tie output to machine configuration (ADR 0006). Non-GB
+  `Locale.getDefault()`, which would tie output to machine configuration (ADR 0006). Non-UK
   users configure explicitly; an unshipped country fails fast (section 4). v1 built-ins consult
   only the locale's **country**; the language component steers nothing yet.
 
@@ -300,14 +300,14 @@ options.
 
 Realistic replacement values are a property of the **country**, not the language. A dataset in
 Welsh is not a dataset about Wales, just as `en-GB` implies the English language, not an England
-location: names, towns, streets, postcodes, and phone numbers in GB data are GB-wide whatever
-language the application speaks. Everything the built-ins consult — dictionaries (names, towns,
+location: names, towns, streets, postcodes, and phone numbers in data are UK-wide regardless the
+language of the application. Everything the built-ins consult — dictionaries (names, towns,
 streets, organisation components) and structural rules (postcode formats, fictional phone
 ranges, recognised legal suffixes) — therefore resolves by the locale's **country**: exact
 country match, else `AlterEgoConfigException` (never a silent borrow from another country). The
-GB dictionaries are GB-wide pools that naturally include Welsh, Scottish, and Northern Irish
-names and places; town and street entries use their English-language forms (Swansea, not
-Abertawe), matching what data stores typically hold.
+dictionaries are UK-wide pools that naturally include Welsh, Scottish, and Northern Irish
+names and places; although currently town and street entries use their English-language forms
+(Swansea, not Abertawe).
 
 Consequences: `cy-GB` and `en-GB` are configuration synonyms for the v1 built-ins (an
 equivalence test enforces this, section 10); a locale without a country (e.g. `Locale.of("en")`)
@@ -325,16 +325,15 @@ a message. Where such a region exists, the built-in generates inside it **by def
 |------------------------------|------------------------------|---------------------------------------|
 | `emailAddress()`             | never a working mailbox      | RFC 2606 reserved domains             |
 |                              |                              | (`example.com`, `.org`, `.net`)       |
-| `phoneNumber()` GB           | never a connectable number   | Ofcom drama ranges (e.g.              |
+| `phoneNumber()`              | never a connectable number   | Ofcom drama ranges (e.g.              |
 |                              |                              | `020 7946 0xxx`, `07700 900xxx`,      |
 |                              |                              | `01632 960xxx`)                       |
-| `phoneNumber()` US (post-v1) | never allocated              | `555-0100`–`555-0199` fictional range |
-| `postcode()` GB              | never a deliverable postcode | plausible outward code, but the       |
+| `postcode()`                 | never a deliverable postcode | plausible outward code, but the       |
 |                              |                              | inward code ends in a letter never    |
 |                              |                              | used in real postcodes (`C I K M O V`)|
 
-Guarantees key on the locale's **country** (section 4 intro): any GB locale, whatever its
-language, gets the GB mechanisms.
+Guarantees key on the locale's **country** (section 4 intro): any UK locale (ISO code `GB`),
+whatever its language, gets the UK mechanisms.
 
 Two things follow from the mechanism and are documented plainly:
 
@@ -356,15 +355,19 @@ synthetic. Candidate future additions in the same spirit: TEST-NET IP addresses 
 ### 4.2 People and organisations
 
 | Method               | Behaviour                                                       |
-|----------------------|------------------------------------------------------------------|
+|----------------------|-----------------------------------------------------------------|
 | `firstName()`        | Replacement drawn from the country's first-name dictionary.     |
 | `lastName()`         | Replacement drawn from the country's surname dictionary.        |
 | `fullName()`         | Tokenises and delegates to the name strategies (see below).     |
 | `organisationName()` | Generated from country-appropriate component lists, preserving  |
 |                      | a recognised legal suffix if present. Recognised suffixes are a |
-|                      | per-country resource; GB includes both the English forms        |
-|                      | ("Ltd", "plc") and the Welsh company forms permitted by         |
-|                      | Companies House ("Cyf.", "c.c.c.").                             |
+|                      | per-country resource; UK includes both the English forms        |
+|                      | ("Ltd", "plc") and the Welsh company forms ("Cyf.", "c.c.c.").  |
+
+The Welsh suffixes are the abbreviated forms Companies Act 2006 ss.58(2) and 59(2) permit as
+alternatives to "plc"/"public limited company" and "Ltd"/"Limited" respectively for a Welsh
+company; the Act also permits the corresponding full Welsh words ("cwmni cyfyngedig cyhoeddus",
+"cyfyngedig"), not shipped as separate dictionary entries in v1.
 
 Dictionary entries are emitted as stored (title case); v1 does not mirror the input's casing.
 
@@ -396,13 +399,12 @@ Options (per-transformation, e.g. `firstName(NameOptions.preserveInitial())`):
 | Method            | Behaviour                                                            |
 |-------------------|----------------------------------------------------------------------|
 | `streetAddress()` | House number drawn deterministically from 1–299, plus a complete     |
-|                   | street name from the country's dictionary. The GB list includes both |
-|                   | suffix-form English names ("Acacia Avenue") and prefix-form Welsh    |
-|                   | names ("Heol y Bont"), as found across GB — the dictionary, not the  |
-|                   | code, owns the shape.                                                |
+|                   | street name composed from the country's dictionary (a theme word     |
+|                   | plus a type word, e.g. "Victoria Road") — the dictionary, not the    |
+|                   | code, owns the vocabulary.                                           |
 | `city()`          | Replacement from the country's town/city dictionary.                 |
 | `postcode()`      | Country-specific format with the fictionality guarantee of 4.1 where |
-|                   | the country defines one (GB: impossible inward-code letters).        |
+|                   | the country defines one (UK: impossible inward-code letters).        |
 
 Inside a record scope, `city()`, `postcode()`, and `phoneNumber()` cohere via record attributes
 (section 6.3): the first of them to run ties down the record's place, and the others follow it.
@@ -649,13 +651,13 @@ Record attributes are **not** the `MappingStore` and deliberately do not use its
 is persistent, cross-record, and pluggable; attributes are ephemeral, intra-record, in-memory
 state with the scope's lifetime — nothing about them needs to be pluggable (ADR 0008).
 
-### 6.3 Built-in coherence (GB)
+### 6.3 Built-in coherence
 
-The GB built-ins share two published attribute keys (constants on `AlterEgoAttributes`):
+The built-ins share two published attribute keys (constants on `AlterEgoAttributes`):
 
-- `GB_POSTCODE_AREA` (`String`, e.g. `"M"` for Manchester) — set by `city()` from the chosen
+- `UK_POSTCODE_AREA` (`String`, e.g. `"M"` for Manchester) — set by `city()` from the chosen
   town's dictionary tag, or resolved by `postcode()` if it runs first.
-- `GB_COUNTRY` (`GbCountry` enum: `ENGLAND`, `WALES`, `SCOTLAND`, `NORTHERN_IRELAND`) — implied
+- `UK_NATION` (`UkNation` enum: `ENGLAND`, `WALES`, `SCOTLAND`, `NORTHERN_IRELAND`) — implied
   by the postcode area.
 
 Behaviour inside a scope: `city()` picks a town consistent with an already-fixed area, otherwise
@@ -666,7 +668,7 @@ and falls back to the geography-neutral `01632 960xxx` range when no matching dr
 — coherence is best-effort, fictionality is not.
 
 Custom strategies join in the same way — e.g. a Companies House number strategy reads or resolves
-`GB_COUNTRY` and picks its prefix (`SC`, `NI`, none) accordingly, and conversely a strategy that
+`UK_NATION` and picks its prefix (`SC`, `NI`, none) accordingly, and conversely a strategy that
 knows the country can `set` it for later fields.
 
 **Interaction with `stored()`/`unique()`**: attributes steer *newly generated* candidates only.
@@ -724,10 +726,35 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
 - **No runtime dependencies.** Test dependencies: JUnit Jupiter, and jqwik for property-based
   determinism tests.
 - Dictionaries and structural-rule tables are plain-text resource files, UTF-8, under
-  `dictionaries/<country>/<name>.txt` (ISO 3166-1 alpha-2, e.g. `GB`), each with a version and
+  `src/main/resources/dictionaries/<country>/<name>.txt` (ISO 3166-1 alpha-2, e.g. `GB`) —
+  under `src/main/resources`, not the repo root, since they are loaded as classpath resources
+  at runtime (`getResourceAsStream`), not read from the filesystem — each with a version and
   provenance header comment. One entry per line: the value, optionally followed by tab-separated
-  tag fields (e.g. a town's postcode area and UK country). v1 ships `GB`; lookup rules are
+  tag fields (e.g. a town's postcode area and country). Lookup rules are
   defined in section 4.
+- **Provenance header, required for every dictionary file derived from downloaded data** — a
+  comment block naming: the source (organisation and dataset name), the exact original URL of
+  the data as downloaded, the licence name and its exact original URL, and the retrieval date.
+  The full licence text is additionally committed once per licence (not per file) under
+  `src/main/resources/dictionaries/LICENCES/<licence-name>.txt`, referenced by name from each
+  file's header — so
+  redistribution terms are traceable without relying on an external link staying live. A
+  dictionary file with no header, or one citing a licence with no matching committed text, fails
+  the build-time well-formedness check (section 10).
+- **Licence: MIT**, in a root file named `LICENCE` (UK spelling for the filename; the licence's
+  own canonical text and title — "MIT License" — are left as written, since that is its
+  official name). MIT covers the source code only; it does not relicense the bundled OGL data.
+  `LICENCE`'s own text says so explicitly and points to `NOTICE`, so the split is clear to
+  anyone reading the licence, not just to anyone who happens to notice a second file exists.
+- **`NOTICE` file**, at the repository root, consolidating the exact required attribution
+  string for every dictionary source in use. Attribution obligations under licences like OGL
+  follow the data wherever it is redistributed — including transitively, since every application
+  that depends on AlterEgo also redistributes the bundled dictionary data — so a per-file
+  provenance header alone is not enough visibility.
+- **Both `LICENCE` and `NOTICE` are packaged into `META-INF/` inside the built JAR** (a Gradle
+  task on the `jar` task; not automatic) — most consumers receive only the JAR, never the
+  repository, so both files must travel inside the artifact itself, not just sit at the repo
+  root. `README.md` references both.
 
 ## 10. Testing strategy
 
@@ -741,7 +768,7 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
 - **Golden outputs**: exact expected outputs of every built-in for a reference salt, to catch
   accidental algorithm/dictionary drift between releases.
 - **Fictionality**: property tests assert every generated email uses a reserved domain, every
-  GB phone number falls inside a published Ofcom drama range, and every GB postcode violates the
+  UK phone number falls inside a published Ofcom drama range, and every UK postcode violates the
   inward-code letter rules — over large generated samples.
 - **Locale equivalence**: `en-GB` and `cy-GB` configurations produce identical outputs for every
   v1 built-in (country-scoped resolution, section 4).
@@ -749,27 +776,39 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
   first; keyed scopes resolve attributes independently of field order; two scopes never share
   state; outside a scope behaviour is byte-identical to pre-scope behaviour; conflicting `set`
   throws `AlterEgoCoherenceException`; a custom Companies House-style strategy coheres via
-  `GB_COUNTRY`.
+  `UK_NATION`.
 - **Uniqueness**: exhaust a deliberately tiny output space (e.g. pattern `"D"` over 11 inputs)
   and assert `AlterEgoCollisionException`; concurrent hammer test against the in-memory store
   asserting no duplicate outputs and no lost mappings.
 - **Store contract test**: a reusable test class exercising the `MappingStore` SPI (atomicity of
   `putIfAbsentUnique`, race behaviour), run against the in-memory store and available to authors
   of external stores.
-- **Dictionary coverage**: each shipped dictionary is non-empty, deduplicated, well-formed, and
-  its tag fields valid (build-time check).
+- **Dictionary coverage**: each shipped dictionary is non-empty, well-formed, its tag fields
+  valid, and its provenance header present with a licence name matching a committed file under
+  `dictionaries/LICENCES/` (build-time check; section 9). Deduplicated means no duplicate
+  (value, tags) row, not no duplicate value: a tagged dictionary may legitimately repeat a value
+  under different tags (e.g. London spans several UK postcode areas, so it appears once per
+  area) — only an exact repeated row is rejected.
 - **Null/edge cases**: null, empty string, single-character, and non-ASCII inputs for every
   built-in.
 
 ## 11. Open questions
 
 1. **Group id / package**: `io.github.dconneely.alterego` assumed; confirm.
-2. **Licence**: none chosen yet; needed before publishing.
-3. **Dictionary sourcing**: name/place lists must come from freely licensed sources (e.g. public
-   domain census data); provenance to be recorded in each dictionary file's header. This is the
-   main external risk, is investigated early (see the plan), and the data files should be
+2. ~~**Licence**: none chosen yet.~~ **Resolved: MIT** (section 9) — compatible with the OGL
+   data dictionaries embed, since the two licences cover different things (code vs. data) and
+   don't need merging; OGL's own guidance confirms compatibility with other open licences.
+3. **Dictionary sourcing**: name/place lists must come from freely licensed sources — OGL, MIT,
+   or CC0 preferred as clean, specific written licences; a bare public-domain claim is not
+   automatically in the same tier (it is a copyright-status assertion, not a licence, and can be
+   jurisdiction-dependent) unless it rests on genuinely expired copyright — see
+   `docs/dictionaries.md`'s sourcing policy. Strong preference for UK-government-associated
+   sources (ONS, Ordnance Survey, National Records of Scotland, NISRA, Companies House) over
+   others even where a non-government source offers broader coverage; provenance to be recorded
+   in each dictionary file's header (section 9) and tracked in `docs/dictionaries.md`. This is
+   the main external risk, is investigated early (see the plan), and the data files should be
    human-reviewed rather than machine-collected. Town entries additionally need postcode-area
-   and UK-country tags (section 6.3).
+   and country tags (section 6.3).
 
 ## Appendix A — Normative algorithms
 

@@ -1,0 +1,8 @@
+# source: AlterEgo test fixtures: synthetic street type list
+# data-url: https://example.invalid/test-fixtures/street-types
+# licence: TEST-LICENCE
+# licence-url: https://example.invalid/test-fixtures/licence
+# retrieved: 2026-07-14
+Avenue
+Road
+Street

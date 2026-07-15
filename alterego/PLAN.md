@@ -15,9 +15,6 @@ what let a less-capable implementation agent execute the plan without design lat
 - `module-info.java` for `io.github.dconneely.alterego`.
 - Test setup: JUnit Jupiter + jqwik.
 - GitHub Actions CI: build + test on every push.
-- `CLAUDE.md` for implementation agents: build/test commands, definition of done ("`./gradlew
-  build` green, no new public API without a spec section"), and hard invariants (never change
-  Appendix A algorithms, canonical encodings, frozen test vectors, or built-in domain names).
 - `docs/adr/` with short records of the decisions already made and why, so they are not
   "helpfully" reverted: per-input derivation; no `RandomGenerator` in the API and no
   off-the-shelf PRNG (e.g. Mersenne Twister) behind it — the HMAC counter-mode stream uses the
@@ -34,7 +31,7 @@ what let a less-capable implementation agent execute the plan without design lat
 io.github.dconneely.alterego           AlterEgo, Transformation, Strategy,
                                        TransformationContext, Randomness, Mappings, NullPolicy,
                                        RecordScope, AttributeKey, RecordAttributes,
-                                       AlterEgoAttributes, GbCountry, exceptions
+                                       AlterEgoAttributes, UkNation, exceptions
 io.github.dconneely.alterego.store     MappingStore, InMemoryMappingStore
 io.github.dconneely.alterego.strategy  built-in strategies (mostly package-private,
                                        exposed only via AlterEgo factory methods)
@@ -71,11 +68,14 @@ Order matters within this milestone:
 7. Pattern compiler (`D`, `L`, `l`, `A`, `\` escape, literals) with position-reporting
    `AlterEgoPatternException`; `pattern(String)`, `constant(T)`, `mask(char, int)`.
 
-In parallel: identify freely licensed sources for the GB-wide dictionaries (first names,
-surnames, towns, streets) — GB-wide means including Welsh, Scottish, and Northern Irish names
-and places as part of the real GB distribution, since a Welsh-language deployment is GB-wide
-data, not Wales-located data. Record provenance decisions before any dictionary work in M2.
+In parallel: identify freely licensed sources for the UK-wide dictionaries (first names,
+surnames, towns, streets) — UK-wide means including Welsh, Scottish, and Northern Irish names
+and places as part of the real distribution. Record provenance decisions before dictionary work.
 Dictionary data files are human-reviewed artifacts, not machine-collected ones.
+Every downloaded dataset actually used needs, recorded before consuming it: full attribution
+(source organisation and dataset name), the exact original URL of the data, the licence name
+and its exact original URL, and the retrieval date — spec section 9 pins this as a per-file
+provenance header plus a once-per-licence committed licence text under `dictionaries/LICENCES/`.
 
 **Done when**: conformance vectors pass; property tests prove order-independence and
 parallel-stream stability; golden-output tests pin exact values for a reference salt; malformed
@@ -83,18 +83,29 @@ patterns, unsupported types, invalid domains, and short salts fail fast with goo
 
 ## M2 — Dictionaries + name/organisation/address strategies
 
-- Dictionary resource format (UTF-8, one entry per line, version + provenance header), loader
+- Dictionary resource format (UTF-8, one entry per line, version + provenance header per spec
+  section 9: source, original data URL, licence name and URL, retrieval date), loader
   with caching and the section 4 lookup rule (all resources resolve by the locale's country;
   no country or no matching resources → fail fast), and a build-time well-formedness check
-  (non-empty, deduplicated, sorted).
-- Commit the `GB` dictionaries from the sources identified in M1: first names, surnames, street
-  names (both suffix-form English and prefix-form Welsh entries), towns/cities,
-  organisation-name components — all GB-wide pools, English-language forms. Town entries carry
-  tab-separated postcode-area and UK-country tags (spec section 6.3), validated at build time.
+  (non-empty, deduplicated, sorted, provenance header present, cited licence text committed
+  under `dictionaries/LICENCES/`).
+- Commit the dictionaries from the sources identified in M1: first names, surnames, street
+  names (composed from theme-word and type-word pools), towns/cities,
+  organisation-name components — all UK-wide pools. Town entries carry
+  tab-separated postcode-area and nation tags (spec section 6.3), validated at build time.
+- **Done**: root `LICENCE` (MIT, scoped to source code, points at `NOTICE` for the separately
+  licensed OGL data) and `NOTICE` (every dictionary source's exact required attribution string,
+  for sources actually in use — not sources still marked "lead" or "not yet decided" in
+  `docs/dictionaries.md`) created; both packaged into `META-INF/` in the built JAR via a Gradle
+  task on `jar` (verified against the built artifact). Resolves spec open question 2. OS
+  Code-Point Open was dropped from the plan (superseded by a curated top-20 town list — see
+  `docs/dictionaries.md`), so `NOTICE` no longer cites its compound attribution; update `NOTICE`
+  whenever a sourcing decision in `docs/dictionaries.md` changes, including street names once
+  that category is decided.
 - `firstName()`, `lastName()` (+ `preserveInitial()` option with its no-matching-initial
   fallback), `organisationName()` (legal-suffix preservation, including the Welsh company forms
-  "Cyf." and "c.c.c." for country GB), `city()`, `streetAddress()`, `postcode()` (per-country
-  format table; GB enforces the impossible-inward-code fictionality guarantee, with
+  "Cyf." and "c.c.c."), `city()`, `streetAddress()`, `postcode()` (per-country
+  format table; enforces the impossible-inward-code fictionality guarantee, with
   `PostcodeOptions.realistic()` opt-out). Factory methods fail fast when the locale has no
   country or the country has no resources.
 - `fullName()` implementing the pinned tokenisation rules of section 4.2 (including hyphenated
@@ -115,13 +126,13 @@ country fails at factory-method call time.
 - `emailAddress()` (class-wise local-part replacement, last-`@` split rule, RFC 2606 reserved
   domains by default, options for preserving/mapping the domain).
 - `phoneNumber()` (punctuation/grouping preserved; output lands in the country's reserved
-  fictional range by default — Ofcom drama ranges for GB — with `PhoneOptions.realistic()`
+  fictional range by default — Ofcom drama ranges — with `PhoneOptions.realistic()`
   opt-out; countries without ranges fall back with no guarantee). The fictional range tables
   live in the per-country resources alongside the dictionaries.
 
 **Done when**: jitter is proven uniform-in-range and deterministic; equal inputs jitter
 identically; clamps, exclude-zero, and incompatible units behave at the boundaries; fictionality
-property tests pass (reserved email domains, GB drama phone ranges, impossible GB postcodes
+property tests pass (reserved email domains, drama phone ranges, impossible postcodes
 from M2).
 
 ## M4 — MappingStore, `stored()`, `unique()`
@@ -146,12 +157,12 @@ contract test (usable by future external implementations) covers atomicity of
   `AlterEgoCoherenceException`, no-op behaviour outside a scope, keyed-scope `computeIfAbsent`
   randomness derived per Appendix A.1 (purpose `alterego/1/record`).
 - `TransformationContext.record()` wiring through the binding machinery and `derived(...)`.
-- GB built-in coherence (spec section 6.3): `AlterEgoAttributes.GB_POSTCODE_AREA` /
-  `GB_COUNTRY`; `city()` reads/sets them from the M2 town tags; `postcode()` builds its outward
+- Built-in coherence (spec section 6.3): `AlterEgoAttributes.UK_POSTCODE_AREA` /
+  `UK_NATION`; `city()` reads/sets them from the M2 town tags; `postcode()` builds its outward
   code from the fixed area; `phoneNumber()` prefers a place-matching drama range, falling back
   to `01632 960xxx`.
 - A custom-strategy coherence example as a test (Companies House-style prefix from
-  `GB_COUNTRY`).
+  `UK_NATION`).
 
 **Done when**: the spec section 10 record-coherence tests pass — town/postcode/phone agree
 whichever field runs first; keyed scopes are field-order-independent for resolved attributes;
@@ -164,16 +175,18 @@ outputs; fictionality property tests still pass inside scopes.
   not anonymisation — guard the salt" warning including the frequency and low-cardinality limits
   (spec section 3.3), the fictional-by-default guarantee table, the `unique()` order-independence
   caveat, a record-coherence example, and an extension example. README code samples are compiled
-  as tests so they cannot rot.
+  as tests so they cannot rot. Also: a licence section (MIT, `LICENCE`) and a data-attribution
+  section pointing at `NOTICE`, stating that dictionary data is OGL-licensed UK government
+  data and that this obligation passes through to applications depending on AlterEgo (spec
+  section 9; `docs/dictionaries.md`).
 - Javadoc for the public API; `./gradlew javadoc` warning-free.
-- `maven-publish` configuration (publishing itself deferred until licence and group id are
-  confirmed — see the spec's open questions).
+- `maven-publish` configuration (licence resolved — MIT, `LICENCE` — see spec section 9;
+  publishing itself still deferred until the group id open question is confirmed).
 - CHANGELOG noting the output-stability guarantees (spec section 3.4) and the frozen vectors.
 
 ## Deferred (post-v1)
 
-- `ServiceLoader` strategy/dictionary packs; additional countries (starting with `US`: its
-  `555-01xx` fictional phone range and ZIP format).
+- `ServiceLoader` strategy/dictionary packs; additional countries.
 - Language-sensitive generation keyed on the locale's language component (unused in v1).
 - Pattern extensions: `[ABC]` classes, `D{5}` repetition, checksum-aware (Luhn) generation.
 - External `MappingStore` modules (JDBC, file-backed) — built against the M4 contract test.
@@ -184,4 +197,13 @@ outputs; fictionality property tests still pass inside scopes.
 - `jitterInstant(n, unit)` — `Instant` is already a supported value type; only the built-in is
   missing, and it was not needed for v1.
 - Fictional-range additions: TEST-NET IPs (RFC 5737), `.test`/`.invalid` domains (RFC 6761),
-  never-allocated UK National Insurance prefixes.
+  never-allocated National Insurance prefixes.
+- A `QT` ("Cute") locale: a wholly invented country whose dictionaries (first names, surnames,
+  towns, street names, organisation components) are authored, not sourced — deliberately
+  obvious, unmistakably fictitious values ("Madeupborough", "Unrealtown"). Unlike
+  real-word dictionaries, this would give names/streets/organisations the same kind of
+  guaranteed-fictional property ADR 0005 gives phone/email/postcode, since invented words can
+  never coincide with something real, the way rare-but-real ones still could. `QT` sits in ISO
+  3166-1's user-assigned range, distinct from `ZZ` (already used for internal test fixtures,
+  not a shipped locale). Would need its own ADR, not a revision of ADR 0005 — that ADR's
+  conclusion is specifically about real-word dictionaries and would stand unchanged.

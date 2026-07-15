@@ -22,7 +22,7 @@ considered:
 A `RecordScope` (`try (var rec = alterego.record()) { ... }`, or `alterego.record(key)` for a
 keyed scope) bounds one record. It holds typed attributes (`AttributeKey<A>`), reached from any
 strategy via `context.record()`, with **first-touch-wins** semantics: whichever field is
-transformed first fixes shared attributes (e.g. `GB_POSTCODE_AREA`, `GB_COUNTRY`) and later
+transformed first fixes shared attributes (e.g. `UK_POSTCODE_AREA`, `UK_NATION`) and later
 fields follow. Conflicting `set` throws `AlterEgoCoherenceException`. Keyed scopes derive
 `computeIfAbsent` randomness from the record key and attribute name (purpose
 `alterego/1/record`), making resolved attributes independent of field order.

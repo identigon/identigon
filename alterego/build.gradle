@@ -40,3 +40,15 @@ test {
         exceptionFormat = 'full'
     }
 }
+
+// LICENCE and NOTICE must travel inside the built artifact: most consumers receive only the
+// jar, never the repository, so packaging them at the repo root alone is not enough (see
+// docs/dictionaries.md, "Attribution placement").
+tasks.named('jar') {
+    from(rootProject.file('LICENCE')) {
+        into 'META-INF'
+    }
+    from(rootProject.file('NOTICE')) {
+        into 'META-INF'
+    }
+}

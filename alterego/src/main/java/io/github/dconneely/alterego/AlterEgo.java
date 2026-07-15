@@ -2,6 +2,12 @@ package io.github.dconneely.alterego;
 
 import io.github.dconneely.alterego.pattern.PatternStrategy;
 import io.github.dconneely.alterego.store.MappingStore;
+import io.github.dconneely.alterego.strategy.DictionaryLoader;
+import io.github.dconneely.alterego.strategy.FullNameStrategy;
+import io.github.dconneely.alterego.strategy.NameDictionaryStrategy;
+import io.github.dconneely.alterego.strategy.OrganisationNameStrategy;
+import io.github.dconneely.alterego.strategy.PostcodeStrategy;
+import io.github.dconneely.alterego.strategy.StreetAddressStrategy;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
@@ -107,6 +113,84 @@ public final class AlterEgo {
     }
     sb.append(input, maskCount, input.length());
     return sb.toString();
+  }
+
+  /** Replacement drawn from the locale's country's first-name dictionary (section 4.2). */
+  public Transformation<String> firstName() {
+    return firstName(NameOptions.defaults());
+  }
+
+  /** As {@link #firstName()}, with {@link NameOptions}. */
+  public Transformation<String> firstName(NameOptions options) {
+    String country = DictionaryLoader.requireCountry(locale);
+    Strategy<String> strategy =
+        NameDictionaryStrategy.forDictionary(country, "first-names", options.isPreserveInitial());
+    return bind(FullNameStrategy.FIRST_NAME_DOMAIN, strategy);
+  }
+
+  /** Replacement drawn from the locale's country's surname dictionary (section 4.2). */
+  public Transformation<String> lastName() {
+    return lastName(NameOptions.defaults());
+  }
+
+  /** As {@link #lastName()}, with {@link NameOptions}. */
+  public Transformation<String> lastName(NameOptions options) {
+    String country = DictionaryLoader.requireCountry(locale);
+    Strategy<String> strategy =
+        NameDictionaryStrategy.forDictionary(country, "surnames", options.isPreserveInitial());
+    return bind(FullNameStrategy.LAST_NAME_DOMAIN, strategy);
+  }
+
+  /**
+   * Tokenises and delegates to {@link #firstName()}/{@link #lastName()} strategies per the
+   * pinned rules of section 4.2, so results agree with those standalone transformations.
+   */
+  public Transformation<String> fullName() {
+    String country = DictionaryLoader.requireCountry(locale);
+    Strategy<String> strategy = FullNameStrategy.forCountry(country);
+    return bind("alterego:full-name", strategy);
+  }
+
+  /** Replacement drawn from the locale's country's town/city dictionary (section 4.3). */
+  public Transformation<String> city() {
+    String country = DictionaryLoader.requireCountry(locale);
+    Strategy<String> strategy = NameDictionaryStrategy.forDictionary(country, "towns", false);
+    return bind("alterego:city", strategy);
+  }
+
+  /**
+   * A house number (1-299) plus a complete street name composed from the locale's country's
+   * street dictionaries (section 4.3).
+   */
+  public Transformation<String> streetAddress() {
+    String country = DictionaryLoader.requireCountry(locale);
+    Strategy<String> strategy = StreetAddressStrategy.forCountry(country);
+    return bind("alterego:street-address", strategy);
+  }
+
+  /**
+   * Country-specific postcode format with the fictionality guarantee of section 4.1 where one
+   * is defined (e.g. for UK, the inward code ends in a letter never used).
+   */
+  public Transformation<String> postcode() {
+    return postcode(PostcodeOptions.defaults());
+  }
+
+  /** As {@link #postcode()}, with {@link PostcodeOptions}. */
+  public Transformation<String> postcode(PostcodeOptions options) {
+    String country = DictionaryLoader.requireCountry(locale);
+    Strategy<String> strategy = PostcodeStrategy.forCountry(country, options.isRealistic());
+    return bind("alterego:postcode", strategy);
+  }
+
+  /**
+   * Generated from the locale's country's organisation-name component list, preserving a
+   * recognised legal suffix from the input if present (section 4.2).
+   */
+  public Transformation<String> organisationName() {
+    String country = DictionaryLoader.requireCountry(locale);
+    Strategy<String> strategy = OrganisationNameStrategy.forCountry(country);
+    return bind("alterego:organisation-name", strategy);
   }
 
   /** Opens an anonymous record scope: attributes resolve using the first-asking field's own randomness. */

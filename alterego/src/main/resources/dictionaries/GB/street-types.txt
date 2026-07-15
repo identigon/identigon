@@ -1,0 +1,30 @@
+# source: Ideal Postcodes 'UK PAF Thoroughfare Descriptors' guide, corroborated against Royal Mail's own PAF Programmers Guide
+# data-url: https://ideal-postcodes.co.uk/guides/thoroughfare-descriptors
+# licence: OGL-v3
+# licence-url: http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+# retrieved: 2026-07-14
+Avenue
+Close
+Court
+Crescent
+Drive
+Gardens
+Gate
+Green
+Grove
+Hill
+Lane
+Mews
+Mount
+Orchard
+Place
+Plaza
+Road
+Row
+Square
+Street
+Terrace
+Vale
+View
+Walk
+Way

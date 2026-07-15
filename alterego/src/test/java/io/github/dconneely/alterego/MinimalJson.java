@@ -7,9 +7,8 @@ import java.util.Map;
 
 /**
  * A hand-rolled JSON reader/writer for the conformance vector fixtures. No JSON library is a
- * test dependency (CLAUDE.md restricts test scope to JUnit Jupiter and jqwik), and the vector
- * schemas are simple enough (objects, arrays, strings, longs, booleans) that this is the
- * pragmatic choice over adding one.
+ * test dependency, and the vector schemas are simple enough (objects, arrays, strings, longs,
+ * booleans) that this is the pragmatic choice over adding one.
  */
 final class MinimalJson {
 

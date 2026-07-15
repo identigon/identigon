@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
-class AlterEgoBuilderTest {
+class BuilderTest {
 
   private static final byte[] VALID_SALT = "0123456789abcdef".getBytes(StandardCharsets.UTF_8);
 
@@ -53,7 +53,7 @@ class AlterEgoBuilderTest {
   @Test
   void defaultsLocaleToUk() {
     // No direct getter on AlterEgo for locale; verified indirectly via TransformationContext
-    // in AlterEgoBindingTest. This test just confirms build() succeeds without a locale call.
+    // in BindingTest. This test just confirms build() succeeds without a locale call.
     AlterEgo.builder().salt(VALID_SALT).build();
   }
 

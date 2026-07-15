@@ -7,9 +7,8 @@ Status: accepted (2026-07-12)
 Pseudonymised data leaks into test systems, demos, screenshots, and training material. If a
 generated phone number, email address, or postcode happens to be real, that data can misdirect
 mail, calls, or messages to a real person. Several value spaces have officially reserved or
-structurally impossible regions: RFC 2606 email domains, Ofcom drama telephone ranges, the
-`555-0100`–`0199` US range, and UK postcode inward codes ending in letters never used
-(`C I K M O V`).
+structurally impossible regions: RFC 2606 email domains, Ofcom drama telephone ranges,
+and postcode inward codes ending in letters never used (`C I K M O V`).
 
 ## Decision
 

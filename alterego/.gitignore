@@ -5,3 +5,10 @@ bin/
 *.iml
 .DS_Store
 .jqwik-database
+
+# Cached raw third-party source spreadsheets and derived candidate lists (see
+# tools/data-cache/SOURCES.md for provenance). Not committed: too large, and reproducible by
+# re-running tools/curate_dictionaries.py / tools/mine_org_components.py against a fresh
+# download from the documented URLs.
+tools/data-cache/*.xlsx
+tools/data-cache/*.tsv

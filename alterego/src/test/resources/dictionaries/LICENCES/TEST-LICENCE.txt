@@ -1,0 +1,3 @@
+Test fixture licence text. Not a real licence; exists only so the dictionary well-formedness
+check has a real file to match against for the "TEST-LICENCE" name cited by the synthetic
+fixtures under src/test/resources/dictionaries/ZZ/.

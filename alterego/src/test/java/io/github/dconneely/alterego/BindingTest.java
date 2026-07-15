@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
-class AlterEgoBindingTest {
+class BindingTest {
 
   private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 

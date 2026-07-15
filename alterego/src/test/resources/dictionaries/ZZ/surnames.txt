@@ -1,0 +1,10 @@
+# source: AlterEgo test fixtures: synthetic surname list
+# data-url: https://example.invalid/test-fixtures/surnames
+# licence: TEST-LICENCE
+# licence-url: https://example.invalid/test-fixtures/licence
+# retrieved: 2026-07-14
+Anderson
+Baker
+Clarke
+Dixon
+Ellis

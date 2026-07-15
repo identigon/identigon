@@ -13,7 +13,7 @@ import net.jqwik.api.constraints.IntRange;
 import net.jqwik.api.constraints.StringLength;
 import org.junit.jupiter.api.Test;
 
-class AlterEgoUtilityTransformationsTest {
+class UtilityTransformationsTest {
 
   private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
@@ -99,8 +99,8 @@ class AlterEgoUtilityTransformationsTest {
 
   @Test
   void constantWorksForEnumValues() {
-    Transformation<GbCountry> t = alterego().constant(GbCountry.ENGLAND);
-    assertEquals(GbCountry.ENGLAND, t.apply(GbCountry.SCOTLAND));
+    Transformation<UkNation> t = alterego().constant(UkNation.ENGLAND);
+    assertEquals(UkNation.ENGLAND, t.apply(UkNation.SCOTLAND));
   }
 
   // --- mask() ----------------------------------------------------------------------------------

@@ -86,8 +86,8 @@ class ValueCodecsTest {
 
   @Test
   void enumRoundTripsUsingNameNotToString() {
-    assertRoundTrip(GbCountry.NORTHERN_IRELAND, GbCountry.class);
-    assertEquals("NORTHERN_IRELAND", ValueCodecs.encode(GbCountry.NORTHERN_IRELAND, GbCountry.class));
+    assertRoundTrip(UkNation.NORTHERN_IRELAND, UkNation.class);
+    assertEquals("NORTHERN_IRELAND", ValueCodecs.encode(UkNation.NORTHERN_IRELAND, UkNation.class));
   }
 
   @Test
@@ -112,7 +112,7 @@ class ValueCodecsTest {
   @Test
   void decodeRejectsCorruptedEnumConstant() {
     AlterEgoStoreException ex =
-        assertThrows(AlterEgoStoreException.class, () -> ValueCodecs.decode("ATLANTIS", GbCountry.class));
+        assertThrows(AlterEgoStoreException.class, () -> ValueCodecs.decode("ATLANTIS", UkNation.class));
     assertFalse(ex.getMessage().isBlank());
   }
 
@@ -131,7 +131,7 @@ class ValueCodecsTest {
     assertTrue(ValueCodecs.isSupported(LocalDateTime.class));
     assertTrue(ValueCodecs.isSupported(Instant.class));
     assertTrue(ValueCodecs.isSupported(UUID.class));
-    assertTrue(ValueCodecs.isSupported(GbCountry.class));
+    assertTrue(ValueCodecs.isSupported(UkNation.class));
     assertFalse(ValueCodecs.isSupported(Double.class));
     assertFalse(ValueCodecs.isSupported(Object.class));
   }

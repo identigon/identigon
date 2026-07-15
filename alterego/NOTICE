@@ -1,0 +1,70 @@
+AlterEgo — Third-Party Data Notices
+
+The source code of this project is MIT-licensed (see LICENCE). The dictionary data files under
+`src/main/resources/dictionaries/GB/` are derived from UK government sources published under
+the Open Government Licence v3.0
+<http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/> and remain under
+that licence. Full provenance (exact data URLs, licence URLs, retrieval dates) is tracked in
+docs/dictionaries.md; the attribution required by each source actually in use is reproduced
+below. This file lists only sources actually embedded in a committed dictionary file — a source
+recorded as a "lead," "not yet decided," or "not yet curated" in docs/dictionaries.md is not
+listed here until the corresponding dictionary file actually exists and is committed.
+
+Where a source has not specified a source-specific attribution string, the generic Open
+Government Licence form is used: "Contains public sector information licensed under the Open
+Government Licence v3.0."
+
+--------------------------------------------------------------------------------
+
+Surnames (src/main/resources/dictionaries/GB/surnames.txt)
+
+Contains public sector information from the Office for National Statistics ("Twenty most
+common surnames for births in England and Wales, 2014 and 2024" — both years used), licensed
+under the Open Government Licence v3.0.
+
+Contains public sector information from National Records of Scotland ("Most common surnames,
+2025" — top 10 only), licensed under the Open Government Licence v3.0.
+
+--------------------------------------------------------------------------------
+
+First names (src/main/resources/dictionaries/GB/first-names.txt)
+
+Contains public sector information from the Office for National Statistics ("Baby names in
+England and Wales, 1996 to 2025" — top 20 boys' and girls' names for 2025 and 1996 both used),
+licensed under the Open Government Licence v3.0.
+
+Contains public sector information from National Records of Scotland ("Babies' First Names,
+2025" — top 10 boys' and girls' names only), licensed under the Open Government Licence v3.0.
+
+Contains public sector information from the Northern Ireland Statistics and Research Agency
+("Top 10 Baby Names, 1997 to 2025" — 2025 column only), licensed under the Open Government
+Licence v3.0. Source: NISRA: Website: www.nisra.gov.uk
+
+--------------------------------------------------------------------------------
+
+Towns/cities and postcode area / nation tags (src/main/resources/dictionaries/GB/towns.txt)
+
+A curated top-20 UK population ranking (see docs/dictionaries.md, "Towns/cities + postcode
+area + nation tags"), verified against public reference sources rather than mined from a
+single redistributed dataset. No third-party data attribution is required for this category.
+
+--------------------------------------------------------------------------------
+
+Street names (src/main/resources/dictionaries/GB/street-themes.txt,
+src/main/resources/dictionaries/GB/street-types.txt)
+
+English-only (see docs/dictionaries.md, "Street names", for why). Standard street-type
+descriptor words are a matter of accuracy, not redistribution rights — not creative or
+copyrightable content in their own right. Theme words are derived from published frequency
+analyses of real UK street names, ultimately Ordnance Survey Open Names data, itself licensed
+under the Open Government Licence v3.0.
+
+--------------------------------------------------------------------------------
+
+Organisation-name components (src/main/resources/dictionaries/GB/organisation-components.txt)
+
+Contains public sector information from the Intellectual Property Office ("Trade Mark Data
+Release", Domestic UK Applications dataset), licensed under the Open Government Licence v3.0.
+Word tokens only, mined from the dataset's owner-name field and filtered against personal
+names — no owner names themselves are used or redistributed (see docs/dictionaries.md,
+"Organisation-name components", and tools/mine_org_components.py).

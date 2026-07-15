@@ -13,16 +13,14 @@ library's primary deployment is UK data.
 ## Decision
 
 The builder defaults to the fixed constant `Locale.UK` (`en-GB`). `Locale.getDefault()` is banned
-from all code paths (see CLAUDE.md invariants). Non-GB users configure a locale explicitly; an
-unshipped country fails fast.
+from all code paths. Non-UK users configure a locale explicitly; an unshipped country fails fast.
 
 All country-scoped resources — dictionaries, postcode formats, fictional phone ranges, legal
-suffixes — resolve by the locale's **country**, never its language: a Welsh-language dataset is
-GB-wide data, not Wales-located data, just as `en-GB` implies the English language, not an
-England location. A locale without a country fails fast; the language component steers nothing
+suffixes — `en-GB` and `cy-GB` resolve by the locale's **country**, not its language. A locale
+without a country fails fast; the language component steers nothing
 in v1 and is reserved for future language-sensitive generation (SPECIFICATION.md section 4).
-Town and street dictionary entries use English-language forms (Swansea, not Abertawe), matching
-what data stores typically hold.
+For the moment, town and street dictionary entries use English-language forms (Swansea,
+not Abertawe).
 
 ## Consequences
 
@@ -31,5 +29,5 @@ what data stores typically hold.
 - `en-GB` and `cy-GB` are configuration synonyms for the v1 built-ins (enforced by an
   equivalence test); `en-AU` fails fast (no AU resources) rather than silently borrowing another
   country's data.
-- A non-UK adopter who forgets to set a locale gets GB output — obvious on first look, and
+- A non-UK adopter who forgets to set a locale gets UK output — obvious on first look, and
   documented in the README.
