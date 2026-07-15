@@ -30,13 +30,13 @@ See `docs/tasks/M2.md` step 2 for the full gate this maps to.
   jurisdiction — CC0 exists specifically because unilateral public-domain dedications don't
   work reliably worldwide. Genuine public domain via *expired copyright* (e.g. old census data
   where the term has actually run out) is solid and acceptable; an *asserted* dedication with no
-  CC0 or equivalent instrument behind it is flagged for a human decision, same as the informal
-  "no restrictions, free to use" cases below.
+  CC0 or equivalent instrument behind it is flagged for an independent decision, same as the
+  informal "no restrictions, free to use" cases below.
 - Licences requiring share-alike on the derived work (e.g. ODbL, CC-BY-SA) or restricting
   redistribution (view-only, non-commercial-only, accredited-researcher-only), and any other
   non-standard or informally-stated position (e.g. Companies House's Free Company Data Product)
   are avoided unless no acceptable alternative exists, and any use of one is flagged explicitly
-  for a human decision before committing data under it.
+  for an independent decision before committing data under it.
 - **Strong preference for UK-government-associated sources** (ONS, Ordnance Survey, National
   Records of Scotland, NISRA, Companies House, data.gov.uk) over academic, community, or
   commercial sources, given their consistent OGL licensing and official standing — even when a

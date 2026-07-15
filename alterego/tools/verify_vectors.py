@@ -3,7 +3,7 @@
 
 This is a from-scratch reimplementation of Appendix A (SPECIFICATION.md) using Python's stdlib
 hmac/hashlib, deliberately not sharing any code with the Java implementation. It is what backed
-the M1 human review gate (docs/tasks/M1.md) before the vectors were frozen: every case in all
+the M1 independent review gate (docs/tasks/M1.md) before the vectors were frozen: every case in all
 four vector files was checked against this script and matched exactly.
 
 Not part of the Gradle build. Re-run it any time you want an independent second opinion on the

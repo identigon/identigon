@@ -71,7 +71,7 @@ Order matters within this milestone:
 In parallel: identify freely licensed sources for the UK-wide dictionaries (first names,
 surnames, towns, streets) — UK-wide means including Welsh, Scottish, and Northern Irish names
 and places as part of the real distribution. Record provenance decisions before dictionary work.
-Dictionary data files are human-reviewed artifacts, not machine-collected ones.
+Dictionary data files are independently reviewed artifacts, not machine-collected ones.
 Every downloaded dataset actually used needs, recorded before consuming it: full attribution
 (source organisation and dataset name), the exact original URL of the data, the licence name
 and its exact original URL, and the retrieval date — spec section 9 pins this as a per-file
@@ -95,13 +95,9 @@ patterns, unsupported types, invalid domains, and short salts fail fast with goo
   tab-separated postcode-area and nation tags (spec section 6.3), validated at build time.
 - **Done**: root `LICENCE` (MIT, scoped to source code, points at `NOTICE` for the separately
   licensed OGL data) and `NOTICE` (every dictionary source's exact required attribution string,
-  for sources actually in use — not sources still marked "lead" or "not yet decided" in
-  `docs/dictionaries.md`) created; both packaged into `META-INF/` in the built JAR via a Gradle
-  task on `jar` (verified against the built artifact). Resolves spec open question 2. OS
-  Code-Point Open was dropped from the plan (superseded by a curated top-20 town list — see
-  `docs/dictionaries.md`), so `NOTICE` no longer cites its compound attribution; update `NOTICE`
-  whenever a sourcing decision in `docs/dictionaries.md` changes, including street names once
-  that category is decided.
+  for sources actually in use) created; both packaged into `META-INF/` in the built JAR via a
+  Gradle task on `jar` (verified against the built artifact); update `NOTICE` whenever a sourcing
+  decision in `docs/dictionaries.md` changes.
 - `firstName()`, `lastName()` (+ `preserveInitial()` option with its no-matching-initial
   fallback), `organisationName()` (legal-suffix preservation, including the Welsh company forms
   "Cyf." and "c.c.c."), `city()`, `streetAddress()`, `postcode()` (per-country
@@ -180,8 +176,8 @@ outputs; fictionality property tests still pass inside scopes.
   data and that this obligation passes through to applications depending on AlterEgo (spec
   section 9; `docs/dictionaries.md`).
 - Javadoc for the public API; `./gradlew javadoc` warning-free.
-- `maven-publish` configuration (licence resolved — MIT, `LICENCE` — see spec section 9;
-  publishing itself still deferred until the group id open question is confirmed).
+- `maven-publish` configuration (group id `io.github.dconneely`, licence MIT, `LICENCE` — see
+  spec section 9).
 - CHANGELOG noting the output-stability guarantees (spec section 3.4) and the frozen vectors.
 
 ## Deferred (post-v1)
