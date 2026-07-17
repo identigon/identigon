@@ -115,10 +115,10 @@ country fails at factory-method call time.
 
 ## M3 — Temporal jitter + contact details
 
-- `jitterLocalDate(n, unit)`, `jitterLocalDateTime(n, unit)` with unit-compatibility validation
-  at call time and `JitterOptions` (exclude-zero per A.3; inclusive `min`/`max` clamp bounds
-  typed to the value — explicit values, the library never reads the clock, ADR 0007; pinned
-  fields).
+- `shiftDate(int days)`, `shiftDate(AlterEgo.DateField)`, and the six `shiftDateTime(...)`
+  overloads pairing a date strategy with a time strategy (spec section 4.5), each with a twin
+  taking a trailing `JitterOptions<T>` for inclusive `min`/`max` clamp bounds typed to the value —
+  explicit values, the library never reads the clock, ADR 0007.
 - `emailAddress()` (class-wise local-part replacement, last-`@` split rule, RFC 2606 reserved
   domains by default, options for preserving/mapping the domain).
 - `phoneNumber()` (punctuation/grouping preserved; output lands in the country's reserved
@@ -126,10 +126,10 @@ country fails at factory-method call time.
   opt-out; countries without ranges fall back with no guarantee). The fictional range tables
   live in the per-country resources alongside the dictionaries.
 
-**Done when**: jitter is proven uniform-in-range and deterministic; equal inputs jitter
-identically; clamps, exclude-zero, and incompatible units behave at the boundaries; fictionality
-property tests pass (reserved email domains, drama phone ranges, impossible postcodes
-from M2).
+**Done when**: every jitter strategy is proven uniform-in-range and deterministic; equal inputs
+jitter identically; clamps behave at the boundaries; nanoseconds are zeroed in every
+`shiftDateTime(...)` output; fictionality property tests pass (reserved email domains, drama
+phone ranges, impossible postcodes from M2).
 
 ## M4 — MappingStore, `stored()`, `unique()`
 
@@ -190,8 +190,8 @@ outputs; fictionality property tests still pass inside scopes.
   structural tags in v1.
 - Additional value types (`LocalTime`, `YearMonth`, ...) or a public codec mechanism, if a real
   need appears.
-- `jitterInstant(n, unit)` — `Instant` is already a supported value type; only the built-in is
-  missing, and it was not needed for v1.
+- Jitter for `Instant` — already a supported value type; only the built-in (matching the
+  `shiftDate`/`shiftDateTime` family, section 4.5) is missing, and it was not needed for v1.
 - Fictional-range additions: TEST-NET IPs (RFC 5737), `.test`/`.invalid` domains (RFC 6761),
   never-allocated National Insurance prefixes.
 - A `QT` ("Cute") locale: a wholly invented country whose dictionaries (first names, surnames,

@@ -11,7 +11,7 @@ var pseudonymisedFirstNames = originalFirstNames.stream()
     .toList();
 
 var pseudonymisedBirthDates = originalBirthDates.stream()
-    .map(alterego.jitterLocalDate(30, ChronoUnit.DAYS))
+    .map(alterego.shiftDate(30))
     .toList();
 ```
 
@@ -269,8 +269,9 @@ Two limits follow from determinism itself and are documented rather than hidden:
 - **Frequency is preserved.** Deterministic pseudonymisation maps equal inputs to equal outputs,
   so the most common surname in the input is the most common pseudonym in the output. An
   attacker with population statistics can make good guesses about frequent values without the
-  salt; similarly, a jittered date remains within `±n` units of the truth. Where this matters,
-  the mitigation is aggregation or suppression — out of scope (section 1).
+  salt; similarly, a jittered date remains close to the truth by construction (`shiftDate(30)`
+  keeps it within 30 days). Where this matters, the mitigation is aggregation or suppression —
+  out of scope (section 1).
 - **Low-cardinality values gain almost nothing.** A deterministic mapping of a `Boolean` or a
   small enum is a relabelling of a handful of values and provides essentially no protection on
   its own. These types are supported chiefly so custom and composite strategies can cover
@@ -295,8 +296,7 @@ algorithms — all of which are owned by this library, none by the JDK. Therefor
 
 All are locale-aware where meaningful, and honour the `NullPolicy`. Factory methods fail fast
 with `AlterEgoConfigException` (throw at call time, not per element) for configuration problems:
-no resources for the locale's country, malformed pattern, incompatible jitter unit, invalid
-options.
+no resources for the locale's country, malformed pattern, invalid options.
 
 Realistic replacement values are a property of the **country**, not the language. A dataset in
 Welsh is not a dataset about Wales, just as `en-GB` implies the English language, not an England
@@ -427,25 +427,66 @@ part and the output gains `@` plus the chosen reserved domain.
 ### 4.5 Temporal jitter
 
 ```java
-alterego.jitterLocalDate(30, ChronoUnit.DAYS)      // Transformation<LocalDate>
-alterego.jitterLocalDateTime(4, ChronoUnit.HOURS)  // Transformation<LocalDateTime>
+alterego.shiftDate(30)                              // Transformation<LocalDate>, ±30 days
+alterego.shiftDateTime(30, AlterEgo.TimeField.HOUR)  // Transformation<LocalDateTime>
 ```
 
-- Shifts by a deterministic **whole number** of units drawn uniformly from `[-n, +n]`
-  (Appendix A.3); smaller fields are untouched (jitter by hours preserves minutes and seconds).
-  Units incompatible with the value type (e.g. `HOURS` for `LocalDate`) are rejected at call time.
-- `JitterOptions` control:
-  - `excludeZero()` — guarantee the value changes (Appendix A.3);
-  - `min(value)` / `max(value)` — **inclusive** clamp bounds, typed to the transformation's value
-    type. Clamping makes values near a bound pile up on it; documented. The library never reads
-    the clock (section 3.4): a caller wanting "no future dates" writes
-    `max(LocalDate.now())`. Note the type-dependent meaning of "past", which the caller owns:
-    a `LocalDate` strictly in the past excludes today (`max(LocalDate.now().minusDays(1))`),
-    whereas an instant strictly in the past is anything before now
-    (`max(LocalDateTime.now().minusNanos(1))`).
-  - pinning fields (e.g. jitter the day but preserve the year).
-- Because the shift is derived from the input value, equal timestamps jitter identically —
-  preserving equality relationships in the data.
+Eight factory methods, each pairing a date strategy with (for `LocalDateTime`) a time strategy;
+`AlterEgo.DateField` and `AlterEgo.TimeField` are nested enums selecting which strategy runs. Each
+of the eight also has a twin taking a trailing `JitterOptions<T>` for clamping — sixteen methods
+in total.
+
+**Date strategies** — `LocalDate`, and the date part of every `shiftDateTime(...)` call:
+
+| Call                                  | Behaviour                                              |
+|---------------------------------------|---------------------------------------------------------|
+| `shiftDate(int days)`                 | Whole-day shift, uniform over `[-days, +days]`         |
+|                                        | (Appendix A.3).                                         |
+| `shiftDate(AlterEgo.DateField field)` | `MONTH`: uniform random day within the input's own     |
+|                                        | year and month. `YEAR`: uniform random day within the  |
+|                                        | input's own year, leap-aware. Drawn via                |
+|                                        | `nextInt(lengthOfMonth)` / `nextInt(lengthOfYear)`     |
+|                                        | (Appendix A.3), 1-based.                                |
+
+**Time strategies** — the time part of `shiftDateTime(...)` only, as the trailing argument(s):
+
+| Call                               | Behaviour                                                 |
+|-------------------------------------|------------------------------------------------------------|
+| `int seconds`                      | Whole-second shift, uniform over `[-seconds, +seconds]`.  |
+| `LocalTime start, LocalTime end`   | Uniform random point in `[start, end]` inclusive, to the  |
+|                                     | second (`nextInt(endSecondOfDay - startSecondOfDay + 1)`);|
+|                                     | `start` after `end` is an `AlterEgoConfigException` at    |
+|                                     | call time.                                                 |
+| `AlterEgo.TimeField.HOUR`          | Same hour as the input; uniform random minute, then       |
+|                                     | second, each `nextInt(60)`.                                |
+
+giving the six overloads `shiftDateTime(int days, int seconds)`,
+`shiftDateTime(int days, LocalTime start, LocalTime end)`,
+`shiftDateTime(int days, AlterEgo.TimeField field)`,
+`shiftDateTime(AlterEgo.DateField field, int seconds)`,
+`shiftDateTime(AlterEgo.DateField field, LocalTime start, LocalTime end)`, and
+`shiftDateTime(AlterEgo.DateField field, AlterEgo.TimeField field)`. The date component is always
+drawn before the time component.
+
+- Nanoseconds are zeroed in the output of every `shiftDateTime(...)` overload, unconditionally,
+  regardless of which time strategy ran — carrying them over unperturbed from the input would leak
+  sub-second precision that is itself close to unique per record.
+- `JitterOptions<T>` (`T` is `LocalDate` or `LocalDateTime`, matching the method) clamps the
+  result, applied last, after the strategy has run:
+  - `JitterOptions.min(value)`, `JitterOptions.max(value)`, `JitterOptions.minmax(min, max)` — an
+    **inclusive** bound, or both in one call. Values that would fall outside a bound are clamped
+    to it, not rejected — values near a bound pile up on it; documented, not hidden. The library
+    never reads the clock (section 3.4): a caller wanting "no future dates" writes
+    `JitterOptions.max(LocalDate.now())`. Note the type-dependent meaning of "past", which the
+    caller owns: a `LocalDate` strictly in the past excludes today
+    (`max(LocalDate.now().minusDays(1))`), whereas a `LocalDateTime` strictly in the past is
+    anything before now (`max(LocalDateTime.now().minusNanos(1))`).
+  - `JitterOptions` is an immutable value type with no "no bounds" state of its own — an unclamped
+    call simply omits the trailing `JitterOptions` argument.
+- Because every draw is derived from the input value, equal timestamps jitter identically —
+  preserving equality relationships in the data. Ordering is **not** preserved: two distinct
+  inputs' shifts are drawn independently, so a date before another in the input can land after it
+  in the output (most likely when their true difference is small relative to the jitter range).
 
 ### 4.6 Pattern-based strategies
 
@@ -703,9 +744,8 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
 
 - `AlterEgoException` (unchecked) is the root. Subtypes:
   - `AlterEgoConfigException` — creation-time configuration errors (no resources for the
-    country, unsupported value type, invalid domain, invalid options, incompatible jitter unit).
-    Its subtype `AlterEgoPatternException` reports malformed patterns with the offending
-    position.
+    country, unsupported value type, invalid domain, invalid options). Its subtype
+    `AlterEgoPatternException` reports malformed patterns with the offending position.
   - `AlterEgoStoreException` — mapping store required but not configured, store failure, or a
     stored value that fails to decode.
   - `AlterEgoCollisionException` — `unique()` exhausted its retry budget.
@@ -849,9 +889,7 @@ All primitives consume from the stream in the order the strategy calls them.
 - `digit()`: `(char) ('0' + nextInt(10))`.
 - `letterUpper()`: `(char) ('A' + nextInt(26))`; `letterLower()`: `(char) ('a' + nextInt(26))`.
 - Pattern token `A`: `k = nextInt(52)`; `k < 26 ? (char) ('A' + k) : (char) ('a' + k - 26)`.
-- Jitter shift over `[-n, +n]`: `nextLong(2n + 1) - n`. With exclude-zero:
-  `k = nextLong(2n)`; shift is `k - n` if `k < n`, otherwise `k - n + 1` (uniform over
-  `[-n, -1] ∪ [1, n]`).
+- Jitter shift over `[-n, +n]`: `nextLong(2n + 1) - n`.
 
 ### A.4 Mapping-store keys
 
