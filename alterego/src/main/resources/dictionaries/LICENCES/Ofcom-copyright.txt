@@ -1,0 +1,24 @@
+Ofcom copyright and information re-use notice
+Source: https://www.ofcom.org.uk/about-ofcom/our-website/copyright
+Retrieved: 2026-07-25
+
+All material either on Ofcom's website or provided by Ofcom in hard copy is owned by Ofcom, or is
+licensed to Ofcom, and is protected by copyright, trade marks, service marks, patents or other
+proprietary rights and laws.
+
+Unless indicated as Crown-owned material or otherwise, the material featured on this website or
+provided in hard copy may be reproduced free of charge in any format or medium, provided that it
+is reproduced accurately and not used in a misleading context. The material must be acknowledged
+as Ofcom copyright and the title of the document/publication specified.
+
+For the use of Crown-owned material, refer to the National Archives website.
+
+This is not one of AlterEgo's ordinarily-preferred licences (OGL, MIT, CC0 — see
+docs/dictionaries.md's sourcing policy). It is used here, as a documented exception, only for
+Ofcom's "Telephone numbers for use in TV and radio drama programmes" guidance
+(dictionaries/GB/phone-ranges.txt) because Ofcom is the sole authority publishing these reserved
+number ranges — there is no alternative source to prefer instead — and its terms (accurate
+reproduction, attributed to Ofcom and the document title) are fully compatible with the
+NOTICE-file attribution already required for this project's other sources. See
+docs/phone-ranges.md for the full sourcing record and the independent decision to accept this
+exception.

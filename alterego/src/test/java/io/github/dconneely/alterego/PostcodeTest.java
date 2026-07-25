@@ -34,19 +34,8 @@ class PostcodeTest {
     }
   }
 
-  @Test
-  void everyDefaultOutputViolatesTheInwardCodeRule() {
-    // Fictionality property test (M2 acceptance criterion): every generated postcode must be
-    // undeliverable by construction, over a large sample.
-    Transformation<String> t = gb().postcode();
-    for (int i = 0; i < 500; i++) {
-      String result = t.apply("input-" + i);
-      char lastLetter = result.charAt(result.length() - 1);
-      assertTrue(
-          NEVER_USED_LETTERS.contains(lastLetter),
-          "expected a never-used letter, got '" + lastLetter + "' in " + result);
-    }
-  }
+  // The fictionality property test (every default output violates the inward-code rule, large
+  // sample) now lives in FictionalityTest, alongside emailAddress()'s and phoneNumber()'s.
 
   @Test
   void realisticOptionCanProduceLettersOutsideTheNeverUsedSet() {

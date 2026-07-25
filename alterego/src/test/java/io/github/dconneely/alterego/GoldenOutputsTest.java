@@ -3,15 +3,18 @@ package io.github.dconneely.alterego;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 
 /**
- * Exact expected outputs of every M1 and M2 built-in transformation for the reference salt (see
- * {@code docs/tasks/M1.md}, {@code docs/tasks/M2.md}). Generated once, eyeballed for
- * plausibility (each output matches its declared pattern shape, and M2's dictionary-drawn
- * outputs are real dictionary entries), then frozen: a future change to the Appendix A
- * algorithms, a dictionary file, or this class's logic that alters any of these values is a
- * breaking change and MUST stop and be flagged, not silently "fixed" here.
+ * Exact expected outputs of every M1, M2, and M3 built-in transformation for the reference salt
+ * (see {@code docs/tasks/M1.md}, {@code docs/tasks/M2.md}, {@code docs/tasks/M3.md}). Generated
+ * once, eyeballed for plausibility (each output matches its declared pattern shape, M2's
+ * dictionary-drawn outputs are real dictionary entries, and M3's jitter/email/phone outputs
+ * satisfy their own guarantees), then frozen: a future change to the Appendix A algorithms, a
+ * dictionary file, or this class's logic that alters any of these values is a breaking change
+ * and MUST stop and be flagged, not silently "fixed" here.
  */
 class GoldenOutputsTest {
 
@@ -86,5 +89,60 @@ class GoldenOutputsTest {
   void organisationNameGoldenOutputs() {
     assertEquals("Edinburgh Media Care Ltd", alterego().organisationName().apply("Acme Trading Ltd"));
     assertEquals("Medical Training Foods", alterego().organisationName().apply("Foo Bar"));
+  }
+
+  // --- M3: temporal jitter, a representative selection of the eight strategies (not all sixteen
+  // methods), plus emailAddress() and phoneNumber() ---------------------------------------------
+
+  private static final LocalDate GOLDEN_DAY = LocalDate.of(2026, 3, 15);
+  private static final LocalDateTime GOLDEN_MOMENT = LocalDateTime.of(2026, 3, 15, 14, 30, 45, 123_456_789);
+
+  @Test
+  void shiftDateByDaysGoldenOutput() {
+    assertEquals(LocalDate.of(2026, 2, 26), alterego().shiftDate(30).apply(GOLDEN_DAY));
+  }
+
+  @Test
+  void shiftDateByMonthGoldenOutput() {
+    assertEquals(LocalDate.of(2026, 3, 12), alterego().shiftDate(AlterEgo.DateField.MONTH).apply(GOLDEN_DAY));
+  }
+
+  @Test
+  void shiftDateByYearGoldenOutput() {
+    assertEquals(LocalDate.of(2026, 1, 27), alterego().shiftDate(AlterEgo.DateField.YEAR).apply(GOLDEN_DAY));
+  }
+
+  @Test
+  void shiftDateTimeByDaysAndSecondsGoldenOutput() {
+    assertEquals(
+        LocalDateTime.of(2026, 2, 14, 14, 48, 2), alterego().shiftDateTime(30, 3600).apply(GOLDEN_MOMENT));
+  }
+
+  @Test
+  void shiftDateTimeByDaysAndHourFieldGoldenOutput() {
+    assertEquals(
+        LocalDateTime.of(2026, 4, 12, 14, 33, 49),
+        alterego().shiftDateTime(30, AlterEgo.TimeField.HOUR).apply(GOLDEN_MOMENT));
+  }
+
+  @Test
+  void shiftDateTimeByYearFieldAndRangeGoldenOutput() {
+    assertEquals(
+        LocalDateTime.of(2026, 5, 24, 10, 53, 20),
+        alterego()
+            .shiftDateTime(AlterEgo.DateField.YEAR, LocalTime.of(9, 0), LocalTime.of(17, 0))
+            .apply(GOLDEN_MOMENT));
+  }
+
+  @Test
+  void emailAddressGoldenOutputs() {
+    assertEquals("aufxv.mzfic@example.net", alterego().emailAddress().apply("alice.smith@realmail.com"));
+    assertEquals("ttq88@example.com", alterego().emailAddress().apply("bob99"));
+  }
+
+  @Test
+  void phoneNumberGoldenOutputs() {
+    assertEquals("0131 496 0178", alterego().phoneNumber().apply("020 7946 0958"));
+    assertEquals("0116 496 0405", alterego().phoneNumber().apply("07123 456789"));
   }
 }

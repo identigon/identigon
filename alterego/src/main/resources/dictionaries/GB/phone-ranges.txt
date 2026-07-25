@@ -1,0 +1,22 @@
+# source: Ofcom, "Telephone numbers for use in TV and radio drama programmes" (published 2019-03-01, last updated 2023-05-11)
+# data-url: https://www.ofcom.org.uk/phones-and-broadband/phone-numbers/numbers-for-drama
+# licence: Ofcom-copyright
+# licence-url: https://www.ofcom.org.uk/about-ofcom/our-website/copyright
+# retrieved: 2026-07-25
+01134960	0113 496 0XXX
+01144960	0114 496 0XXX
+01154960	0115 496 0XXX
+01164960	0116 496 0XXX
+01174960	0117 496 0XXX
+01184960	0118 496 0XXX
+01214960	0121 496 0XXX
+01314960	0131 496 0XXX
+01414960	0141 496 0XXX
+01514960	0151 496 0XXX
+01614960	0161 496 0XXX
+01632960	01632 960XXX
+01914980	0191 498 0XXX
+02079460	020 7946 0XXX
+02896496	028 9649 6XXX
+02920180	029 2018 0XXX
+07700900	07700 900XXX

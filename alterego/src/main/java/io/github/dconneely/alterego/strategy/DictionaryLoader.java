@@ -50,6 +50,20 @@ public final class DictionaryLoader {
     }
   }
 
+  /**
+   * Whether {@code dictionaries/<country>/<name>.txt} exists on the classpath, without throwing
+   * if it doesn't — for built-ins like {@code phoneNumber()} where a missing resource is a
+   * documented lesser category (no fictionality guarantee), not a configuration failure.
+   */
+  static boolean exists(String country, String name) {
+    try (InputStream in =
+        DictionaryLoader.class.getResourceAsStream("/dictionaries/" + country + "/" + name + ".txt")) {
+      return in != null;
+    } catch (IOException e) {
+      throw new UncheckedIOException("Failed to check dictionary resource: " + country + "/" + name, e);
+    }
+  }
+
   private static Dictionary loadFromClasspath(String country, String name) {
     String resourcePath = "/dictionaries/" + country + "/" + name + ".txt";
     try (InputStream in = DictionaryLoader.class.getResourceAsStream(resourcePath)) {

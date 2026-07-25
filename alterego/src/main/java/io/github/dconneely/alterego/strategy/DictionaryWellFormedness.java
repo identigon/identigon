@@ -65,6 +65,46 @@ final class DictionaryWellFormedness {
     }
   }
 
+  /**
+   * Validates the one-tag (display template) convention for the phone-ranges resource
+   * (SPECIFICATION.md section 4.1, section 4.4; {@code docs/phone-ranges.md}): each entry's
+   * value is an 8-digit fixed prefix, and its template tag is that same prefix, in Ofcom's own
+   * digit-grouping, with the 3 freely-varying trailing digits marked {@code XXX} — stripping the
+   * template's spaces and {@code XXX} must reconstruct the value exactly.
+   */
+  static void validatePhoneRangeTags(Dictionary dictionary, String resourceName) {
+    Pattern valuePattern = Pattern.compile("[0-9]{8}");
+    for (DictionaryEntry entry : dictionary.entries()) {
+      String value = entry.value();
+      if (entry.tags().size() != 1) {
+        throw new AlterEgoConfigException(
+            resourceName + ": phone-range entry '" + value + "' must have exactly 1 tag (the display template), got "
+                + entry.tags().size());
+      }
+      if (!valuePattern.matcher(value).matches()) {
+        throw new AlterEgoConfigException(
+            resourceName + ": phone-range value must be exactly 8 digits, got: " + value);
+      }
+      String template = entry.tags().get(0);
+      if (!template.endsWith("XXX") || template.indexOf("XXX") != template.length() - 3) {
+        throw new AlterEgoConfigException(
+            resourceName + ": phone-range template must end in exactly one 'XXX', got: " + template);
+      }
+      String reconstructed = template.replace(" ", "").replace("XXX", "");
+      if (!reconstructed.equals(value)) {
+        throw new AlterEgoConfigException(
+            resourceName
+                + ": phone-range template '"
+                + template
+                + "' does not reconstruct value '"
+                + value
+                + "' (got '"
+                + reconstructed
+                + "')");
+      }
+    }
+  }
+
   /** Validates the two-tag (postcode area, {@link UkNation}) convention for town dictionaries. */
   static void validateTownTags(Dictionary dictionary, String resourceName) {
     for (DictionaryEntry entry : dictionary.entries()) {

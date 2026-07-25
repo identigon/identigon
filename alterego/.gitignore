@@ -1,10 +1,27 @@
-.gradle/
-build/
-bin/
-.idea/
+*.bak
+*.code-workspace
 *.iml
+*.ipr
+*.iws
+*.log
+*.tmp
 .DS_Store
+.classpath
+.claude/
+.env
+.factorypath
+.gradle/
+.idea/
 .jqwik-database
+.project
+.run/
+.settings/
+.vscode/
+.yamlrc.yml
+._*
+CLAUDE.md
+bin/
+build/
 
 # Cached raw third-party source spreadsheets and derived candidate lists (see
 # tools/data-cache/SOURCES.md for provenance). Not committed: too large, and reproducible by

@@ -40,6 +40,13 @@ class DictionaryWellFormednessTest {
                 DictionaryLoader.licenceTextExists(orgComponents.header().licence())));
     assertDoesNotThrow(
         () -> DictionaryWellFormedness.validateOrgComponentTags(orgComponents, "ZZ/organisation-components"));
+
+    Dictionary phoneRanges = DictionaryLoader.load("ZZ", "phone-ranges");
+    assertDoesNotThrow(
+        () ->
+            DictionaryWellFormedness.validate(
+                phoneRanges, "ZZ/phone-ranges", DictionaryLoader.licenceTextExists(phoneRanges.header().licence())));
+    assertDoesNotThrow(() -> DictionaryWellFormedness.validatePhoneRangeTags(phoneRanges, "ZZ/phone-ranges"));
   }
 
   @Test
@@ -54,7 +61,8 @@ class DictionaryWellFormednessTest {
             "towns",
             "street-themes",
             "street-types",
-            "organisation-components")) {
+            "organisation-components",
+            "phone-ranges")) {
       Dictionary dict = DictionaryLoader.load("GB", name);
       boolean licenceOk = DictionaryLoader.licenceTextExists(dict.header().licence());
       assertDoesNotThrow(
@@ -66,6 +74,8 @@ class DictionaryWellFormednessTest {
     Dictionary orgComponents = DictionaryLoader.load("GB", "organisation-components");
     assertDoesNotThrow(
         () -> DictionaryWellFormedness.validateOrgComponentTags(orgComponents, "GB/organisation-components"));
+    Dictionary phoneRanges = DictionaryLoader.load("GB", "phone-ranges");
+    assertDoesNotThrow(() -> DictionaryWellFormedness.validatePhoneRangeTags(phoneRanges, "GB/phone-ranges"));
   }
 
   @Test
@@ -158,5 +168,33 @@ class DictionaryWellFormednessTest {
     assertThrows(
         AlterEgoConfigException.class,
         () -> DictionaryWellFormedness.validateOrgComponentTags(dict, "test"));
+  }
+
+  @Test
+  void phoneRangeTagWrongCountFails() {
+    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\n", "test");
+    assertThrows(
+        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
+  }
+
+  @Test
+  void phoneRangeValueNotEightDigitsFails() {
+    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "0123456\t012 345 6XXX\n", "test");
+    assertThrows(
+        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
+  }
+
+  @Test
+  void phoneRangeTemplateMissingXxxSuffixFails() {
+    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\t0123 4560\n", "test");
+    assertThrows(
+        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
+  }
+
+  @Test
+  void phoneRangeTemplateNotReconstructingValueFails() {
+    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\t0999 999 0XXX\n", "test");
+    assertThrows(
+        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
   }
 }
