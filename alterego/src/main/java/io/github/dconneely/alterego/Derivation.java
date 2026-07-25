@@ -5,6 +5,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -30,6 +31,21 @@ final class Derivation {
   /** Builds a {@link HmacRandomness} stream directly from a randomness-purpose derivation. */
   static Randomness randomness(byte[] salt, String domain, String canonical, int counter) {
     return new HmacRandomness(deriveKey(salt, PURPOSE_RANDOM, domain, canonical, counter));
+  }
+
+  /**
+   * The store key for {@code canonical} under {@code domain} (section 5.1, Appendix A.4):
+   * {@code raw} writes the canonical text itself (the {@code rawMappingKeys} opt-in, section
+   * 2.6); otherwise the purpose-separated {@code HMAC(salt, input)}, as 64 lowercase hex
+   * characters. The single path both {@code DefaultMappings} and the {@code stored()}/
+   * {@code unique()} decorator logic use, so the two never diverge.
+   */
+  static String mapKey(byte[] salt, String domain, String canonical, boolean raw) {
+    if (raw) {
+      return canonical;
+    }
+    byte[] key = deriveKey(salt, PURPOSE_MAPKEY, domain, canonical, 0);
+    return HexFormat.of().formatHex(key);
   }
 
   private static byte[] buildMessage(String purpose, String domain, String canonical, int counter) {

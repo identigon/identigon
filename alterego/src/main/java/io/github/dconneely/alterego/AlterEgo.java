@@ -35,12 +35,22 @@ public final class AlterEgo {
   private final Locale locale;
   private final MappingStore mappingStore;
   private final NullPolicy nullPolicy;
+  private final boolean rawMappingKeys;
+  private final int uniqueMaxAttempts;
 
-  private AlterEgo(byte[] salt, Locale locale, MappingStore mappingStore, NullPolicy nullPolicy) {
+  private AlterEgo(
+      byte[] salt,
+      Locale locale,
+      MappingStore mappingStore,
+      NullPolicy nullPolicy,
+      boolean rawMappingKeys,
+      int uniqueMaxAttempts) {
     this.salt = salt;
     this.locale = locale;
     this.mappingStore = mappingStore;
     this.nullPolicy = nullPolicy;
+    this.rawMappingKeys = rawMappingKeys;
+    this.uniqueMaxAttempts = uniqueMaxAttempts;
   }
 
   /** Starts building a new {@code AlterEgo} instance. */
@@ -50,7 +60,8 @@ public final class AlterEgo {
 
   /** Binds a {@code String} strategy under {@code domain} to a reusable transformation. */
   public Transformation<String> bind(String domain, Strategy<String> strategy) {
-    return new DefaultTransformation<>(salt, locale, domain, String.class, strategy, mappingStore, nullPolicy);
+    return new DefaultTransformation<>(
+        salt, locale, domain, String.class, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts);
   }
 
   /**
@@ -58,7 +69,8 @@ public final class AlterEgo {
    * {@code domain} to a reusable transformation.
    */
   public <T> Transformation<T> bind(String domain, Class<T> type, Strategy<T> strategy) {
-    return new DefaultTransformation<>(salt, locale, domain, type, strategy, mappingStore, nullPolicy);
+    return new DefaultTransformation<>(
+        salt, locale, domain, type, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts);
   }
 
   /**
@@ -463,10 +475,14 @@ public final class AlterEgo {
   /** Builds a configured {@link AlterEgo} instance. */
   public static final class Builder {
 
+    private static final int DEFAULT_UNIQUE_MAX_ATTEMPTS = 64;
+
     private byte[] salt;
     private Locale locale = Locale.UK;
     private MappingStore mappingStore;
     private NullPolicy nullPolicy = NullPolicy.PASS_THROUGH;
+    private boolean rawMappingKeys = false;
+    private int uniqueMaxAttempts = DEFAULT_UNIQUE_MAX_ATTEMPTS;
 
     private Builder() {}
 
@@ -500,6 +516,27 @@ public final class AlterEgo {
       return this;
     }
 
+    /**
+     * Whether {@code stored()}/{@code unique()}/{@code context.mappings()} write the raw
+     * canonical input as the store key, instead of the default purpose-separated
+     * {@code HMAC(salt, input)} (section 5.1). An explicit, instance-wide opt-out of the
+     * privacy-by-default behaviour, for debugging a store's contents directly. Defaults to
+     * {@code false}.
+     */
+    public Builder rawMappingKeys(boolean rawMappingKeys) {
+      this.rawMappingKeys = rawMappingKeys;
+      return this;
+    }
+
+    /**
+     * The retry budget {@code unique()} (section 5.3) exhausts before throwing
+     * {@link AlterEgoCollisionException}. Defaults to 64; must be at least 1.
+     */
+    public Builder uniqueMaxAttempts(int uniqueMaxAttempts) {
+      this.uniqueMaxAttempts = uniqueMaxAttempts;
+      return this;
+    }
+
     /** Validates the configuration and builds the {@link AlterEgo} instance. */
     public AlterEgo build() {
       if (salt == null || salt.length < MIN_SALT_BYTES) {
@@ -509,7 +546,10 @@ public final class AlterEgo {
                 + " bytes, got: "
                 + (salt == null ? "none" : salt.length + " bytes"));
       }
-      return new AlterEgo(salt, locale, mappingStore, nullPolicy);
+      if (uniqueMaxAttempts < 1) {
+        throw new AlterEgoConfigException("uniqueMaxAttempts must be >= 1, got: " + uniqueMaxAttempts);
+      }
+      return new AlterEgo(salt, locale, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts);
     }
   }
 }

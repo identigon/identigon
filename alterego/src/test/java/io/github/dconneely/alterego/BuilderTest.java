@@ -73,6 +73,32 @@ class BuilderTest {
   }
 
   @Test
+  void acceptsExplicitUniqueMaxAttempts() {
+    AlterEgo.builder().salt(VALID_SALT).uniqueMaxAttempts(1).build();
+  }
+
+  @Test
+  void rejectsZeroUniqueMaxAttempts() {
+    AlterEgoConfigException ex =
+        assertThrows(
+            AlterEgoConfigException.class,
+            () -> AlterEgo.builder().salt(VALID_SALT).uniqueMaxAttempts(0).build());
+    assertTrue(ex.getMessage().contains("uniqueMaxAttempts"));
+  }
+
+  @Test
+  void rejectsNegativeUniqueMaxAttempts() {
+    assertThrows(
+        AlterEgoConfigException.class,
+        () -> AlterEgo.builder().salt(VALID_SALT).uniqueMaxAttempts(-1).build());
+  }
+
+  @Test
+  void acceptsExplicitRawMappingKeys() {
+    AlterEgo.builder().salt(VALID_SALT).rawMappingKeys(true).build();
+  }
+
+  @Test
   void saltIsDefensivelyCopiedFromCallersArray() {
     byte[] mutableSalt = VALID_SALT.clone();
     AlterEgo built = AlterEgo.builder().salt(mutableSalt).build();

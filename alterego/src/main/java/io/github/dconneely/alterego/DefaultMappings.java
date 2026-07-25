@@ -1,7 +1,6 @@
 package io.github.dconneely.alterego;
 
 import io.github.dconneely.alterego.store.MappingStore;
-import java.util.HexFormat;
 import java.util.Optional;
 
 /**
@@ -10,26 +9,26 @@ import java.util.Optional;
  */
 final class DefaultMappings implements Mappings {
 
-  private static final HexFormat HEX = HexFormat.of();
-
   private final byte[] salt;
   private final String domain;
   private final MappingStore store;
+  private final boolean rawMappingKeys;
 
-  DefaultMappings(byte[] salt, String domain, MappingStore store) {
+  DefaultMappings(byte[] salt, String domain, MappingStore store, boolean rawMappingKeys) {
     this.salt = salt;
     this.domain = domain;
     this.store = store;
+    this.rawMappingKeys = rawMappingKeys;
   }
 
   @Override
   public Optional<String> get(String canonicalKey) {
-    return store().get(domain, hash(canonicalKey));
+    return store().get(domain, key(canonicalKey));
   }
 
   @Override
   public String putIfAbsent(String canonicalKey, String value) {
-    return store().putIfAbsent(domain, hash(canonicalKey), value);
+    return store().putIfAbsent(domain, key(canonicalKey), value);
   }
 
   private MappingStore store() {
@@ -39,8 +38,7 @@ final class DefaultMappings implements Mappings {
     return store;
   }
 
-  private String hash(String canonicalKey) {
-    byte[] key = Derivation.deriveKey(salt, Derivation.PURPOSE_MAPKEY, domain, canonicalKey, 0);
-    return HEX.formatHex(key);
+  private String key(String canonicalKey) {
+    return Derivation.mapKey(salt, domain, canonicalKey, rawMappingKeys);
   }
 }

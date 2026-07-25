@@ -10,30 +10,49 @@ final class DefaultTransformationContext implements TransformationContext {
   private final Locale locale;
   private final String domain;
   private final MappingStore mappingStore;
+  private final boolean rawMappingKeys;
   private final Randomness random;
   private final Mappings mappings;
   private RecordAttributes recordAttributes;
 
   private DefaultTransformationContext(
-      byte[] salt, Locale locale, String domain, String canonical, int counter, MappingStore mappingStore) {
+      byte[] salt,
+      Locale locale,
+      String domain,
+      String canonical,
+      int counter,
+      MappingStore mappingStore,
+      boolean rawMappingKeys) {
     this.salt = salt;
     this.locale = locale;
     this.domain = domain;
     this.mappingStore = mappingStore;
+    this.rawMappingKeys = rawMappingKeys;
     this.random = Derivation.randomness(salt, domain, canonical, counter);
-    this.mappings = new DefaultMappings(salt, domain, mappingStore);
+    this.mappings = new DefaultMappings(salt, domain, mappingStore, rawMappingKeys);
   }
 
   /** Creates the top-level context for a fresh input (Appendix A.1, counter 0). */
   static TransformationContext topLevel(
-      byte[] salt, Locale locale, String domain, String canonical, MappingStore mappingStore) {
-    return new DefaultTransformationContext(salt, locale, domain, canonical, 0, mappingStore);
+      byte[] salt,
+      Locale locale,
+      String domain,
+      String canonical,
+      MappingStore mappingStore,
+      boolean rawMappingKeys) {
+    return new DefaultTransformationContext(salt, locale, domain, canonical, 0, mappingStore, rawMappingKeys);
   }
 
-  /** Creates a retry context for {@code unique()} collision escape (Appendix A.1; M4). */
+  /** Creates a retry context for {@code unique()} collision escape (Appendix A.1). */
   static TransformationContext retry(
-      byte[] salt, Locale locale, String domain, String canonical, int counter, MappingStore mappingStore) {
-    return new DefaultTransformationContext(salt, locale, domain, canonical, counter, mappingStore);
+      byte[] salt,
+      Locale locale,
+      String domain,
+      String canonical,
+      int counter,
+      MappingStore mappingStore,
+      boolean rawMappingKeys) {
+    return new DefaultTransformationContext(salt, locale, domain, canonical, counter, mappingStore, rawMappingKeys);
   }
 
   @Override
@@ -67,6 +86,6 @@ final class DefaultTransformationContext implements TransformationContext {
   @Override
   public TransformationContext derived(String subDomain, String subInput) {
     DomainNames.requireValid(subDomain, "domain");
-    return new DefaultTransformationContext(salt, locale, subDomain, subInput, 0, mappingStore);
+    return new DefaultTransformationContext(salt, locale, subDomain, subInput, 0, mappingStore, rawMappingKeys);
   }
 }

@@ -178,6 +178,8 @@ AlterEgo alterego = AlterEgo.builder()
     .locale(Locale.UK)                       // default: Locale.UK (a fixed constant)
     .mappingStore(new InMemoryMappingStore())// default: none (unique()/stored() then throw)
     .nullPolicy(NullPolicy.PASS_THROUGH)     // default
+    .rawMappingKeys(false)                   // default: false (hashed keys — section 5.1)
+    .uniqueMaxAttempts(64)                   // default: 64 (section 5.3)
     .build();
 ```
 
@@ -188,6 +190,14 @@ AlterEgo alterego = AlterEgo.builder()
   `Locale.getDefault()`, which would tie output to machine configuration (ADR 0006). Non-UK
   users configure explicitly; an unshipped country fails fast (section 4). v1 built-ins consult
   only the locale's **country**; the language component steers nothing yet.
+- **`rawMappingKeys`**: applies to every `stored()`/`unique()`/`context.mappings()` use from this
+  instance. `false` (default) writes purpose-separated `HMAC(salt, input)` store keys (section
+  5.1, Appendix A.4); `true` writes the raw canonical input text as the key instead, for
+  debugging a store's contents directly — an explicit, instance-wide opt-out of the
+  privacy-by-default behaviour, not a per-transformation choice.
+- **`uniqueMaxAttempts`**: the retry budget `unique()` (section 5.3) exhausts before throwing
+  `AlterEgoCollisionException`, applied to every `unique()` transformation from this instance.
+  Must be `>= 1`; the builder rejects anything less.
 
 Built-in transformation factory methods (section 4) and binding methods for client strategies:
 
@@ -568,7 +578,8 @@ public interface MappingStore {
 - **Privacy**: by default the *key* written to the store is the purpose-separated
   `HMAC(salt, input)` from Appendix A.4, encoded as 64 lowercase hex characters — the store never
   contains raw input data, and store contents cannot be used to reconstruct randomness keys.
-  Storing raw keys is opt-in for debugging. Keys are never decoded; stored *values* are decoded
+  Storing raw keys is opt-in for debugging (`AlterEgo.Builder.rawMappingKeys(true)`, section 2.6).
+  Keys are never decoded; stored *values* are decoded
   via the canonical forms of section 2.6, and a value that fails to decode (corrupted store,
   renamed enum constant) throws `AlterEgoStoreException`.
 
@@ -590,8 +601,9 @@ each input:
    - `ExistingMapping(v)` — another thread mapped this same input concurrently; return `v`.
    - `ValueTaken` — increment the retry counter, re-derive the context (Appendix A.1), generate a
      new candidate, and repeat step 3.
-4. After a configurable number of attempts (default 64), throw `AlterEgoCollisionException` —
-   with a message pointing out the likely cause (output space too small for the input volume).
+4. After `AlterEgo.Builder.uniqueMaxAttempts` attempts (default 64, section 2.6), throw
+   `AlterEgoCollisionException` — with a message pointing out the likely cause (output space too
+   small for the input volume).
 
 Uniqueness necessarily depends on the mapping store's lifetime: it holds across everything that
 shares one store, and no further. This is documented rather than hidden.

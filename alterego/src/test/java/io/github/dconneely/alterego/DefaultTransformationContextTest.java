@@ -16,7 +16,7 @@ class DefaultTransformationContextTest {
   private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   private static TransformationContext topLevel(String domain, String canonical) {
-    return DefaultTransformationContext.topLevel(SALT, Locale.UK, domain, canonical, null);
+    return DefaultTransformationContext.topLevel(SALT, Locale.UK, domain, canonical, null, false);
   }
 
   // --- section 2.2 invariant: derived(...) matches an equivalent top-level context -----------
@@ -54,7 +54,7 @@ class DefaultTransformationContextTest {
 
   @Test
   void derivedContextCarriesLocaleForward() {
-    TransformationContext parent = DefaultTransformationContext.topLevel(SALT, Locale.UK, "d", "x", null);
+    TransformationContext parent = DefaultTransformationContext.topLevel(SALT, Locale.UK, "d", "x", null, false);
     TransformationContext derived = parent.derived("sub", "y");
     assertEquals(Locale.UK, derived.locale());
   }
