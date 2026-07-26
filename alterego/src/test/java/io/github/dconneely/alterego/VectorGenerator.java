@@ -12,13 +12,12 @@ import java.util.Map;
 
 /**
  * Generates the frozen conformance vector fixtures under {@code src/test/resources/vectors/}
- * from this milestone's implementation of Appendix A. Run once via {@code main}; the output is
- * reviewed by hand (see the independent review gate in {@code docs/tasks/M1.md}) and then never
- * regenerated.
+ * from the Appendix A implementation. Run once via {@code main}; the output is reviewed by hand
+ * (spec section 10) and then never regenerated.
  */
 final class VectorGenerator {
 
-  /** The reference salt for every golden/vector test; never changes (docs/tasks/M1.md). */
+  /** The reference salt for every golden/vector test; never changes. */
   static final byte[] REFERENCE_SALT = "alterego-reference-salt!".getBytes(StandardCharsets.UTF_8);
 
   private static final Path OUTPUT_DIR = Path.of("src/test/resources/vectors");

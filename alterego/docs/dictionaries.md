@@ -19,8 +19,6 @@ having each piece present somewhere else in the project:**
    (`tools/curate_dictionaries.py`, matching `tools/verify_vectors.py`'s standing), not manual
    transcription from a report into a file.
 
-See `docs/tasks/M2.md` step 2 for the full gate this maps to.
-
 ## Sourcing policy
 
 - **Clean, directly acceptable licences**: Open Government Licence (OGL), MIT, CC0 — each a
@@ -142,7 +140,7 @@ in their own source; kept distinct, same reasoning as Thompson/Thomson in surnam
 
 The final lists, and the script that produces them deterministically from these sources, are
 tracked against `tools/curate_dictionaries.py` (spec section 9's "repeatable, documented
-process" requirement — see `docs/tasks/M2.md` step 2).
+process" requirement).
 
 ## Towns/cities + postcode area + nation tags
 

@@ -1,9 +1,9 @@
 # Phone-range source provenance
 
-Sibling document to `docs/dictionaries.md`, for `phoneNumber()`'s fictional-range data (M3,
-`docs/tasks/M3.md` step 4). Kept separate because this is a single small "structural rule table"
-sourced from one regulatory guidance page, not a dictionary of curated words with its own
-population-sizing/tokenisation decisions — the shape doesn't fit `dictionaries.md` naturally.
+Sibling document to `docs/dictionaries.md`, for `phoneNumber()`'s fictional-range data. Kept
+separate because this is a single small "structural rule table" sourced from one regulatory
+guidance page, not a dictionary of curated words with its own population-sizing/tokenisation
+decisions — the shape doesn't fit `dictionaries.md` naturally.
 
 The same three-part gate as every dictionary file applies (see `docs/dictionaries.md`):
 provenance, licensing, data processing. All three are recorded below and in
@@ -73,10 +73,10 @@ and `XXX` stripped, reconstruct the value exactly.
 | Premium rate services           | —         | 0909 8790000–8790999 |
 | UK-wide                         | —         | 03069 990000–990999  |
 
-## Record coherence (M5): area tagging
+## Record coherence: area tagging
 
-Each shipped row carries a second tag, added for `phoneNumber()`'s section 6.3 coherence with
-`city()`/`postcode()` (`docs/tasks/M5.md` step 5): the associated postcode area (cross-checked
+Each shipped row carries a second tag, for `phoneNumber()`'s section 6.3 coherence with
+`city()`/`postcode()`: the associated postcode area (cross-checked
 against `dictionaries/GB/towns.txt`'s own area strings), `NONE` for the 01632 no-area range (the
 designated geography-neutral fallback when a fixed area matches no range), or `MOBILE` for the
 mobile range (never a coherence match target or the neutral fallback — reachable only via the

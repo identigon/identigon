@@ -8,10 +8,9 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 
 /**
- * Exact expected outputs of every M1, M2, and M3 built-in transformation for the reference salt
- * (see {@code docs/tasks/M1.md}, {@code docs/tasks/M2.md}, {@code docs/tasks/M3.md}). Generated
- * once, eyeballed for plausibility (each output matches its declared pattern shape, M2's
- * dictionary-drawn outputs are real dictionary entries, and M3's jitter/email/phone outputs
+ * Exact expected outputs of every built-in transformation for the reference salt (spec section
+ * 10). Generated once, eyeballed for plausibility (each output matches its declared pattern
+ * shape, dictionary-drawn outputs are real dictionary entries, and jitter/email/phone outputs
  * satisfy their own guarantees), then frozen: a future change to the Appendix A algorithms, a
  * dictionary file, or this class's logic that alters any of these values is a breaking change
  * and MUST stop and be flagged, not silently "fixed" here.

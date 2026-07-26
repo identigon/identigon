@@ -12,10 +12,9 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
 /**
- * The M4 milestone gate (docs/tasks/M4.md step 6, spec section 10): a real {@code unique()}
- * transformation, backed by {@link InMemoryMappingStore}, driven through a parallel stream —
- * shows no duplicate outputs and no lost mappings under genuine concurrent load, not just via
- * the store's own contract test.
+ * A real {@code unique()} transformation, backed by {@link InMemoryMappingStore}, driven through
+ * a parallel stream (spec section 10) — shows no duplicate outputs and no lost mappings under
+ * genuine concurrent load, not just via the store's own contract test.
  */
 class UniqueParallelStreamHammerTest {
 

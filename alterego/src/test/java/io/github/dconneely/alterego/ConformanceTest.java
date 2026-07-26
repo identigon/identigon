@@ -18,8 +18,8 @@ import org.junit.jupiter.api.TestFactory;
 /**
  * Loads the frozen conformance vectors under {@code src/test/resources/vectors/} and asserts
  * this implementation reproduces every case exactly. These vectors were independently
- * recomputed in Python during the M1 independent review gate (docs/tasks/M1.md) before being
- * frozen; this test is what keeps them enforced on every future build.
+ * recomputed in Python during review before being frozen (spec section 10); this test is what
+ * keeps them enforced on every future build.
  */
 class ConformanceTest {
 
