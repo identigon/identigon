@@ -10,42 +10,45 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import net.jqwik.api.ForAll;
-import net.jqwik.api.Property;
-import net.jqwik.api.constraints.Size;
-import net.jqwik.api.constraints.StringLength;
 import org.junit.jupiter.api.Test;
 
 /**
- * Property tests backing the PLAN.md M1 "done when" criterion: {@code t.apply(x)} is stable
+ * Property-style tests backing the PLAN.md M1 "done when" criterion: {@code t.apply(x)} is stable
  * across repeated calls, input-order permutations, and sequential vs parallel streams
- * (section 3.1's order-independence guarantee).
+ * (section 3.1's order-independence guarantee). Inputs are enumerated deterministically so a
+ * failure always reproduces.
  */
 class PatternDeterminismPropertyTest {
 
   private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
+  /** A deliberately varied fixed input set: lengths, casing, punctuation, whitespace, non-ASCII. */
+  private static final List<String> VARIED_INPUTS =
+      List.of(
+          "a", "Z", "7", "!", "  ", "abc", "Hello, World", "1234567890",
+          "the-quick-brown-fox", "MiXeDcAsE", "café", "naïve", "東京", "🙂emoji",
+          "line\nbreak", "tab\there", "xxxxxxxxxxxxxxxxxxxx");
+
   private static AlterEgo alterego() {
     return AlterEgo.builder().salt(SALT).build();
   }
 
-  @Property
-  void stableAcrossRepeatedCalls(@ForAll @StringLength(min = 1, max = 20) String input) {
+  @Test
+  void stableAcrossRepeatedCalls() {
     Transformation<String> t = alterego().pattern("DLDDDL");
-    String first = t.apply(input);
-    String second = t.apply(input);
-    String third = alterego().pattern("DLDDDL").apply(input);
-    assertEquals(first, second);
-    assertEquals(first, third);
+    for (String input : VARIED_INPUTS) {
+      String first = t.apply(input);
+      String second = t.apply(input);
+      String third = alterego().pattern("DLDDDL").apply(input);
+      assertEquals(first, second, "input=" + input);
+      assertEquals(first, third, "input=" + input);
+    }
   }
 
-  @Property
-  void stableAcrossInputOrderPermutations(
-      @ForAll @Size(min = 3, max = 12) List<@StringLength(min = 1, max = 10) String> rawInputs) {
-    List<String> inputs = rawInputs.stream().distinct().toList();
-    if (inputs.size() < 2) {
-      return; // not enough distinct inputs to meaningfully permute
-    }
+  @Test
+  void stableAcrossInputOrderPermutations() {
+    List<String> inputs = IntStream.range(0, 12).mapToObj(i -> "perm-" + i).toList();
+
     Transformation<String> forwardTransformation = alterego().pattern("DLDDDL");
     Map<String, String> forward = new LinkedHashMap<>();
     for (String in : inputs) {

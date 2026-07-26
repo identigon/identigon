@@ -6,9 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import net.jqwik.api.ForAll;
-import net.jqwik.api.Property;
-import net.jqwik.api.constraints.IntRange;
 import org.junit.jupiter.api.Test;
 
 class HmacRandomnessTest {
@@ -107,24 +104,25 @@ class HmacRandomnessTest {
     }
   }
 
-  @Property
-  void nextIntStaysWithinBound(@ForAll @IntRange(min = 1, max = 1_000_000) int bound) {
-    Randomness r = fresh("property-" + bound);
-    for (int i = 0; i < 20; i++) {
-      int v = r.nextInt(bound);
-      assertTrue(v >= 0 && v < bound);
+  @Test
+  void nextIntStaysWithinBoundAcrossManyBounds() {
+    int[] bounds = {1, 2, 3, 5, 7, 10, 100, 999, 1000, 65_536, 999_983, 1_000_000};
+    for (int bound : bounds) {
+      Randomness r = fresh("bound-" + bound);
+      for (int i = 0; i < 20; i++) {
+        int v = r.nextInt(bound);
+        assertTrue(v >= 0 && v < bound, "bound=" + bound + " v=" + v);
+      }
     }
   }
 
-  @Property
-  void nextBooleanMatchesNextLongOfTwoEqualsOne(@ForAll("seeds") String seed) {
-    Randomness a = fresh(seed);
-    Randomness b = fresh(seed);
-    assertEquals(b.nextLong(2) == 1, a.nextBoolean());
-  }
-
-  @net.jqwik.api.Provide
-  net.jqwik.api.Arbitrary<String> seeds() {
-    return net.jqwik.api.Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(10);
+  @Test
+  void nextBooleanMatchesNextLongOfTwoEqualsOne() {
+    for (int i = 0; i < 100; i++) {
+      String seed = "seed-" + i;
+      Randomness a = fresh(seed);
+      Randomness b = fresh(seed);
+      assertEquals(b.nextLong(2) == 1, a.nextBoolean(), "seed=" + seed);
+    }
   }
 }

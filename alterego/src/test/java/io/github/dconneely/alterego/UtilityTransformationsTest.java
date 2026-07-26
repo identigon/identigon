@@ -6,11 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
-import net.jqwik.api.ForAll;
-import net.jqwik.api.Property;
-import net.jqwik.api.constraints.IntRange;
-import net.jqwik.api.constraints.StringLength;
 import org.junit.jupiter.api.Test;
 
 class UtilityTransformationsTest {
@@ -75,10 +73,12 @@ class UtilityTransformationsTest {
     assertEquals(alterego().pattern("DLDDDL").apply("x"), alterego().pattern("DLDDDL").apply("x"));
   }
 
-  @Property
-  void patternAlwaysMatchesShapeAcrossManyInputs(@ForAll @StringLength(min = 1, max = 20) String input) {
+  @Test
+  void patternAlwaysMatchesShapeAcrossManyInputs() {
     Transformation<String> t = alterego().pattern("DLDDDL");
-    assertTrue(Pattern.matches("[0-9][A-Z][0-9]{3}[A-Z]", t.apply(input)));
+    for (String input : manyInputs()) {
+      assertTrue(Pattern.matches("[0-9][A-Z][0-9]{3}[A-Z]", t.apply(input)), "input=" + input);
+    }
   }
 
   // --- constant() ------------------------------------------------------------------------------
@@ -128,10 +128,27 @@ class UtilityTransformationsTest {
     assertThrows(AlterEgoConfigException.class, () -> alterego().mask('*', -1));
   }
 
-  @Property
-  void maskAlwaysPreservesLength(
-      @ForAll @StringLength(min = 0, max = 30) String input, @ForAll @IntRange(min = 0, max = 30) int keepLast) {
-    Transformation<String> t = alterego().mask('*', keepLast);
-    assertEquals(input.length(), t.apply(input).length());
+  @Test
+  void maskAlwaysPreservesLength() {
+    for (String input : manyInputs()) {
+      for (int keepLast = 0; keepLast <= 30; keepLast++) {
+        Transformation<String> t = alterego().mask('*', keepLast);
+        assertEquals(
+            input.length(), t.apply(input).length(), "input=" + input + " keepLast=" + keepLast);
+      }
+    }
+  }
+
+  /** A varied fixed input set (including the empty string and non-ASCII) for the loop-based tests. */
+  private static List<String> manyInputs() {
+    List<String> inputs =
+        new ArrayList<>(
+            List.of(
+                "", "a", "Z", "7", "!", "  ", "abc", "café", "naïve", "東京都",
+                "🙂", "MiXeD", "the-quick-brown-fox-jumps!!", "1234567890123456789012345678"));
+    for (int i = 0; i < 200; i++) {
+      inputs.add("input-" + i);
+    }
+    return inputs;
   }
 }
