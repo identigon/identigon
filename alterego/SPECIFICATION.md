@@ -348,6 +348,21 @@ a message. Where such a region exists, the built-in generates inside it **by def
 | `streetAddress()`            | reads as obviously fictional,| authored (not sourced) theme word     |
 |                              | not a real street            | (e.g. "Example") plus a real          |
 |                              |                              | structural type word ("Road")         |
+| `nhsNumber()`                | never a live NHS number      | the NHS test range: numbers beginning |
+|                              |                              | `999` are reserved for test data and  |
+|                              |                              | never issued; check digit valid (A.5) |
+| `nationalInsuranceNumber()`  | never an allocated NI number | prefix `QQ` — `Q` is never used as a  |
+|                              |                              | first letter in allocated prefixes;   |
+|                              |                              | HMRC's own documentation example      |
+| `drivingLicenceNumber()`     | never a real GB driving      | surname block `99999` — impossible on |
+|                              | licence number               | a real licence, where a real surname  |
+|                              |                              | always contributes at least one letter|
+| `passportNumber()`           | never a valid UK passport    | two leading letters (`ZZ`) — real UK  |
+|                              | number                       | passport numbers are wholly numeric   |
+| `creditCardNumber()`         | never an issued card number  | leading digit `0`, an ISO/IEC 7812    |
+|                              |                              | major industry identifier no card     |
+|                              |                              | scheme issues from; Luhn check digit  |
+|                              |                              | valid (A.9)                           |
 
 Guarantees key on the locale's **country** (section 4 intro): any UK locale (ISO code `GB`),
 whatever its language, gets the UK mechanisms.
@@ -371,13 +386,18 @@ reviewed carefully, not on an external authority's own reserved-value-space rule
 per-category, not per-locale — any future country's surname/street dictionaries are authored the
 same way, so the guarantee doesn't require a separate "fictional" locale per real one.
 
+The identifier transformations (section 4.8) fall into the same two families: `nhsNumber()`
+draws from an officially reserved test range, while `nationalInsuranceNumber()`,
+`drivingLicenceNumber()`, `passportNumber()`, and `creditCardNumber()` rely on structural
+impossibility — a prefix or field value a real identifier can never carry, chosen so the output
+still passes shape-and-checksum validation.
+
 Countries with no defined fictional range fall back to in-place digit replacement with **no
 guarantee**; the Javadoc of each built-in states, per country, which category applies. No
 guarantee of this kind is possible for first names, towns, or organisation names — each output
 word is real (that is what makes it realistic); only the combination and its attachment to a
 record are synthetic. Candidate future additions in the same spirit: TEST-NET IP addresses
-(RFC 5737), `.test`/`.invalid` domains (RFC 6761), and never-allocated UK National Insurance
-prefixes.
+(RFC 5737) and `.test`/`.invalid` domains (RFC 6761).
 
 ### 4.2 People and organisations
 
@@ -540,8 +560,10 @@ Patterns are compiled once (at `pattern(...)` call time); a malformed pattern (e
 throws `AlterEgoPatternException` with the offending position. A raw pattern carries no
 fictionality guarantee (section 4.1): `pattern("LLDD DLL")` can and will produce real postcodes —
 use `postcode()` when the guarantee matters. Possible later extensions, explicitly out of scope
-for v1: character classes `[ABC]`, repetition counts `D{5}`, and checksum-aware generation
-(e.g. Luhn digits).
+for the pattern language itself: character classes `[ABC]` and repetition counts `D{5}`.
+Checksum-carrying identifiers (NHS numbers, card numbers) are deliberately built-ins with pinned
+fictional value spaces (section 4.8), not generic pattern tokens — a generic Luhn token could not
+also express the never-issued-prefix rules that make the output safe.
 
 There is deliberately no generic format-inferring transformation (section 1 non-goals):
 consumers state the format they want. Built-ins that replace characters in place (email local
@@ -556,6 +578,75 @@ inference facility.
 | `mask(char c, int keepLast)`  | Mask all but the last `keepLast` characters with `c`.      |
 |                               | Inputs of length ≤ `keepLast` are returned unchanged;      |
 |                               | negative `keepLast` throws `AlterEgoConfigException`.      |
+
+### 4.8 Identifier transformations (UK documents and payment cards)
+
+Five `Transformation<String>` built-ins for common identifying numbers. Each generates a
+complete replacement in a pinned output format — the input's content is only the derivation
+input (section 3.1) and is otherwise ignored; there is no in-place digit preservation, no
+options type, and no blank-input special case (the empty string is an input like any other).
+Every output satisfies the identifier's shape (and checksum, where one exists) while landing in
+the fictional space of section 4.1. The generation algorithms, including the exact order of
+randomness draws, are pinned in Appendix A.5-A.9.
+
+| Method                        | Output format (fixed)               | Domain                                |
+|-------------------------------|--------------------------------------|----------------------------------------|
+| `nhsNumber()`                 | `999 ddd dddc` — 10 digits, 3-3-4   | `alterego:nhs-number`                 |
+|                               | spacing, `c` = valid mod-11 check   |                                        |
+|                               | digit (A.5)                          |                                        |
+| `nationalInsuranceNumber()`   | `QQ dd dd dd S` — `S` drawn from    | `alterego:national-insurance-number`  |
+|                               | `A`-`D` (A.6)                        |                                        |
+| `drivingLicenceNumber()`      | 16 characters, unspaced, DVLA       | `alterego:driving-licence-number`     |
+|                               | (Great Britain) layout: `99999` +   |                                        |
+|                               | 6-digit encoded date-of-birth block |                                        |
+|                               | + 2 initial letters + `9` + 2       |                                        |
+|                               | letters (A.7)                        |                                        |
+| `passportNumber()`            | `ZZddddddd` — `ZZ` plus 7 digits,   | `alterego:passport-number`            |
+|                               | unspaced (A.8)                       |                                        |
+| `creditCardNumber()`          | `0ddd dddd dddd dddc` — 16 digits   | `alterego:credit-card-number`         |
+|                               | in four spaced groups, `c` = valid  |                                        |
+|                               | Luhn check digit (A.9)               |                                        |
+
+Country scoping: `nhsNumber()`, `nationalInsuranceNumber()`, `drivingLicenceNumber()`, and
+`passportNumber()` are UK document formats and require the locale's country to be `GB`; any
+other country throws `AlterEgoConfigException` at factory-call time (the same fail-fast rule as
+the dictionary-backed built-ins). `creditCardNumber()` is locale-independent (like
+`emailAddress()`): ISO/IEC 7812 and Luhn are not country-specific.
+
+Fictionality mechanisms, and what each rests on:
+
+- **`nhsNumber()`** — NHS numbers beginning `999` are reserved for test and synthetic data and
+  are never issued to a person (NHS England test-data guidance). This is a documented reserved
+  range, the same guarantee family as Ofcom drama phone numbers. The check digit is computed
+  normally (A.5), so the output passes full NHS-number validation including the checksum.
+- **`nationalInsuranceNumber()`** — HMRC's published prefix-validity rules never allocate
+  prefixes whose first letter is `D`, `F`, `I`, `Q`, `U`, or `V`; `QQ` in particular is the
+  prefix HMRC itself uses for example NI numbers in documentation. A `QQ`-prefixed number is
+  structurally unallocatable. NI numbers carry no checksum; the suffix letter is drawn from the
+  valid set `A`-`D`.
+- **`drivingLicenceNumber()`** — in the DVLA format, characters 1-5 encode the licence holder's
+  surname, padded with `9`s only after the surname's own letters. A real surname always
+  contributes at least one letter, so the block `99999` can never occur on a real licence. The
+  remaining fields (date-of-birth block, initials, issue letters) are generated shape-valid
+  (A.7) so the output passes DVLA-format validation. Northern Ireland's separate DVA format
+  (8 digits) is not generated in this version — the output is always the Great Britain layout.
+- **`passportNumber()`** — UK passport numbers are wholly numeric (9 digits); an output carrying
+  the letters `ZZ` can never be a valid UK passport number, while still passing the generic
+  passport-field validation (up to 9 alphanumeric characters) used by systems that accept
+  multiple nationalities' documents. The guarantee is scoped to UK passports, like the postcode
+  guarantee is scoped to UK postcodes.
+- **`creditCardNumber()`** — ISO/IEC 7812 reserves major industry identifier `0` (the first
+  digit) for ISO/TC 68 and future industry assignment; no payment card scheme issues PANs
+  beginning `0`. The Luhn check digit is computed normally (A.9), so the output passes
+  length-and-checksum validation while being unmistakably outside every issuing range.
+
+As with section 4.1's other structural guarantees, these outputs pass shape/checksum validation
+but fail live lookups (a PDS trace, a DVLA record check, an issuer BIN lookup) — usually exactly
+the point. There are deliberately no `realistic()` opt-outs for these five: a "realistic" NHS,
+NI, licence, passport, or card number is a real person's credential-shaped identifier, and the
+risk-to-value ratio is far worse than for phone numbers or postcodes. Systems that need
+network-testable card numbers should use the card networks' own published test PANs, not this
+library.
 
 ## 5. Uniqueness and stored mappings
 
@@ -592,9 +683,10 @@ public interface MappingStore {
 - Implementations must be thread-safe (parallel streams).
 - The library ships `InMemoryMappingStore` (`ConcurrentHashMap`-based, with an inverse index per
   namespace to make the value-in-use check O(1)). Its memory use grows without bound with the
-  number of distinct inputs — documented; large or long-lived datasets belong in an external
-  store. JDBC-, file-, or Redis-backed stores are left to clients or future modules; the SPI plus
-  the contract test (section 10) are the contract.
+  number of distinct inputs — documented; large or long-lived datasets belong in a persistent
+  store. The library also ships `FileMappingStore` (section 5.4), a single-process persistent
+  store backed by one local file. JDBC- or Redis-backed stores are left to clients or future
+  modules; the SPI plus the contract test (section 10) are the contract.
 - **Privacy**: by default the *key* written to the store is the purpose-separated
   `HMAC(salt, input)` from Appendix A.4, encoded as 64 lowercase hex characters — the store never
   contains raw input data, and store contents cannot be used to reconstruct randomness keys.
@@ -636,7 +728,60 @@ regardless of processing order; on collision, only the colliding inputs are affe
 resolution is captured in the mapping store so it remains stable on every later run. This is
 inherent to any uniqueness guarantee, and the documentation says so.
 
-## 6. Record coherence
+### 5.4 File-backed store: FileMappingStore
+
+`FileMappingStore` is the shipped persistent `MappingStore`: one local file, one process,
+JDK-only (`java.nio`). It is what makes the cross-run stability promises of 5.2/5.3 achievable
+without writing a custom store (ADR 0011).
+
+```java
+public final class FileMappingStore implements MappingStore, AutoCloseable {
+    public static FileMappingStore open(Path file);  // creates the file if absent
+    @Override public void close();
+}
+```
+
+**Lifecycle.**
+
+- `open(file)` creates the file if it does not exist (the parent directory must already exist),
+  acquires an **exclusive file lock** (`FileChannel.tryLock`) held for the store's lifetime, and
+  replays the file into an in-memory index (same structure as `InMemoryMappingStore`: forward
+  map plus per-namespace inverse index). If the lock is already held — another store instance in
+  this or any other process has the file open — `open` throws `AlterEgoStoreException`. The
+  store is single-process by design; multi-process sharing needs an external store.
+- All operations after `close()` throw `AlterEgoStoreException`. `close()` is idempotent and
+  releases the lock. The store is thread-safe within its process (writes serialised on an
+  internal monitor; reads served from the in-memory index).
+- Reads (`get`) never touch the file after `open`. Writes append exactly one record per **newly
+  stored mapping** — `putIfAbsent` on an existing key and `putIfAbsentUnique` returning
+  `ExistingMapping`/`ValueTaken` write nothing. The append is flushed to the OS before the call
+  returns success. There is no fsync: an OS-level crash can lose the final record(s), which the
+  torn-tail rule below makes safe; a process crash cannot, because success is only reported
+  after the write.
+- The file only grows, by one line per distinct stored mapping — the same asymptotic footprint
+  as the in-memory store, and no compaction is needed because records are never superseded
+  (mappings are permanent by contract).
+
+**File format (v1, frozen like the A.4 key encoding — this file is persistent user data).**
+
+- UTF-8 text, `\n` line terminators only. A record is complete iff its line ends in `\n`.
+- Line 1 (header): exactly `alterego-mapping-store 1`. On creating a new (or empty) file the
+  store writes this header; on opening a non-empty file whose first complete line is anything
+  else, `open` throws `AlterEgoStoreException`.
+- Every subsequent line is one mapping:
+  `namespace + "\t" + base64url(key) + "\t" + base64url(value)`, where `base64url` is
+  `java.util.Base64.getUrlEncoder().withoutPadding()` over the string's UTF-8 bytes. The
+  namespace is written verbatim (domains match `[A-Za-z0-9:._-]{1,100}`, section 2.6, so it can
+  never contain a tab or newline); key and value are always encoded, because raw mapping keys
+  (`rawMappingKeys(true)`) may contain anything.
+- **Torn-tail rule**: a final line with no trailing `\n` is an interrupted append. It is ignored
+  on replay, and the next append overwrites it (the store positions writes at the end of the
+  last complete line). This is safe because a torn record's `putIfAbsent`/`putIfAbsentUnique`
+  call never returned success.
+- Any other malformation — a non-final line that does not parse, a wrong field count, an invalid
+  base64 field, or a **duplicate (namespace, key)** — is corruption or external editing, and
+  `open` throws `AlterEgoStoreException` naming the file and line number. The store never
+  silently drops or repairs interior data.
 
 Transforming the fields of a record independently can produce incoherent combinations: a record
 reading *Manchester, E4 0VV, 020 4966 3211* mixes a northern town, a London postcode, and a
@@ -807,8 +952,9 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
 - **JPMS module** `io.github.dconneely.alterego`; group id `io.github.dconneely` (Maven
   Central-compatible with the GitHub account).
 - **Gradle (Groovy DSL)**, `java-library` plugin, toolchain pinned to 25.
-- **No runtime dependencies.** Test dependencies: JUnit Jupiter, and jqwik for property-based
-  determinism tests.
+- **No runtime dependencies.** Test dependencies: JUnit Jupiter (and AssertJ if fluent assertions
+  are wanted). No property-based-testing framework — property-style tests are plain JUnit loops
+  over deterministically enumerated inputs (ADR 0013).
 - Dictionaries and structural-rule tables are plain-text resource files, UTF-8, under
   `src/main/resources/dictionaries/<country>/<name>.txt` (ISO 3166-1 alpha-2, e.g. `GB`) —
   under `src/main/resources`, not the repo root, since they are loaded as classpath resources
@@ -859,7 +1005,12 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
 - **Fictionality**: property tests assert every generated email uses a reserved domain, every
   UK phone number falls inside a published Ofcom drama range, every UK postcode violates the
   inward-code letter rules, and every surname/street-theme word is drawn from the authored
-  fictional wordlist — over large generated samples.
+  fictional wordlist — over large generated samples. For the identifier built-ins (section 4.8),
+  the same style of test asserts, per output: `nhsNumber()` matches `999 \d{3} \d{4}` **and**
+  its mod-11 check digit verifies; `nationalInsuranceNumber()` matches `QQ \d{2} \d{2} \d{2} [A-D]`;
+  `drivingLicenceNumber()` matches the A.7 shape with surname block `99999` and a valid
+  date-of-birth encoding; `passportNumber()` matches `ZZ\d{7}`; `creditCardNumber()` matches
+  `0\d{3}( \d{4}){3}` **and** its Luhn check digit verifies.
 - **Locale equivalence**: `en-GB` and `cy-GB` configurations produce identical outputs for every
   v1 built-in (country-scoped resolution, section 4).
 - **Record coherence**: within a scope, town/postcode/phone agree whichever field is asked
@@ -871,8 +1022,13 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
   and assert `AlterEgoCollisionException`; concurrent hammer test against the in-memory store
   asserting no duplicate outputs and no lost mappings.
 - **Store contract test**: a reusable test class exercising the `MappingStore` SPI (atomicity of
-  `putIfAbsentUnique`, race behaviour), run against the in-memory store and available to authors
-  of external stores.
+  `putIfAbsentUnique`, race behaviour), run against the in-memory store **and the file store**,
+  and available to authors of external stores.
+- **File store**: beyond the contract test — mappings and `unique()` collision resolutions
+  survive `close()`/`open()`; a torn final line is ignored and safely overwritten; a malformed
+  interior line, duplicate key, or wrong header fails `open` with `AlterEgoStoreException`; a
+  second concurrent `open` of the same file fails; operations after `close()` fail; the file
+  gains exactly one line per newly stored mapping and none for hits/rejections.
 - **Dictionary coverage**: each shipped dictionary is non-empty, well-formed, its tag fields
   valid, and its provenance header present with a licence name matching a committed file under
   `dictionaries/LICENCES/` (build-time check; section 9). Deduplicated means no duplicate
@@ -942,3 +1098,66 @@ All primitives consume from the stream in the order the strategy calls them.
 The stored key for an input is the A.1 derivation with purpose `"alterego/1/mapkey"` and counter
 `0`, encoded as 64 lowercase hexadecimal characters. This encoding is part of the persistent
 store format and never changes within a major version.
+
+The identifier algorithms below (A.5-A.9) compose the A.3 primitives; they are pinned by the
+golden-output tests (section 10) rather than by new vector files. Draws always occur in exactly
+the order written.
+
+### A.5 NHS number generation
+
+```
+repeat:
+    d[1..6] = digit() x 6                       // six fresh draws on every iteration
+    digits  = 9, 9, 9, d1, d2, d3, d4, d5, d6   // the nine payload digits
+    sum     = Σ digits[i] * w[i]                // w = 10, 9, 8, 7, 6, 5, 4, 3, 2
+    c       = 11 - (sum mod 11)
+    if c == 11: c = 0
+until c != 10                                    // 10 marks an unissuable number: redraw
+output "999 " + d1 d2 d3 + " " + d4 d5 d6 + c    // "999 ddd dddc"
+```
+
+### A.6 National Insurance number generation
+
+```
+d[1..6] = digit() x 6
+s       = pick(["A", "B", "C", "D"])
+output "QQ " + d1 d2 + " " + d3 d4 + " " + d5 d6 + " " + s     // "QQ dd dd dd S"
+```
+
+### A.7 GB driving licence number generation
+
+```
+decade   = digit()                       // second digit of the birth year
+female   = nextBoolean()
+month    = nextInt(12) + 1               // 1..12; add 50 if female
+day      = nextInt(28) + 1               // 1..28 (fixed cap: no month-length logic)
+yearUnit = digit()                       // final digit of the birth year
+i1, i2   = letterUpper() x 2             // initials block
+t1, t2   = letterUpper() x 2             // trailing letters
+output "99999"                           // surname block: impossible on a real licence
+     + decade + 2dig(month + (female ? 50 : 0)) + 2dig(day) + yearUnit
+     + i1 + i2 + "9" + t1 + t2           // char 14 is the literal digit 9
+```
+
+`2dig(n)` is `n` zero-padded to two digits. The output is 16 characters, unspaced.
+
+### A.8 UK passport number generation
+
+```
+d[1..7] = digit() x 7
+output "ZZ" + d1 d2 d3 d4 d5 d6 d7       // "ZZddddddd", unspaced
+```
+
+### A.9 Credit card number generation
+
+```
+d[1..14] = digit() x 14
+payload  = 0, d1, ..., d14               // fifteen digits, leading 0 fixed
+sum = 0
+for i = 0 .. 14:                          // i counts from the RIGHT end of payload
+    v = payload[14 - i]                   // 0-indexed left to right
+    if i is even: v = 2 * v; if v > 9: v = v - 9
+    sum += v
+c = (10 - (sum mod 10)) mod 10            // standard Luhn check digit
+output the sixteen digits payload + c, grouped "0ddd dddd dddd dddc"
+```
