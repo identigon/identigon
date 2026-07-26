@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
 
 group = 'io.github.dconneely'
@@ -9,6 +10,9 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
     }
+    // Maven Central requires both alongside the binary jar.
+    withSourcesJar()
+    withJavadocJar()
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -53,5 +57,41 @@ tasks.named('jar') {
     }
     from(rootProject.file('NOTICE')) {
         into 'META-INF'
+    }
+}
+
+// No repository/credentials are configured here — that's environment-specific and not this
+// project's job to commit. This produces a correct, complete POM plus the three artifact jars
+// (binary, sources, javadoc) for `./gradlew publishToMavenLocal`; wiring an actual remote
+// (Central, GitHub Packages) is a separate, later decision.
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifactId = 'alterego' // the library's own name, distinct from the lib-alterego repo/directory name
+
+            pom {
+                name = 'AlterEgo'
+                description = 'A zero-dependency Java library for deterministic pseudonymisation.'
+                url = 'https://github.com/dconneely/lib-alterego'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://github.com/dconneely/lib-alterego/blob/main/LICENCE'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'dconneely'
+                        name = 'David Conneely'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/dconneely/lib-alterego.git'
+                    developerConnection = 'scm:git:https://github.com/dconneely/lib-alterego.git'
+                    url = 'https://github.com/dconneely/lib-alterego'
+                }
+            }
+        }
     }
 }

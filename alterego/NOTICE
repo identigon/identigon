@@ -68,3 +68,15 @@ Release", Domestic UK Applications dataset), licensed under the Open Government 
 Word tokens only, mined from the dataset's owner-name field and filtered against personal
 names — no owner names themselves are used or redistributed (see docs/dictionaries.md,
 "Organisation-name components", and tools/mine_org_components.py).
+
+--------------------------------------------------------------------------------
+
+Phone number ranges (src/main/resources/dictionaries/GB/phone-ranges.txt)
+
+Contains material from Ofcom, "Telephone numbers for use in TV and radio drama programmes"
+(https://www.ofcom.org.uk/phones-and-broadband/phone-numbers/numbers-for-drama), (c) Ofcom.
+Not Open Government Licence: reproduced under Ofcom's own copyright and information re-use
+terms (accurate reproduction, acknowledged as Ofcom copyright with the document title
+specified) — a documented exception to this project's usual OGL/MIT/CC0 sourcing policy, since
+Ofcom is the sole authority publishing these reserved number ranges (see docs/phone-ranges.md,
+and the full licence text at src/main/resources/dictionaries/LICENCES/Ofcom-copyright.txt).

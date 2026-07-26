@@ -154,9 +154,13 @@ contract test (usable by future external implementations) covers atomicity of
   randomness derived per Appendix A.1 (purpose `alterego/1/record`).
 - `TransformationContext.record()` wiring through the binding machinery and `derived(...)`.
 - Built-in coherence (spec section 6.3): `AlterEgoAttributes.UK_POSTCODE_AREA` /
-  `UK_NATION`; `city()` reads/sets them from the M2 town tags; `postcode()` builds its outward
-  code from the fixed area; `phoneNumber()` prefers a place-matching drama range, falling back
-  to `01632 960xxx`.
+  `UK_NATION`; `city()` reads/sets them from the M2 town tags. `postcode()`/`phoneNumber()` build
+  from the fixed area if one exists, or — via `RecordAttributes.isActive()` and a shared
+  `computeIfAbsent`-based establishing helper (ADR 0009) — pick a real town from the country's
+  dictionary and establish it themselves if they're the first field to touch the record's place,
+  guaranteeing a later `city()` call always matches. `phoneNumber()`
+  falls back to `01632 960xxx` only when the (fixed or newly established) area has no drama range
+  of its own.
 - A custom-strategy coherence example as a test (Companies House-style prefix from
   `UK_NATION`).
 
