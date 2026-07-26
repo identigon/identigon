@@ -1,30 +1,29 @@
-# source: drivers.co.uk 'Revealed: The UK's most common street names' and thefactsite.com 'The Most Common Street Names In The UK' — both secondary reporting ultimately over OS Open Names frequency data, OGL v3.0
-# data-url: https://drivers.co.uk/general/revealed-the-uks-most-common-street-names/; https://www.thefactsite.com/most-common-street-names-in-uk/
-# licence: OGL-v3
-# licence-url: http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
-# retrieved: 2026-07-14
-Albert
-Alexander
-Broadway
-Chester
-Church
-George
-Grange
-High
-Highfield
-King
-London
-Main
-Manor
-Mill
-New
-Park
-Queen
-Richmond
-School
-Springfield
-Stanley
-Station
-Victoria
-Windsor
-York
+# source: AlterEgo project: authored, deliberately fictional street-name theme words — not sourced from real UK street-name frequency data (see docs/dictionaries.md, "Street names", and ADR 0010)
+# data-url: https://github.com/dconneely/lib-alterego/blob/main/docs/dictionaries.md
+# licence: MIT
+# licence-url: https://github.com/dconneely/lib-alterego/blob/main/LICENCE
+# retrieved: 2026-07-27
+Artificial
+Bluff
+Bogus
+Counterfeit
+Demo
+Dummy
+Example
+Fabricated
+Fake
+Fictional
+Hypothetical
+Imaginary
+Invented
+Madeup
+Nonexistent
+Notreal
+Phony
+Placeholder
+Pretend
+Sample
+Somewhere
+Specimen
+Synthetic
+Unreal

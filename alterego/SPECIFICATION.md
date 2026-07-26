@@ -31,12 +31,14 @@ left to the implementer's choice of algorithm or the JDK's.
   transformations obtained from it share that configuration.
 - **Extensible**: clients can define their own strategies and get the same features as built-ins
   (determinism, uniqueness, stored mappings, record coherence).
-- **Realistic output**: replacement names come from country-appropriate dictionaries;
+- **Realistic output**: where a built-in draws from real vocabulary (first names, towns,
+  organisation-name components), replacement values come from country-appropriate dictionaries;
   pattern-based output matches a caller-declared format.
 - **Fictional by default**: where a recognised reserved-for-fiction or guaranteed-invalid value
   space exists (reserved email domains, Ofcom drama numbers, impossible postcodes), built-ins
-  generate inside it, so pseudonymised data cannot accidentally reference something real
-  (section 4.1).
+  generate inside it; surnames and street names go further, drawing from authored, deliberately
+  obvious vocabulary rather than real data at all — so pseudonymised data cannot accidentally
+  reference something real (section 4.1).
 - **Record-coherent**: fields of one record can be transformed consistently — town, postcode, and
   phone number agree — via an explicit record scope (section 6).
 - **Zero runtime dependencies**: the library depends only on the JDK.
@@ -341,6 +343,11 @@ a message. Where such a region exists, the built-in generates inside it **by def
 | `postcode()`                 | never a deliverable postcode | plausible outward code, but the       |
 |                              |                              | inward code ends in a letter never    |
 |                              |                              | used in real postcodes (`C I K M O V`)|
+| `lastName()`                 | reads as obviously fictional,| authored (not sourced) surname        |
+|                              | not a real person's surname  | vocabulary (e.g. "Testperson")        |
+| `streetAddress()`            | reads as obviously fictional,| authored (not sourced) theme word     |
+|                              | not a real street            | (e.g. "Example") plus a real          |
+|                              |                              | structural type word ("Road")         |
 
 Guarantees key on the locale's **country** (section 4 intro): any UK locale (ISO code `GB`),
 whatever its language, gets the UK mechanisms.
@@ -355,19 +362,31 @@ Two things follow from the mechanism and are documented plainly:
   `PhoneOptions.realistic()` or `PostcodeOptions.realistic()` disable it, and their documentation
   states the risk: realistic output can collide with a real person's number or address.
 
+`lastName()` and `streetAddress()` use a different mechanism from the other three: there is no
+officially reserved "fictional surname" or "fictional street" space to draw from, so their entire
+vocabulary is authored rather than sourced from real UK population/geographic data, reviewed to
+avoid coinciding with a known real name (ADR 0010). This is a curation-time guarantee, not a
+structural or regulatory one like the other three: it depends on the wordlist actually having been
+reviewed carefully, not on an external authority's own reserved-value-space rules. The policy is
+per-category, not per-locale — any future country's surname/street dictionaries are authored the
+same way, so the guarantee doesn't require a separate "fictional" locale per real one.
+
 Countries with no defined fictional range fall back to in-place digit replacement with **no
 guarantee**; the Javadoc of each built-in states, per country, which category applies. No
-guarantee is possible for names, streets, cities, or organisations — each output word is real
-(that is what makes it realistic); only the combination and its attachment to a record are
-synthetic. Candidate future additions in the same spirit: TEST-NET IP addresses (RFC 5737),
-`.test`/`.invalid` domains (RFC 6761), and never-allocated UK National Insurance prefixes.
+guarantee of this kind is possible for first names, towns, or organisation names — each output
+word is real (that is what makes it realistic); only the combination and its attachment to a
+record are synthetic. Candidate future additions in the same spirit: TEST-NET IP addresses
+(RFC 5737), `.test`/`.invalid` domains (RFC 6761), and never-allocated UK National Insurance
+prefixes.
 
 ### 4.2 People and organisations
 
 | Method               | Behaviour                                                       |
 |----------------------|-----------------------------------------------------------------|
 | `firstName()`        | Replacement drawn from the country's first-name dictionary.     |
-| `lastName()`         | Replacement drawn from the country's surname dictionary.        |
+| `lastName()`         | Replacement drawn from the country's surname dictionary —       |
+|                      | authored to read as obviously fictional (section 4.1), not real |
+|                      | population data.                                                 |
 | `fullName()`         | Tokenises and delegates to the name strategies (see below).     |
 | `organisationName()` | Generated from country-appropriate component lists, preserving  |
 |                      | a recognised legal suffix if present. Recognised suffixes are a |
@@ -409,9 +428,10 @@ Options (per-transformation, e.g. `firstName(NameOptions.preserveInitial())`):
 | Method            | Behaviour                                                            |
 |-------------------|----------------------------------------------------------------------|
 | `streetAddress()` | House number drawn deterministically from 1–299, plus a complete     |
-|                   | street name composed from the country's dictionary (a theme word     |
-|                   | plus a type word, e.g. "Victoria Road") — the dictionary, not the    |
-|                   | code, owns the vocabulary.                                           |
+|                   | street name composed from the country's dictionary (an authored,     |
+|                   | obviously-fictional theme word plus a real structural type word,     |
+|                   | e.g. "Example Road" — section 4.1) — the dictionary, not the code,   |
+|                   | owns the vocabulary.                                                  |
 | `city()`          | Replacement from the country's town/city dictionary.                 |
 | `postcode()`      | Country-specific format with the fictionality guarantee of 4.1 where |
 |                   | the country defines one (UK: impossible inward-code letters).        |
@@ -837,8 +857,9 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
 - **Golden outputs**: exact expected outputs of every built-in for a reference salt, to catch
   accidental algorithm/dictionary drift between releases.
 - **Fictionality**: property tests assert every generated email uses a reserved domain, every
-  UK phone number falls inside a published Ofcom drama range, and every UK postcode violates the
-  inward-code letter rules — over large generated samples.
+  UK phone number falls inside a published Ofcom drama range, every UK postcode violates the
+  inward-code letter rules, and every surname/street-theme word is drawn from the authored
+  fictional wordlist — over large generated samples.
 - **Locale equivalence**: `en-GB` and `cy-GB` configurations produce identical outputs for every
   v1 built-in (country-scoped resolution, section 4).
 - **Record coherence**: within a scope, town/postcode/phone agree whichever field is asked

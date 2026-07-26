@@ -9,10 +9,12 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The section 4.1 "fictional by default" property tests, gathered in one place now that there
- * are three built-ins with a reserved/impossible value space (spec section 10): every default
- * {@code postcode()} inward code violates the real inward-code rule, every default
- * {@code emailAddress()} uses an RFC 2606 reserved domain, and every default {@code
- * phoneNumber()} falls inside a published Ofcom drama range — each over a large sample.
+ * are five built-ins with some kind of guaranteed-fictional value space (spec section 10): every
+ * default {@code postcode()} inward code violates the real inward-code rule, every default
+ * {@code emailAddress()} uses an RFC 2606 reserved domain, every default {@code phoneNumber()}
+ * falls inside a published Ofcom drama range, and every default {@code lastName()}/{@code
+ * streetAddress()} theme word is drawn from the authored, deliberately fictional word list
+ * (ADR 0010) rather than real population/vocabulary data — each over a large sample.
  */
 class FictionalityTest {
 
@@ -26,6 +28,19 @@ class FictionalityTest {
           "01134960", "01144960", "01154960", "01164960", "01174960", "01184960", "01214960",
           "01314960", "01414960", "01514960", "01614960", "01632960", "01914980", "02079460",
           "02896496", "02920180", "07700900");
+  private static final Set<String> GB_FICTIONAL_SURNAMES =
+      Set.of(
+          "Artificialworth", "Bogusmore", "Concoctedham", "Counterfeitby", "Dummyford",
+          "Examplewick", "Fabricatedstead", "Fakemore", "Fictionalhurst", "Hypotheticalby",
+          "Imaginarydale", "Inventedthorpe", "Madeupperson", "Nonexistentham", "Phonycroft",
+          "Placeholdergate", "Pretendbrook", "Pseudonymby", "Samplebrook", "Sampleford",
+          "Simulatedgate", "Specimenworth", "Syntheticcombe", "Testperson");
+  private static final Set<String> GB_FICTIONAL_STREET_THEMES =
+      Set.of(
+          "Artificial", "Bluff", "Bogus", "Counterfeit", "Demo", "Dummy", "Example", "Fabricated",
+          "Fake", "Fictional", "Hypothetical", "Imaginary", "Invented", "Madeup", "Nonexistent",
+          "Notreal", "Phony", "Placeholder", "Pretend", "Sample", "Somewhere", "Specimen",
+          "Synthetic", "Unreal");
 
   private static AlterEgo alterego() {
     return AlterEgo.builder().salt(SALT).build();
@@ -63,6 +78,27 @@ class FictionalityTest {
       assertTrue(
           GB_PHONE_FIXED_PREFIXES.contains(digitsOnly.substring(0, 8)),
           "not a published fixed prefix: " + digitsOnly.substring(0, 8) + " in " + result);
+    }
+  }
+
+  @Test
+  void everyDefaultLastNameIsDrawnFromTheAuthoredFictionalSurnameSet() {
+    Transformation<String> t = alterego().lastName();
+    for (int i = 0; i < SAMPLE_SIZE; i++) {
+      String result = t.apply("input-" + i);
+      assertTrue(
+          GB_FICTIONAL_SURNAMES.contains(result), "not an authored fictional surname: " + result);
+    }
+  }
+
+  @Test
+  void everyDefaultStreetAddressThemeWordIsDrawnFromTheAuthoredFictionalSet() {
+    Transformation<String> t = alterego().streetAddress();
+    for (int i = 0; i < SAMPLE_SIZE; i++) {
+      String result = t.apply("input-" + i);
+      String theme = result.split(" ")[1];
+      assertTrue(
+          GB_FICTIONAL_STREET_THEMES.contains(theme), "not an authored fictional theme word: " + theme);
     }
   }
 }

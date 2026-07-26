@@ -20,7 +20,7 @@ entry in this file meaningful rather than just a feature list:
 - The `GoldenOutputsTest` suite pins exact expected outputs for a reference salt across every
   built-in, to catch accidental drift in the algorithms or dictionaries between releases.
 
-## [0.1.0] — 2026-07-26 (unreleased)
+## [0.1.0] — 2026-07-26
 
 Initial implementation, milestones M0-M6 of `PLAN.md`. Not yet published to Maven Central.
 
@@ -31,7 +31,10 @@ Initial implementation, milestones M0-M6 of `PLAN.md`. Not yet published to Mave
 - Pattern-based (`pattern()`), constant (`constant()`), and masking (`mask()`) transformations.
 - Name and address built-ins: `firstName()`, `lastName()`, `fullName()`, `city()`,
   `streetAddress()`, `postcode()`, `organisationName()`, backed by curated, provenance-tracked UK
-  dictionaries (`docs/dictionaries.md`).
+  dictionaries (`docs/dictionaries.md`). `lastName()` and `streetAddress()`'s theme words go
+  further: authored, deliberately fictional vocabulary rather than real data, so a pseudonymised
+  name or street address reads as unmistakably fictional, not merely a real one attached to the
+  wrong person (ADR 0010).
 - Temporal jitter: `shiftDate(...)`/`shiftDateTime(...)`, sixteen methods across eight jitter
   strategies, with inclusive `JitterOptions` clamping.
 - Fictional-by-default contact details: `emailAddress()` (RFC 2606 reserved domains) and

@@ -60,13 +60,13 @@ class GoldenOutputsTest {
 
   @Test
   void lastNameGoldenOutputs() {
-    assertEquals("Thomson", alterego().lastName().apply("Smith"));
-    assertEquals("Anderson", alterego().lastName().apply("Jones"));
+    assertEquals("Fictionalhurst", alterego().lastName().apply("Smith"));
+    assertEquals("Fabricatedstead", alterego().lastName().apply("Jones"));
   }
 
   @Test
   void fullNameGoldenOutput() {
-    assertEquals("Alexander Thomson", alterego().fullName().apply("Alice Smith"));
+    assertEquals("Alexander Fictionalhurst", alterego().fullName().apply("Alice Smith"));
   }
 
   @Test
@@ -76,7 +76,7 @@ class GoldenOutputsTest {
 
   @Test
   void streetAddressGoldenOutput() {
-    assertEquals("5 Albert Close", alterego().streetAddress().apply("original"));
+    assertEquals("5 Pretend Close", alterego().streetAddress().apply("original"));
   }
 
   @Test

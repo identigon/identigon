@@ -67,48 +67,30 @@ if a sourcing decision below changes.
 
 ## Surnames
 
-**Status: decided for v1 — all four UK nations, each sized to its real population share rather
-than treated as equal-sized or as one default nation plus adjustments to it.**
+**Status: decided for v1 — authored, not sourced (ADR 0010).**
 
-**Size every nation's contribution to its real population share, calculated the
-same way for all four nations rather than picking one as the default.** England & Wales, at
-89.2% of the UK population, draws on two ONS cohort years (2024 and 2014, see below); Scotland,
-at 8.0%, draws on NRS's top 10 for a single current year. An exactly proportional count would
-give Scotland roughly 2 entries in a pool this size — nowhere near enough to be a genuine,
-recognisable representation of Scottish naming — so top 10 was chosen deliberately, as a level
-big enough to actually represent Scottish surnames rather than token them, without creating
-a distortion in the other direction. Northern Ireland has no equivalent surname
-publication to draw from at all (confirmed via ONS/NRS FOI history), and Wales has no separate
-figure of its own to draw from either — ONS publishes "England and Wales" as one combined
-ranking, not two national ones. Both are gaps in what the UK's own statistics bodies currently
-publish, not a choice this project made; worth revisiting the moment either gap is filled by a
-new official source.
-
-- **England and Wales**: "Twenty most common surnames for births in England and Wales, 2014 and
-  2024" — Office for National Statistics. Both years used (see cohort-blending note below).
-  Data: https://www.ons.gov.uk/aboutus/transparencyandgovernance/freedomofinformationfoi/twentymostcommonsurnamesforbirthsinenglandandwales2014and2024
-  Licence: Open Government Licence v3.0 — http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
-  Retrieved: 2026-07-14
-
-- **Scotland**: "Most common surnames, 2025" — National Records of Scotland. Top 10 (see the
-  population-sizing note above), single current year (no older cohort for Scotland — see the
-  "First names" cohort-blending note below for why an older Scotland cohort wasn't chased).
-  Data: https://www.nrscotland.gov.uk/publications/most-common-surnames-2025/
-  Licence: Open Government Licence v3.0 (Crown Copyright) — http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
-  Retrieved: 2026-07-14
-
-**Combination rule**: 2024 top-20 + 2014 top-20 + Scotland top-10, deduplicated, gives **28
-unique surnames**.
+`lastName()` draws from a deliberately obviously-fictional, authored word list rather than real
+population data, so a pseudonymised full name is unmistakably not a real person's regardless of
+the (real) first name it's paired with (`firstName()` is unaffected — see ADR 0010 for why only
+the surname needs this). The three-part sourcing gate (provenance/licensing/data-processing) that
+applies to sourced dictionaries doesn't apply the same way here, since there is no third-party
+source to cite; instead, the bar is: every entry reviewed to confirm it does not coincide with a
+known real UK surname, and that it reads as unmistakably fictional at a glance rather than merely
+plausible-shaped (e.g. "Testperson", "Sampleford" — not a joke name, just unmistakably synthetic).
+Licensed
+under this project's own MIT licence as original content (`dictionaries/LICENCES/MIT.txt`), not
+a third-party data licence.
 
 ## First names
 
-**Status: decided for v1 — all four UK nations, each sized to its real population share, same
-principle as surnames.**
+**Status: decided for v1 — all four UK nations, each sized to its real population share rather
+than treated as equal-sized or as one default nation plus adjustments to it.**
 
-**As with surnames — size each nation's contribution to its population
-share**: England & Wales draws on two cohort years 29 years apart, to cover more than one
-generation; Scotland and Northern Ireland each draw their top 10 boys' + top 10 girls' names for
-the current year.
+**Size every nation's contribution to its real population share, calculated the same way for
+all four nations rather than picking one as the default**: England & Wales draws on two cohort
+years 29 years apart, to cover more than one generation; Scotland and Northern Ireland each draw
+their top 10 boys' + top 10 girls' names for the current year — big enough to actually represent
+each nation's naming rather than token it, without creating a distortion in the other direction.
 
 - **England and Wales**: "Baby names in England and Wales, 1996 to 2025" — Office for National
   Statistics. Top 20 boys' + top 20 girls' names for both 2025 (the most recent year published)
@@ -136,7 +118,8 @@ the current year.
 **Deduplication detail**: 2025+1996 England & Wales (80 raw) + Scotland top-10×2 (20 raw) +
 Northern Ireland top-10×2 (20 raw) = 120 raw entries, reducing to **89 unique first names**.
 "Muhammad"/"Mohammed" and "Finley"/"Finlay" are different spellings, each independently ranked
-in their own source; kept distinct, same reasoning as Thompson/Thomson in surnames.
+in their own source; kept distinct rather than merged, since each is a genuinely separate ranked
+entry in its source.
 
 The final lists, and the script that produces them deterministically from these sources, are
 tracked against `tools/curate_dictionaries.py` (spec section 9's "repeatable, documented
@@ -170,11 +153,12 @@ against `tools/curate_dictionaries.py` alongside the first-names curation (see a
 
 ## Street names
 
-**Status: decided for v1 — Compositional (theme word + type word).**
+**Status: decided for v1 — Compositional (theme word + type word); theme words authored per
+ADR 0010, type words still real.**
 
-**Decision**: two small composed word lists — `street-themes.txt` (descriptive words)
-and `street-types.txt` (road-type words: "Road", "Avenue", "Close"...), combined at generation
-time (e.g. "Victoria" + "Road" → "Victoria Road"). Both flat lists.
+**Decision**: two small composed word lists — `street-themes.txt` (descriptive words) and
+`street-types.txt` (road-type words: "Road", "Avenue", "Close"...), combined at generation time
+(e.g. "Example" + "Road" → "Example Road"). Both flat lists.
 
 Street-type words (25): Avenue, Close, Court, Crescent, Drive, Gardens, Gate, Green,
 Grove, Hill, Lane, Mews, Mount, Orchard, Place, Plaza, Road, Row, Square, Street, Terrace, Vale,
@@ -189,20 +173,16 @@ users of PAF" (poweredbypaf.com/resources/), which independently confirms PAF ho
 (ordinary English words, not creative or copyrightable content in their own right).
 Retrieved: 2026-07-14
 
-Street theme words (25): Albert, Alexander, Broadway, Chester, Church, George, Grange, High,
-Highfield, King, London, Main, Manor, Mill, New, Park, Queen, Richmond, School, Springfield,
-Stanley, Station, Victoria, Windsor, York.
-Source: drivers.co.uk, "Revealed: The UK's most common street names", and thefactsite.com, "The
-Most Common Street Names In The UK" — both secondary reporting, ultimately over OS Open Names
-frequency data (OGL v3.0), not a primary government publication.
-Data: https://drivers.co.uk/general/revealed-the-uks-most-common-street-names/;
-https://www.thefactsite.com/most-common-street-names-in-uk/
-Licence: not stated on either page directly; treated as accuracy-only sourcing (ordinary English
-words, not creative or copyrightable content in their own right), same basis as the street-type
-words above.
-Words already used as street *types* (Green, Grove, Avenue, Crescent, Drive) are deliberately
-excluded here to avoid degenerate combinations like "Green Green".
-Retrieved: 2026-07-14
+Street theme words (24): Artificial, Bluff, Bogus, Counterfeit, Demo, Dummy, Example, Fabricated,
+Fake, Fictional, Hypothetical, Imaginary, Invented, Madeup, Nonexistent, Notreal, Phony,
+Placeholder, Pretend, Sample, Somewhere, Specimen, Synthetic, Unreal.
+
+Authored, not sourced (ADR 0010): deliberately obvious placeholder-style words, reviewed to
+confirm none coincides with a real UK street-name theme word and that every theme+type
+combination (e.g. "Example Road") reads as unmistakably fictional. Licensed under this project's
+own MIT licence as original content (`dictionaries/LICENCES/MIT.txt`), not a third-party data
+licence — the three-part sourcing gate for real data doesn't apply the same way here, since there
+is no third-party source to cite.
 
 ## Organisation-name components
 

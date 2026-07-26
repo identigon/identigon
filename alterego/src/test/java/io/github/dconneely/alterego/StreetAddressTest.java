@@ -11,7 +11,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Exercises {@code streetAddress()} against the ZZ synthetic street-theme/street-type fixtures
- * and the real curated dictionaries.
+ * and the default-configured GB dictionaries. The GB theme words are authored, deliberately
+ * fictional vocabulary (ADR 0010), not real UK street-name data; the type words (Road, Avenue,
+ * Close...) are real and structural. See {@link FictionalityTest} for the property test
+ * confirming every streetAddress() theme word is drawn from that fictional set.
  */
 class StreetAddressTest {
 
@@ -65,7 +68,10 @@ class StreetAddressTest {
   }
 
   @Test
-  void defaultLocaleGbStreetAddressPicksFromRealDictionary() {
+  void defaultLocaleGbStreetAddressPicksFromAuthoredFictionalDictionary() {
+    // Default locale is Locale.UK; confirms the authored, deliberately fictional
+    // theme-word dictionary (ADR 0010) loads and works via the default-configured
+    // AlterEgo instance.
     AlterEgo gb = AlterEgo.builder().salt(SALT).build();
     String result = gb.streetAddress().apply("original");
     String[] parts = result.split(" ", 2);

@@ -11,8 +11,11 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Exercises firstName()/lastName()/fullName() against the ZZ synthetic test fixtures (for
- * exact, controlled assertions) and the real curated dictionaries (for end-to-end coverage
- * of the default-configured path).
+ * exact, controlled assertions) and the default-configured GB dictionaries (for end-to-end
+ * coverage of the default-configured path). firstName() draws from a real curated dictionary;
+ * lastName() draws from an authored, deliberately fictional dictionary (ADR 0010) — see
+ * {@link FictionalityTest} for the property test confirming every lastName() output is drawn
+ * from that fictional set.
  */
 class NameTest {
 
@@ -70,7 +73,10 @@ class NameTest {
   }
 
   @Test
-  void defaultLocaleGbLastNamePicksFromRealDictionary() {
+  void defaultLocaleGbLastNamePicksFromAuthoredFictionalDictionary() {
+    // Default locale is Locale.UK; confirms the authored, deliberately fictional
+    // dictionary (ADR 0010, not real population data) loads and works via the
+    // default-configured AlterEgo instance.
     AlterEgo gb = AlterEgo.builder().salt(SALT).build();
     String result = gb.lastName().apply("original");
     assertTrue(Character.isUpperCase(result.charAt(0)));

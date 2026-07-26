@@ -16,17 +16,6 @@ Government Licence v3.0."
 
 --------------------------------------------------------------------------------
 
-Surnames (src/main/resources/dictionaries/GB/surnames.txt)
-
-Contains public sector information from the Office for National Statistics ("Twenty most
-common surnames for births in England and Wales, 2014 and 2024" — both years used), licensed
-under the Open Government Licence v3.0.
-
-Contains public sector information from National Records of Scotland ("Most common surnames,
-2025" — top 10 only), licensed under the Open Government Licence v3.0.
-
---------------------------------------------------------------------------------
-
 First names (src/main/resources/dictionaries/GB/first-names.txt)
 
 Contains public sector information from the Office for National Statistics ("Baby names in
@@ -50,14 +39,13 @@ single redistributed dataset. No third-party data attribution is required for th
 
 --------------------------------------------------------------------------------
 
-Street names (src/main/resources/dictionaries/GB/street-themes.txt,
-src/main/resources/dictionaries/GB/street-types.txt)
+Street types (src/main/resources/dictionaries/GB/street-types.txt)
 
-English-only (see docs/dictionaries.md, "Street names", for why). Standard street-type
-descriptor words are a matter of accuracy, not redistribution rights — not creative or
-copyrightable content in their own right. Theme words are derived from published frequency
-analyses of real UK street names, ultimately Ordnance Survey Open Names data, itself licensed
-under the Open Government Licence v3.0.
+Standard street-type descriptor words (Road, Avenue, Close...) are a matter of accuracy, not
+redistribution rights — not creative or copyrightable content in their own right, corroborated
+against Royal Mail's own PAF descriptor list (see docs/dictionaries.md, "Street names").
+`street-themes.txt` is authored, deliberately fictional content (ADR 0010), not third-party
+data, and needs no attribution here — see `dictionaries/LICENCES/MIT.txt`.
 
 --------------------------------------------------------------------------------
 

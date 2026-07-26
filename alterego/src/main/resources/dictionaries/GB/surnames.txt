@@ -1,33 +1,29 @@
-# source: Office for National Statistics: Twenty most common surnames for births in England and Wales, 2014 and 2024 (both years used); National Records of Scotland: Most common surnames, 2025 (top 10 only)
-# data-url: https://www.ons.gov.uk/aboutus/transparencyandgovernance/freedomofinformationfoi/twentymostcommonsurnamesforbirthsinenglandandwales2014and2024; https://www.nrscotland.gov.uk/publications/most-common-surnames-2025/
-# licence: OGL-v3
-# licence-url: http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
-# retrieved: 2026-07-14
-Ahmed
-Ali
-Anderson
-Brown
-Campbell
-Davies
-Edwards
-Evans
-Hussain
-Johnson
-Jones
-Kaur
-Khan
-Murray
-Patel
-Roberts
-Robertson
-Robinson
-Singh
-Smith
-Stewart
-Taylor
-Thomas
-Thompson
-Thomson
-Williams
-Wilson
-Wright
+# source: AlterEgo project: authored, deliberately fictional surnames — not sourced from real population data (see docs/dictionaries.md, "Surnames", and ADR 0010)
+# data-url: https://github.com/dconneely/lib-alterego/blob/main/docs/dictionaries.md
+# licence: MIT
+# licence-url: https://github.com/dconneely/lib-alterego/blob/main/LICENCE
+# retrieved: 2026-07-27
+Artificialworth
+Bogusmore
+Concoctedham
+Counterfeitby
+Dummyford
+Examplewick
+Fabricatedstead
+Fakemore
+Fictionalhurst
+Hypotheticalby
+Imaginarydale
+Inventedthorpe
+Madeupperson
+Nonexistentham
+Phonycroft
+Placeholdergate
+Pretendbrook
+Pseudonymby
+Samplebrook
+Sampleford
+Simulatedgate
+Specimenworth
+Syntheticcombe
+Testperson
