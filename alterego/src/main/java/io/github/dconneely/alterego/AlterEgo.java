@@ -187,7 +187,9 @@ public final class AlterEgo {
   }
 
   /**
-   * Replacement drawn from the locale's country's surname dictionary (section 4.2).
+   * Replacement drawn from the locale's country's surname dictionary (section 4.2). The surname
+   * vocabulary is authored to read as obviously fictional (section 4.1) — never a real person's
+   * surname.
    *
    * @return a {@link Transformation} over surnames
    */
@@ -235,7 +237,9 @@ public final class AlterEgo {
 
   /**
    * A house number (1-299) plus a complete street name composed from the locale's country's
-   * street dictionaries (section 4.3).
+   * street dictionaries (section 4.3). Theme words are authored to read as obviously fictional
+   * (section 4.1) — never a real street name; type words ("Road", "Avenue") are real structural
+   * vocabulary.
    *
    * @return a {@link Transformation} over street addresses
    */

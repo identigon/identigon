@@ -2,7 +2,7 @@
 # data-url: https://github.com/dconneely/lib-alterego/blob/main/docs/dictionaries.md
 # licence: MIT
 # licence-url: https://github.com/dconneely/lib-alterego/blob/main/LICENCE
-# retrieved: 2026-07-27
+# retrieved: 2026-07-26
 Artificialworth
 Bogusmore
 Concoctedham

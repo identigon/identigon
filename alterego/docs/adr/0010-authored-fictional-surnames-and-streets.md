@@ -1,6 +1,6 @@
 # ADR 0010: Authored, obviously-fictional surnames and street names, across all countries
 
-Status: accepted (2026-07-27)
+Status: accepted (2026-07-26)
 
 ## Context
 
