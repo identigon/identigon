@@ -19,17 +19,32 @@ public final class AttributeKey<A> {
     this.type = Objects.requireNonNull(type, "type");
   }
 
-  /** Creates an attribute key. {@code name} must match {@code [A-Za-z0-9:._-]\{1,100\}}. */
+  /**
+   * Creates an attribute key. {@code name} must match {@code [A-Za-z0-9:._-]\{1,100\}}.
+   *
+   * @param <A> the attribute's value type
+   * @param name the key's name
+   * @param type the attribute's value type
+   * @return the attribute key
+   */
   public static <A> AttributeKey<A> of(String name, Class<A> type) {
     return new AttributeKey<>(name, type);
   }
 
-  /** The key's name. */
+  /**
+   * The key's name.
+   *
+   * @return the key's name
+   */
   public String name() {
     return name;
   }
 
-  /** The attribute's value type. */
+  /**
+   * The attribute's value type.
+   *
+   * @return the attribute's value type
+   */
   public Class<A> type() {
     return type;
   }

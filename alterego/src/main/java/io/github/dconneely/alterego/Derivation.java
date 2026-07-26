@@ -34,6 +34,16 @@ final class Derivation {
   }
 
   /**
+   * Builds a {@link HmacRandomness} stream for keyed record-attribute resolution (section 6.2,
+   * Appendix A.1, purpose {@code alterego/1/record}): the domain slot carries the attribute
+   * name, the canonical slot carries the record key, counter always {@code 0} — independent of
+   * which field asks first.
+   */
+  static Randomness recordRandomness(byte[] salt, String attributeName, String recordKey) {
+    return new HmacRandomness(deriveKey(salt, PURPOSE_RECORD, attributeName, recordKey, 0));
+  }
+
+  /**
    * The store key for {@code canonical} under {@code domain} (section 5.1, Appendix A.4):
    * {@code raw} writes the canonical text itself (the {@code rawMappingKeys} opt-in, section
    * 2.6); otherwise the purpose-separated {@code HMAC(salt, input)}, as 64 lowercase hex

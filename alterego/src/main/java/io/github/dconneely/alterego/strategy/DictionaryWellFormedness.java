@@ -66,19 +66,25 @@ final class DictionaryWellFormedness {
   }
 
   /**
-   * Validates the one-tag (display template) convention for the phone-ranges resource
-   * (SPECIFICATION.md section 4.1, section 4.4; {@code docs/phone-ranges.md}): each entry's
-   * value is an 8-digit fixed prefix, and its template tag is that same prefix, in Ofcom's own
-   * digit-grouping, with the 3 freely-varying trailing digits marked {@code XXX} — stripping the
-   * template's spaces and {@code XXX} must reconstruct the value exactly.
+   * Validates the two-tag (display template, place) convention for the phone-ranges resource
+   * (SPECIFICATION.md section 4.1, section 4.4, section 6.3; {@code docs/phone-ranges.md}): each
+   * entry's value is an 8-digit fixed prefix, its first tag is that same prefix in Ofcom's own
+   * digit-grouping with the 3 freely-varying trailing digits marked {@code XXX} (stripping the
+   * template's spaces and {@code XXX} must reconstruct the value exactly), and its second tag is
+   * either a 1–2 uppercase-letter postcode area (for record-coherence matching against {@code
+   * UK_POSTCODE_AREA}), {@code NONE} (the designated geography-neutral fallback range), or
+   * {@code MOBILE} (never a coherence match target or the neutral fallback).
    */
   static void validatePhoneRangeTags(Dictionary dictionary, String resourceName) {
     Pattern valuePattern = Pattern.compile("[0-9]{8}");
     for (DictionaryEntry entry : dictionary.entries()) {
       String value = entry.value();
-      if (entry.tags().size() != 1) {
+      if (entry.tags().size() != 2) {
         throw new AlterEgoConfigException(
-            resourceName + ": phone-range entry '" + value + "' must have exactly 1 tag (the display template), got "
+            resourceName
+                + ": phone-range entry '"
+                + value
+                + "' must have exactly 2 tags (display template, place), got "
                 + entry.tags().size());
       }
       if (!valuePattern.matcher(value).matches()) {
@@ -101,6 +107,15 @@ final class DictionaryWellFormedness {
                 + "' (got '"
                 + reconstructed
                 + "')");
+      }
+      String place = entry.tags().get(1);
+      if (!place.equals("NONE") && !place.equals("MOBILE") && !POSTCODE_AREA.matcher(place).matches()) {
+        throw new AlterEgoConfigException(
+            resourceName
+                + ": phone-range entry '"
+                + value
+                + "' has invalid place tag (must be NONE, MOBILE, or 1-2 uppercase letters): "
+                + place);
       }
     }
   }

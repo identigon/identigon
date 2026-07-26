@@ -15,7 +15,11 @@ public final class EmailOptions {
     this.mappedDomain = mappedDomain;
   }
 
-  /** The domain is drawn from the RFC 2606 reserved set (the fictionality guarantee applies). */
+  /**
+   * The domain is drawn from the RFC 2606 reserved set (the fictionality guarantee applies).
+   *
+   * @return the default options
+   */
   public static EmailOptions defaults() {
     return DEFAULTS;
   }
@@ -24,12 +28,19 @@ public final class EmailOptions {
    * Keeps the input's own domain unchanged instead of drawing a reserved one — opts out of the
    * fictionality guarantee. If the input has no {@code @}, there is no domain to preserve, and
    * this falls back to a reserved-set draw (documented, still deterministic).
+   *
+   * @return options that preserve the input's own domain
    */
   public static EmailOptions preserveDomain() {
     return new EmailOptions(true, null);
   }
 
-  /** Maps every output to {@code domain} instead of drawing a reserved one. */
+  /**
+   * Maps every output to {@code domain} instead of drawing a reserved one.
+   *
+   * @param domain the fixed domain to map every output to
+   * @return options that map every output to {@code domain}
+   */
   public static EmailOptions mapDomain(String domain) {
     Objects.requireNonNull(domain, "domain");
     return new EmailOptions(false, domain);

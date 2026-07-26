@@ -676,6 +676,11 @@ public interface RecordAttributes {
     /** First write wins; a second set with an equal value is a no-op; a conflicting
         value throws AlterEgoCoherenceException — incoherence should be loud. */
     <A> void set(AttributeKey<A> key, A value);
+
+    /** True inside a real scope, false outside any scope — costs no randomness and touches no
+        attribute, unlike the other three methods; lets a strategy check cheaply whether
+        attempting to *establish* shared state (not just read one) is worth doing at all. */
+    boolean isActive();
 }
 ```
 
@@ -714,11 +719,19 @@ The built-ins share two published attribute keys (constants on `AlterEgoAttribut
   by the postcode area.
 
 Behaviour inside a scope: `city()` picks a town consistent with an already-fixed area, otherwise
-picks freely and sets the area and country from the town's tags; `postcode()` builds its outward
-code from the fixed area (inward code stays impossible, so the 4.1 guarantee is unaffected);
-`phoneNumber()` prefers a drama range matching the fixed place (e.g. `020 7946 xxxx` for London)
-and falls back to the geography-neutral `01632 960xxx` range when no matching drama range exists
-— coherence is best-effort, fictionality is not.
+picks freely and sets the area and nation from the town's tags. `postcode()` and `phoneNumber()`
+build from the fixed area if one exists; if neither `city()` nor a caller-supplied `with(...)` has
+fixed one yet, whichever of them runs first *establishes* it via `computeIfAbsent`, picking a real
+town from the country's own dictionary (ignoring the town's name — only its area/nation tags) so a
+later `city()` call is guaranteed a match, not an arbitrary or fabricated area. `isActive()` is
+what lets `postcode()`/`phoneNumber()` tell "nothing fixed, but inside a real scope" (worth
+establishing) apart from "outside any scope" (must not spend randomness on this at all, since it
+would silently perturb every subsequent draw and break output stability, section 3.4) without
+touching the record's attributes at all. `postcode()`'s outward code built this way still keeps
+its inward code's impossible-letter guarantee (the 4.1 guarantee is unaffected either way);
+`phoneNumber()` prefers a drama range matching the (fixed or newly established) place (e.g.
+`020 7946 xxxx` for London) and falls back to the geography-neutral `01632 960xxx` range when no
+matching drama range exists for that place — coherence is best-effort, fictionality is not.
 
 Custom strategies join in the same way — e.g. a Companies House number strategy reads or resolves
 `UK_NATION` and picks its prefix (`SC`, `NI`, none) accordingly, and conversely a strategy that

@@ -179,22 +179,37 @@ class DictionaryWellFormednessTest {
 
   @Test
   void phoneRangeValueNotEightDigitsFails() {
-    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "0123456\t012 345 6XXX\n", "test");
+    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "0123456\t012 345 6XXX\tLS\n", "test");
     assertThrows(
         AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
   }
 
   @Test
   void phoneRangeTemplateMissingXxxSuffixFails() {
-    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\t0123 4560\n", "test");
+    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\t0123 4560\tLS\n", "test");
     assertThrows(
         AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
   }
 
   @Test
   void phoneRangeTemplateNotReconstructingValueFails() {
-    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\t0999 999 0XXX\n", "test");
+    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\t0999 999 0XXX\tLS\n", "test");
     assertThrows(
         AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
+  }
+
+  @Test
+  void phoneRangeInvalidPlaceTagFails() {
+    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\t0123 456 0XXX\tLondon\n", "test");
+    assertThrows(
+        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
+  }
+
+  @Test
+  void phoneRangeAcceptsNoneAndMobilePlaceTags() {
+    Dictionary dict =
+        DictionaryParser.parse(
+            VALID_HEADER + "01234560\t0123 456 0XXX\tNONE\n09876540\t0987 654 0XXX\tMOBILE\n", "test");
+    assertDoesNotThrow(() -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
   }
 }

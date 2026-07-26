@@ -73,6 +73,23 @@ and `XXX` stripped, reconstruct the value exactly.
 | Premium rate services           | —         | 0909 8790000–8790999 |
 | UK-wide                         | —         | 03069 990000–990999  |
 
+## Record coherence (M5): area tagging
+
+Each shipped row carries a second tag, added for `phoneNumber()`'s section 6.3 coherence with
+`city()`/`postcode()` (`docs/tasks/M5.md` step 5): the associated postcode area (cross-checked
+against `dictionaries/GB/towns.txt`'s own area strings), `NONE` for the 01632 no-area range (the
+designated geography-neutral fallback when a fixed area matches no range), or `MOBILE` for the
+mobile range (never a coherence match target or the neutral fallback — reachable only via the
+unconstrained pool, same as before M5). London's single range gets one row per postcode area it
+spans (E, EC, N, NW, SE, SW, W, WC), exactly as `towns.txt` already lists London itself — same
+"list once per area" precedent, same well-formedness rule (not a duplicate row, since the tags
+differ per row). Reading's range (`RG`) has no matching town in `towns.txt`'s curated 20 towns —
+documented, not a bug: still reachable via an explicit `.with(UK_POSTCODE_AREA, "RG")` pre-seed.
+
+The unconstrained ("no area fixed") pool must stay exactly the same 17 distinct choices it was in
+M3, not 24 rows — `PhoneNumberStrategy` de-duplicates by template before picking, so London's
+8-way tag expansion doesn't shift the pick bound and silently change M3's golden outputs.
+
 ## v1 scope: shipped pool excludes freephone/premium-rate/UK-wide
 
 **Decided (project owner, 2026-07-25)**: `phoneNumber()`'s default pool draws from only the 17

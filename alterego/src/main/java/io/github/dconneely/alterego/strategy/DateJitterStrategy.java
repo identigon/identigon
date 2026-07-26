@@ -24,11 +24,23 @@ public final class DateJitterStrategy implements Strategy<LocalDate> {
     this.field = field;
   }
 
+  /**
+   * A whole-day shift, uniform over {@code [-days, +days]}.
+   *
+   * @param days the half-range of the shift, in days; must be {@code >= 0}
+   * @return a strategy for that shift
+   */
   public static DateJitterStrategy byDays(int days) {
     requireNonNegative(days, "days");
     return new DateJitterStrategy(days, null);
   }
 
+  /**
+   * A uniform random day within the input's own month or year, per {@code field}.
+   *
+   * @param field which date-jitter strategy to run
+   * @return a strategy for that field
+   */
   public static DateJitterStrategy byField(AlterEgo.DateField field) {
     return new DateJitterStrategy(null, Objects.requireNonNull(field, "field"));
   }

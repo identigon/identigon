@@ -23,6 +23,14 @@ public final class NameDictionaryStrategy implements Strategy<String> {
     this.preserveInitial = preserveInitial;
   }
 
+  /**
+   * Creates a strategy over {@code dictionaryName} for {@code country}.
+   *
+   * @param country the ISO 3166-1 alpha-2 country to load the dictionary for
+   * @param dictionaryName the dictionary's file name (without the {@code .txt} extension)
+   * @param preserveInitial whether to restrict picks to entries sharing the input's first letter
+   * @return a strategy over that dictionary
+   */
   public static NameDictionaryStrategy forDictionary(String country, String dictionaryName, boolean preserveInitial) {
     Dictionary dictionary = DictionaryLoader.load(country, dictionaryName);
     return new NameDictionaryStrategy(dictionary, preserveInitial);

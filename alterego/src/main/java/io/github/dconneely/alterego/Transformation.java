@@ -15,6 +15,8 @@ public interface Transformation<T> extends Function<T, T> {
    * Returns a transformation guaranteeing distinct inputs map to distinct outputs. Subsumes
    * {@link #stored()}; idempotent; composes with {@code stored()} to the same effect either way
    * round. Requires a configured {@code MappingStore}, checked immediately, not per element.
+   *
+   * @return a uniqueness-guaranteeing transformation
    */
   Transformation<T> unique();
 
@@ -22,6 +24,8 @@ public interface Transformation<T> extends Function<T, T> {
    * Returns a transformation that persists input-to-output mappings and reuses them on later
    * calls. Idempotent. Requires a configured {@code MappingStore}, checked immediately, not per
    * element.
+   *
+   * @return a mapping-persisting transformation
    */
   Transformation<T> stored();
 }

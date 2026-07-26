@@ -10,12 +10,21 @@ import java.util.Optional;
  */
 public interface Mappings {
 
-  /** Looks up a previously stored value for {@code canonicalKey}, if any. */
+  /**
+   * Looks up a previously stored value for {@code canonicalKey}, if any.
+   *
+   * @param canonicalKey the canonical text form of the key (section 2.6)
+   * @return the stored value, if any
+   */
   Optional<String> get(String canonicalKey);
 
   /**
    * Stores {@code value} under {@code canonicalKey} if absent, atomically. Returns the value
    * now associated with the key: {@code value} itself, or an existing value on a race.
+   *
+   * @param canonicalKey the canonical text form of the key (section 2.6)
+   * @param value the value to store if the key is absent
+   * @return the value now associated with the key
    */
   String putIfAbsent(String canonicalKey, String value);
 }

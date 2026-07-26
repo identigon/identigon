@@ -12,6 +12,10 @@ public interface Strategy<T> {
   /**
    * Transforms one input value. Called once per element; {@code context} is fresh for this
    * call and must not be retained.
+   *
+   * @param input the input value
+   * @param context this call's fresh transformation context
+   * @return the transformed value
    */
   T transform(T input, TransformationContext context);
 }

@@ -30,7 +30,13 @@ public final class EmailAddressStrategy implements Strategy<String> {
     this.mappedDomain = mappedDomain;
   }
 
-  /** {@code mappedDomain} null means no mapping is configured. */
+  /**
+   * {@code mappedDomain} null means no mapping is configured.
+   *
+   * @param preserveDomain whether to keep the input's own domain instead of drawing a reserved one
+   * @param mappedDomain a fixed domain to map every output to, or {@code null} for none
+   * @return a configured strategy
+   */
   public static EmailAddressStrategy create(boolean preserveDomain, String mappedDomain) {
     return new EmailAddressStrategy(preserveDomain, mappedDomain);
   }

@@ -21,7 +21,12 @@ public final class PatternStrategy implements Strategy<String> {
     this.tokens = tokens;
   }
 
-  /** Compiles {@code pattern}, throwing {@link AlterEgoPatternException} if it is malformed. */
+  /**
+   * Compiles {@code pattern}, throwing {@link AlterEgoPatternException} if it is malformed.
+   *
+   * @param pattern the pattern text (section 4.6)
+   * @return the compiled strategy
+   */
   public static PatternStrategy compile(String pattern) {
     List<PatternToken> tokens = new ArrayList<>();
     int i = 0;

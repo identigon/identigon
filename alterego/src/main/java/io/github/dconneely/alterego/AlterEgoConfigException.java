@@ -7,10 +7,21 @@ package io.github.dconneely.alterego;
  */
 public class AlterEgoConfigException extends AlterEgoException {
 
+  /**
+   * Creates the exception with a message.
+   *
+   * @param message a message describing the configuration problem
+   */
   public AlterEgoConfigException(String message) {
     super(message);
   }
 
+  /**
+   * Creates the exception with a message and cause.
+   *
+   * @param message a message describing the configuration problem
+   * @param cause the underlying cause
+   */
   public AlterEgoConfigException(String message, Throwable cause) {
     super(message, cause);
   }

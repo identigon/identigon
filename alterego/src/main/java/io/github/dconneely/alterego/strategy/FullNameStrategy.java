@@ -16,7 +16,10 @@ import java.util.List;
  */
 public final class FullNameStrategy implements Strategy<String> {
 
+  /** The built-in domain {@code firstName()} and {@code fullName()}'s first-name tokens both use. */
   public static final String FIRST_NAME_DOMAIN = "alterego:first-name";
+
+  /** The built-in domain {@code lastName()} and {@code fullName()}'s surname token both use. */
   public static final String LAST_NAME_DOMAIN = "alterego:last-name";
 
   private final NameDictionaryStrategy firstNameStrategy;
@@ -27,6 +30,12 @@ public final class FullNameStrategy implements Strategy<String> {
     this.lastNameStrategy = lastNameStrategy;
   }
 
+  /**
+   * Creates a strategy for {@code country}.
+   *
+   * @param country the ISO 3166-1 alpha-2 country to load name dictionaries for
+   * @return a strategy for that country
+   */
   public static FullNameStrategy forCountry(String country) {
     NameDictionaryStrategy firstNames = NameDictionaryStrategy.forDictionary(country, "first-names", false);
     NameDictionaryStrategy lastNames = NameDictionaryStrategy.forDictionary(country, "surnames", false);

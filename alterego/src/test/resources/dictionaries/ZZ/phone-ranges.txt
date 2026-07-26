@@ -3,5 +3,5 @@
 # licence: TEST-LICENCE
 # licence-url: https://example.invalid/test-fixtures/licence
 # retrieved: 2026-07-14
-01234560	0123 456 0XXX
-09876540	0987 654 0XXX
+01234560	0123 456 0XXX	FX
+09876540	0987 654 0XXX	NONE

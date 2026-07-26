@@ -30,4 +30,9 @@ final class NoOpRecordAttributes implements RecordAttributes {
   public <A> void set(AttributeKey<A> key, A value) {
     // Discarded: outside any scope, attributes are not retained (section 6.2).
   }
+
+  @Override
+  public boolean isActive() {
+    return false;
+  }
 }

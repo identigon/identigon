@@ -21,6 +21,12 @@ public final class StreetAddressStrategy implements Strategy<String> {
     this.types = types;
   }
 
+  /**
+   * Creates a strategy for {@code country}.
+   *
+   * @param country the ISO 3166-1 alpha-2 country to load street dictionaries for
+   * @return a strategy for that country
+   */
   public static StreetAddressStrategy forCountry(String country) {
     Dictionary themes = DictionaryLoader.load(country, "street-themes");
     Dictionary types = DictionaryLoader.load(country, "street-types");

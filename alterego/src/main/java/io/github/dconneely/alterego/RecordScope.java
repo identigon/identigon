@@ -14,10 +14,24 @@ package io.github.dconneely.alterego;
  */
 public interface RecordScope extends AutoCloseable {
 
-  /** Applies {@code transformation} to {@code value} with this record's attributes visible. */
+  /**
+   * Applies {@code transformation} to {@code value} with this record's attributes visible.
+   *
+   * @param <T> the value type transformed
+   * @param transformation the transformation to apply
+   * @param value the input value
+   * @return the transformed value
+   */
   <T> T apply(Transformation<T> transformation, T value);
 
-  /** Pre-seeds an attribute (e.g. a known region) before any field is transformed. */
+  /**
+   * Pre-seeds an attribute (e.g. a known region) before any field is transformed.
+   *
+   * @param <A> the attribute's value type
+   * @param key the attribute key
+   * @param value the value to fix {@code key} to
+   * @return this scope
+   */
   <A> RecordScope with(AttributeKey<A> key, A value);
 
   /** Discards this record's attributes. Does not close the owning {@code AlterEgo} instance. */

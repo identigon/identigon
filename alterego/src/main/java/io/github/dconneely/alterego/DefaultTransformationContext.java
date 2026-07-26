@@ -78,7 +78,8 @@ final class DefaultTransformationContext implements TransformationContext {
   @Override
   public RecordAttributes record() {
     if (recordAttributes == null) {
-      recordAttributes = new NoOpRecordAttributes(random);
+      DefaultRecordScope active = DefaultRecordScope.current();
+      recordAttributes = active != null ? active.viewFor(random) : new NoOpRecordAttributes(random);
     }
     return recordAttributes;
   }

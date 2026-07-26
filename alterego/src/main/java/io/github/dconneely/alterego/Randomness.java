@@ -10,24 +10,56 @@ import java.util.List;
  */
 public interface Randomness {
 
-  /** Returns a value drawn uniformly from {@code [0, bound)}. Requires {@code bound > 0}. */
+  /**
+   * Returns a value drawn uniformly from {@code [0, bound)}. Requires {@code bound > 0}.
+   *
+   * @param bound the exclusive upper bound; must be {@code > 0}
+   * @return a value in {@code [0, bound)}
+   */
   int nextInt(int bound);
 
-  /** Returns a value drawn uniformly from {@code [0, bound)}. Requires {@code bound > 0}. */
+  /**
+   * Returns a value drawn uniformly from {@code [0, bound)}. Requires {@code bound > 0}.
+   *
+   * @param bound the exclusive upper bound; must be {@code > 0}
+   * @return a value in {@code [0, bound)}
+   */
   long nextLong(long bound);
 
-  /** Returns a fair coin flip. */
+  /**
+   * Returns a fair coin flip.
+   *
+   * @return a fair coin flip
+   */
   boolean nextBoolean();
 
-  /** Returns a uniformly chosen element of {@code choices}. Requires a non-empty list. */
+  /**
+   * Returns a uniformly chosen element of {@code choices}. Requires a non-empty list.
+   *
+   * @param <T> the element type
+   * @param choices the candidates to choose from; must be non-empty
+   * @return a uniformly chosen element of {@code choices}
+   */
   <T> T pick(List<T> choices);
 
-  /** Returns a digit in {@code '0'..'9'}. */
+  /**
+   * Returns a digit.
+   *
+   * @return a digit in {@code '0'..'9'}
+   */
   char digit();
 
-  /** Returns an upper-case letter in {@code 'A'..'Z'}. */
+  /**
+   * Returns an upper-case letter.
+   *
+   * @return an upper-case letter in {@code 'A'..'Z'}
+   */
   char letterUpper();
 
-  /** Returns a lower-case letter in {@code 'a'..'z'}. */
+  /**
+   * Returns a lower-case letter.
+   *
+   * @return a lower-case letter in {@code 'a'..'z'}
+   */
   char letterLower();
 }

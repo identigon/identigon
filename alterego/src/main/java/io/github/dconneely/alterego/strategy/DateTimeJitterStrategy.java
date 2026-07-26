@@ -46,35 +46,79 @@ public final class DateTimeJitterStrategy implements Strategy<LocalDateTime> {
     this.timeField = timeField;
   }
 
+  /**
+   * Pairs a whole-day date shift with a whole-second time shift.
+   *
+   * @param days the half-range of the date shift, in days; must be {@code >= 0}
+   * @param seconds the half-range of the time shift, in seconds; must be {@code >= 0}
+   * @return a strategy pairing a whole-day date shift with a whole-second time shift
+   */
   public static DateTimeJitterStrategy of(int days, int seconds) {
     DateJitterStrategy.requireNonNegative(days, "days");
     requireNonNegativeSeconds(seconds);
     return new DateTimeJitterStrategy(days, null, seconds, null, null, null);
   }
 
+  /**
+   * Pairs a whole-day date shift with a uniform time-of-day range.
+   *
+   * @param days the half-range of the date shift, in days; must be {@code >= 0}
+   * @param start the inclusive lower bound of the time-of-day range
+   * @param end the inclusive upper bound of the time-of-day range
+   * @return a strategy pairing a whole-day date shift with a uniform time-of-day range
+   */
   public static DateTimeJitterStrategy of(int days, LocalTime start, LocalTime end) {
     DateJitterStrategy.requireNonNegative(days, "days");
     requireValidRange(start, end);
     return new DateTimeJitterStrategy(days, null, null, start, end, null);
   }
 
+  /**
+   * Pairs a whole-day date shift with the given time strategy.
+   *
+   * @param days the half-range of the date shift, in days; must be {@code >= 0}
+   * @param timeField which time-jitter strategy to run
+   * @return a strategy pairing a whole-day date shift with the given time strategy
+   */
   public static DateTimeJitterStrategy of(int days, AlterEgo.TimeField timeField) {
     DateJitterStrategy.requireNonNegative(days, "days");
     return new DateTimeJitterStrategy(days, null, null, null, null, Objects.requireNonNull(timeField, "timeField"));
   }
 
+  /**
+   * Pairs the given date strategy with a whole-second time shift.
+   *
+   * @param dateField which date-jitter strategy to run
+   * @param seconds the half-range of the time shift, in seconds; must be {@code >= 0}
+   * @return a strategy pairing the given date strategy with a whole-second time shift
+   */
   public static DateTimeJitterStrategy of(AlterEgo.DateField dateField, int seconds) {
     Objects.requireNonNull(dateField, "dateField");
     requireNonNegativeSeconds(seconds);
     return new DateTimeJitterStrategy(null, dateField, seconds, null, null, null);
   }
 
+  /**
+   * Pairs the given date strategy with a uniform time-of-day range.
+   *
+   * @param dateField which date-jitter strategy to run
+   * @param start the inclusive lower bound of the time-of-day range
+   * @param end the inclusive upper bound of the time-of-day range
+   * @return a strategy pairing the given date strategy with a uniform time-of-day range
+   */
   public static DateTimeJitterStrategy of(AlterEgo.DateField dateField, LocalTime start, LocalTime end) {
     Objects.requireNonNull(dateField, "dateField");
     requireValidRange(start, end);
     return new DateTimeJitterStrategy(null, dateField, null, start, end, null);
   }
 
+  /**
+   * Pairs the given date and time strategies.
+   *
+   * @param dateField which date-jitter strategy to run
+   * @param timeField which time-jitter strategy to run
+   * @return a strategy pairing the given date and time strategies
+   */
   public static DateTimeJitterStrategy of(AlterEgo.DateField dateField, AlterEgo.TimeField timeField) {
     return new DateTimeJitterStrategy(
         null,

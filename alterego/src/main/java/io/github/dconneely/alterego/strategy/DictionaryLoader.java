@@ -30,6 +30,9 @@ public final class DictionaryLoader {
    * Returns the ISO 3166-1 alpha-2 country of {@code locale}, or throws
    * {@link AlterEgoConfigException} if the locale has none (section 4: country-scoped
    * transformations require a country).
+   *
+   * @param locale the locale to read the country from
+   * @return the locale's ISO 3166-1 alpha-2 country
    */
   public static String requireCountry(Locale locale) {
     String country = locale.getCountry();

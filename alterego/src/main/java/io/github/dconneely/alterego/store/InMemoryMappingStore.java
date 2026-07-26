@@ -19,6 +19,7 @@ public final class InMemoryMappingStore implements MappingStore {
 
   private final ConcurrentMap<String, Namespace> namespaces = new ConcurrentHashMap<>();
 
+  /** Creates an empty store. */
   public InMemoryMappingStore() {}
 
   @Override

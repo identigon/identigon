@@ -17,6 +17,9 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.withType(Javadoc).configureEach {
     options.encoding = 'UTF-8'
+    // Enforced from M5 (CLAUDE.md): a doclint warning fails the build instead of the M1-M4
+    // backlog quietly accumulating (100 warnings had, by M5, gone unnoticed).
+    options.addBooleanOption('Xwerror', true)
 }
 
 repositories {

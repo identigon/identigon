@@ -26,6 +26,12 @@ public final class OrganisationNameStrategy implements Strategy<String> {
     this.suffixes = suffixes;
   }
 
+  /**
+   * Creates a strategy for {@code country}.
+   *
+   * @param country the ISO 3166-1 alpha-2 country to load organisation components for
+   * @return a strategy for that country
+   */
   public static OrganisationNameStrategy forCountry(String country) {
     Dictionary dictionary = DictionaryLoader.load(country, "organisation-components");
     List<String> nouns =

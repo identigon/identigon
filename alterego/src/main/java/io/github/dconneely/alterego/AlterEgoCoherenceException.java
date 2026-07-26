@@ -6,6 +6,11 @@ package io.github.dconneely.alterego;
  */
 public class AlterEgoCoherenceException extends AlterEgoException {
 
+  /**
+   * Creates the exception with a message.
+   *
+   * @param message a message describing the conflict
+   */
   public AlterEgoCoherenceException(String message) {
     super(message);
   }

@@ -22,17 +22,36 @@ public final class JitterOptions<T extends Comparable<? super T>> {
     this.max = max;
   }
 
-  /** Clamps the result to no earlier than {@code min} (inclusive). */
+  /**
+   * Clamps the result to no earlier than {@code min} (inclusive).
+   *
+   * @param <T> {@link java.time.LocalDate} or {@link java.time.LocalDateTime}
+   * @param min the inclusive lower bound
+   * @return the clamp options
+   */
   public static <T extends Comparable<? super T>> JitterOptions<T> min(T min) {
     return new JitterOptions<>(Objects.requireNonNull(min, "min"), null);
   }
 
-  /** Clamps the result to no later than {@code max} (inclusive). */
+  /**
+   * Clamps the result to no later than {@code max} (inclusive).
+   *
+   * @param <T> {@link java.time.LocalDate} or {@link java.time.LocalDateTime}
+   * @param max the inclusive upper bound
+   * @return the clamp options
+   */
   public static <T extends Comparable<? super T>> JitterOptions<T> max(T max) {
     return new JitterOptions<>(null, Objects.requireNonNull(max, "max"));
   }
 
-  /** Clamps the result to the inclusive range {@code [min, max]}. */
+  /**
+   * Clamps the result to the inclusive range {@code [min, max]}.
+   *
+   * @param <T> {@link java.time.LocalDate} or {@link java.time.LocalDateTime}
+   * @param min the inclusive lower bound
+   * @param max the inclusive upper bound
+   * @return the clamp options
+   */
   public static <T extends Comparable<? super T>> JitterOptions<T> minmax(T min, T max) {
     Objects.requireNonNull(min, "min");
     Objects.requireNonNull(max, "max");
