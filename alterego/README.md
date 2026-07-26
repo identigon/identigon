@@ -5,11 +5,13 @@ personal or sensitive values (names, addresses, dates, reference numbers) with r
 substitutes, such that the same input always produces the same output for a given configuration.
 It is designed for use in Java streams, is extensible with custom transformations, and generates
 fictional-by-default output (reserved email domains, Ofcom drama phone numbers, impossible
-postcodes) so pseudonymised data never accidentally references something real.
+postcodes, obviously-fictional surnames and street names) so pseudonymised data never accidentally
+references something real.
 
-This project is not yet released. See [`SPECIFICATION.md`](SPECIFICATION.md) for the full
-behavioural contract, [`PLAN.md`](PLAN.md) for the implementation milestones, and
-[`CHANGELOG.md`](CHANGELOG.md) for what's changed between versions.
+The first release, v0.1.0, is tagged on GitHub. See
+[`SPECIFICATION.md`](SPECIFICATION.md) for the full behavioural contract,
+[`PLAN.md`](PLAN.md) for the implementation milestones, and [`CHANGELOG.md`](CHANGELOG.md) for
+what's changed between versions.
 
 Every code sample below is compiled and run as part of the test suite
 (`src/test/java/io/github/dconneely/alterego/ReadmeExamplesTest.java`), so they cannot silently
@@ -75,17 +77,26 @@ Where a real reserved-for-fiction or structurally-impossible value space exists,
 built-in generates inside it by default, so pseudonymised data can never accidentally reference a
 real mailbox, phone number, or deliverable address:
 
-| Transformation    | Guarantee                     | Mechanism                                          |
-|-------------------|--------------------------------|-----------------------------------------------------|
-| `emailAddress()`  | never a working mailbox        | RFC 2606 reserved domains (`example.com`, `.net`, `.org`) |
-| `phoneNumber()`   | never a connectable number     | Ofcom drama ranges (e.g. `020 7946 0xxx`, `07700 900xxx`, `01632 960xxx`) |
-| `postcode()`      | never a deliverable postcode    | a plausible outward code, but an inward code letter Royal Mail never uses |
+| Transformation      | Guarantee                            | Mechanism                                          |
+|---------------------|---------------------------------------|-----------------------------------------------------|
+| `emailAddress()`    | never a working mailbox               | RFC 2606 reserved domains (`example.com`, `.net`, `.org`) |
+| `phoneNumber()`     | never a connectable number             | Ofcom drama ranges (e.g. `020 7946 0xxx`, `07700 900xxx`, `01632 960xxx`) |
+| `postcode()`        | never a deliverable postcode           | a plausible outward code, but an inward code letter Royal Mail never uses |
+| `lastName()`        | reads as obviously fictional, not a real person's surname | authored (not sourced) surname vocabulary (e.g. `"Testperson"`) |
+| `streetAddress()`   | reads as obviously fictional, not a real street | authored (not sourced) theme word (e.g. `"Example"`) plus a real structural type word (`"Road"`) |
 
-Each of these fictional values is format-valid — that's exactly why it was reserved — so it
-passes ordinary validation but fails a live lookup against real reference data (an MX record, a
-number allocation, a delivery address). Where full realism matters more than the guarantee,
+Each of the first three is format-valid — that's exactly why it was reserved — so it passes
+ordinary validation but fails a live lookup against real reference data (an MX record, a number
+allocation, a delivery address). Where full realism matters more than the guarantee,
 `PhoneOptions.realistic()` and `PostcodeOptions.realistic()` opt out explicitly; their Javadoc
 states the risk (a realistic output can coincide with a real person's number or address).
+
+`lastName()` and `streetAddress()` use a different mechanism: there's no officially reserved
+"fictional surname" or "fictional street" space to draw from, so their vocabulary is authored
+rather than sourced from real UK data, and reviewed to avoid coinciding with a known real name
+(ADR 0010) — a curation-time guarantee, not a structural one. `firstName()` and `city()` are
+unaffected and keep drawing from real data; the surname alone is enough to make a full name
+unmistakably not a real person's.
 
 ## `unique()` and the order-independence caveat
 

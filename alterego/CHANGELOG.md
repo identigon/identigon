@@ -22,7 +22,7 @@ entry in this file meaningful rather than just a feature list:
 
 ## [0.1.0] — 2026-07-26
 
-Initial implementation, milestones M0-M6 of `PLAN.md`. Not yet published to Maven Central.
+Initial implementation, milestones M0-M6 of `PLAN.md`.
 
 ### Added
 
