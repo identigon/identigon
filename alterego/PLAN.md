@@ -198,6 +198,10 @@ outputs; fictionality property tests still pass inside scopes.
   `shiftDate`/`shiftDateTime` family, section 4.5) is missing, and it was not needed for v1.
 - Fictional-range additions: TEST-NET IPs (RFC 5737), `.test`/`.invalid` domains (RFC 6761),
   never-allocated National Insurance prefixes.
+- `phoneNumber()`'s freephone/premium-rate/UK-wide Ofcom ranges, behind an option — excluded
+  from v1's default pool since they don't read as a realistic personal contact number; already
+  sourced and recorded in full (`docs/phone-ranges.md`), so adding them later needs no
+  re-sourcing.
 - A `QT` ("Cute") locale: a wholly invented country whose dictionaries (first names, surnames,
   towns, street names, organisation components) are authored, not sourced — deliberately
   obvious, unmistakably fictitious values ("Madeupborough", "Unrealtown"). Unlike
