@@ -23,7 +23,10 @@ entry in this file meaningful rather than just a feature list:
 ## [0.3.0] — (unreleased)
 
 ### Added
-- (Nothing yet)
+- `domainName()` and `url()` built-ins using RFC 2606 reserved domains.
+- `shiftInstant()` family to `AlterEgo` for `Instant` jitter.
+- `PhoneOptions.includeNonGeographic()` to allow `phoneNumber()` to draw from Ofcom freephone, premium rate, and UK-wide drama ranges.
+- Supported `LocalTime`, `YearMonth`, and `BigDecimal` in the canonical value codecs and `redact()`.
 
 ## [0.2.0] — 2026-07-31
 

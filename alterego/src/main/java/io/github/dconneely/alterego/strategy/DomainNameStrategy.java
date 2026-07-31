@@ -13,7 +13,7 @@ public final class DomainNameStrategy implements Strategy<String> {
   /** Singleton instance. */
   public static final DomainNameStrategy INSTANCE = new DomainNameStrategy();
 
-  private static final List<String> RESERVED_TLDS = List.of("test", "example", "invalid", "localhost");
+  private static final List<String> RESERVED_TLDS = List.of("test", "example", "invalid");
   private static final List<String> RESERVED_DOMAINS = List.of("example.com", "example.net", "example.org");
 
   private DomainNameStrategy() {}

@@ -4,6 +4,7 @@ import io.github.dconneely.alterego.store.MappingStore;
 import io.github.dconneely.alterego.store.MappingStore.PutUniqueResult;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 /** The concrete {@link Transformation} returned by {@code AlterEgo.bind(...)}. */
 final class DefaultTransformation<T> implements Transformation<T> {
@@ -26,6 +27,9 @@ final class DefaultTransformation<T> implements Transformation<T> {
   private final int uniqueMaxAttempts;
   private final Mode mode;
 
+  /** Reports whether the owning {@link AlterEgo} has been closed (its salt zeroed). */
+  private final BooleanSupplier parentClosed;
+
   DefaultTransformation(
       byte[] salt,
       Locale locale,
@@ -35,9 +39,11 @@ final class DefaultTransformation<T> implements Transformation<T> {
       MappingStore mappingStore,
       NullPolicy nullPolicy,
       boolean rawMappingKeys,
-      int uniqueMaxAttempts) {
+      int uniqueMaxAttempts,
+      BooleanSupplier parentClosed) {
     this(
-        salt, locale, domain, type, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts, Mode.NONE);
+        salt, locale, domain, type, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts, Mode.NONE,
+        parentClosed);
   }
 
   private DefaultTransformation(
@@ -50,7 +56,8 @@ final class DefaultTransformation<T> implements Transformation<T> {
       NullPolicy nullPolicy,
       boolean rawMappingKeys,
       int uniqueMaxAttempts,
-      Mode mode) {
+      Mode mode,
+      BooleanSupplier parentClosed) {
     DomainNames.requireValid(domain, "domain");
     ValueCodecs.requireSupported(type);
     this.salt = salt;
@@ -63,10 +70,17 @@ final class DefaultTransformation<T> implements Transformation<T> {
     this.rawMappingKeys = rawMappingKeys;
     this.uniqueMaxAttempts = uniqueMaxAttempts;
     this.mode = mode;
+    this.parentClosed = parentClosed;
   }
 
   @Override
   public T apply(T input) {
+    if (parentClosed.getAsBoolean()) {
+      throw new IllegalStateException(
+          "AlterEgo instance has been destroyed; its transformations can no longer be applied (domain: "
+              + domain
+              + ")");
+    }
     if (input == null) {
       if (nullPolicy == NullPolicy.FAIL) {
         throw new AlterEgoException("Null input is not allowed under NullPolicy.FAIL: " + domain);
@@ -162,6 +176,7 @@ final class DefaultTransformation<T> implements Transformation<T> {
 
   private DefaultTransformation<T> withMode(Mode newMode) {
     return new DefaultTransformation<>(
-        salt, locale, domain, type, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts, newMode);
+        salt, locale, domain, type, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts, newMode,
+        parentClosed);
   }
 }

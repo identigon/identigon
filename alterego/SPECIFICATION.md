@@ -186,7 +186,19 @@ AlterEgo alterego = AlterEgo.builder()
 ```
 
 - **Salt**: required, minimum 16 bytes (shorter salts are trivially brute-forced; the builder
-  rejects them). Accepted as `byte[]` or `char[]`; a `char[]` is converted via UTF-8.
+  rejects them). Accepted as `byte[]` or `char[]`; a `char[]` is converted via UTF-8. The builder
+  copies the caller's array, so mutating the original afterwards has no effect; callers who passed
+  a secret in a `byte[]`/`char[]` should still zero their own copy.
+- **Lifecycle**: `AlterEgo` is `AutoCloseable`. `close()` (and its alias `destroy()`) zeroes the
+  instance's salt bytes and marks the instance closed; any later factory call on it throws
+  `IllegalStateException`. `close()` is idempotent. Closing is optional — an instance left open is
+  not a leak beyond the salt residing in memory — but a try-with-resources block, or an explicit
+  `destroy()`, lets security-sensitive callers bound how long the salt lives. Every
+  `Transformation` shares the lifetime of the instance that produced it: because they share the
+  one salt array that `close()` zeroes, a transformation's lifetime cannot outlive its parent's.
+  Applying a transformation after its parent is closed therefore throws `IllegalStateException`
+  (it does **not** silently derive from the zeroed salt). Close an instance only once every
+  transformation built from it is done being used.
 - **Locale**: defaults to the fixed constant `Locale.UK` (`en-GB`) — this library's primary
   deployment. A *fixed* default is deterministic on every machine; what remains banned is
   `Locale.getDefault()`, which would tie output to machine configuration (ADR 0006). Non-UK
@@ -229,15 +241,17 @@ encodings:
 | `Integer`, `Long`     | `Integer.toString` / `Long.toString` (decimal, `-` sign)            |
 | `Boolean`             | `toString()` — `true` / `false`                                     |
 | `LocalDate`           | `toString()` — ISO-8601 (`2026-07-12`)                              |
+| `LocalTime`           | `toString()` — ISO-8601                                             |
 | `LocalDateTime`       | `toString()` — ISO-8601; note this omits zero seconds (`14:30`) and |
 |                       | includes nanoseconds only when present; injective either way        |
 | `Instant`             | `toString()` — ISO-8601 UTC                                         |
+| `YearMonth`           | `toString()` — ISO-8601 (`2026-07`)                                 |
+| `BigDecimal`          | `.stripTrailingZeros().toPlainString()`                             |
 | `UUID`                | `toString()` — lower case                                           |
 | any `enum`            | `name()`                                                            |
 
 `bind(domain, type, strategy)` throws `AlterEgoConfigException` immediately for an unsupported
-`type` (fail fast, not per element). Enums are recognised via `Class::isEnum`. Adding further
-types later (e.g. `LocalTime`, `YearMonth`) is a non-breaking change; this set is the v1 floor.
+`type` (fail fast, not per element). Enums are recognised via `Class::isEnum`.
 
 ## 3. Determinism model
 
@@ -337,9 +351,13 @@ a message. Where such a region exists, the built-in generates inside it **by def
 |------------------------------|------------------------------|---------------------------------------|
 | `emailAddress()`             | never a working mailbox      | RFC 2606 reserved domains             |
 |                              |                              | (`example.com`, `.org`, `.net`)       |
+| `domainName()`               | never a routable domain      | RFC 2606 reserved domains and TLDs    |
+|                              |                              | (`.test`, `.example`, `.invalid`)     |
+| `url()`                      | never a working link         | URL with a RFC 2606 reserved domain   |
 | `phoneNumber()`              | never a connectable number   | Ofcom drama ranges (e.g.              |
 |                              |                              | `020 7946 0xxx`, `07700 900xxx`,      |
-|                              |                              | `01632 960xxx`)                       |
+|                              |                              | `01632 960xxx`); optionally includes  |
+|                              |                              | non-geographic drama ranges           |
 | `postcode()`                 | never a deliverable postcode | plausible outward code, but the       |
 |                              |                              | inward code ends in a letter never    |
 |                              |                              | used in real postcodes (`C I K M O V`)|
@@ -479,6 +497,7 @@ part and the output gains `@` plus the chosen reserved domain.
 ```java
 alterego.shiftDate(30)                              // Transformation<LocalDate>, ±30 days
 alterego.shiftDateTime(30, AlterEgo.TimeField.HOUR)  // Transformation<LocalDateTime>
+alterego.shiftInstant(30, 86400)                    // Transformation<Instant>, ±30 days, ±1 day seconds
 ```
 
 Eight factory methods, each pairing a date strategy with (for `LocalDateTime`) a time strategy;
@@ -518,10 +537,13 @@ giving the six overloads `shiftDateTime(int days, int seconds)`,
 `shiftDateTime(AlterEgo.DateField field, AlterEgo.TimeField field)`. The date component is always
 drawn before the time component.
 
+**Instant strategies** — for `shiftInstant(int days, int seconds)`:
+Independent whole-day shift and whole-second shift, bounded by `days` and `seconds` respectively, applied to an `Instant`. Sub-second precision is preserved, not zeroed.
+
 - Nanoseconds are zeroed in the output of every `shiftDateTime(...)` overload, unconditionally,
   regardless of which time strategy ran — carrying them over unperturbed from the input would leak
   sub-second precision that is itself close to unique per record.
-- `JitterOptions<T>` (`T` is `LocalDate` or `LocalDateTime`, matching the method) clamps the
+- `JitterOptions<T>` (`T` is `LocalDate`, `LocalDateTime`, or `Instant`, matching the method) clamps the
   result, applied last, after the strategy has run:
   - `JitterOptions.min(value)`, `JitterOptions.max(value)`, `JitterOptions.minmax(min, max)` — an
     **inclusive** bound, or both in one call. Values that would fall outside a bound are clamped
@@ -575,9 +597,22 @@ inference facility.
 | Method                        | Behaviour                                                 |
 |-------------------------------|------------------------------------------------------------|
 | `constant(T value)`           | Replace everything with a fixed value.                     |
+| `redact(Class<T> type)`       | Replace everything with a fixed type-appropriate default   |
+|                               | (see below), for schema-preserving redaction without       |
+|                               | naming the constant.                                        |
+| `mask(char c)`                | Mask every character with `c`; equivalent to               |
+|                               | `mask(c, 0)`.                                               |
 | `mask(char c, int keepLast)`  | Mask all but the last `keepLast` characters with `c`.      |
 |                               | Inputs of length ≤ `keepLast` are returned unchanged;      |
 |                               | negative `keepLast` throws `AlterEgoConfigException`.      |
+
+`redact(type)` returns `constant(default)` for the given type, so it inherits every property of
+`constant` (deterministic, order-independent, ignores the input). The defaults are the natural
+zero for each supported value type: `""` (`String`), `0` (`Integer`), `0L` (`Long`), `false`
+(`Boolean`), `1970-01-01` (`LocalDate`), `1970-01-01T00:00` (`LocalDateTime`), the epoch
+(`Instant`), `00:00` (`LocalTime`), `1970-01` (`YearMonth`), `0` (`BigDecimal`), and the
+all-zeroes UUID. A type with no obvious safe default — notably any `enum` — throws
+`AlterEgoConfigException`; use `constant(value)` with an explicit value for those.
 
 ### 4.8 Identifier transformations (UK documents and payment cards)
 

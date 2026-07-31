@@ -5,9 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -77,6 +80,29 @@ class ValueCodecsTest {
   }
 
   @Test
+  void localTimeRoundTrips() {
+    assertRoundTrip(LocalTime.of(14, 30), LocalTime.class);
+  }
+
+  @Test
+  void yearMonthRoundTrips() {
+    assertRoundTrip(YearMonth.of(2026, 7), YearMonth.class);
+  }
+
+  @Test
+  void bigDecimalRoundTripsAndCanonicalizes() {
+    BigDecimal val1 = new BigDecimal("10.00");
+    BigDecimal val2 = new BigDecimal("10");
+    assertEquals("10", ValueCodecs.encode(val1, BigDecimal.class));
+    assertEquals("10", ValueCodecs.encode(val2, BigDecimal.class));
+    assertRoundTrip(new BigDecimal("10"), BigDecimal.class);
+    
+    BigDecimal val3 = new BigDecimal("10.50");
+    assertEquals("10.5", ValueCodecs.encode(val3, BigDecimal.class));
+    assertRoundTrip(new BigDecimal("10.5"), BigDecimal.class);
+  }
+
+  @Test
   void uuidRoundTripsAndIsLowerCase() {
     UUID value = UUID.randomUUID();
     String encoded = ValueCodecs.encode(value, UUID.class);
@@ -130,6 +156,9 @@ class ValueCodecsTest {
     assertTrue(ValueCodecs.isSupported(LocalDate.class));
     assertTrue(ValueCodecs.isSupported(LocalDateTime.class));
     assertTrue(ValueCodecs.isSupported(Instant.class));
+    assertTrue(ValueCodecs.isSupported(LocalTime.class));
+    assertTrue(ValueCodecs.isSupported(YearMonth.class));
+    assertTrue(ValueCodecs.isSupported(BigDecimal.class));
     assertTrue(ValueCodecs.isSupported(UUID.class));
     assertTrue(ValueCodecs.isSupported(UkNation.class));
     assertFalse(ValueCodecs.isSupported(Double.class));

@@ -49,6 +49,8 @@ final class ValueCodecs {
     requireSupported(type);
     if (type.isEnum()) {
       return ((Enum<?>) value).name();
+    } else if (type == BigDecimal.class) {
+      return ((BigDecimal) value).stripTrailingZeros().toPlainString();
     }
     return value.toString();
   }

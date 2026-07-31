@@ -81,7 +81,8 @@ public final class AlterEgo implements AutoCloseable {
   public Transformation<String> bind(String domain, Strategy<String> strategy) {
     checkNotClosed();
     return new DefaultTransformation<>(
-        salt, locale, domain, String.class, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts);
+        salt, locale, domain, String.class, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts,
+        this::isClosed);
   }
 
   /**
@@ -97,7 +98,8 @@ public final class AlterEgo implements AutoCloseable {
   public <T> Transformation<T> bind(String domain, Class<T> type, Strategy<T> strategy) {
     checkNotClosed();
     return new DefaultTransformation<>(
-        salt, locale, domain, type, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts);
+        salt, locale, domain, type, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts,
+        this::isClosed);
   }
 
   /**
@@ -860,6 +862,14 @@ public final class AlterEgo implements AutoCloseable {
     if (closed) {
       throw new IllegalStateException("AlterEgo instance has been destroyed");
     }
+  }
+
+  /**
+   * Whether this instance has been closed. Shared with every {@link Transformation} it produces so
+   * they can reject application after the salt has been zeroed (see {@link #close()}).
+   */
+  boolean isClosed() {
+    return closed;
   }
 
   /** Builds a configured {@link AlterEgo} instance. */
