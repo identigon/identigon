@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -23,6 +24,7 @@ class TemporalJitterTest {
   private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
   private static final LocalDate DAY = LocalDate.of(2026, 7, 25);
   private static final LocalDateTime MOMENT = LocalDateTime.of(2026, 7, 25, 14, 30, 15, 123_456_789);
+  private static final Instant INSTANT_MOMENT = Instant.parse("2026-07-25T14:30:15.123456789Z");
 
   private static AlterEgo alterego() {
     return AlterEgo.builder().salt(SALT).build();
@@ -199,6 +201,38 @@ class TemporalJitterTest {
       LocalDateTime result = t.apply(MOMENT.plusHours(i));
       assertFalse(result.isBefore(MOMENT.minusDays(1)));
       assertFalse(result.isAfter(MOMENT.plusDays(1)));
+    }
+  }
+
+  // --- shiftInstant(int, int) --------------------------------------------------------------------
+
+  @Test
+  void shiftInstantByDaysAndSecondsIsUniformInRangeAndPreservesNanos() {
+    Transformation<Instant> t = alterego().shiftInstant(30, 3600);
+    for (int i = 0; i < 300; i++) {
+      Instant input = INSTANT_MOMENT.plusSeconds(i * 3600L);
+      Instant result = t.apply(input);
+      assertEquals(123_456_789, result.getNano());
+      long secDiff = result.getEpochSecond() - input.getEpochSecond();
+      long maxDiff = 30L * 86400L + 3600L;
+      assertTrue(secDiff >= -maxDiff && secDiff <= maxDiff, "sec diff out of range: " + secDiff);
+    }
+  }
+
+  @Test
+  void shiftInstantByDaysAndSecondsIsDeterministic() {
+    assertEquals(
+        alterego().shiftInstant(30, 3600).apply(INSTANT_MOMENT), alterego().shiftInstant(30, 3600).apply(INSTANT_MOMENT));
+  }
+
+  @Test
+  void clampAppliesToShiftInstantToo() {
+    JitterOptions<Instant> options = JitterOptions.minmax(INSTANT_MOMENT.minus(1, ChronoUnit.DAYS), INSTANT_MOMENT.plus(1, ChronoUnit.DAYS));
+    Transformation<Instant> t = alterego().shiftInstant(365, 3600, options);
+    for (int i = 0; i < 100; i++) {
+      Instant result = t.apply(INSTANT_MOMENT.plusSeconds(i * 3600L));
+      assertFalse(result.isBefore(INSTANT_MOMENT.minus(1, ChronoUnit.DAYS)));
+      assertFalse(result.isAfter(INSTANT_MOMENT.plus(1, ChronoUnit.DAYS)));
     }
   }
 }

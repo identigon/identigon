@@ -31,6 +31,10 @@ Landed on `main` (see `CHANGELOG.md`), not yet tagged:
   factory calls and transformation application on a closed instance throw (spec 2, "Lifecycle").
 - Schema-preserving `redact(Class<T>)` and full-length `mask(char)` (spec 4.7).
 
+## Known bugs
+
+- (None)
+
 ## Deferred (not yet scheduled)
 
 - `ServiceLoader` strategy/dictionary packs; additional countries.

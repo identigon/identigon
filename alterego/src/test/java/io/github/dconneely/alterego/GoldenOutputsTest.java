@@ -2,6 +2,7 @@ package io.github.dconneely.alterego;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -148,6 +149,13 @@ class GoldenOutputsTest {
   }
 
   @Test
+  void shiftInstantByDaysAndSecondsGoldenOutput() {
+    assertEquals(
+        Instant.parse("2026-03-28T14:27:10.123456789Z"),
+        alterego().shiftInstant(30, 3600).apply(Instant.parse("2026-03-15T14:30:45.123456789Z")));
+  }
+
+  @Test
   void shiftDateTimeByDaysAndHourFieldGoldenOutput() {
     assertEquals(
         LocalDateTime.of(2026, 4, 12, 14, 33, 49),
@@ -167,6 +175,18 @@ class GoldenOutputsTest {
   void emailAddressGoldenOutputs() {
     assertEquals("aufxv.mzfic@example.net", alterego().emailAddress().apply("alice.smith@realmail.com"));
     assertEquals("ttq88@example.com", alterego().emailAddress().apply("bob99"));
+  }
+
+  @Test
+  void domainNameGoldenOutputs() {
+    assertEquals("example.org", alterego().domainName().apply("original"));
+    assertEquals("zzhrb.invalid", alterego().domainName().apply("second"));
+  }
+
+  @Test
+  void urlGoldenOutputs() {
+    assertEquals("http://example.net/vwgi", alterego().url().apply("original"));
+    assertEquals("http://qqqepud.test/mpgrg", alterego().url().apply("second"));
   }
 
   @Test

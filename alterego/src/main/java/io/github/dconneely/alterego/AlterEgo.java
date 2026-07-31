@@ -419,7 +419,7 @@ public final class AlterEgo implements AutoCloseable {
    */
   public Transformation<Instant> shiftInstant(int days, int seconds) {
     Strategy<Instant> strategy = InstantJitterStrategy.of(days, seconds);
-    return bind("alterego:shift-instant:days=" + days + ":seconds=" + seconds, Instant.class, strategy);
+    return bind(shiftInstantDomain(dateFragment(days), timeFragment(seconds)), Instant.class, strategy);
   }
 
   /**
@@ -432,7 +432,7 @@ public final class AlterEgo implements AutoCloseable {
    */
   public Transformation<Instant> shiftInstant(int days, int seconds, JitterOptions<Instant> options) {
     Strategy<Instant> strategy = clampInstant(InstantJitterStrategy.of(days, seconds), options);
-    return bind("alterego:shift-instant:days=" + days + ":seconds=" + seconds, Instant.class, strategy);
+    return bind(shiftInstantDomain(dateFragment(days), timeFragment(seconds)), Instant.class, strategy);
   }
 
   // --- Internals --------------------------------------------------------------------------------
@@ -775,6 +775,10 @@ public final class AlterEgo implements AutoCloseable {
 
   private static String shiftDateTimeDomain(String dateFragment, String timeFragment) {
     return "alterego:shift-date-time:" + dateFragment + ":" + timeFragment;
+  }
+
+  private static String shiftInstantDomain(String dateFragment, String timeFragment) {
+    return "alterego:shift-instant:" + dateFragment + ":" + timeFragment;
   }
 
   private static String dateFragment(int days) {
