@@ -43,8 +43,6 @@ Landed on `main` (see `CHANGELOG.md`), not yet tagged:
   not deferred — ADR 0012.)
 - External `MappingStore` modules (JDBC, Redis) as separate artifacts — built against the M4
   contract test. A local single-process file store ships in core as of v0.2.0 (ADR 0011).
-- Tagged name dictionaries (e.g. gendered name lists) — town dictionaries already carry
-  structural tags in v1.
 - A public codec mechanism / SPI for caller-supplied value types (the fixed set is rejected as an
   SPI, ADR 0003) — only if a real need appears.
 - Fictional-range additions: TEST-NET IPs (RFC 5737).
