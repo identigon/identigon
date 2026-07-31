@@ -32,7 +32,15 @@ implementation; each has an ordered checklist in `docs/tasks/`:
 - Jitter for `Instant` — already a supported value type; only the built-in (matching the
   `shiftDate`/`shiftDateTime` family, section 4.5) is missing, and it was not needed for v1.
 - Fictional-range additions: TEST-NET IPs (RFC 5737), `.test`/`.invalid` domains (RFC 6761).
+- `companyNumber()` (Companies House) — **blocked, unsolved fictional space.** No reserved/test
+  range and no checksum exist; the only impossible value is zero, and mapping every company to
+  zero is redaction, not pseudonymisation. A high range is time-dependent (Scotland is already at
+  `SC770005`). Deferred until a reserved or never-issued range is found. Full analysis in
+  `docs/fictional-ranges.md`. Note it has a regional element (`SC`/`NI`/plain) that would feed
+  `UK_NATION` record coherence if it returns.
 - `phoneNumber()`'s freephone/premium-rate/UK-wide Ofcom ranges, behind an option — excluded
   from v1's default pool since they don't read as a realistic personal contact number; already
   sourced and recorded in full (`docs/phone-ranges.md`), so adding them later needs no
   re-sourcing.
+
+

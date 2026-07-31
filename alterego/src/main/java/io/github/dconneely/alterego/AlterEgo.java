@@ -28,7 +28,7 @@ import java.util.Objects;
  * locale, and an optional mapping store, and hands out {@link Transformation}s and
  * {@link RecordScope}s that share that configuration. Immutable and thread-safe once built.
  */
-public final class AlterEgo {
+public final class AlterEgo implements AutoCloseable {
 
   private static final int MIN_SALT_BYTES = 16;
 
@@ -38,6 +38,7 @@ public final class AlterEgo {
   private final NullPolicy nullPolicy;
   private final boolean rawMappingKeys;
   private final int uniqueMaxAttempts;
+  private volatile boolean closed;
 
   private AlterEgo(
       byte[] salt,
@@ -71,6 +72,7 @@ public final class AlterEgo {
    * @return a reusable {@link Transformation}
    */
   public Transformation<String> bind(String domain, Strategy<String> strategy) {
+    checkNotClosed();
     return new DefaultTransformation<>(
         salt, locale, domain, String.class, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts);
   }
@@ -86,6 +88,7 @@ public final class AlterEgo {
    * @return a reusable {@link Transformation}
    */
   public <T> Transformation<T> bind(String domain, Class<T> type, Strategy<T> strategy) {
+    checkNotClosed();
     return new DefaultTransformation<>(
         salt, locale, domain, type, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts);
   }
@@ -133,6 +136,49 @@ public final class AlterEgo {
       return (Class<T>) enumValue.getDeclaringClass();
     }
     return (Class<T>) value.getClass();
+  }
+
+  /**
+   * Returns a {@link Transformation} that replaces every input with a sensible dummy constant
+   * for the given type (e.g. {@code 0} for {@link Integer}, {@code 1970-01-01} for {@link java.time.LocalDate}).
+   * Throws {@link AlterEgoConfigException} if there is no obvious safe default for the type (e.g. Enums).
+   *
+   * @param <T> the value type transformed
+   * @param type the class of the value type
+   * @return a {@link Transformation} that always returns the default redacted value
+   */
+  @SuppressWarnings("unchecked")
+  public <T> Transformation<T> redact(Class<T> type) {
+    Objects.requireNonNull(type, "type");
+    if (type == String.class) {
+      return (Transformation<T>) constant("");
+    } else if (type == Integer.class) {
+      return (Transformation<T>) constant(0);
+    } else if (type == Long.class) {
+      return (Transformation<T>) constant(0L);
+    } else if (type == Boolean.class) {
+      return (Transformation<T>) constant(Boolean.FALSE);
+    } else if (type == LocalDate.class) {
+      return (Transformation<T>) constant(LocalDate.of(1970, 1, 1));
+    } else if (type == LocalDateTime.class) {
+      return (Transformation<T>) constant(LocalDateTime.of(1970, 1, 1, 0, 0));
+    } else if (type == java.time.Instant.class) {
+      return (Transformation<T>) constant(java.time.Instant.EPOCH);
+    } else if (type == java.util.UUID.class) {
+      return (Transformation<T>) constant(new java.util.UUID(0L, 0L));
+    }
+    throw new AlterEgoConfigException(
+        "Cannot provide a default redacted constant for type: " + type.getName() + " (use constant(T) instead)");
+  }
+
+  /**
+   * Masks every character of each input with {@code maskChar} (section 4.7).
+   *
+   * @param maskChar the character used to mask each position
+   * @return a masking {@link Transformation}
+   */
+  public Transformation<String> mask(char maskChar) {
+    return mask(maskChar, 0);
   }
 
   /**
@@ -615,6 +661,7 @@ public final class AlterEgo {
    * @return a new {@link RecordScope}
    */
   public RecordScope record() {
+    checkNotClosed();
     return new DefaultRecordScope(salt, null);
   }
 
@@ -627,6 +674,7 @@ public final class AlterEgo {
    */
   public RecordScope record(String key) {
     Objects.requireNonNull(key, "key");
+    checkNotClosed();
     return new DefaultRecordScope(salt, key);
   }
 
@@ -649,6 +697,29 @@ public final class AlterEgo {
   public enum TimeField {
     /** Same hour as the input; uniform random minute, then second, each {@code nextInt(60)}. */
     HOUR
+  }
+
+  /**
+   * Destroys this instance by zeroing out the secret salt array.
+   */
+  public void destroy() {
+    close();
+  }
+
+  /**
+   * Destroys this instance by zeroing out the secret salt array. After calling this method,
+   * factory methods on this instance will throw {@link IllegalStateException}.
+   */
+  @Override
+  public void close() {
+    closed = true;
+    java.util.Arrays.fill(salt, (byte) 0);
+  }
+
+  private void checkNotClosed() {
+    if (closed) {
+      throw new IllegalStateException("AlterEgo instance has been destroyed");
+    }
   }
 
   /** Builds a configured {@link AlterEgo} instance. */

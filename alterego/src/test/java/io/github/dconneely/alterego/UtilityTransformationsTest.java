@@ -106,6 +106,13 @@ class UtilityTransformationsTest {
   // --- mask() ----------------------------------------------------------------------------------
 
   @Test
+  void fullMaskReplacesEveryCharacter() {
+    Transformation<String> t = alterego().mask('*');
+    assertEquals("****************", t.apply("credit-card-1234"));
+    assertEquals("", t.apply(""));
+  }
+
+  @Test
   void maskReplacesAllButLastNCharacters() {
     Transformation<String> t = alterego().mask('*', 4);
     assertEquals("************1234", t.apply("credit-card-1234"));
@@ -137,6 +144,25 @@ class UtilityTransformationsTest {
             input.length(), t.apply(input).length(), "input=" + input + " keepLast=" + keepLast);
       }
     }
+  }
+
+  // --- redact() --------------------------------------------------------------------------------
+
+  @Test
+  void redactReturnsSensibleConstants() {
+    assertEquals("", alterego().redact(String.class).apply("anything"));
+    assertEquals(0, alterego().redact(Integer.class).apply(123));
+    assertEquals(0L, alterego().redact(Long.class).apply(123L));
+    assertEquals(Boolean.FALSE, alterego().redact(Boolean.class).apply(true));
+    assertEquals(LocalDate.of(1970, 1, 1), alterego().redact(LocalDate.class).apply(LocalDate.of(2026, 7, 13)));
+    assertEquals(java.time.LocalDateTime.of(1970, 1, 1, 0, 0), alterego().redact(java.time.LocalDateTime.class).apply(java.time.LocalDateTime.of(2026, 7, 13, 12, 0)));
+    assertEquals(java.time.Instant.EPOCH, alterego().redact(java.time.Instant.class).apply(java.time.Instant.EPOCH.plusSeconds(10)));
+    assertEquals(new java.util.UUID(0L, 0L), alterego().redact(java.util.UUID.class).apply(new java.util.UUID(1L, 2L)));
+  }
+
+  @Test
+  void redactThrowsForUnsupportedTypes() {
+    assertThrows(AlterEgoConfigException.class, () -> alterego().redact(UkNation.class));
   }
 
   /** A varied fixed input set (including the empty string and non-ASCII) for the loop-based tests. */
