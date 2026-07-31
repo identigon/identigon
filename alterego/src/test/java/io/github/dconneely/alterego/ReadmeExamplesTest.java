@@ -4,12 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.dconneely.alterego.store.FileMappingStore;
 import io.github.dconneely.alterego.store.InMemoryMappingStore;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Every code sample in {@code README.md}, compiled and run here so a breaking change to the
@@ -45,6 +48,17 @@ class ReadmeExamplesTest {
     pseudonymisedFirstNames.forEach(name -> assertTrue(Character.isUpperCase(name.charAt(0))));
   }
 
+  // --- Fictional by default ----------------------------------------------------------------------
+
+  @Test
+  void fictionalByDefault() {
+    AlterEgo alterego = AlterEgo.builder().salt(loadSecretSaltFromSomewhereSafe()).build();
+    Transformation<String> cc = alterego.creditCardNumber();
+    String ccOutput = cc.apply("input");
+    assertNotNull(ccOutput);
+    assertTrue(ccOutput.startsWith("0"));
+  }
+
   // --- unique() and the order-independence caveat ------------------------------------------------
 
   @Test
@@ -59,6 +73,17 @@ class ReadmeExamplesTest {
     String second = uniqueCustomerId.apply("bob@example.com");
     assertNotNull(first);
     assertNotNull(second);
+  }
+
+  @Test
+  void persistentUnique(@TempDir Path tempDir) {
+    byte[] salt = loadSecretSaltFromSomewhereSafe();
+    try (FileMappingStore store = FileMappingStore.open(tempDir.resolve("mappings.alterego"))) {
+      AlterEgo alterego = AlterEgo.builder().salt(salt).mappingStore(store).build();
+      Transformation<String> customerId = alterego.pattern("LLDDDDDD").unique();
+      // ... mappings and collision resolutions now survive across runs
+      assertNotNull(customerId.apply("test@example.com"));
+    }
   }
 
   // --- Record coherence ----------------------------------------------------------------------------
@@ -91,7 +116,7 @@ class ReadmeExamplesTest {
 
   // --- Extending with custom strategies --------------------------------------------------------
 
-  private static String generateNhsNumber(Randomness random) {
+  private static String generateEmployeeId(Randomness random) {
     StringBuilder sb = new StringBuilder(10);
     for (int i = 0; i < 10; i++) {
       sb.append(random.digit());
@@ -103,11 +128,11 @@ class ReadmeExamplesTest {
   void customStrategyExtension() {
     AlterEgo alterego =
         AlterEgo.builder().salt(loadSecretSaltFromSomewhereSafe()).mappingStore(new InMemoryMappingStore()).build();
-    Strategy<String> nhsNumberStrategy = (input, context) -> generateNhsNumber(context.random());
+    Strategy<String> employeeIdStrategy = (input, context) -> generateEmployeeId(context.random());
 
-    Transformation<String> nhsNumber = alterego.bind("myapp:nhs-number", nhsNumberStrategy).unique();
+    Transformation<String> employeeId = alterego.bind("myapp:employee-id", employeeIdStrategy).unique();
 
-    String result = nhsNumber.apply("1234567890");
+    String result = employeeId.apply("1234567890");
     assertEquals(10, result.length());
     assertTrue(result.chars().allMatch(Character::isDigit));
   }

@@ -20,6 +20,12 @@ entry in this file meaningful rather than just a feature list:
 - The `GoldenOutputsTest` suite pins exact expected outputs for a reference salt across every
   built-in, to catch accidental drift in the algorithms or dictionaries between releases.
 
+## [0.2.0] — (unreleased)
+
+### Added
+- `FileMappingStore` (spec §5.4): a persistent, file-backed `MappingStore` that provides cross-run stability for `stored()` and `unique()` mappings.
+- Five identifier built-ins (`nhsNumber()`, `nationalInsuranceNumber()`, `drivingLicenceNumber()`, `passportNumber()`, `creditCardNumber()`) with structurally guaranteed fictional outputs (ADR 0012).
+
 ## [0.1.0] — 2026-07-26
 
 Initial implementation, milestones M0-M6 of `PLAN.md`.

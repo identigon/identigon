@@ -71,6 +71,31 @@ class LocaleEquivalenceTest {
     assertLocaleAgreement(AlterEgo::phoneNumber);
   }
 
+  @Test
+  void nhsNumberAgreesAcrossEnGbAndCyGb() {
+    assertLocaleAgreement(AlterEgo::nhsNumber);
+  }
+
+  @Test
+  void nationalInsuranceNumberAgreesAcrossEnGbAndCyGb() {
+    assertLocaleAgreement(AlterEgo::nationalInsuranceNumber);
+  }
+
+  @Test
+  void drivingLicenceNumberAgreesAcrossEnGbAndCyGb() {
+    assertLocaleAgreement(AlterEgo::drivingLicenceNumber);
+  }
+
+  @Test
+  void passportNumberAgreesAcrossEnGbAndCyGb() {
+    assertLocaleAgreement(AlterEgo::passportNumber);
+  }
+
+  @Test
+  void creditCardNumberAgreesAcrossEnGbAndCyGb() {
+    assertLocaleAgreement(AlterEgo::creditCardNumber);
+  }
+
   private static void assertLocaleAgreement(java.util.function.Function<AlterEgo, Transformation<String>> builtIn) {
     Transformation<String> enGb = builtIn.apply(egFor(EN_GB));
     Transformation<String> cyGb = builtIn.apply(egFor(CY_GB));

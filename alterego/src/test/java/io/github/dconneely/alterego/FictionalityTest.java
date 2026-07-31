@@ -101,4 +101,71 @@ class FictionalityTest {
           GB_FICTIONAL_STREET_THEMES.contains(theme), "not an authored fictional theme word: " + theme);
     }
   }
+
+  @Test
+  void everyDefaultNhsNumberFallsIn999RangeAndHasValidCheckDigit() {
+    Transformation<String> t = alterego().nhsNumber();
+    for (int i = 0; i < SAMPLE_SIZE; i++) {
+      String result = t.apply("input-" + i);
+      assertTrue(result.matches("^999 \\d{3} \\d{4}$"), "malformed NHS number: " + result);
+
+      String digits = result.replace(" ", "");
+      int sum = 0;
+      for (int j = 0; j < 9; j++) {
+        sum += (digits.charAt(j) - '0') * (10 - j);
+      }
+      int c = 11 - (sum % 11);
+      if (c == 11) c = 0;
+      assertEquals(c, digits.charAt(9) - '0', "invalid check digit in: " + result);
+    }
+  }
+
+  @Test
+  void everyDefaultNationalInsuranceNumberUsesQQPrefix() {
+    Transformation<String> t = alterego().nationalInsuranceNumber();
+    for (int i = 0; i < SAMPLE_SIZE; i++) {
+      String result = t.apply("input-" + i);
+      assertTrue(result.matches("^QQ \\d{2} \\d{2} \\d{2} [A-D]$"), "malformed NI number: " + result);
+    }
+  }
+
+  @Test
+  void everyDefaultDrivingLicenceNumberUses99999SurnameBlock() {
+    Transformation<String> t = alterego().drivingLicenceNumber();
+    for (int i = 0; i < SAMPLE_SIZE; i++) {
+      String result = t.apply("input-" + i);
+      assertTrue(result.matches("^99999\\d{6}[A-Z]{2}9[A-Z]{2}$"), "malformed DL number: " + result);
+    }
+  }
+
+  @Test
+  void everyDefaultPassportNumberUsesZZPrefix() {
+    Transformation<String> t = alterego().passportNumber();
+    for (int i = 0; i < SAMPLE_SIZE; i++) {
+      String result = t.apply("input-" + i);
+      assertTrue(result.matches("^ZZ\\d{7}$"), "malformed passport number: " + result);
+    }
+  }
+
+  @Test
+  void everyDefaultCreditCardNumberUsesZeroMiiAndHasValidLuhnCheckDigit() {
+    Transformation<String> t = alterego().creditCardNumber();
+    for (int i = 0; i < SAMPLE_SIZE; i++) {
+      String result = t.apply("input-" + i);
+      assertTrue(result.matches("^0\\d{3}( \\d{4}){3}$"), "malformed credit card number: " + result);
+
+      String digits = result.replace(" ", "");
+      int sum = 0;
+      for (int j = 0; j < 15; j++) {
+        int v = digits.charAt(14 - j) - '0';
+        if (j % 2 == 0) {
+          v *= 2;
+          if (v > 9) v -= 9;
+        }
+        sum += v;
+      }
+      int expectedC = (10 - (sum % 10)) % 10;
+      assertEquals(expectedC, digits.charAt(15) - '0', "invalid check digit in: " + result);
+    }
+  }
 }

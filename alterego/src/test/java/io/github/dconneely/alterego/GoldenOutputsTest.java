@@ -90,6 +90,36 @@ class GoldenOutputsTest {
     assertEquals("Medical Training Foods", alterego().organisationName().apply("Foo Bar"));
   }
 
+  @Test
+  void nhsNumberGoldenOutputs() {
+    assertEquals("999 709 0632", alterego().nhsNumber().apply("original"));
+    assertEquals("999 863 3680", alterego().nhsNumber().apply("second"));
+  }
+
+  @Test
+  void nationalInsuranceNumberGoldenOutputs() {
+    assertEquals("QQ 30 40 08 D", alterego().nationalInsuranceNumber().apply("original"));
+    assertEquals("QQ 28 77 59 A", alterego().nationalInsuranceNumber().apply("second"));
+  }
+
+  @Test
+  void drivingLicenceNumberGoldenOutputs() {
+    assertEquals("99999454110NW9XN", alterego().drivingLicenceNumber().apply("original"));
+    assertEquals("99999609028SI9ZD", alterego().drivingLicenceNumber().apply("second"));
+  }
+
+  @Test
+  void passportNumberGoldenOutputs() {
+    assertEquals("ZZ0273960", alterego().passportNumber().apply("original"));
+    assertEquals("ZZ0425340", alterego().passportNumber().apply("second"));
+  }
+
+  @Test
+  void creditCardNumberGoldenOutputs() {
+    assertEquals("0814 6733 3628 4153", alterego().creditCardNumber().apply("original"));
+    assertEquals("0407 7733 5108 9975", alterego().creditCardNumber().apply("second"));
+  }
+
   // --- M3: temporal jitter, a representative selection of the eight strategies (not all sixteen
   // methods), plus emailAddress() and phoneNumber() ---------------------------------------------
 

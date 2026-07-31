@@ -82,14 +82,25 @@ real mailbox, phone number, or deliverable address:
 | `emailAddress()`    | never a working mailbox               | RFC 2606 reserved domains (`example.com`, `.net`, `.org`) |
 | `phoneNumber()`     | never a connectable number             | Ofcom drama ranges (e.g. `020 7946 0xxx`, `07700 900xxx`, `01632 960xxx`) |
 | `postcode()`        | never a deliverable postcode           | a plausible outward code, but an inward code letter Royal Mail never uses |
+| `nhsNumber()`       | never issued to a real person          | `999` prefix reserved for test and synthetic data |
+| `nationalInsuranceNumber()` | never issued to a real person  | `QQ` prefix structurally unallocatable by HMRC |
+| `drivingLicenceNumber()` | never issued to a real person     | `99999` surname block impossible on a real licence |
+| `passportNumber()`  | never issued to a real person          | `ZZ` prefix impossible on a UK passport |
+| `creditCardNumber()`| never issued to a real person          | `0` major industry identifier reserved by ISO/IEC 7812 |
 | `lastName()`        | reads as obviously fictional, not a real person's surname | authored (not sourced) surname vocabulary (e.g. `"Testperson"`) |
 | `streetAddress()`   | reads as obviously fictional, not a real street | authored (not sourced) theme word (e.g. `"Example"`) plus a real structural type word (`"Road"`) |
 
-Each of the first three is format-valid — that's exactly why it was reserved — so it passes
+Each of the first eight is format-valid — that's exactly why it was reserved — so it passes
 ordinary validation but fails a live lookup against real reference data (an MX record, a number
-allocation, a delivery address). Where full realism matters more than the guarantee,
+allocation, a delivery address, a PDS trace). Where full realism matters more than the guarantee,
 `PhoneOptions.realistic()` and `PostcodeOptions.realistic()` opt out explicitly; their Javadoc
-states the risk (a realistic output can coincide with a real person's number or address).
+states the risk (a realistic output can coincide with a real person's number or address). The
+identifier built-ins offer no realistic opt-out.
+
+```java
+Transformation<String> cc = alterego.creditCardNumber();
+// 0814 6733 3628 4153 (valid Luhn check digit, but '0' MII is unissued)
+```
 
 `lastName()` and `streetAddress()` use a different mechanism: there's no officially reserved
 "fictional surname" or "fictional street" space to draw from, so their vocabulary is authored
@@ -113,7 +124,17 @@ candidates would collide, whichever one is processed *first* keeps that natural 
 the other is re-derived. Absent an actual collision — the overwhelming majority of real data —
 `unique()` output is identical regardless of processing order; when a collision does happen, only
 those specific inputs are affected, and the resolution is recorded in the mapping store, so it
-stays stable on every later run.
+stay stable on every later run.
+
+To make this stability permanent, back AlterEgo with a persistent file store:
+
+```java
+try (FileMappingStore store = FileMappingStore.open(Path.of("mappings.alterego"))) {
+    AlterEgo alterego = AlterEgo.builder().salt(salt).mappingStore(store).build();
+    Transformation<String> customerId = alterego.pattern("LLDDDDDD").unique();
+    // ... mappings and collision resolutions now survive across runs
+}
+```
 
 ## Record coherence
 
@@ -139,10 +160,10 @@ A custom strategy is a plain lambda; binding it gives it every feature a built-i
 determinism, `unique()`, `stored()`, and record coherence:
 
 ```java
-Strategy<String> nhsNumberStrategy = (input, context) -> generateNhsNumber(context.random());
+Strategy<String> employeeIdStrategy = (input, context) -> generateEmployeeId(context.random());
 
-Transformation<String> nhsNumber =
-    alterego.bind("myapp:nhs-number", nhsNumberStrategy).unique();
+Transformation<String> employeeId =
+    alterego.bind("myapp:employee-id", employeeIdStrategy).unique();
 ```
 
 Prefix your own domains (`"myapp:..."`) to avoid clashing with AlterEgo's own built-in domains

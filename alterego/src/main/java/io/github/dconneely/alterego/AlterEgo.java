@@ -377,6 +377,83 @@ public final class AlterEgo implements AutoCloseable {
     return bind("alterego:phone-number", strategy);
   }
 
+  // --- Identifiers (section 4.8) ------------------------------------------------------------
+
+  /**
+   * Generates a fictional NHS number (SPECIFICATION.md section 4.1, 4.8).
+   * <p>
+   * Output format: 10 digits with 3-3-4 spacing, e.g. "999 ddd dddc", where c is a valid mod-11 check digit.
+   * Guarantee: The number falls within the '999' test/synthetic range and is never issued to a real person.
+   * Requires the locale's country to be GB.
+   *
+   * @return a {@link Transformation} over NHS numbers
+   */
+  public Transformation<String> nhsNumber() {
+    requireGB("nhsNumber");
+    return bind("alterego:nhs-number", io.github.dconneely.alterego.strategy.NhsNumberStrategy.INSTANCE);
+  }
+
+  /**
+   * Generates a fictional National Insurance number (SPECIFICATION.md section 4.1, 4.8).
+   * <p>
+   * Output format: "QQ dd dd dd S".
+   * Guarantee: The 'QQ' prefix is structurally unallocatable by HMRC (used only for examples).
+   * Requires the locale's country to be GB.
+   *
+   * @return a {@link Transformation} over National Insurance numbers
+   */
+  public Transformation<String> nationalInsuranceNumber() {
+    requireGB("nationalInsuranceNumber");
+    return bind("alterego:national-insurance-number", io.github.dconneely.alterego.strategy.NationalInsuranceNumberStrategy.INSTANCE);
+  }
+
+  /**
+   * Generates a fictional GB driving licence number (SPECIFICATION.md section 4.1, 4.8).
+   * <p>
+   * Output format: 16 characters DVLA layout, unspaced.
+   * Guarantee: Uses the surname block "99999", which implies a zero-letter surname and can never occur on a real licence.
+   * Requires the locale's country to be GB.
+   *
+   * @return a {@link Transformation} over GB driving licence numbers
+   */
+  public Transformation<String> drivingLicenceNumber() {
+    requireGB("drivingLicenceNumber");
+    return bind("alterego:driving-licence-number", io.github.dconneely.alterego.strategy.DrivingLicenceNumberStrategy.INSTANCE);
+  }
+
+  /**
+   * Generates a fictional UK passport number (SPECIFICATION.md section 4.1, 4.8).
+   * <p>
+   * Output format: "ZZddddddd", unspaced.
+   * Guarantee: The "ZZ" prefix makes it structurally impossible for a UK passport, which must be 9 numeric digits.
+   * Requires the locale's country to be GB.
+   *
+   * @return a {@link Transformation} over UK passport numbers
+   */
+  public Transformation<String> passportNumber() {
+    requireGB("passportNumber");
+    return bind("alterego:passport-number", io.github.dconneely.alterego.strategy.PassportNumberStrategy.INSTANCE);
+  }
+
+  /**
+   * Generates a fictional credit card number (SPECIFICATION.md section 4.1, 4.8).
+   * <p>
+   * Output format: 16 digits grouped as "0ddd dddd dddd dddc" with a valid Luhn check digit.
+   * Guarantee: The '0' major industry identifier is reserved for ISO/TC 68 and future assignment; no scheme issues PANs beginning with 0.
+   *
+   * @return a {@link Transformation} over credit card numbers
+   */
+  public Transformation<String> creditCardNumber() {
+    return bind("alterego:credit-card-number", io.github.dconneely.alterego.strategy.CreditCardNumberStrategy.INSTANCE);
+  }
+
+  private void requireGB(String methodName) {
+    String country = DictionaryLoader.requireCountry(locale);
+    if (!"GB".equals(country)) {
+      throw new AlterEgoConfigException(methodName + " requires country GB, but locale " + locale + " resolved to " + country);
+    }
+  }
+
   // --- Temporal jitter (section 4.5) --------------------------------------------------------
 
   /**
