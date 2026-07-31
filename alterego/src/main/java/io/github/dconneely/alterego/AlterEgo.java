@@ -6,16 +6,23 @@ import io.github.dconneely.alterego.strategy.CityStrategy;
 import io.github.dconneely.alterego.strategy.DateJitterStrategy;
 import io.github.dconneely.alterego.strategy.DateTimeJitterStrategy;
 import io.github.dconneely.alterego.strategy.DictionaryLoader;
+import io.github.dconneely.alterego.strategy.DomainNameStrategy;
 import io.github.dconneely.alterego.strategy.EmailAddressStrategy;
 import io.github.dconneely.alterego.strategy.FullNameStrategy;
+import io.github.dconneely.alterego.strategy.InstantJitterStrategy;
 import io.github.dconneely.alterego.strategy.NameDictionaryStrategy;
+import io.github.dconneely.alterego.strategy.NationalInsuranceNumberStrategy;
+import io.github.dconneely.alterego.strategy.NhsNumberStrategy;
 import io.github.dconneely.alterego.strategy.OrganisationNameStrategy;
+import io.github.dconneely.alterego.strategy.PassportNumberStrategy;
 import io.github.dconneely.alterego.strategy.PhoneNumberStrategy;
 import io.github.dconneely.alterego.strategy.PostcodeStrategy;
 import io.github.dconneely.alterego.strategy.StreetAddressStrategy;
+import io.github.dconneely.alterego.strategy.UrlStrategy;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -164,6 +171,12 @@ public final class AlterEgo implements AutoCloseable {
       return (Transformation<T>) constant(LocalDateTime.of(1970, 1, 1, 0, 0));
     } else if (type == java.time.Instant.class) {
       return (Transformation<T>) constant(java.time.Instant.EPOCH);
+    } else if (type == java.time.LocalTime.class) {
+      return (Transformation<T>) constant(java.time.LocalTime.MIDNIGHT);
+    } else if (type == java.time.YearMonth.class) {
+      return (Transformation<T>) constant(java.time.YearMonth.of(1970, 1));
+    } else if (type == java.math.BigDecimal.class) {
+      return (Transformation<T>) constant(java.math.BigDecimal.ZERO);
     } else if (type == java.util.UUID.class) {
       return (Transformation<T>) constant(new java.util.UUID(0L, 0L));
     }
@@ -354,6 +367,24 @@ public final class AlterEgo implements AutoCloseable {
   }
 
   /**
+   * Returns a {@link Transformation} that derives a fictional domain name for each input.
+   *
+   * @return a fictional-by-default domain name transformation
+   */
+  public Transformation<String> domainName() {
+    return bind("alterego:domain-name", DomainNameStrategy.INSTANCE);
+  }
+
+  /**
+   * Returns a {@link Transformation} that derives a fictional URL for each input.
+   *
+   * @return a fictional-by-default URL transformation
+   */
+  public Transformation<String> url() {
+    return bind("alterego:url", UrlStrategy.INSTANCE);
+  }
+
+  /**
    * Generates a fictional phone number (section 4.1, section 4.4): digits replaced in place,
    * punctuation and grouping preserved. By default lands in the locale's country's reserved
    * fictional range where one is published ({@code docs/phone-ranges.md}); a country with no
@@ -373,9 +404,36 @@ public final class AlterEgo implements AutoCloseable {
    */
   public Transformation<String> phoneNumber(PhoneOptions options) {
     String country = DictionaryLoader.requireCountry(locale);
-    Strategy<String> strategy = PhoneNumberStrategy.forCountry(country, options.isRealistic());
+    Strategy<String> strategy = PhoneNumberStrategy.forCountry(country, options.isRealistic(), options.isIncludeNonGeographic());
     return bind("alterego:phone-number", strategy);
   }
+
+  /**
+   * Returns a {@link Transformation} that shifts each input {@link Instant} uniformly.
+   *
+   * @param days the half-range of the date shift, in days; must be {@code >= 0}
+   * @param seconds the half-range of the time shift, in seconds; must be {@code >= 0}
+   * @return a date-and-time jitter transformation over {@link Instant}
+   */
+  public Transformation<Instant> shiftInstant(int days, int seconds) {
+    Strategy<Instant> strategy = InstantJitterStrategy.of(days, seconds);
+    return bind("alterego:shift-instant:days=" + days + ":seconds=" + seconds, Instant.class, strategy);
+  }
+
+  /**
+   * As {@link #shiftInstant(int, int)}, clamped inclusively by {@code options} after shifting.
+   *
+   * @param days the half-range of the date shift, in days; must be {@code >= 0}
+   * @param seconds the half-range of the time shift, in seconds; must be {@code >= 0}
+   * @param options inclusive clamp bounds to apply after shifting
+   * @return a clamped date-and-time jitter transformation over {@link Instant}
+   */
+  public Transformation<Instant> shiftInstant(int days, int seconds, JitterOptions<Instant> options) {
+    Strategy<Instant> strategy = clampInstant(InstantJitterStrategy.of(days, seconds), options);
+    return bind("alterego:shift-instant:days=" + days + ":seconds=" + seconds, Instant.class, strategy);
+  }
+
+  // --- Internals --------------------------------------------------------------------------------
 
   // --- Identifiers (section 4.8) ------------------------------------------------------------
 
@@ -701,6 +759,11 @@ public final class AlterEgo implements AutoCloseable {
 
   private static Strategy<LocalDateTime> clampDateTime(
       Strategy<LocalDateTime> strategy, JitterOptions<LocalDateTime> options) {
+    return (input, context) -> options.clamp(strategy.transform(input, context));
+  }
+
+  private static Strategy<Instant> clampInstant(
+      Strategy<Instant> strategy, JitterOptions<Instant> options) {
     return (input, context) -> options.clamp(strategy.transform(input, context));
   }
 

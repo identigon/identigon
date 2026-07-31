@@ -49,9 +49,10 @@ public final class PhoneNumberStrategy implements Strategy<String> {
    *
    * @param country the ISO 3166-1 alpha-2 country to load phone ranges for
    * @param realistic whether to opt out of the fictionality guarantee
+   * @param includeNonGeographic whether to include non-geographic (freephone, premium, UK-wide) ranges
    * @return a strategy for that country
    */
-  public static PhoneNumberStrategy forCountry(String country, boolean realistic) {
+  public static PhoneNumberStrategy forCountry(String country, boolean realistic, boolean includeNonGeographic) {
     if (realistic || !DictionaryLoader.exists(country, "phone-ranges")) {
       return new PhoneNumberStrategy(null, Map.of(), null, country);
     }
@@ -60,7 +61,17 @@ public final class PhoneNumberStrategy implements Strategy<String> {
     // areas all sharing one range) purely for area-matching purposes; the unconstrained pool
     // must still treat it as a single choice, or the pick bound (and so the golden outputs)
     // would shift purely from that duplication.
-    List<String> allTemplates = dictionary.entries().stream().map(entry -> entry.tags().get(0)).distinct().toList();
+    List<String> allTemplates = dictionary.entries().stream()
+        .filter(entry -> {
+          String place = entry.tags().get(1);
+          if (place.equals("FREEPHONE") || place.equals("PREMIUM") || place.equals("UK_WIDE")) {
+            return includeNonGeographic;
+          }
+          return true;
+        })
+        .map(entry -> entry.tags().get(0))
+        .distinct()
+        .toList();
     Map<String, String> templateByArea = new HashMap<>();
     String neutralFallbackTemplate = null;
     for (DictionaryEntry entry : dictionary.entries()) {
@@ -68,7 +79,7 @@ public final class PhoneNumberStrategy implements Strategy<String> {
       String place = entry.tags().get(1);
       if (place.equals("NONE")) {
         neutralFallbackTemplate = template;
-      } else if (!place.equals("MOBILE")) {
+      } else if (!place.equals("MOBILE") && !place.equals("FREEPHONE") && !place.equals("PREMIUM") && !place.equals("UK_WIDE")) {
         templateByArea.put(place, template);
       }
     }

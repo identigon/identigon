@@ -206,10 +206,10 @@ class DictionaryWellFormednessTest {
   }
 
   @Test
-  void phoneRangeAcceptsNoneAndMobilePlaceTags() {
+  void phoneRangeAcceptsNoneAndMobileAndNonGeographicPlaceTags() {
     Dictionary dict =
         DictionaryParser.parse(
-            VALID_HEADER + "01234560\t0123 456 0XXX\tNONE\n09876540\t0987 654 0XXX\tMOBILE\n", "test");
+            VALID_HEADER + "01234560\t0123 456 0XXX\tNONE\n03069990\t03069 990XXX\tUK_WIDE\n07700900\t07700 900XXX\tMOBILE\n08081570\t08081 570XXX\tFREEPHONE\n09098790\t0909 879 0XXX\tPREMIUM\n", "test");
     assertDoesNotThrow(() -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
   }
 }

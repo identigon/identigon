@@ -1,8 +1,11 @@
 package io.github.dconneely.alterego;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.UUID;
 
 /**
@@ -23,6 +26,9 @@ final class ValueCodecs {
         || type == LocalDate.class
         || type == LocalDateTime.class
         || type == Instant.class
+        || type == LocalTime.class
+        || type == YearMonth.class
+        || type == BigDecimal.class
         || type == UUID.class
         || type.isEnum();
   }
@@ -34,7 +40,7 @@ final class ValueCodecs {
           "Unsupported value type: "
               + type.getName()
               + ". Supported types: String, Integer, Long, Boolean, LocalDate, LocalDateTime, "
-              + "Instant, UUID, and any enum.");
+              + "Instant, LocalTime, YearMonth, BigDecimal, UUID, and any enum.");
     }
   }
 
@@ -70,6 +76,12 @@ final class ValueCodecs {
         return (T) LocalDateTime.parse(text);
       } else if (type == Instant.class) {
         return (T) Instant.parse(text);
+      } else if (type == LocalTime.class) {
+        return (T) LocalTime.parse(text);
+      } else if (type == YearMonth.class) {
+        return (T) YearMonth.parse(text);
+      } else if (type == BigDecimal.class) {
+        return (T) new BigDecimal(text);
       } else if (type == UUID.class) {
         return (T) UUID.fromString(text);
       } else {

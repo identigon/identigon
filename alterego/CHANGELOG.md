@@ -20,6 +20,11 @@ entry in this file meaningful rather than just a feature list:
 - The `GoldenOutputsTest` suite pins exact expected outputs for a reference salt across every
   built-in, to catch accidental drift in the algorithms or dictionaries between releases.
 
+## [0.3.0] — (unreleased)
+
+### Added
+- (Nothing yet)
+
 ## [0.2.0] — 2026-07-31
 
 ### Added

@@ -109,12 +109,17 @@ final class DictionaryWellFormedness {
                 + "')");
       }
       String place = entry.tags().get(1);
-      if (!place.equals("NONE") && !place.equals("MOBILE") && !POSTCODE_AREA.matcher(place).matches()) {
+      if (!place.equals("NONE")
+          && !place.equals("MOBILE")
+          && !place.equals("FREEPHONE")
+          && !place.equals("PREMIUM")
+          && !place.equals("UK_WIDE")
+          && !POSTCODE_AREA.matcher(place).matches()) {
         throw new AlterEgoConfigException(
             resourceName
                 + ": phone-range entry '"
                 + value
-                + "' has invalid place tag (must be NONE, MOBILE, or 1-2 uppercase letters): "
+                + "' has invalid place tag (must be NONE, MOBILE, FREEPHONE, PREMIUM, UK_WIDE, or 1-2 uppercase letters): "
                 + place);
       }
     }
