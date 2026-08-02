@@ -16,6 +16,12 @@ implementation:
   `drivingLicenceNumber()`, `passportNumber()`, `creditCardNumber()` (spec 4.8, algorithms
   A.5-A.9, ADR 0012), each shape/checksum-valid inside a pinned fictional value space.
 
+## v0.4.0 (in progress)
+
+Landed on `main` (see `CHANGELOG.md`), not yet tagged:
+
+- (None)
+
 ## v0.3.0 (released)
 
 Landed on `main` (see `CHANGELOG.md`), and tagged:
