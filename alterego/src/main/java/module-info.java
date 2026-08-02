@@ -1,5 +1,5 @@
-/** Deterministic pseudonymisation: see {@link io.github.dconneely.alterego.AlterEgo}. */
-module io.github.dconneely.alterego {
-  exports io.github.dconneely.alterego;
-  exports io.github.dconneely.alterego.store;
+/** Deterministic pseudonymisation: see {@link org.identigon.alterego.AlterEgo}. */
+module org.identigon.alterego {
+  exports org.identigon.alterego;
+  exports org.identigon.alterego.store;
 }

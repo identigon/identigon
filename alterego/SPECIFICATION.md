@@ -984,7 +984,7 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
 
 - **Java 25**, compiled with `--release 25`; idiomatic use of records, sealed interfaces, and
   pattern matching.
-- **JPMS module** `io.github.dconneely.alterego`; group id `io.github.dconneely` (Maven
+- **JPMS module** `org.identigon.alterego`; group id `org.identigon` (Maven
   Central-compatible with the GitHub account).
 - **Gradle (Groovy DSL)**, `java-library` plugin, toolchain pinned to 25.
 - **No runtime dependencies.** Test dependencies: JUnit Jupiter (and AssertJ if fluent assertions

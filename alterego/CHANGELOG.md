@@ -20,7 +20,7 @@ entry in this file meaningful rather than just a feature list:
 - The `GoldenOutputsTest` suite pins exact expected outputs for a reference salt across every
   built-in, to catch accidental drift in the algorithms or dictionaries between releases.
 
-## [0.3.0] — (unreleased)
+## [0.3.0] — 2026-08-02
 
 ### Added
 - `domainName()` and `url()` built-ins using RFC 2606 reserved domains.
@@ -61,4 +61,4 @@ Initial implementation, milestones M0-M6 of `PLAN.md`.
   follow.
 - Extensibility: any `Strategy<T>` lambda bound via `AlterEgo.bind(...)` gets full built-in
   parity (determinism, `unique()`, `stored()`, record coherence, `derived(...)` composition).
-- `maven-publish` configuration (group `io.github.dconneely`, artifact `alterego`).
+- `maven-publish` configuration (group `org.identigon`, artifact `alterego`).

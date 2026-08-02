@@ -16,9 +16,9 @@ implementation:
   `drivingLicenceNumber()`, `passportNumber()`, `creditCardNumber()` (spec 4.8, algorithms
   A.5-A.9, ADR 0012), each shape/checksum-valid inside a pinned fictional value space.
 
-## v0.3.0 (in progress)
+## v0.3.0 (released)
 
-Landed on `main` (see `CHANGELOG.md`), not yet tagged:
+Landed on `main` (see `CHANGELOG.md`), and tagged:
 
 - URL/domain built-ins: `domainName()` and `url()` (spec 4.1), drawing on RFC 2606 reserved
   domains and RFC 6761 reserved TLDs (`.test`/`.example`/`.invalid`).

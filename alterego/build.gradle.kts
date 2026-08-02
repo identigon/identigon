@@ -7,8 +7,8 @@ plugins {
     id("jacoco")
 }
 
-group = "io.github.dconneely"
-version = "0.3.0-SNAPSHOT"
+group = "org.identigon"
+version = "0.3.0"
 
 java {
     toolchain {
@@ -124,11 +124,11 @@ publishing {
             pom {
                 name = "AlterEgo"
                 description = "A zero-dependency Java library for deterministic pseudonymisation."
-                url = "https://github.com/dconneely/lib-alterego"
+                url = "https://github.com/identigon/lib-alterego"
                 licenses {
                     license {
                         name = "MIT License"
-                        url = "https://github.com/dconneely/lib-alterego/blob/main/LICENCE"
+                        url = "https://github.com/identigon/lib-alterego/blob/main/LICENCE"
                     }
                 }
                 developers {
@@ -138,9 +138,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = "scm:git:https://github.com/dconneely/lib-alterego.git"
-                    developerConnection = "scm:git:https://github.com/dconneely/lib-alterego.git"
-                    url = "https://github.com/dconneely/lib-alterego"
+                    connection = "scm:git:https://github.com/identigon/lib-alterego.git"
+                    developerConnection = "scm:git:https://github.com/identigon/lib-alterego.git"
+                    url = "https://github.com/identigon/lib-alterego"
                 }
             }
         }

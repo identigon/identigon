@@ -1,5 +1,5 @@
 MIT License
-Source: root LICENCE file of this project (https://github.com/dconneely/lib-alterego/blob/main/LICENCE)
+Source: root LICENCE file of this project (https://github.com/identigon/lib-alterego/blob/main/LICENCE)
 Retrieved: 2026-07-27
 
 Copyright (c) 2026 David Conneely

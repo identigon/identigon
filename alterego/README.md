@@ -14,7 +14,7 @@ The first release, v0.1.0, is tagged on GitHub. See
 what's changed between versions.
 
 Every code sample below is compiled and run as part of the test suite
-(`src/test/java/io/github/dconneely/alterego/ReadmeExamplesTest.java`), so they cannot silently
+(`src/test/java/org/identigon/alterego/ReadmeExamplesTest.java`), so they cannot silently
 rot out of sync with the actual API.
 
 ## Quick start
