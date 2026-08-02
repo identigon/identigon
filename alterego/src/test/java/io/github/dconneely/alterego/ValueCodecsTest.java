@@ -96,7 +96,7 @@ class ValueCodecsTest {
     assertEquals("10", ValueCodecs.encode(val1, BigDecimal.class));
     assertEquals("10", ValueCodecs.encode(val2, BigDecimal.class));
     assertRoundTrip(new BigDecimal("10"), BigDecimal.class);
-    
+
     BigDecimal val3 = new BigDecimal("10.50");
     assertEquals("10.5", ValueCodecs.encode(val3, BigDecimal.class));
     assertRoundTrip(new BigDecimal("10.5"), BigDecimal.class);

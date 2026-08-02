@@ -69,7 +69,7 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
       if (lock == null) {
         throw new AlterEgoStoreException("File is already locked by another process: " + file);
       }
-      
+
       FileMappingStore store = new FileMappingStore(file, channel, lock);
       store.replay();
       return store;
@@ -98,7 +98,7 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
       channel.write(ByteBuffer.wrap(HEADER_BYTES));
       return;
     }
-    
+
     // Read whole file for replay. File footprint matches in-memory map footprint, so memory is sufficient.
     ByteBuffer buffer = ByteBuffer.allocate((int) size);
     while (buffer.hasRemaining()) {
@@ -106,10 +106,10 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
       if (read == -1) break;
     }
     buffer.flip();
-    
+
     byte[] bytes = new byte[buffer.remaining()];
     buffer.get(bytes);
-    
+
     int start = 0;
     int lineNum = 1;
     long validBytes = 0;
@@ -119,14 +119,14 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
       while (end < bytes.length && bytes[end] != '\n') {
         end++;
       }
-      
+
       if (end == bytes.length) {
         // Torn tail (no '\n')
         break; // Ignore and let validBytes truncate it on next write
       }
-      
+
       String line = new String(bytes, start, end - start, StandardCharsets.UTF_8);
-      
+
       if (lineNum == 1) {
         if (!HEADER.equals(line)) {
           throw new AlterEgoStoreException("Wrong header in file " + file + " at line 1: " + line);
@@ -145,7 +145,7 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
         } catch (IllegalArgumentException e) {
           throw new AlterEgoStoreException("Invalid base64 in file " + file + " at line " + lineNum, e);
         }
-        
+
         Namespace ns = namespace(namespaceName);
         if (ns.forward.containsKey(key)) {
           throw new AlterEgoStoreException("Duplicate key in file " + file + " at line " + lineNum + ": namespace=" + namespaceName);
@@ -153,12 +153,12 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
         ns.forward.put(key, value);
         ns.inverse.put(value, key);
       }
-      
+
       start = end + 1;
       validBytes = start;
       lineNum++;
     }
-    
+
     // Position channel exactly after the last valid newline so we overwrite any torn tail
     channel.truncate(validBytes);
     channel.position(validBytes);
@@ -185,7 +185,7 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
     checkNotClosed();
     Namespace ns = namespace(namespace);
     // Reuse namespace monitor, same as InMemoryMappingStore
-    synchronized (ns) { 
+    synchronized (ns) {
       String existing = ns.forward.get(key);
       if (existing != null) {
         return existing;
@@ -221,7 +221,7 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
     String encodedValue = Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8));
     String line = namespace + "\t" + encodedKey + "\t" + encodedValue + "\n";
     byte[] bytes = line.getBytes(StandardCharsets.UTF_8);
-    
+
     synchronized (writeMonitor) {
       checkNotClosed();
       try {

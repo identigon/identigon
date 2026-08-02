@@ -31,9 +31,24 @@ Landed on `main` (see `CHANGELOG.md`), not yet tagged:
   factory calls and transformation application on a closed instance throw (spec 2, "Lifecycle").
 - Schema-preserving `redact(Class<T>)` and full-length `mask(char)` (spec 4.7).
 
-## Known bugs
-
 - (None)
+
+## Code hygiene tooling
+
+Adopt the same minimal setup as `../lib-incognito` and `../play-bazlang` — keep the config identical
+across the repos. (Done in lib-incognito; mirror it here.)
+
+- [x] **Spotless (tidy-only)** — `importOrder`, `removeUnusedImports`, trailing-whitespace, EOF
+  newline; **no** `googleJavaFormat` (don't reflow the hand-maintained style). Wire `spotlessCheck`
+  into `check`; run `spotlessApply` once to normalise. Plugin `com.diffplug.spotless` 8.8.0.
+- [x] **pre-commit / prek** (`.pre-commit-config.yaml`) — `spotlessApply` + `compile` (local Gradle),
+  the native hygiene hooks (trailing-whitespace, end-of-file-fixer, check-yaml,
+  check-added-large-files), and **gitleaks** secret-scanning. Omit SpotBugs and tests (too slow for a
+  commit hook).
+- [x] **SpotBugs + find-sec-bugs** (CI, `ignoreFailures = false`) — the security-focused follow-up;
+  seed `config/spotbugs/exclude.xml` from the first run. Versions to match `../play-bazlang`: spotbugs
+  plugin 6.5.9, tool 4.9.8.
+- [x] Optional / consistency-only: PMD (bug-focused; prefer over Checkstyle) and JaCoCo.
 
 ## Deferred (not yet scheduled)
 
@@ -52,5 +67,3 @@ Landed on `main` (see `CHANGELOG.md`), not yet tagged:
   `SC770005`). Deferred until a reserved or never-issued range is found. Full analysis in
   `docs/fictional-ranges.md`. Note it has a regional element (`SC`/`NI`/plain) that would feed
   `UK_NATION` record coherence if it returns.
-
-

@@ -1,6 +1,5 @@
 package io.github.dconneely.alterego.strategy;
 
-import io.github.dconneely.alterego.JitterOptions;
 import io.github.dconneely.alterego.Randomness;
 import io.github.dconneely.alterego.Strategy;
 import io.github.dconneely.alterego.TransformationContext;

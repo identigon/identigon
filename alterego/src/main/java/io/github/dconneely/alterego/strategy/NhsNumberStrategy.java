@@ -18,7 +18,7 @@ public final class NhsNumberStrategy implements Strategy<String> {
     int[] digits = new int[9];
     digits[0] = 9; digits[1] = 9; digits[2] = 9;
     int c = -1;
-    
+
     while (true) {
       for (int i = 3; i < 9; i++) {
         digits[i] = random.digit() - '0';
@@ -31,14 +31,14 @@ public final class NhsNumberStrategy implements Strategy<String> {
       if (c == 11) c = 0;
       if (c != 10) break;
     }
-    
+
     StringBuilder sb = new StringBuilder(14);
     sb.append("999 ");
     for (int i = 3; i < 6; i++) sb.append(digits[i]);
     sb.append(' ');
     for (int i = 6; i < 9; i++) sb.append(digits[i]);
     sb.append(c);
-    
+
     return sb.toString();
   }
 }

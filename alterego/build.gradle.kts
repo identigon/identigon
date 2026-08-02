@@ -1,6 +1,10 @@
 plugins {
     `java-library`
     `maven-publish`
+    id("com.diffplug.spotless") version "8.8.0"
+    id("com.github.spotbugs") version "6.5.9"
+    id("pmd")
+    id("jacoco")
 }
 
 group = "io.github.dconneely"
@@ -13,6 +17,52 @@ java {
     // Maven Central requires both alongside the binary jar.
     withSourcesJar()
     withJavadocJar()
+}
+
+spotless {
+    java {
+        importOrder()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+spotbugs {
+    toolVersion = "4.9.8"
+    ignoreFailures = false
+}
+
+tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
+    excludeFilter.set(rootProject.file("config/spotbugs/exclude.xml"))
+    reports {
+        create("html") { required.set(true) }
+        create("xml") { required.set(true) }
+    }
+}
+
+tasks.named("check") {
+    dependsOn(tasks.withType<com.github.spotbugs.snom.SpotBugsTask>())
+    dependsOn(tasks.withType<JacocoReport>())
+}
+
+// PMD
+pmd {
+    toolVersion = "7.22.0"
+    isConsoleOutput = true
+    isIgnoreFailures = false
+    ruleSets = emptyList()
+    ruleSetFiles = rootProject.files("config/pmd/ruleset.xml")
+}
+
+// JaCoCo
+tasks.withType<JacocoReport>().configureEach {
+    dependsOn(tasks.withType<Test>())
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(true)
+    }
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -36,6 +86,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0")
 }
 
 tasks.test {

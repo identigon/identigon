@@ -161,6 +161,7 @@ final class VectorGenerator {
     return Derivation.deriveKey(REFERENCE_SALT, Derivation.PURPOSE_RANDOM, "vector-generator", seed, 0);
   }
 
+  @FunctionalInterface
   private interface CallSequence {
     List<Map<String, Object>> generate(Randomness rand);
   }

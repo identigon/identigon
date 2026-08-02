@@ -47,11 +47,11 @@ class IdentifierTest {
     AlterEgo eg = alterego();
     for (var factory : allIdentifiers()) {
       Transformation<String> t = factory.apply(eg);
-      
+
       String res1 = t.apply("alice");
       String res2 = t.apply("alice");
       assertEquals(res1, res2, "expected determinism");
-      
+
       String res3 = t.apply("bob");
       assertNotEquals(res1, res3, "expected distinct outputs for distinct inputs");
     }
@@ -62,13 +62,13 @@ class IdentifierTest {
     AlterEgo eg = alterego();
     for (var factory : allIdentifiers()) {
       Transformation<String> t = factory.apply(eg);
-      
+
       String emptyOutput = t.apply("");
       assertTrue(emptyOutput.length() > 0);
-      
+
       String nonAsciiOutput = t.apply("olé😀");
       assertTrue(nonAsciiOutput.length() > 0);
-      
+
       assertNotEquals(emptyOutput, nonAsciiOutput);
     }
   }
@@ -85,7 +85,7 @@ class IdentifierTest {
   void creditCardNumberWorksUnderNonGbLocales() {
     Transformation<String> usCard = alterego(Locale.US).creditCardNumber();
     assertTrue(usCard.apply("test").startsWith("0"));
-    
+
     Transformation<String> noCountryCard = alterego(Locale.ENGLISH).creditCardNumber();
     assertTrue(noCountryCard.apply("test").startsWith("0"));
   }
