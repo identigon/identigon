@@ -89,4 +89,21 @@ class IdentifierTest {
     Transformation<String> noCountryCard = alterego(Locale.ENGLISH).creditCardNumber();
     assertTrue(noCountryCard.apply("test").startsWith("0"));
   }
+
+  @Test
+  void drivingLicenceNumberDigitsAreAsciiRegardlessOfDefaultFormatLocale() {
+    // A default FORMAT locale with an explicit non-Latin numbering system makes
+    // String.format("%d", ...) render native digit glyphs unless the format call pins
+    // Locale.ROOT explicitly (CLAUDE.md hard invariant: no Locale.getDefault() dependence).
+    Locale original = Locale.getDefault(Locale.Category.FORMAT);
+    try {
+      Locale.setDefault(Locale.Category.FORMAT, Locale.forLanguageTag("ar-SA-u-nu-arab"));
+      String result = alterego().drivingLicenceNumber().apply("original");
+      assertTrue(
+          result.matches("^99999\\d{6}[A-Z]{2}9[A-Z]{2}$"),
+          "expected ASCII digits regardless of default locale, got: " + result);
+    } finally {
+      Locale.setDefault(Locale.Category.FORMAT, original);
+    }
+  }
 }

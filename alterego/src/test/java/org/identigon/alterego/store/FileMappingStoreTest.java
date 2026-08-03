@@ -92,6 +92,25 @@ class FileMappingStoreTest {
   }
 
   @Test
+  void tornHeaderIsRecoveredNotJustOverwrittenLater(@TempDir Path tempDir) throws IOException {
+    Path file = tempDir.resolve("store.txt");
+
+    // Simulate a crash mid-write of the very first header line: no trailing newline at all.
+    Files.write(file, "alterego-mapping-store".getBytes(StandardCharsets.UTF_8));
+
+    try (FileMappingStore store = FileMappingStore.open(file)) {
+      store.putIfAbsent("ns", "k1", "v1");
+    }
+    List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
+    assertEquals("alterego-mapping-store 1", lines.get(0));
+
+    // Reopening must not fail: the header was re-established, not left missing.
+    try (FileMappingStore store = FileMappingStore.open(file)) {
+      assertEquals("v1", store.get("ns", "k1").orElse(null));
+    }
+  }
+
+  @Test
   void corruptionThrowsOnOpen(@TempDir Path tempDir) throws IOException {
     Path file = tempDir.resolve("store.txt");
 

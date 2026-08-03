@@ -161,6 +161,11 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
     // Position channel exactly after the last valid newline so we overwrite any torn tail
     channel.truncate(validBytes);
     channel.position(validBytes);
+    if (validBytes == 0) {
+      // No complete line was recovered, so even the header line was torn (or the file was
+      // pure garbage). Re-establish the header, exactly as for a freshly-created empty file.
+      channel.write(ByteBuffer.wrap(HEADER_BYTES));
+    }
   }
 
   private Namespace namespace(String name) {

@@ -26,6 +26,8 @@ public final class InstantJitterStrategy implements Strategy<Instant> {
    * @return a new strategy
    */
   public static InstantJitterStrategy of(int days, int seconds) {
+    DateJitterStrategy.requireNonNegative(days, "days");
+    DateJitterStrategy.requireNonNegative(seconds, "seconds");
     return new InstantJitterStrategy(days, seconds);
   }
 

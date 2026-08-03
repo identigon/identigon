@@ -226,6 +226,12 @@ class TemporalJitterTest {
   }
 
   @Test
+  void shiftInstantRejectsNegativeDaysOrSeconds() {
+    assertThrows(AlterEgoConfigException.class, () -> alterego().shiftInstant(-1, 0));
+    assertThrows(AlterEgoConfigException.class, () -> alterego().shiftInstant(0, -1));
+  }
+
+  @Test
   void clampAppliesToShiftInstantToo() {
     JitterOptions<Instant> options = JitterOptions.minmax(INSTANT_MOMENT.minus(1, ChronoUnit.DAYS), INSTANT_MOMENT.plus(1, ChronoUnit.DAYS));
     Transformation<Instant> t = alterego().shiftInstant(365, 3600, options);
