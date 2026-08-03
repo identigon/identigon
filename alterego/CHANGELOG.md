@@ -22,6 +22,11 @@ entry in this file meaningful rather than just a feature list:
 
 ## [0.4.0] — (unreleased)
 
+### Fixed
+- `drivingLicenceNumber()` now formats its digits with `Locale.ROOT`, so output no longer depends on the JVM's default formatting locale. Under a default locale with a non-Latin numbering system the month/day digits could previously render as non-ASCII glyphs; reference-salt output (ASCII) is unchanged.
+- `FileMappingStore` now re-establishes its header when recovery truncates the file to empty. A crash while writing the initial header line previously left the store with no header, making it permanently unopenable on the next `open()`.
+- `shiftInstant()` now validates `days`/`seconds >= 0` at configuration time, throwing `AlterEgoConfigException` like `shiftDate()`/`shiftDateTime()`, instead of throwing a raw `IllegalArgumentException` lazily on first application.
+
 ## [0.3.0] — 2026-08-02
 
 ### Added

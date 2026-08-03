@@ -487,7 +487,8 @@ Inside a record scope, `city()`, `postcode()`, and `phoneNumber()` cohere via re
 |                  | preserved/mapped via options.                                              |
 | `phoneNumber()`  | Digits replaced, punctuation and grouping kept; output lands in the        |
 |                  | country's reserved fictional range by default (section 4.1);               |
-|                  | `PhoneOptions.realistic()` opts out.                                       |
+|                  | `PhoneOptions.realistic()` opts out;                                       |
+|                  | `PhoneOptions.includeNonGeographic()` adds non-geographic drama ranges.    |
 
 `emailAddress()` splits at the **last** `@`; input containing no `@` is treated as a bare local
 part and the output gains `@` plus the chosen reserved domain.

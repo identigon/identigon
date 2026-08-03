@@ -1,6 +1,7 @@
 plugins {
     `java-library`
     `maven-publish`
+    signing
     id("com.diffplug.spotless") version "8.8.0"
     id("com.github.spotbugs") version "6.5.9"
     id("pmd")
@@ -144,5 +145,20 @@ publishing {
                 }
             }
         }
+    }
+}
+
+// Maven Central requires every artifact to be PGP-signed. Signing activates only when a key is
+// supplied (an ASCII-armored key in SIGNING_KEY, optional passphrase in SIGNING_PASSWORD), so
+// local `build` and CI `build` runs — which have no key — are unaffected; a release job sets the
+// env vars from secrets. The remaining Central step (which staging endpoint/plugin to publish
+// through) is a deliberate, still-open decision, kept out of the build until it is made.
+signing {
+    val signingKey = providers.environmentVariable("SIGNING_KEY").orNull
+    val signingPassword = providers.environmentVariable("SIGNING_PASSWORD").orNull
+    isRequired = signingKey != null
+    if (signingKey != null) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign(publishing.publications["maven"])
     }
 }
