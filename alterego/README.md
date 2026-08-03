@@ -8,10 +8,9 @@ fictional-by-default output (reserved email domains, Ofcom drama phone numbers, 
 postcodes, obviously-fictional surnames and street names) so pseudonymised data never accidentally
 references something real.
 
-The first release, v0.1.0, is tagged on GitHub. See
-[`SPECIFICATION.md`](SPECIFICATION.md) for the full behavioural contract,
-[`PLAN.md`](PLAN.md) for the implementation milestones, and [`CHANGELOG.md`](CHANGELOG.md) for
-what's changed between versions.
+See [`SPECIFICATION.md`](SPECIFICATION.md) for the full behavioural contract,
+[`CHANGELOG.md`](CHANGELOG.md) for the release history and what's changed between versions, and
+[`PLAN.md`](PLAN.md) for the deferred backlog.
 
 Every code sample below is compiled and run as part of the test suite
 (`src/test/java/org/identigon/alterego/ReadmeExamplesTest.java`), so they cannot silently

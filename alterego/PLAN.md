@@ -3,39 +3,8 @@
 v0.1.0 (milestones M0 through M6) is complete and tagged.
 `SPECIFICATION.md` is the authoritative behavioural contract and `CHANGELOG.md` covers what
 shipped; the milestone-by-milestone build history that used to live in this file and in
-`docs/tasks/M<n>.md` is preserved in git history rather than duplicated here.
-
-## v0.2.0 (released)
-
-Two milestones, specified in `SPECIFICATION.md` and decided in ADRs 0011/0012 before
-implementation:
-
-- **M7 — file-backed mapping store**: `FileMappingStore` (spec 5.4, ADR 0011), making
-  `stored()`/`unique()`'s cross-run stability achievable out of the box.
-- **M8 — identifier built-ins**: `nhsNumber()`, `nationalInsuranceNumber()`,
-  `drivingLicenceNumber()`, `passportNumber()`, `creditCardNumber()` (spec 4.8, algorithms
-  A.5-A.9, ADR 0012), each shape/checksum-valid inside a pinned fictional value space.
-
-## v0.4.0 (in progress)
-
-Landed on `main` (see `CHANGELOG.md`), not yet tagged:
-
-- (None)
-
-## v0.3.0 (released)
-
-Landed on `main` (see `CHANGELOG.md`), and tagged:
-
-- URL/domain built-ins: `domainName()` and `url()` (spec 4.1), drawing on RFC 2606 reserved
-  domains and RFC 6761 reserved TLDs (`.test`/`.example`/`.invalid`).
-- `Instant` jitter: `shiftInstant(...)` (spec 4.5), completing the `shiftDate`/`shiftDateTime`
-  family for the already-supported `Instant` value type.
-- Non-geographic phone ranges behind `PhoneOptions.includeNonGeographic()` (spec 4.1) — the
-  Ofcom freephone/premium-rate/UK-wide drama ranges, excluded from the default pool.
-- Extra canonical value types: `LocalTime`, `YearMonth`, `BigDecimal` (spec 2.6).
-- Salt lifecycle: `AlterEgo` is `AutoCloseable`; `close()`/`destroy()` zero the salt, and both
-  factory calls and transformation application on a closed instance throw (spec 2, "Lifecycle").
-- Schema-preserving `redact(Class<T>)` and full-length `mask(char)` (spec 4.7).
+`docs/tasks/M<n>.md` is preserved in git history rather than duplicated here. Released and
+in-progress versions live in `CHANGELOG.md`; this file tracks only the forward-looking backlog.
 
 ## Deferred (not yet scheduled)
 
