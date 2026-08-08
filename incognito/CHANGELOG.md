@@ -57,9 +57,10 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
   destruction; `VerificationStage` (referential integrity, e-mail fictionality, per-period volume
   tolerances, the default-on misdeclaration lint, and a source-value survival net);
   `AnonymisationReportBuilder` (with the §7.2 opaque-type passthrough audit) and a
-  `DpiaArtifactEmitter` that writes JSON, HTML, or Markdown.
+  `DpiaArtefactEmitter` that writes JSON, HTML, or Markdown.
 - **lib-alterego 0.3.0 adoption:** **type-aware redaction** — `CONSTANT`/`MASK` now delegate to
-  `AlterEgo.redact(Class<T>)`/`constant`/`mask`, so numeric, temporal, boolean and opaque `SENSITIVE`
+  `AlterEgo.redact(Class<T>)`/`constant`/`mask`, so numeric, temporal, boolean and opaque
+  `SENSITIVE`
   columns get a type-appropriate constant instead of failing at insert; **salt destruction** — the
   `AlterEgo` instance's internal salt clone is now zeroed on completion via `AlterEgo.close()`, not
   just Incognito's own copy; and **`TIMESTAMP`/`LocalDateTime` quasi-identifier `SYNTHESISE`** (a
@@ -77,12 +78,12 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
 ### Fixed
 
 - **Enum / user-type passthrough.** A kept (`PAYLOAD`) column of a PostgreSQL `enum` or other
-  user-defined type failed on re-insert — the read `String` was bound as `varchar`, so any table with
-  an enum column (e.g. Pagila's `film.rating`) could not be cloned. `String` values now bind as
+  user-defined type failed on re-insert — the read `String` was bound as `varchar`, so any table
+  with an enum column (e.g. Pagila's `film.rating`) could not be cloned. `String` values now bind as
   `Types.OTHER` so PostgreSQL casts them to the column's actual type (enum, `tsvector`, `uuid`, …).
-- `JITTER_DAYS` no longer raises spurious per-period volume-drift *warnings*: because a ±N-day jitter
-  crosses month boundaries, the verification volume check now buckets it **yearly** (not monthly),
-  where a day-window barely leaks. Cosmetic — it never failed the run.
+- `JITTER_DAYS` no longer raises spurious per-period volume-drift *warnings*: because a ±N-day
+  jitter crosses month boundaries, the verification volume check now buckets it **yearly** (not
+  monthly), where a day-window barely leaks. Cosmetic — it never failed the run.
 
 ### Known gaps (tracked in PLAN.md)
 

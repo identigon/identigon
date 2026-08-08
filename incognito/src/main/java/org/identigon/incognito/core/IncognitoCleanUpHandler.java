@@ -17,7 +17,7 @@ import org.identigon.incognito.engine.TableDependencyGraph;
 /**
  * Compensating transaction handler. When a pipeline fails mid-execution, this handler
  * ensures that the target database is left in a safe, consistent state (triggers/FKs enabled,
- * sequences resynchronized, partially loaded data truncated).
+ * sequences resynchronised, partially loaded data truncated).
  */
 public final class IncognitoCleanUpHandler {
 

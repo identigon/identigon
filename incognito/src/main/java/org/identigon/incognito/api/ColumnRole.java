@@ -1,7 +1,7 @@
 package org.identigon.incognito.api;
 
 /**
- * Categorization taxonomy for columns in relational database tables processed by Incognito.
+ * Categorisation taxonomy for columns in relational database tables processed by Incognito.
  */
 public enum ColumnRole {
     /** Primary key column translated to a synthetic surrogate key. */

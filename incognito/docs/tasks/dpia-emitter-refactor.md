@@ -1,10 +1,10 @@
-# Task: refactor DpiaArtifactEmitter (JsonWriter + text blocks)
+# Task: refactor DpiaArtefactEmitter (JsonWriter + text blocks)
 
 Status: not started (build-time handoff; delete this file once implemented and green)
 
 ## 1. Goal
 
-`src/main/java/org/identigon/incognito/core/DpiaArtifactEmitter.java` serialises an
+`src/main/java/org/identigon/incognito/core/DpiaArtefactEmitter.java` serialises an
 `AnonymisationReport` to three formats by hand-concatenating strings. The JSON path is the fragile
 one: it tracks commas with `(i == 0 ? "" : ", ")`, opens/closes braces by hand, and the unit test
 resorts to asserting `count('{') == count('}')` because nothing else guarantees the braces balance.
@@ -26,7 +26,7 @@ public API, no new fields, and no new formats.
    `JsonWriter` is a package-private class in `org.identigon.incognito.core`, ~60 lines,
    `StringBuilder`-backed.
 2. **The existing test is the safety net.**
-   `src/test/java/org/identigon/incognito/core/DpiaArtifactEmitterTest.java` asserts substrings
+   `src/test/java/org/identigon/incognito/core/DpiaArtefactEmitterTest.java` asserts substrings
    across all three formats. It must stay **green without weakening its assertions**. That means the
    JSON token style must stay `"key": value` (colon-space) and `, ` (comma-space) between items —
    see §3 — so assertions like `"saltMode": "EPHEMERAL"` and `"childColumns": ["customer_id"]` keep
@@ -55,7 +55,7 @@ import java.util.Deque;
  * Minimal, dependency-free JSON serialiser for the DPIA artifact. Owns comma placement, brace/bracket
  * nesting, and string escaping so the emitted JSON cannot be structurally malformed. Compact
  * single-line output with a readable {@code "key": value} / {@code , } token style. Not general
- * purpose — it supports exactly the shapes {@link DpiaArtifactEmitter} needs.
+ * purpose — it supports exactly the shapes {@link DpiaArtefactEmitter} needs.
  */
 final class JsonWriter {
 
@@ -129,7 +129,7 @@ empty object `{}`; a flat object with the `"k": v` and `, ` token style; a neste
 an empty array `[]`; escaping of `"`, `\`, newline, and a control char; a `null` string value. These
 lock the writer's contract independently of the emitter.
 
-**Verify:** `./gradlew test --tests "*JsonWriterTest" --tests "*DpiaArtifactEmitterTest"` green with
+**Verify:** `./gradlew test --tests "*JsonWriterTest" --tests "*DpiaArtefactEmitterTest"` green with
 the emitter test's assertions unchanged. (Compact single-line JSON is expected and fine — JSON
 whitespace is insignificant, and a governance system ingesting the file does not care. Do **not**
 add pretty-print indentation just to match the old newlines; the test does not assert on them.)
@@ -181,7 +181,7 @@ aside. After each part, regenerate and `diff` — the only expected differences 
 (Part A) and none at all for HTML/Markdown content.
 
 **Done when:** `./gradlew build` is green (compile, all tests, and the strict `Xdoclint:all` javadoc
-gate — `JsonWriter` needs its class comment); `DpiaArtifactEmitterTest` passes with unchanged
+gate — `JsonWriter` needs its class comment); `DpiaArtefactEmitterTest` passes with unchanged
 assertions; `build.gradle` has no new dependency; `jsonStr` is gone; and `htmlEscape`/`saltModeNote`
 are untouched.
 
@@ -209,7 +209,7 @@ Do this only after the §§3–6 refactor is merged and green. Steps, in order:
 `AnonymisationReport.ColumnAction` (`api` package) — the 3 sample values for that column, in row
 order — with a Javadoc `@param` (the doclint gate requires it). Update the `ColumnAction` line in
 the SPEC §7 schema block to match. The compiler then points you at the two call sites to fix:
-`AnonymisationReportBuilder` (Step 2) and `DpiaArtifactEmitterTest` (Step 4). (Storing the samples
+`AnonymisationReportBuilder` (Step 2) and `DpiaArtefactEmitterTest` (Step 4). (Storing the samples
 per column keeps generation simple; the emitters transpose columns×samples into rows in Step 3.)
 
 **Step 2 — generate them in `AnonymisationReportBuilder`.** Add the two helpers below. Build **one**
@@ -323,7 +323,7 @@ per column. Render only when the table has columns and non-empty `examples`.
   not this run's rows.*`, then a table whose header is the column names, a `|---|` separator with
   one cell per column, and 3 rows built the same way (`ca.examples().get(i)` per column).
 
-**Step 4 — tests + DoD.** Update `DpiaArtifactEmitterTest.sampleReport()`'s three `ColumnAction`
+**Step 4 — tests + DoD.** Update `DpiaArtefactEmitterTest.sampleReport()`'s three `ColumnAction`
 constructions to pass a 3-element list (e.g. `List.of("a@example.com", "b@example.com",
 "c@example.com")`, `List.of("‹kept›", "‹kept›", "‹kept›")`, …); add one assertion per format that
 the "Sample rows"/"Sample Rows" table (or JSON `"examples"`) renders. Existing assertions keep

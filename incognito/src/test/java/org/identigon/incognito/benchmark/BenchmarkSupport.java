@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.DataSource;
 import org.identigon.incognito.api.AnonymisationReport;
-import org.identigon.incognito.core.DpiaArtifactEmitter;
+import org.identigon.incognito.core.DpiaArtefactEmitter;
 import org.identigon.incognito.policy.AnonymisationPolicy;
 import org.identigon.incognito.policy.YamlPolicyParser;
 import org.junit.jupiter.api.Assumptions;
@@ -130,9 +130,9 @@ final class BenchmarkSupport {
     }
 
     /**
-     * Demonstrates the DPIA artifact-emission path (opt-in per the library's design; see PLAN.md)
+     * Demonstrates the DPIA artefact-emission path (opt-in per the library's design; see PLAN.md)
      * against a real, full-scale report from an actual pipeline run — not just the synthetic
-     * single-table sample in {@code DpiaArtifactEmitterTest}. Writes JSON, HTML and Markdown under
+     * single-table sample in {@code DpiaArtefactEmitterTest}. Writes JSON, HTML and Markdown under
      * {@code build/dpia-reports/<benchmarkName>/} and asserts each file was actually written.
      *
      * @param report the pipeline's typed accountability report
@@ -144,9 +144,9 @@ final class BenchmarkSupport {
         Path jsonReport = dir.resolve("report.json");
         Path htmlReport = dir.resolve("report.html");
         Path mdReport = dir.resolve("report.md");
-        DpiaArtifactEmitter.emitJson(report, jsonReport);
-        DpiaArtifactEmitter.emitHtml(report, htmlReport);
-        DpiaArtifactEmitter.emitMarkdown(report, mdReport);
+        DpiaArtefactEmitter.emitJson(report, jsonReport);
+        DpiaArtefactEmitter.emitHtml(report, htmlReport);
+        DpiaArtefactEmitter.emitMarkdown(report, mdReport);
         assertTrue(Files.size(jsonReport) > 0, "DPIA JSON report must be written");
         assertTrue(Files.size(htmlReport) > 0, "DPIA HTML report must be written");
         assertTrue(Files.size(mdReport) > 0, "DPIA Markdown report must be written");

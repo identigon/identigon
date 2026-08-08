@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * Handles database dialect-specific load mechanics, such as trigger isolation,
- * batch rewriting, insert syntax, and sequence resynchronization.
+ * batch rewriting, insert syntax, and sequence resynchronisation.
  */
 public interface DialectHandler {
 
@@ -39,7 +39,7 @@ public interface DialectHandler {
     void postLoadTable(Connection targetConn, String tableName) throws SQLException;
 
     /**
-     * Resynchronizes the sequence for a table's primary key after data has been loaded.
+     * Resynchronises the sequence for a table's primary key after data has been loaded.
      *
      * @param targetConn the target connection
      * @param tableName  the loaded table

@@ -9,19 +9,19 @@ import org.identigon.incognito.api.IncognitoException;
 import org.identigon.incognito.api.PipelineStage;
 
 /**
- * Serializes the {@link AnonymisationReport} to a DPIA artifact. Three formats are offered
+ * Serialises the {@link AnonymisationReport} to a DPIA artefact. Three formats are offered
  * (SPEC §7 / PLAN Phase 6): machine-readable {@link #emitJson JSON}, presentation-ready
- * {@link #emitHtml HTML}, and human-diffable {@link #emitMarkdown Markdown}. All are zero-dependency
- * (no JSON/HTML library) so the core stays dependency-lean.
+ * {@link #emitHtml HTML}, and human-diffable {@link #emitMarkdown Markdown}. All are
+ * zero-dependency (no JSON/HTML library) so the core stays dependency-lean.
  *
- * <p>This is <b>opt-in</b>: the pipeline always builds the {@link AnonymisationReport} (available from
- * {@code PipelineResult.report()}), but it never writes a file automatically. A caller that wants a
- * persisted DPIA artifact invokes one of these methods with that report — e.g.
- * {@code DpiaArtifactEmitter.emitJson(result.report(), path)}.
+ * <p>This is <b>opt-in</b>: the pipeline always builds the {@link AnonymisationReport} (available
+ * from {@code PipelineResult.report()}), but it never writes a file automatically. A caller that
+ * wants a persisted DPIA artefact invokes one of these methods with that report — e.g.
+ * {@code DpiaArtefactEmitter.emitJson(result.report(), path)}.
  */
-public final class DpiaArtifactEmitter {
+public final class DpiaArtefactEmitter {
 
-    private DpiaArtifactEmitter() {}
+    private DpiaArtefactEmitter() {}
 
     // --- JSON ---------------------------------------------------------------------------------
 

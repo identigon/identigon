@@ -28,7 +28,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * Views and materialized views must be excluded from discovery (SPEC §7.2) — Pagila has both.
+ * Views and materialised views must be excluded from discovery (SPEC §7.2) — Pagila has both.
  * {@code SchemaInspector} filters {@code getTables} to type {@code TABLE}; this proves a plain
  * {@code VIEW} and a {@code MATERIALIZED VIEW} are neither classified, loaded, nor reported.
  * Requires Docker; skips gracefully otherwise.

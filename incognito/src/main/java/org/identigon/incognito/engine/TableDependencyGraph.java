@@ -116,11 +116,11 @@ public class TableDependencyGraph {
                 }
             }
 
-            for (int neighborComp : condensedAdj.get(compId)) {
-                int newDegree = inDegree.get(neighborComp) - 1;
-                inDegree.put(neighborComp, newDegree);
+            for (int neighbourComp : condensedAdj.get(compId)) {
+                int newDegree = inDegree.get(neighbourComp) - 1;
+                inDegree.put(neighbourComp, newDegree);
                 if (newDegree == 0) {
-                    queue.add(neighborComp);
+                    queue.add(neighbourComp);
                 }
             }
         }

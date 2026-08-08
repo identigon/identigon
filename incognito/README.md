@@ -8,7 +8,10 @@ identifiers and quasi-identifiers are *fabricated*, not generalised or suppresse
 fabrication engine, **not** a k-anonymity / l-diversity / t-closeness implementation (those are
 explicit non-goals — see [ADR 0001](docs/adr/0001-fabrication-not-k-anonymity.md)).
 
-> **In one sentence:** *"I have a great production database and I want a test environment with similar data volumes and similar relationships between entities, but with no danger of leaking PII — a cloned database where the PII has been anonymised, and obviously anonymised, using clearly fictional data."*
+> **In one sentence:** *"I have a great production database and I want a test environment with
+> similar data volumes and similar relationships between entities, but with no danger of leaking
+> PII — a cloned database where the PII has been anonymised, and obviously anonymised, using
+> clearly fictional data."*
 
 See [`SPECIFICATION.md`](SPECIFICATION.md) for the full behavioural contract, [`PLAN.md`](PLAN.md)
 for the implementation phases, [`docs/adr/`](docs/adr/) for the key design decisions and why they
@@ -19,16 +22,16 @@ were made, and [`CHANGELOG.md`](CHANGELOG.md) for what has changed between versi
 Incognito delegates all **field-value** transformation to its sibling library
 [`lib-alterego`](../lib-alterego) and owns everything relational on top:
 
-| | `lib-alterego` | Incognito |
-| :--- | :--- | :--- |
-| **Scope** | one value, or the fields of one record | a whole relational database |
-| **Job** | fabricate a replacement value (name, e-mail, date shift, …), deterministic in `(salt, domain, value)` | clone a schema and load it while keeping every cross-row / cross-table invariant intact |
-| **Knows about** | values and formats | tables, primary/foreign keys, load order, triggers, sequences, DPIA reporting |
+|                 | `lib-alterego`                                                                                        | Incognito                                                                               |
+|:----------------|:------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|
+| **Scope**       | one value, or the fields of one record                                                                | a whole relational database                                                             |
+| **Job**         | fabricate a replacement value (name, e-mail, date shift, …), deterministic in `(salt, domain, value)` | clone a schema and load it while keeping every cross-row / cross-table invariant intact |
+| **Knows about** | values and formats                                                                                    | tables, primary/foreign keys, load order, triggers, sequences, DPIA reporting           |
 
-The boundary is simply: **Alterego fabricates fields; Incognito preserves relationships**
+The boundary is simply: **AlterEgo fabricates fields; Incognito preserves relationships**
 ([ADR 0002](docs/adr/0002-two-libraries-two-responsibilities.md)). Incognito never implements its
-own value substitution — where it needs a transformation Alterego does not yet expose, the fix is
-to add it to Alterego, not to hand-roll it.
+own value substitution — where it needs a transformation AlterEgo does not yet expose, the fix is to
+add it to AlterEgo, not to hand-roll it.
 
 ## Quick start
 
@@ -36,20 +39,20 @@ to add it to Alterego, not to hand-roll it.
 byte[] ignored; // Incognito owns the secret salt internally and destroys it on completion.
 
 AnonymisationPolicy policy = AnonymisationPolicy.builder()
-    .table("customers", t -> t
-        .column("id",    ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
-        .column("email", ColumnRole.DIRECT_ID,   DirectIdStrategy.ALTEREGO_EMAIL)
-        .column("dob",   ColumnRole.QUASI_ID,    QuasiIdStrategy.SYNTHESISE)
-        .column("status", ColumnRole.PAYLOAD))            // operational data — kept real
-    .build();
+        .table("customers", t -> t
+                .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
+                .column("email", ColumnRole.DIRECT_ID, DirectIdStrategy.ALTEREGO_EMAIL)
+                .column("dob", ColumnRole.QUASI_ID, QuasiIdStrategy.SYNTHESISE)
+                .column("status", ColumnRole.PAYLOAD))            // operational data — kept real
+        .build();
 
 PipelineResult result = IncognitoPipeline.builder()
-    .source(productionDataSource)   // read-only
-    .target(testDataSource)         // schema-identical, empty
-    .ephemeralSalt()                // >= 128-bit, generated per run, destroyed on completion
-    .policy(policy)
-    .build()                        // default stages (discover, transform+load, verify) auto-assembled
-    .execute();
+        .source(productionDataSource)   // read-only
+        .target(testDataSource)         // schema-identical, empty
+        .ephemeralSalt()                // >= 128-bit, generated per run, destroyed on completion
+        .policy(policy)
+        .build()                        // default stages (discover, transform+load, verify) auto-assembled
+        .execute();
 ```
 
 `execute()` streams every table in topological order, fabricates the classified columns, translates
@@ -67,31 +70,36 @@ autoInfer: false          # fail-closed: every column must be classified explici
 tables:
   customers:
     columns:
-      id:     { role: PRIMARY_KEY, surrogateStrategy: SEQUENTIAL_LONG }
-      email:  { role: DIRECT_ID,   directIdStrategy: ALTEREGO_EMAIL }
-      dob:    { role: QUASI_ID,    quasiIdStrategy: SYNTHESISE }
+      id: { role: PRIMARY_KEY, surrogateStrategy: SEQUENTIAL_LONG }
+      email: { role: DIRECT_ID,   directIdStrategy: ALTEREGO_EMAIL }
+      dob: { role: QUASI_ID,    quasiIdStrategy: SYNTHESISE }
       status: { role: PAYLOAD }   # operational data — kept real
 ```
 
 ```java
 AnonymisationPolicy policy;
-try (var in = Files.newInputStream(Path.of("incognito-policy.yaml"))) {
-    policy = new YamlPolicyParser().parse(in);
+try(
+var in = Files.newInputStream(Path.of("incognito-policy.yaml"))){
+policy =new
+
+YamlPolicyParser().
+
+parse(in);
 }
 ```
 
 Every field of the Java builder has a key (`role`, `surrogateStrategy`, `directIdStrategy`,
-`quasiIdStrategy`, `distinguishing`, `jitterDays`, `references`, `derivedFrom`, `coherenceGroup`, …).
-All five benchmark end-to-end tests drive the pipeline from a `policy.yaml` resource, so the YAML
-path is exercised against every real-schema scenario (composite and self-referential keys, opaque
-column types, table omission).
+`quasiIdStrategy`, `distinguishing`, `jitterDays`, `references`, `derivedFrom`,
+`coherenceGroup`, …). All five benchmark end-to-end tests drive the pipeline from a `policy.yaml`
+resource, so the YAML path is exercised against every real-schema scenario (composite and
+self-referential keys, opaque column types, table omission).
 
 ## How it works
 
-Every fabricated value is a deterministic function of a per-run secret salt, a domain, and the
-input value — via Alterego's HMAC-SHA256 keyed generation. Direct identifiers and quasi-identifiers
-are replaced with fictional values (RFC 2606 reserved e-mail domains, wide date jitter, and so on),
-so a clone can never accidentally reference a real mailbox or single out a real person. Because
+Every fabricated value is a deterministic function of a per-run secret salt, a domain, and the input
+value — via AlterEgo's HMAC-SHA256 keyed generation. Direct identifiers and quasi-identifiers are
+replaced with fictional values (RFC 2606 reserved e-mail domains, wide date jitter, and so on), so a
+clone can never accidentally reference a real mailbox or single out a real person. Because
 identifiers are fabricated, **operational data can be kept real** for realistic testing, and a
 **low-cardinality sensitive flag can be kept real** too — once a row cannot be tied to a person, a
 boolean discloses nothing about anyone.

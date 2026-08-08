@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /** Unit coverage for the three DPIA output formats (no database needed). */
-class DpiaArtifactEmitterTest {
+class DpiaArtefactEmitterTest {
 
     private static AnonymisationReport sampleReport() {
         var columns = List.of(
@@ -46,7 +46,7 @@ class DpiaArtifactEmitterTest {
     @Test
     void emitsJson(@TempDir Path dir) throws Exception {
         Path out = dir.resolve("report.json");
-        DpiaArtifactEmitter.emitJson(sampleReport(), out);
+        DpiaArtefactEmitter.emitJson(sampleReport(), out);
         String json = Files.readString(out);
 
         assertTrue(json.contains("\"table\": \"customers\""), "table name present");
@@ -72,7 +72,7 @@ class DpiaArtifactEmitterTest {
     @Test
     void emitsHtml(@TempDir Path dir) throws Exception {
         Path out = dir.resolve("report.html");
-        DpiaArtifactEmitter.emitHtml(sampleReport(), out);
+        DpiaArtefactEmitter.emitHtml(sampleReport(), out);
         String html = Files.readString(out);
 
         assertTrue(html.startsWith("<!doctype html>"), "is an HTML document");
@@ -93,7 +93,7 @@ class DpiaArtifactEmitterTest {
     @Test
     void emitsMarkdown(@TempDir Path dir) throws Exception {
         Path out = dir.resolve("report.md");
-        DpiaArtifactEmitter.emitMarkdown(sampleReport(), out);
+        DpiaArtefactEmitter.emitMarkdown(sampleReport(), out);
         String md = Files.readString(out);
 
         assertTrue(md.contains("# Incognito Anonymisation Report"), "has a title");
