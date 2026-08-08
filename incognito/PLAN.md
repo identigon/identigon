@@ -99,7 +99,7 @@ first: `cd ../lib-alterego && ./gradlew publishToMavenLocal`. (Bump the version 
           composite FK is now *caught*, not missed.
         - [ ] Remaining sub-deferral: **composite PK + cyclic FK** together (the Pass-2 `UPDATE`
           keys on one column) — fail-closed with a clear message rather than corrupt; not in the
-          benchmarks.
+          benchmarks. Implementation handoff: `docs/tasks/composite-pk-cyclic-fk.md`.
         - [x] `CompositeKeyE2ETest` — a composite-PK join table (`authorship`, the `film_actor`
           shape)
           **and** a genuine composite FK (`chapter → authorship`); asserts single- and composite-FK
@@ -224,8 +224,14 @@ first: `cd ../lib-alterego && ./gradlew publishToMavenLocal`. (Bump the version 
     - Remaining, deliberately out of scope here: Appendix B's `SYNTHESISE`-by-type routing (a
       postcode-shaped `QUASI_ID` VARCHAR still falls through to shape-preserving fabrication) is a
       **separate, still-unimplemented** gap — no type-based routing exists at all yet. Same
-      underlying weakness class as this `DIRECT_ID` gap was, but a distinct fix, not addressed by
-      this item.
+      underlying weakness class as this `DIRECT_ID` gap was, but a distinct fix, tracked below.
+- [ ] **`SYNTHESISE`-by-type routing (SPEC Appendix B).** Today the `SYNTHESISE` branch shifts
+  temporal values and shape-preserves everything else — so a postcode/city/state `QUASI_ID` VARCHAR
+  gets a scramble instead of a guaranteed-fictional value (affects live Chinook/Northwind `city`/
+  `region`/`state` columns), and a numeric `QUASI_ID SYNTHESISE` is shape-fabricated instead of
+  failing closed as Appendix B mandates. Fix: author-declared typed routing (reuse
+  `directIdStrategy` as a `SYNTHESISE` hint) plus a fail-closed abort for unmapped types. Handoff:
+  `docs/tasks/synthesise-by-type.md`.
 
 ---
 
