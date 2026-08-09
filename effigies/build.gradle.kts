@@ -1,0 +1,113 @@
+plugins {
+    application
+    // Minimal code hygiene, kept in step with the sibling repos (../lib-incognito, ../lib-alterego).
+    // Tidy-only (no googleJavaFormat) so it does not reflow the hand-maintained style.
+    id("com.diffplug.spotless") version "8.8.0"
+    id("com.github.spotbugs") version "6.5.9"
+}
+
+group = "org.identigon"
+version = "0.1.0-SNAPSHOT"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+application {
+    // The CLI entry point. Effigies is a thin authoring/orchestration front-end above lib-incognito;
+    // see ADR 0001 and SPECIFICATION.md for the boundary.
+    mainClass = "org.identigon.effigies.EffigiesCli"
+}
+
+// Light, non-reflowing hygiene: tidy imports/whitespace only, never a full reformat (which would
+// fight the hand-maintained style). `spotlessCheck` runs as part of `check`; `spotlessApply` fixes.
+spotless {
+    java {
+        target("src/**/*.java")
+        importOrder()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+repositories {
+    mavenCentral()
+    // lib-incognito (and, transitively, lib-alterego) are consumed as local -SNAPSHOTs until they are
+    // published to a shared repository — build them first with `publishToMavenLocal` (see PLAN.md
+    // "Build prerequisite").
+    mavenLocal()
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+}
+
+dependencies {
+    // The orchestration engine. Effigies depends ONLY on lib-incognito (lib-alterego arrives
+    // transitively and is not called directly). Pinned to the current published version; it moves to
+    // 2.0.x once lib-incognito 2.0 lands (which removes the inference that migrates here — ADR 0001).
+    implementation("org.identigon:incognito:1.1.0-SNAPSHOT")
+
+    // Reads/writes the declarative policy YAML that lib-incognito consumes.
+    implementation("org.yaml:snakeyaml:2.2")
+
+    // Testing dependencies
+    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher") // required by the Gradle 9.x test runner
+
+    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0")
+}
+
+tasks.test {
+    useJUnitPlatform {
+        includeEngines("junit-jupiter")
+    }
+    testLogging {
+        events("passed", "skipped", "failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+}
+
+// A single runnable ("fat") jar so the tool runs with a bare `java -jar build/libs/app-effigies.jar`
+// — the runtime classpath (lib-incognito, lib-alterego, snakeyaml, JDBC drivers) is bundled in. No
+// shadow plugin needed; plain Gradle assembles it. Signature files from signed dependency jars are
+// dropped, as they would otherwise invalidate the merged jar.
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = application.mainClass.get()
+        attributes["Implementation-Title"] = "Effigies"
+        attributes["Implementation-Version"] = project.version.toString()
+    }
+    from({
+        configurations.runtimeClasspath.get()
+            .filter { it.name.endsWith(".jar") }
+            .map { zipTree(it) }
+    })
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "META-INF/*.kotlin_module")
+    // The LICENCE travels inside the artifact — most consumers receive only the jar, never the repo.
+    from(rootProject.file("LICENCE")) {
+        into("META-INF")
+    }
+}
+
+spotbugs {
+    toolVersion = "4.9.8"
+    ignoreFailures = false
+    excludeFilter = file("config/spotbugs/exclude.xml")
+}
+
+tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
+    reports {
+        create("html") {
+            required = true
+        }
+        create("xml") {
+            required = false
+        }
+    }
+}

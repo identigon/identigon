@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out app-effigies
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: app-effigies
+
+      # app-effigies depends on org.identigon:incognito, which depends on org.identigon:alterego.
+      # Neither is published to a public repository yet, so both are built into the local Maven repo
+      # first, upstream-first (alterego, then incognito). Adjust the repositories/refs if they move.
+      - name: Check out lib-alterego (transitive local SNAPSHOT dependency)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: identigon/lib-alterego
+          ref: v0.3.0
+          path: lib-alterego
+
+      - name: Check out lib-incognito (local SNAPSHOT dependency)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: identigon/lib-incognito
+          ref: main
+          path: lib-incognito
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Publish lib-alterego to Maven local
+        run: ./gradlew --no-daemon publishToMavenLocal
+        working-directory: lib-alterego
+
+      - name: Publish lib-incognito to Maven local
+        run: ./gradlew --no-daemon publishToMavenLocal
+        working-directory: lib-incognito
+
+      - name: Build app-effigies
+        run: ./gradlew --no-daemon build
+        working-directory: app-effigies
