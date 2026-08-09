@@ -97,9 +97,14 @@ first: `cd ../lib-alterego && ./gradlew publishToMavenLocal`. (Bump the version 
           Single-column FKs keep the simple path.
         - [x] `VerificationStage` checks each FK as a whole tuple (composite-aware), so a broken
           composite FK is now *caught*, not missed.
-        - [ ] Remaining sub-deferral: **composite PK + cyclic FK** together (the Pass-2 `UPDATE`
-          keys on one column) — fail-closed with a clear message rather than corrupt; not in the
-          benchmarks. Implementation handoff: `docs/tasks/composite-pk-cyclic-fk.md`.
+        - [ ] Remaining sub-deferral: **composite PK + cyclic FK** together — fail-closed with a
+          clear message rather than corrupt; not in the benchmarks. Investigated 2026-08-09: bigger
+          than "widen the Pass-2 `UPDATE` to key on every PK column". A composite-PK table can only
+          be *in* a cycle if a **composite FK references it**, which hits the separate
+          composite-FK-into-cyclic guard first — so the real work is **deferred composite-FK
+          resolution into a cyclic table** (defer + per-child-column placeholders + Pass-2 composite
+          resolution), with the composite-PK `UPDATE`-keying riding along. Corrected handoff:
+          `docs/tasks/composite-pk-cyclic-fk.md`.
         - [x] `CompositeKeyE2ETest` — a composite-PK join table (`authorship`, the `film_actor`
           shape)
           **and** a genuine composite FK (`chapter → authorship`); asserts single- and composite-FK
