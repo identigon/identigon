@@ -54,30 +54,37 @@ lib-incognito 2.0 lands (which removes the inference migrating here — see Phas
 
 ## Phase 3: Inference (migrated from lib-incognito)
 
-- [ ] Move the role-inference heuristics (`PolicyInferrer` and the `autoInfer` concept) out of
+- [x] Move the role-inference heuristics (`PolicyInferrer` and the `autoInfer` concept) out of
   lib-incognito into Effigies — inference is authoring, and because lib-incognito is fail-closed it
   never affected execution, so the move is behaviour-neutral for the engine (ADR 0001). This pairs
   with lib-incognito's 2.0 removal of that API.
-- [ ] Pre-fill the scaffold's suggestions, **clearly marked as suggestions**, never auto-applied.
+- [x] Pre-fill the scaffold's suggestions, **clearly marked as suggestions**, never auto-applied.
 
 ## Phase 4: Orchestration (`run`)
 
-- [ ] Given a finished `policy.yaml` plus source/target connection details, drive lib-incognito
+- [x] Given a finished `policy.yaml` plus source/target connection details, drive lib-incognito
   (`YamlPolicyParser` → `IncognitoPipeline`) to produce the clone, and surface the DPIA report
   (JSON/HTML/Markdown) it emits.
-- [ ] Salt handling per `SPECIFICATION.md`: the config declares the salt **mode** (`ephemeral`
+- [x] Salt handling per `SPECIFICATION.md`: the config declares the salt **mode** (`ephemeral`
   default / `persistent` / `reproducible`); the secret salt **bytes** for the fixed-salt modes come
   from out-of-band input (env/secret/flag), never the config. The DPIA report already discloses the
   chosen mode.
 
-## Phase 5: Agent-facing authoring artifact
+## Phase 5: Interactive Agent Skill for Policy Authoring
 
-- [ ] Produce a structured textual artifact — schema metadata + the FK graph + inference suggestions
-  + the fail-closed checklist + the role vocabulary and what each role/strategy means — designed to
-  be handed to a custom agent skill that proposes/iterates the `policy.yaml`. The engine's own
-  feedback (fail-closed errors naming unclassified columns; the DPIA report's
-  survival/lint/structural findings; the illustrative sample rows) is the loop's success signal.
-  Metadata only — never a sampled real value.
+- [x] Build an interactive AI "Agent Skill" (compatible with standard agent platforms like Claude,
+  Antigravity, Copilot) to replace the static artifact approach. The agent reads the scaffolded
+  `policy.yaml`, cross-references it with schema metadata and the deterministic Phase 3 inference
+  suggestions, and interactively interviews the user to fill in unclassified columns.
+- [x] **Risk Mitigation — User Fatigue:** The skill must aggressively batch related questions (e.g.,
+  grouping standard audit timestamps across multiple tables) rather than interrogating the user
+  column-by-column, preventing users from blindly confirming out of boredom.
+- [x] **Risk Mitigation — Context Limits:** The skill must employ a paginated or topological
+  (table-by-table) workflow to avoid context window exhaustion and hallucinated relationships when
+  processing massive enterprise schemas.
+- [x] The skill must honor the fail-closed philosophy: it surfaces insights and asks targeted
+  questions, but never silently assigns a role without user confirmation. It iterates until the
+  policy is valid.
 
 ---
 

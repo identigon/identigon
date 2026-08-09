@@ -21,9 +21,9 @@ class DiscoverCommand {
             return EffigiesCli.EXIT_USAGE;
         }
 
-        String password = System.getenv("EFFIGIES_SOURCE_PASSWORD");
+        String password = System.getenv("IDENTIGON_SOURCE_PASSWORD");
         if (password == null) {
-            err.println("Error: EFFIGIES_SOURCE_PASSWORD environment variable is not set.");
+            err.println("Error: IDENTIGON_SOURCE_PASSWORD environment variable is not set.");
             return EffigiesCli.EXIT_USAGE;
         }
 

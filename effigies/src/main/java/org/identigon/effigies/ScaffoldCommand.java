@@ -27,9 +27,9 @@ class ScaffoldCommand {
             return EffigiesCli.EXIT_USAGE;
         }
 
-        String password = System.getenv("EFFIGIES_SOURCE_PASSWORD");
+        String password = System.getenv("IDENTIGON_SOURCE_PASSWORD");
         if (password == null) {
-            err.println("Error: EFFIGIES_SOURCE_PASSWORD environment variable is not set.");
+            err.println("Error: IDENTIGON_SOURCE_PASSWORD environment variable is not set.");
             return EffigiesCli.EXIT_USAGE;
         }
 
@@ -79,7 +79,13 @@ class ScaffoldCommand {
                         md.append(", fk -> ").append(table.foreignKeys().get(col));
                     }
                     writer.write("      " + col + ":            # " + md + "\n");
-                    writer.write("        role:              # TODO classify — see the role vocabulary; run fails closed until filled\n");
+
+                    java.util.Optional<PolicyInferrer.InferredRole> inferred = new PolicyInferrer().inferRole(col);
+                    if (inferred.isPresent()) {
+                        writer.write("        role:              # TODO classify (Suggestion: " + inferred.get().role() + " based on " + inferred.get().heuristic() + ")\n");
+                    } else {
+                        writer.write("        role:              # TODO classify — see the role vocabulary; run fails closed until filled\n");
+                    }
                 }
             }
         }

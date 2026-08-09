@@ -37,17 +37,8 @@ class EffigiesCliTest {
     }
 
     @Test
-    void plannedCommandsReportNotImplemented() {
-        for (String cmd : new String[] {"run"}) {
-            Result r = invoke(cmd);
-            assertEquals(EffigiesCli.EXIT_NOT_IMPLEMENTED, r.code(), cmd + " exit code");
-            assertTrue(r.err().contains("not yet implemented"), cmd + " message");
-        }
-    }
-
-    @Test
-    void discoverAndScaffoldRequireUsage() {
-        for (String cmd : new String[] {"discover", "scaffold"}) {
+    void commandsRequireUsage() {
+        for (String cmd : new String[] {"discover", "scaffold", "run"}) {
             Result r = invoke(cmd);
             assertEquals(EffigiesCli.EXIT_USAGE, r.code(), cmd + " exit code");
             assertTrue(r.err().contains("Usage: " + cmd), cmd + " usage message");

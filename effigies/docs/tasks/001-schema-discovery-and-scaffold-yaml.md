@@ -24,7 +24,7 @@ closed).
 
 **Step 1 — a source `DataSource` from CLI input.** Add options to `discover`/`scaffold` for the JDBC
 URL and user (e.g. `--source-url`, `--source-user`), and read the password from an env var (e.g.
-`EFFIGIES_SOURCE_PASSWORD`). Wrap them in a minimal `javax.sql.DataSource` (a `DriverManager`-backed
+`IDENTIGON_SOURCE_PASSWORD`). Wrap them in a minimal `javax.sql.DataSource` (a `DriverManager`-backed
 record, as the lib-incognito E2E tests do). Keep a tiny option parser for now — do not pull in a CLI
 framework yet.
 

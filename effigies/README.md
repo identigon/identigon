@@ -43,8 +43,46 @@ the reasoning, [`SPECIFICATION.md`](SPECIFICATION.md) for the behavioural contra
 
 ## Status
 
-**Skeleton.** The CLI dispatches its planned subcommands (`discover`, `scaffold`, `run`) but they
-are not yet implemented. See `PLAN.md`.
+**v1.0 Complete.** The core authoring workflow is fully implemented.
+
+## Usage Workflow
+
+The typical workflow uses three CLI commands and an AI Agent Skill.
+
+### 1. Discover & Scaffold
+Inspect the source database to emit a starter (fail-closed) `policy.yaml`:
+```bash
+# Read the source schema (metadata only)
+export IDENTIGON_SOURCE_PASSWORD="secret"
+java -jar build/libs/effigies.jar discover --source-url "jdbc:postgresql://..." --source-user "admin"
+
+# Generate a starter policy.yaml with deterministic heuristics (Phase 3)
+java -jar build/libs/effigies.jar scaffold --source-url "jdbc:postgresql://..." --source-user "admin" --out ./policy.yaml
+```
+
+### 2. Interactive Policy Authoring (The Agent Skill)
+Effigies ships with a built-in Agent Skill for AI assistants (Claude, Antigravity, Copilot, etc.) that interactively interviews you to safely classify the remaining columns.
+
+Activate the skill in your agent (located at `.agents/skills/identigon-policy-author/SKILL.md`). The agent will:
+- Read your scaffolded `policy.yaml`.
+- Batch related columns (e.g., all audit timestamps) to prevent fatigue.
+- Ask for your explicit confirmation before applying roles (maintaining the fail-closed guarantee).
+
+### 3. Orchestration (`run`)
+Once the policy is authored, drive the `lib-incognito` engine to produce the clone:
+```bash
+export IDENTIGON_SOURCE_PASSWORD="secret"
+export IDENTIGON_TARGET_PASSWORD="secret"
+
+# Required for persistent/reproducible salt modes (configured in policy.yaml)
+export IDENTIGON_SALT="my-secret-salt-bytes" 
+
+java -jar build/libs/effigies.jar run \
+  --policy ./policy.yaml \
+  --source-url "jdbc:postgresql://..." --source-user "admin" \
+  --target-url "jdbc:postgresql://..." --target-user "admin"
+```
+The engine will execute the pipeline and surface the DPIA accountability report to `dpia-report.yaml`.
 
 ## Build & run
 

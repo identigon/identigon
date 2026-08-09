@@ -58,8 +58,7 @@ public final class EffigiesCli {
             }
             // Planned subcommands — see PLAN.md. Declared here so the surface is visible early.
             case "run" -> {
-                err.println("'" + command + "' is not yet implemented — see PLAN.md.");
-                yield EXIT_NOT_IMPLEMENTED;
+                yield RunCommand.execute(args, out, err);
             }
             default -> {
                 err.println("Unknown command: '" + command + "'");
