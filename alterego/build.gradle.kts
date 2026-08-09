@@ -112,10 +112,10 @@ tasks.named<Jar>("jar") {
     }
 }
 
-// No repository/credentials are configured here — that's environment-specific and not this
-// project's job to commit. This produces a correct, complete POM plus the three artifact jars
-// (binary, sources, javadoc) for `./gradlew publishToMavenLocal`; wiring an actual remote
-// (Central, GitHub Packages) is a separate, later decision.
+// Maven Central itself is not wired up yet (a separate, later decision — see the signing block
+// below), but GitHub Packages is: CI publishes every push to main there as a snapshot feed. The
+// credentials are read from the environment only, never committed; locally, `./gradlew publish`
+// simply has nowhere authenticated to push unless GITHUB_ACTOR/GITHUB_TOKEN are set.
 publishing {
     publications {
         create<MavenPublication>("maven") {
@@ -143,6 +143,16 @@ publishing {
                     developerConnection = "scm:git:https://github.com/identigon/lib-alterego.git"
                     url = "https://github.com/identigon/lib-alterego"
                 }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/identigon/lib-alterego")
+            credentials {
+                username = providers.environmentVariable("GITHUB_ACTOR").orNull
+                password = providers.environmentVariable("GITHUB_TOKEN").orNull
             }
         }
     }
