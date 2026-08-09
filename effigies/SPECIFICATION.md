@@ -46,8 +46,8 @@ respect lib-incognito's own contract.
 
 ## 3. Commands (intended contract)
 
-The CLI is `java -jar effigies.jar <command> [options]`. In the skeleton, only `help` and
-`version` do real work; the rest are declared and return "not yet implemented" (exit code 3).
+The CLI is `java -jar effigies.jar <command> [options]`. `discover`, `scaffold`, `run`, `version`,
+and `help` are implemented; a bad or unknown invocation returns exit code 2.
 
 - **`discover`** — inspect a source database and describe its schema (metadata only). Produces a
   human-readable summary and a machine-readable form for the later phases. Requires read access to

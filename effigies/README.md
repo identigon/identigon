@@ -57,7 +57,7 @@ export IDENTIGON_SOURCE_PASSWORD="secret"
 java -jar build/libs/effigies.jar discover --source-url "jdbc:postgresql://..." --source-user "admin"
 
 # Generate a starter policy.yaml with deterministic heuristics (Phase 3)
-java -jar build/libs/effigies.jar scaffold --source-url "jdbc:postgresql://..." --source-user "admin" --out ./policy.yaml
+java -jar build/libs/effigies.jar scaffold --source-url "jdbc:postgresql://..." --source-user "admin" --out ./policy.draft.yaml
 ```
 
 ### 2. Interactive Policy Authoring (The Agent Skill)
@@ -82,7 +82,9 @@ java -jar build/libs/effigies.jar run \
   --source-url "jdbc:postgresql://..." --source-user "admin" \
   --target-url "jdbc:postgresql://..." --target-user "admin"
 ```
-The engine will execute the pipeline and surface the DPIA accountability report to `dpia-report.yaml`.
+The engine will execute the pipeline and surface the DPIA accountability report as
+`dpia-report.html` (presentation-ready), `dpia-report.json` (machine-readable), and
+`dpia-report.md` (human-diffable).
 
 ## Build & run
 

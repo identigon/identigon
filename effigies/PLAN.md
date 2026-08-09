@@ -19,7 +19,7 @@ cd ../lib-alterego  && ./gradlew publishToMavenLocal
 cd ../lib-incognito && ./gradlew publishToMavenLocal
 ```
 
-Effigies currently pins `org.identigon:incognito:1.1.0-SNAPSHOT`; it moves to `2.0.x` once
+Effigies currently pins `incognito` `1.1.0-SNAPSHOT`; it moves to `2.0.x` once
 lib-incognito 2.0 lands (which removes the inference migrating here — see Phase 3 and the ADR).
 
 ---

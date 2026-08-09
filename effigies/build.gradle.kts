@@ -35,7 +35,9 @@ spotless {
 
 repositories {
     mavenCentral()
-    // lib-incognito (and, transitively, lib-alterego) are consumed as local -SNAPSHOTs until they are
+    // Tried before GitHub Packages so a local build resolves the sibling -SNAPSHOTs
+    // (org.identigon:incognito, and transitively alterego) straight from `publishToMavenLocal`
+    // without needing a token — GitHub Packages below is the CI fallback.
     mavenLocal()
     // lib-incognito and lib-alterego are published to GitHub Packages. GitHub Packages requires
     // authentication even to READ, so a token with `read:packages` must be on the environment as

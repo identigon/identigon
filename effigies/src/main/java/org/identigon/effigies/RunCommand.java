@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import org.identigon.incognito.api.IncognitoPipeline;
 import org.identigon.incognito.api.PipelineResult;
+import org.identigon.incognito.core.DpiaArtefactEmitter;
 import org.identigon.incognito.policy.YamlPolicyParser;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -103,12 +104,19 @@ class RunCommand {
             out.println("Tables transformed: " + result.tablesProcessed());
             out.println("Rows processed: " + result.totalRowsLoaded());
 
-            try (java.io.FileWriter fw = new java.io.FileWriter("./dpia-report.yaml")) {
-                Yaml yamlOut = new Yaml();
-                yamlOut.dump(result.report(), fw);
-                out.println("DPIA report written to ./dpia-report.yaml");
+            // The engine's own emitter produces the accountability artefact — salt-mode disclosure,
+            // survival/lint/structural findings, illustrative sample rows. Dumping the raw
+            // AnonymisationReport record graph would throw all of that away, so delegate.
+            Path dpiaHtml = Paths.get("./dpia-report.html");
+            Path dpiaJson = Paths.get("./dpia-report.json");
+            Path dpiaMarkdown = Paths.get("./dpia-report.md");
+            try {
+                DpiaArtefactEmitter.emitHtml(result.report(), dpiaHtml);
+                DpiaArtefactEmitter.emitJson(result.report(), dpiaJson);
+                DpiaArtefactEmitter.emitMarkdown(result.report(), dpiaMarkdown);
+                out.println("DPIA artefact written to " + dpiaHtml + ", " + dpiaJson + " and " + dpiaMarkdown);
             } catch (Exception e) {
-                out.println("Failed to write DPIA report: " + e.getMessage());
+                out.println("Failed to write DPIA artefact: " + e.getMessage());
             }
 
             return 0;

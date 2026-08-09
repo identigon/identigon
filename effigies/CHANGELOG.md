@@ -20,13 +20,14 @@ Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - Phase 5 Agent Skill: Added `identigon-policy-author` Agent Skill (`.agents/skills/identigon-policy-author/SKILL.md`) to conduct interactive, fail-closed user interviews for policy classification, featuring paginated topology parsing and aggressive batching to mitigate fatigue.
-- Phase 4 Orchestration: Added `run` subcommand to execute `lib-incognito` using a finished `policy.yaml`, supporting ephemeral, persistent, and reproducible salt modes. Surfaces the engine's DPIA accountability report as `dpia-report.yaml`.
+- Phase 4 Orchestration: Added `run` subcommand to execute `lib-incognito` using a finished `policy.yaml`, supporting ephemeral, persistent, and reproducible salt modes. Surfaces the engine's DPIA accountability report via `DpiaArtefactEmitter` as `dpia-report.html`, `dpia-report.json`, and `dpia-report.md`.
 - Phase 3 Inference: Added `PolicyInferrer` to auto-suggest column roles based on naming heuristics during `scaffold`. Suggestions are emitted strictly as YAML comments to preserve fail-closed execution.
 - `discover` subcommand: Inspects a source database using `lib-incognito`'s `SchemaInspector` and prints a metadata-only summary.
 - `scaffold` subcommand: Emits a fail-closed starter `policy.yaml` with schema metadata as comments.
 - Project skeleton: Gradle (Kotlin DSL) build with a Java 25 toolchain and a single runnable jar
-  (`java -jar`); Spotless + SpotBugs/find-sec-bugs; pre-commit hooks + gitleaks; a CI workflow that
-  builds lib-alterego and lib-incognito to Maven local first.
+  (`java -jar`); Spotless + SpotBugs/find-sec-bugs; pre-commit hooks + gitleaks; CI mirroring the
+  sibling repos (a reusable `_build.yml` invoked by `main.yml` and `pull-request.yml`) that resolves
+  lib-incognito and lib-alterego from GitHub Packages.
 - `EffigiesCli` dispatch skeleton (`discover` / `scaffold` / `run` declared; `help` / `version`
   live), covered by `EffigiesCliTest`.
 - Base docs: `README.md`, `SPECIFICATION.md`, `PLAN.md`, `docs/adr/` (ADR 0001 — authoring above the

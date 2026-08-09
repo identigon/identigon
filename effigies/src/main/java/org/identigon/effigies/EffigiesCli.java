@@ -9,14 +9,12 @@ import java.io.PrintStream;
  * to produce the anonymised clone. The engine stays deterministic and judgment-free; all inference and
  * scaffolding lives here (see {@code docs/adr/0001-authoring-above-the-engine.md}).
  *
- * <p>This is a skeleton: the subcommands are declared but not yet implemented (see {@code PLAN.md}).
+ * <p>The {@code discover}, {@code scaffold}, and {@code run} subcommands are implemented; see
+ * {@code PLAN.md} for the roadmap.
  */
 public final class EffigiesCli {
 
     private EffigiesCli() {}
-
-    /** Exit code returned by a subcommand that is declared but not yet implemented. */
-    static final int EXIT_NOT_IMPLEMENTED = 3;
 
     /** Exit code returned for an unknown subcommand or bad usage. */
     static final int EXIT_USAGE = 2;
@@ -56,7 +54,6 @@ public final class EffigiesCli {
             case "scaffold" -> {
                 yield ScaffoldCommand.execute(args, out, err);
             }
-            // Planned subcommands — see PLAN.md. Declared here so the surface is visible early.
             case "run" -> {
                 yield RunCommand.execute(args, out, err);
             }
@@ -79,9 +76,7 @@ public final class EffigiesCli {
               scaffold    Emit a starter policy.yaml (fail-closed: every column left to be classified).
               run         Execute lib-incognito against a finished policy.yaml to produce the clone.
               version     Print the version.
-              help        Show this help.
-
-            (Skeleton: the commands above are placeholders — see PLAN.md and SPECIFICATION.md.)""");
+              help        Show this help.""");
     }
 
     /** The build version from the jar manifest, or {@code "dev"} when run from the classpath. */
