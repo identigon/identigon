@@ -496,10 +496,17 @@ start.
   (HTML and Markdown output verified byte-identical against a golden capture; the JSON emitter test
   passes with unchanged assertions), zero new dependencies. Covered by `JsonWriterTest` +
   `DpiaArtefactEmitterTest`.
-- [ ] **Illustrative sample rows in the DPIA artefact** (follow-on to the refactor above) — 3
-  synthetic rows per table, generated from AlterEgo with a fixed non-secret salt (so synthetic and
-  drift-free), to show a reader what the data looks like after transformation. Handoff:
-  `docs/tasks/dpia-sample-rows.md`.
+- [x] **Illustrative sample rows in the DPIA artefact — done.** Each table's report now carries a
+  "Sample rows (illustrative)" table of 3 synthetic rows (in JSON, HTML, and Markdown) showing what
+  the target looks like after transformation. `AnonymisationReportBuilder` generates them from a
+  throwaway AlterEgo keyed with a fixed non-secret salt (`ColumnAction.examples`), so they are
+  synthetic, reproducible, and unlinked to any real or run data. The generator mirrors the real
+  transformation branch-for-branch — a typed `directIdStrategy`/hint yields the typed fictional
+  value (e.g. `postcode`→`P4 4IM`, `city`→`London`, `email`→`…@example.net`), a temporal QUASI_ID
+  shows a
+  shifted date, and a non-temporal QUASI_ID shows `‹synthesised›` rather than misrepresenting a text
+  column as a date; kept/link/inherited columns show `‹kept›`/`‹link›`/`‹inherited›`. Covered by
+  `DpiaArtefactEmitterTest`; exercised by every benchmark's emitted report.
 
 ## Post-v1.0 — possible future directions
 

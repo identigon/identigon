@@ -679,7 +679,8 @@ public record AnonymisationReport(
     ) {
     }
 
-    public record ColumnAction(String column, ColumnRole role, String transformation) {
+    public record ColumnAction(String column, ColumnRole role, String transformation,
+        java.util.List<String> examples) {   // examples: illustrative synthetic sample values (§7)
     }
 
     public record PassthroughFlag(String column, String jdbcType, String reason) {

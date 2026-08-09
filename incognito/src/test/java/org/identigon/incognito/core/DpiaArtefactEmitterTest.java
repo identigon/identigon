@@ -18,10 +18,13 @@ class DpiaArtefactEmitterTest {
 
     private static AnonymisationReport sampleReport() {
         var columns = List.of(
-            new AnonymisationReport.ColumnAction("email", ColumnRole.DIRECT_ID, "ALTEREGO_EMAIL"),
-            new AnonymisationReport.ColumnAction("flag", ColumnRole.SENSITIVE, "KEEP"),
-            // A value with characters that must be escaped in JSON/HTML.
-            new AnonymisationReport.ColumnAction("notes", ColumnRole.SENSITIVE, "say \"hi\" <b> & go"));
+            new AnonymisationReport.ColumnAction("email", ColumnRole.DIRECT_ID, "ALTEREGO_EMAIL",
+                List.of("a@example.com", "b@example.com", "c@example.com")),
+            new AnonymisationReport.ColumnAction("flag", ColumnRole.SENSITIVE, "KEEP",
+                List.of("‹kept›", "‹kept›", "‹kept›")),
+            // A value with characters that must be escaped in JSON/HTML (also as a sample value).
+            new AnonymisationReport.ColumnAction("notes", ColumnRole.SENSITIVE, "say \"hi\" <b> & go",
+                List.of("say \"hi\" <b> & go", "x", "y")));
         var passthrough = List.of(
             new AnonymisationReport.PassthroughFlag("payload", "OTHER",
                 "untransformed potentially-identifying type kept as-is (SPEC §7.2)"));
@@ -66,6 +69,8 @@ class DpiaArtefactEmitterTest {
         assertTrue(json.contains("\"childColumns\": [\"customer_id\"]"), "structural FK column(s) recorded");
         assertTrue(json.contains("\"inferSuggestions\""), "inference-suggestions section present");
         assertTrue(json.contains("\"suggestedRole\": \"DIRECT_ID\""), "inference suggestion rendered");
+        assertTrue(json.contains("\"examples\": [\"a@example.com\", \"b@example.com\", \"c@example.com\"]"),
+            "per-column illustrative examples rendered");
         assertEquals(count(json, '{'), count(json, '}'), "braces balanced");
     }
 
@@ -88,6 +93,8 @@ class DpiaArtefactEmitterTest {
         assertTrue(html.contains("Structural re-identification risk"), "structural section rendered");
         assertTrue(html.contains("<td>orders</td>"), "structural child table rendered");
         assertTrue(html.contains("Inference suggestions"), "inference-suggestions section rendered");
+        assertTrue(html.contains("Sample rows (illustrative"), "sample-rows table rendered");
+        assertTrue(html.contains("<td>a@example.com</td>"), "sample value cell rendered");
     }
 
     @Test
@@ -105,6 +112,8 @@ class DpiaArtefactEmitterTest {
         assertTrue(md.contains("Structural Re-identification Risk"), "structural section rendered");
         assertTrue(md.contains("| customers | orders |"), "structural finding row rendered");
         assertTrue(md.contains("Inference Suggestions"), "inference-suggestions section rendered");
+        assertTrue(md.contains("Sample Rows (Illustrative)"), "sample-rows section rendered");
+        assertTrue(md.contains("| a@example.com |"), "sample value row rendered");
     }
 
     private static long count(String s, char c) {

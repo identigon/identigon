@@ -7,11 +7,14 @@ import java.util.Map;
 import java.util.Optional;
 import org.identigon.incognito.api.AnonymisationReport;
 import org.identigon.incognito.api.ColumnRole;
+import org.identigon.incognito.api.DirectIdStrategy;
 import org.identigon.incognito.api.PipelineContext;
 import org.identigon.incognito.api.PipelineStage;
+import org.identigon.incognito.api.SurrogateStrategy;
 import org.identigon.incognito.engine.SchemaInspector;
 import org.identigon.incognito.engine.TableDependencyGraph;
 import org.identigon.incognito.policy.AnonymisationPolicy;
+import org.identigon.incognito.policy.ColumnPolicy;
 import org.identigon.incognito.policy.TablePolicy;
 
 /**
@@ -78,6 +81,12 @@ public final class AnonymisationReportBuilder {
         AnonymisationPolicy policy = context.policy();
         List<AnonymisationReport.TableReport> tableReports = new ArrayList<>();
 
+        // A throwaway AlterEgo, keyed with a fixed non-secret salt, used only to generate the
+        // illustrative per-column sample values (SPEC §7). It is unrelated to the run's real salt, so
+        // the samples are synthetic and reproducible and correspond to no real subject. Effectively
+        // final so the per-column lambda below can capture it; closed after the loop.
+        org.identigon.alterego.AlterEgo exampleAlterEgo = exampleAlterEgo();
+
         for (String tableName : plan.sequentialTableOrder()) {
             SchemaInspector.TableMetadata tableMeta = metadataList.stream()
                 .filter(m -> m.tableName().equals(tableName)).findFirst().orElse(null);
@@ -123,7 +132,14 @@ public final class AnonymisationReportBuilder {
                             default -> "KEEP"; // PAYLOAD, GENERATED_COLUMN
                         };
                     }
-                    columnActions.add(new AnonymisationReport.ColumnAction(colName, colPol.role(), transformation));
+                    Integer columnSqlType = tableMeta.columnTypes() == null
+                        ? null : tableMeta.columnTypes().get(colName);
+                    List<String> examples = new ArrayList<>();
+                    for (int i = 0; i < SEEDS.size(); i++) {
+                        examples.add(exampleCell(exampleAlterEgo, colPol, columnSqlType, SEEDS.get(i), i));
+                    }
+                    columnActions.add(new AnonymisationReport.ColumnAction(
+                        colName, colPol.role(), transformation, examples));
 
                     // Opaque-type audit (SPEC §7.2): a KEPT column of a complex/untransformable JDBC
                     // type is surfaced in the DPIA report so a retained potentially-identifying value
@@ -153,8 +169,123 @@ public final class AnonymisationReportBuilder {
             ));
         }
 
+        exampleAlterEgo.close(); // zero the (non-secret) example salt; no external resources to release
+
         return new AnonymisationReport(saltMode, tableReports, survivalFindings, lintFindings,
             structuralFindings, stageResults);
+    }
+
+    /** Fixed dummy seeds — one per illustrative sample row. Different seeds give varied sample values. */
+    private static final List<String> SEEDS = List.of("sample-a", "sample-b", "sample-c");
+
+    /**
+     * A fixed, <b>non-secret</b> salt used only to key the illustrative example generator. It protects
+     * nothing and is deliberately hardcoded so the samples are deterministic and reproducible, and it
+     * is unrelated to the run's real salt — the samples therefore have zero linkage to any real or run
+     * data.
+     */
+    private static final byte[] EXAMPLE_SALT =
+        "incognito-illustrative-examples".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+    /** Builds the throwaway AlterEgo used for illustrative sample values; the caller closes it. */
+    private static org.identigon.alterego.AlterEgo exampleAlterEgo() {
+        return org.identigon.alterego.AlterEgo.builder()
+            .salt(EXAMPLE_SALT.clone())
+            .locale(java.util.Locale.UK)
+            .rawMappingKeys(false)
+            .mappingStore(new org.identigon.alterego.store.InMemoryMappingStore())
+            .build();
+    }
+
+    /**
+     * One illustrative sample value for a column at sample-row {@code i}. Synthetic (never touches real
+     * data); mirrors the branch order of the {@code transformation} label above so the two stay in
+     * step, using {@code sqlType} to distinguish a temporal QUASI_ID (shifted date) from a
+     * character/other one. Any generation failure degrades to a placeholder rather than breaking the
+     * report. Uses the literal guillemets {@code ‹ ›} for placeholders deliberately: they contain no
+     * HTML-special character, so the emitter's {@code htmlEscape} leaves them intact.
+     */
+    private static String exampleCell(
+            org.identigon.alterego.AlterEgo ex, ColumnPolicy colPol, Integer sqlType, String seed, int i) {
+        try {
+            ColumnRole role = colPol.role();
+            if (role == ColumnRole.PAYLOAD) return "‹kept›";
+            if (role == ColumnRole.FOREIGN_KEY) return "‹link›";
+            if (role == ColumnRole.INHERITED_ATTRIBUTE) return "‹inherited›";
+            if (role == ColumnRole.SENSITIVE) {
+                if (Boolean.FALSE.equals(colPol.distinguishing())) return "‹kept›";
+                if (colPol.redactionStrategy() != null) {
+                    return switch (colPol.redactionStrategy()) {
+                        case MASK -> ex.mask('*', 0).apply(seed);
+                        case CLEAR -> "(cleared)";
+                        case CONSTANT -> "(fixed value)";
+                    };
+                }
+                if (colPol.quasiIdStrategy() != null) return quasiIdExample(ex, colPol, sqlType, seed, i);
+                return "(redacted)";
+            }
+            if (role == ColumnRole.PRIMARY_KEY) {
+                if (colPol.surrogateStrategy() == SurrogateStrategy.UUID_V4) {
+                    return java.util.UUID.nameUUIDFromBytes(
+                        seed.getBytes(java.nio.charset.StandardCharsets.UTF_8)).toString();
+                }
+                if (colPol.surrogateStrategy() == SurrogateStrategy.PASSTHROUGH_SURROGATE) return "‹kept›";
+                return String.valueOf(1001 + i); // SEQUENTIAL_LONG or null
+            }
+            if (role == ColumnRole.QUASI_ID) return quasiIdExample(ex, colPol, sqlType, seed, i);
+            if (role == ColumnRole.DIRECT_ID || role == ColumnRole.UNIQUE_CANDIDATE_KEY) {
+                return directIdExample(ex, colPol.directIdStrategy(), seed);
+            }
+            return "‹kept›";
+        } catch (RuntimeException e) {
+            return "‹example unavailable›";
+        }
+    }
+
+    /**
+     * A sample value for a QUASI_ID (or SENSITIVE-jittered) column, matching what the run actually
+     * does: a typed {@code directIdStrategy} hint routes to that generator; otherwise a temporal type
+     * shifts, and a non-temporal one is synthesised (a shape-preserving fabrication not reproduced
+     * concretely here — shown as a placeholder so the sample never misrepresents a text column as a
+     * date).
+     */
+    private static String quasiIdExample(
+            org.identigon.alterego.AlterEgo ex, ColumnPolicy colPol, Integer sqlType, String seed, int i) {
+        if (colPol.directIdStrategy() != null) return directIdExample(ex, colPol.directIdStrategy(), seed);
+        if (isTemporalType(sqlType)) return shiftedDate(ex, i);
+        return "‹synthesised›";
+    }
+
+    /** A sample value for a typed direct identifier; a null strategy is a generic shape-preserving one. */
+    private static String directIdExample(
+            org.identigon.alterego.AlterEgo ex, DirectIdStrategy s, String seed) {
+        if (s == null) return "Example-" + seed;
+        return switch (s) {
+            case ALTEREGO_NAME -> ex.fullName().apply(seed);
+            case ALTEREGO_FIRST_NAME -> ex.firstName().apply(seed);
+            case ALTEREGO_LAST_NAME -> ex.lastName().apply(seed);
+            case ALTEREGO_ORGANISATION -> ex.organisationName().apply(seed);
+            case ALTEREGO_CITY -> ex.city().apply(seed);
+            case ALTEREGO_STREET_ADDRESS -> ex.streetAddress().apply(seed);
+            case ALTEREGO_POSTCODE -> ex.postcode().apply(seed);
+            case ALTEREGO_EMAIL -> ex.emailAddress().apply(seed);
+            case ALTEREGO_PHONE -> ex.phoneNumber().apply(seed);
+            case ALTEREGO_DOMAIN -> ex.domainName().apply(seed);
+            case ALTEREGO_URL -> ex.url().apply(seed);
+            case ALTEREGO_GENERIC -> "Example-" + seed;
+        };
+    }
+
+    /** Whether a JDBC type is temporal (so a QUASI_ID sample is a shifted date, not a synthesised string). */
+    private static boolean isTemporalType(Integer sqlType) {
+        return sqlType != null && (sqlType == java.sql.Types.DATE || sqlType == java.sql.Types.TIMESTAMP
+            || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE);
+    }
+
+    /** A representative shifted date for a temporal QUASI_ID sample, varied by sample-row {@code i}. */
+    private static String shiftedDate(org.identigon.alterego.AlterEgo ex, int i) {
+        return ex.shiftDate(org.identigon.alterego.AlterEgo.DateField.MONTH)
+            .apply(java.time.LocalDate.of(1984, 1 + i, 15)).toString();
     }
 
     /**

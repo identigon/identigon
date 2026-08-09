@@ -54,8 +54,11 @@ public record AnonymisationReport(
      * @param column the column name
      * @param role the classified {@link ColumnRole}
      * @param transformation the transformation applied, e.g. {@code "ALTEREGO_EMAIL"} or {@code "KEEP"}
+     * @param examples illustrative sample values (one per report sample row) showing what this
+     *     column's transformation produces — synthetic, generated from a fixed non-secret salt, so
+     *     they correspond to no real subject and are not this run's actual data
      */
-    public record ColumnAction(String column, ColumnRole role, String transformation) {}
+    public record ColumnAction(String column, ColumnRole role, String transformation, List<String> examples) {}
 
     /**
      * A kept column of a complex/opaque JDBC type that v1.0 could not transform (SPEC §7.2 audit).

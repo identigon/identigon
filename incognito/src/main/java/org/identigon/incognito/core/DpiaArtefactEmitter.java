@@ -109,8 +109,11 @@ public final class DpiaArtefactEmitter {
                 jw.beginObject()
                     .field("column", ca.column())
                     .field("role", ca.role().name())
-                    .field("transformation", ca.transformation())
-                    .endObject();
+                    .field("transformation", ca.transformation());
+                jw.name("examples").beginArray();
+                for (String e : ca.examples()) jw.value(e);
+                jw.endArray();
+                jw.endObject();
             }
             jw.endArray();
             jw.name("passthroughFlags").beginArray();
@@ -224,6 +227,23 @@ public final class DpiaArtefactEmitter {
                         + "</td><td>" + htmlEscape(ca.transformation()) + "</td></tr>\n");
                 }
                 w.write("</table>\n");
+                if (!tr.columns().isEmpty() && !tr.columns().get(0).examples().isEmpty()) {
+                    w.write("<table><caption>Sample rows (illustrative &mdash; synthetic data, not this"
+                        + " run's rows)</caption><tr>");
+                    for (AnonymisationReport.ColumnAction ca : tr.columns()) {
+                        w.write("<th>" + htmlEscape(ca.column()) + "</th>");
+                    }
+                    w.write("</tr>\n");
+                    int sampleRows = tr.columns().get(0).examples().size();
+                    for (int r = 0; r < sampleRows; r++) {
+                        w.write("<tr>");
+                        for (AnonymisationReport.ColumnAction ca : tr.columns()) {
+                            w.write("<td>" + htmlEscape(ca.examples().get(r)) + "</td>");
+                        }
+                        w.write("</tr>\n");
+                    }
+                    w.write("</table>\n");
+                }
                 if (!tr.passthroughFlags().isEmpty()) {
                     w.write("<table><caption>Passthrough flags (opaque types kept as-is)</caption>"
                         + "<tr><th>Column</th><th>JDBC type</th><th>Reason</th></tr>\n");
@@ -357,6 +377,31 @@ public final class DpiaArtefactEmitter {
                     writer.write(String.format("| %s | %s | %s |\n", ca.column(), ca.role(), ca.transformation()));
                 }
                 writer.write("\n");
+
+                if (!tr.columns().isEmpty() && !tr.columns().get(0).examples().isEmpty()) {
+                    writer.write("""
+                        #### Sample Rows (Illustrative)
+
+                        *Synthetic data showing each column's transformation, not this run's rows.*
+
+                        """);
+                    StringBuilder header = new StringBuilder("|");
+                    StringBuilder separator = new StringBuilder("|");
+                    for (AnonymisationReport.ColumnAction ca : tr.columns()) {
+                        header.append(' ').append(ca.column()).append(" |");
+                        separator.append("---|");
+                    }
+                    writer.write(header + "\n" + separator + "\n");
+                    int sampleRows = tr.columns().get(0).examples().size();
+                    for (int r = 0; r < sampleRows; r++) {
+                        StringBuilder row = new StringBuilder("|");
+                        for (AnonymisationReport.ColumnAction ca : tr.columns()) {
+                            row.append(' ').append(ca.examples().get(r)).append(" |");
+                        }
+                        writer.write(row + "\n");
+                    }
+                    writer.write("\n");
+                }
 
                 if (!tr.inferSuggestions().isEmpty()) {
                     writer.write("""
