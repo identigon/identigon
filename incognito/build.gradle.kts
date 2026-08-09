@@ -1,11 +1,11 @@
 plugins {
     `java-library`
     `maven-publish`
-    // Minimal code hygiene, kept in step with sibling repos (../play-bazlang, ../lib-alterego).
+    // Minimal code hygiene, kept in step with the sibling subprojects (alterego, effigies).
     // Tidy-only (no googleJavaFormat) so it does not reflow the hand-maintained style. SpotBugs +
     // find-sec-bugs is a tracked follow-up (see PLAN).
-    id("com.diffplug.spotless") version "8.8.0"
-    id("com.github.spotbugs") version "6.5.9"
+    id("com.diffplug.spotless") // version pinned at the root
+    id("com.github.spotbugs") // version pinned at the root
 }
 
 group = "org.identigon"
@@ -33,23 +33,9 @@ spotless {
 }
 
 repositories {
+    // alterego is now a sibling subproject (see dependencies below), not fetched from Maven --
+    // this only resolves incognito's other, genuinely external dependencies (snakeyaml, JUnit, etc.).
     mavenCentral()
-    // mavenLocal is kept as the first fallback so a local `publishToMavenLocal`-first build (see
-    // PLAN.md "Build prerequisite") still resolves lib-alterego without any token — and, being listed
-    // before GitHub Packages, means an unauthenticated local build never even queries it.
-    mavenLocal()
-    // lib-alterego is published to GitHub Packages (identigon/lib-alterego). GitHub Packages requires
-    // authentication even to READ, so a token with `read:packages` must be on the environment as
-    // GITHUB_ACTOR/GITHUB_TOKEN — in CI the automatic token, locally a PAT. Credentials resolve to
-    // null when unset, so this repo is simply skipped when the artifact is already available above.
-    maven {
-        name = "AlterEgoGitHubPackages"
-        url = uri("https://maven.pkg.github.com/identigon/lib-alterego")
-        credentials {
-            username = providers.environmentVariable("GITHUB_ACTOR").orNull
-            password = providers.environmentVariable("GITHUB_TOKEN").orNull
-        }
-    }
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -69,9 +55,9 @@ tasks.withType<Javadoc>().configureEach {
 }
 
 dependencies {
-    // lib-alterego is exposed through Incognito's public API (e.g. PipelineContext.alterEgo()), so it
+    // alterego is exposed through Incognito's public API (e.g. PipelineContext.alterEgo()), so it
     // is `api`, not `implementation` — consumers writing custom stages compile against its types.
-    api("org.identigon:alterego:0.5.0-SNAPSHOT")
+    api(project(":alterego"))
 
     // Declarative YAML policy parser — an internal detail. TODO: move to a separate incognito-yaml
     // module so the core stays dependency-lean (SPECIFICATION.md §1); currently bundled in core.

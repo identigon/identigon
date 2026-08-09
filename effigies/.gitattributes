@@ -1,8 +1,0 @@
-# Normalise line endings on checkout regardless of platform/autocrlf so
-# gradlew and scripts don't show as modified purely from CRLF conversion.
-* text=auto eol=lf
-
-*.bat text eol=crlf
-
-*.jar binary
-gradle/wrapper/gradle-wrapper.jar binary

@@ -2,8 +2,8 @@ plugins {
     `java-library`
     `maven-publish`
     signing
-    id("com.diffplug.spotless") version "8.8.0"
-    id("com.github.spotbugs") version "6.5.9"
+    id("com.diffplug.spotless") // version pinned at the root
+    id("com.github.spotbugs") // version pinned at the root
     id("pmd")
     id("jacoco")
 }
@@ -35,7 +35,7 @@ spotbugs {
 }
 
 tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
-    excludeFilter.set(rootProject.file("config/spotbugs/exclude.xml"))
+    excludeFilter.set(file("config/spotbugs/exclude.xml"))
     reports {
         create("html") { required.set(true) }
         create("xml") { required.set(true) }
@@ -53,7 +53,7 @@ pmd {
     isConsoleOutput = true
     isIgnoreFailures = false
     ruleSets = emptyList()
-    ruleSetFiles = rootProject.files("config/pmd/ruleset.xml")
+    ruleSetFiles = files("config/pmd/ruleset.xml")
 }
 
 // JaCoCo
@@ -102,12 +102,14 @@ tasks.test {
 
 // LICENCE and NOTICE must travel inside the built artifact: most consumers receive only the
 // jar, never the repository, so packaging them at the repo root alone is not enough (see
-// docs/dictionaries.md, "Attribution placement").
+// docs/dictionaries.md, "Attribution placement"). These are alterego's own copies (its LICENCE
+// carries an extra Open Government Licence clause for the dictionaries/ data, and NOTICE is the
+// attribution it points to) -- not the monorepo root's, which is deliberately the plainer, common text.
 tasks.named<Jar>("jar") {
-    from(rootProject.file("LICENCE")) {
+    from(file("LICENCE")) {
         into("META-INF")
     }
-    from(rootProject.file("NOTICE")) {
+    from(file("NOTICE")) {
         into("META-INF")
     }
 }

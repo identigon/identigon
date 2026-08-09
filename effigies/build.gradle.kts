@@ -1,9 +1,9 @@
 plugins {
     application
-    // Minimal code hygiene, kept in step with the sibling repos (../lib-incognito, ../lib-alterego).
+    // Minimal code hygiene, kept in step with the sibling subprojects (incognito, alterego).
     // Tidy-only (no googleJavaFormat) so it does not reflow the hand-maintained style.
-    id("com.diffplug.spotless") version "8.8.0"
-    id("com.github.spotbugs") version "6.5.9"
+    id("com.diffplug.spotless") // version pinned at the root
+    id("com.github.spotbugs") // version pinned at the root
 }
 
 group = "org.identigon"
@@ -34,31 +34,10 @@ spotless {
 }
 
 repositories {
+    // incognito (and transitively alterego) are now sibling subprojects (see dependencies below),
+    // not fetched from Maven -- this only resolves effigies's other, genuinely external dependencies
+    // (snakeyaml, JUnit, etc.).
     mavenCentral()
-    // Tried before GitHub Packages so a local build resolves the sibling -SNAPSHOTs
-    // (org.identigon:incognito, and transitively alterego) straight from `publishToMavenLocal`
-    // without needing a token — GitHub Packages below is the CI fallback.
-    mavenLocal()
-    // lib-incognito and lib-alterego are published to GitHub Packages. GitHub Packages requires
-    // authentication even to READ, so a token with `read:packages` must be on the environment as
-    // GITHUB_ACTOR/GITHUB_TOKEN — in CI the automatic token, locally a PAT. Credentials resolve to
-    // null when unset, so this repo is simply skipped when the artifact is already available above.
-    maven {
-        name = "IncognitoGitHubPackages"
-        url = uri("https://maven.pkg.github.com/identigon/lib-incognito")
-        credentials {
-            username = providers.environmentVariable("GITHUB_ACTOR").orNull
-            password = providers.environmentVariable("GITHUB_TOKEN").orNull
-        }
-    }
-    maven {
-        name = "AlterEgoGitHubPackages"
-        url = uri("https://maven.pkg.github.com/identigon/lib-alterego")
-        credentials {
-            username = providers.environmentVariable("GITHUB_ACTOR").orNull
-            password = providers.environmentVariable("GITHUB_TOKEN").orNull
-        }
-    }
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -66,10 +45,10 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 dependencies {
-    // The orchestration engine. Effigies depends ONLY on lib-incognito (lib-alterego arrives
-    // transitively and is not called directly). Pinned to the current published version; it moves to
-    // 2.0.x once lib-incognito 2.0 lands (which removes the inference that migrates here — ADR 0001).
-    implementation("org.identigon:incognito:1.1.0-SNAPSHOT")
+    // The orchestration engine. Effigies depends ONLY on incognito (alterego arrives transitively
+    // and is not called directly). It moves to a 2.0.x incognito once that lands (which removes the
+    // inference that migrates here — ADR 0001).
+    implementation(project(":incognito"))
 
     // Reads/writes the declarative policy YAML that lib-incognito consumes.
     implementation("org.yaml:snakeyaml:2.2")
@@ -107,6 +86,10 @@ tasks.jar {
         attributes["Implementation-Title"] = "Effigies"
         attributes["Implementation-Version"] = project.version.toString()
     }
+    // Now that incognito/alterego are sibling project() dependencies rather than external Maven
+    // coordinates, Gradle can't infer from the `from({ ... })` closure alone that this task's output
+    // depends on their jar tasks -- declare it explicitly so build ordering/up-to-date checks are correct.
+    dependsOn(configurations.runtimeClasspath)
     from({
         configurations.runtimeClasspath.get()
             .filter { it.name.endsWith(".jar") }
