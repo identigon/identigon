@@ -666,11 +666,20 @@ public final class TableTransformLoadStage implements PipelineStage {
                 }
             }
             case SYNTHESISE -> {
+                // Author-declared typed routing (SPEC Appendix B): a QUASI_ID SYNTHESISE column may
+                // name a DirectIdStrategy to synthesise a guaranteed-fictional typed value (postcode,
+                // city, street, …) instead of a shape-preserving scramble. The routing is explicit,
+                // never auto-detected (ADR 0004). Delegating to the DIRECT_ID transformer reuses the
+                // single strategy→primitive switch, so the two can never diverge.
+                if (colPolicy.directIdStrategy() != null) {
+                    yield buildDirectIdTransformer(colPolicy, alterEgo, tableName);
+                }
                 String domain = "incognito:synth:" + tableName + ":" + colPolicy.columnName();
                 // A temporal QI is shifted within a ±5y window (destroys the identifying year, SPEC
                 // Appendix B) through the type-matched lib-alterego primitive; a non-temporal value is
                 // shape-fabricated. shiftDateTime (seconds=0) keeps the time-of-day and fits
-                // TIMESTAMP/TIMESTAMPTZ columns, which shiftDate alone cannot.
+                // TIMESTAMP/TIMESTAMPTZ columns, which shiftDate alone cannot. A non-temporal type with
+                // no mapping and no hint is rejected fail-closed at discovery (SchemaDiscoveryStage).
                 Transformation<LocalDate> dateTransform = alterEgo.shiftDate(SYNTHESISE_DATE_WINDOW_DAYS);
                 Transformation<java.time.LocalDateTime> dateTimeTransform = alterEgo.shiftDateTime(SYNTHESISE_DATE_WINDOW_DAYS, 0);
                 Transformation<String> strTransform = alterEgo.bind(domain,

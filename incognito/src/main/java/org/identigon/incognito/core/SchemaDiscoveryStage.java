@@ -6,6 +6,7 @@ import org.identigon.incognito.api.ColumnRole;
 import org.identigon.incognito.api.IncognitoException;
 import org.identigon.incognito.api.PipelineContext;
 import org.identigon.incognito.api.PipelineStage;
+import org.identigon.incognito.api.QuasiIdStrategy;
 import org.identigon.incognito.engine.SchemaInspector;
 import org.identigon.incognito.engine.TableDependencyGraph;
 import org.identigon.incognito.policy.AnonymisationPolicy;
@@ -141,6 +142,8 @@ public final class SchemaDiscoveryStage implements PipelineStage {
                             "Fail-closed: SENSITIVE column '" + column + "' in table '" + table.tableName()
                                 + "' is distinguishing: true, but declares no RedactionStrategy or QuasiIdStrategy (SPEC §4.1).");
                     }
+                } else if (colPol.role() == ColumnRole.QUASI_ID) {
+                    validateSynthesiseType(table, column, colPol);
                 }
             }
         }
@@ -152,6 +155,52 @@ public final class SchemaDiscoveryStage implements PipelineStage {
                     + " unclassified column(s) with no declared ColumnRole in the policy: "
                     + String.join(", ", unclassifiedMessages)
                     + ". Classify each explicitly — auto-infer only suggests, never assigns.");
+        }
+    }
+
+    /**
+     * Fail-closed guard for {@code SYNTHESISE}-by-type (SPEC Appendix B): a {@code QUASI_ID} that is
+     * synthesised (its strategy is {@code SYNTHESISE}, or absent — the default) from a source type
+     * with no built-in generator, and with no typed {@code directIdStrategy} hint, would silently
+     * shape-fabricate. That is forbidden; abort with a clear message directing the author to the fix.
+     * Temporal and character types have a mapping ({@link #isSynthesisableType}) and pass.
+     */
+    private void validateSynthesiseType(
+            SchemaInspector.TableMetadata table, String column, ColumnPolicy colPol) {
+        QuasiIdStrategy strategy = colPol.quasiIdStrategy();
+        boolean synthesise = strategy == null || strategy == QuasiIdStrategy.SYNTHESISE;
+        if (!synthesise || colPol.directIdStrategy() != null) {
+            return; // jitter modes, or an explicit typed hint, are always fine
+        }
+        Integer sqlType = table.columnTypes() == null ? null : table.columnTypes().get(column);
+        if (sqlType != null && !isSynthesisableType(sqlType)) {
+            throw new IncognitoException.ConfigException(
+                "Fail-closed: QUASI_ID column '" + column + "' in table '" + table.tableName()
+                    + "' uses SYNTHESISE but its type (" + jdbcTypeName(sqlType) + ") has no built-in"
+                    + " generator. Declare a directIdStrategy hint (e.g. ALTEREGO_POSTCODE) or a custom"
+                    + " strategy — SYNTHESISE never shape-fabricates an unmapped type (SPEC Appendix B).");
+        }
+    }
+
+    /**
+     * Whether a source SQL type has a built-in {@code SYNTHESISE} mapping (SPEC Appendix B): temporal
+     * types shift; character types shape-preserve. Everything else needs a typed hint or fails closed.
+     */
+    private static boolean isSynthesisableType(int sqlType) {
+        return switch (sqlType) {
+            case java.sql.Types.DATE, java.sql.Types.TIMESTAMP, java.sql.Types.TIMESTAMP_WITH_TIMEZONE,
+                 java.sql.Types.VARCHAR, java.sql.Types.CHAR, java.sql.Types.LONGVARCHAR,
+                 java.sql.Types.NVARCHAR, java.sql.Types.NCHAR, java.sql.Types.LONGNVARCHAR -> true;
+            default -> false;
+        };
+    }
+
+    /** The JDBC type name for a {@link java.sql.Types} code, for a readable fail-closed message. */
+    private static String jdbcTypeName(int sqlType) {
+        try {
+            return java.sql.JDBCType.valueOf(sqlType).getName();
+        } catch (IllegalArgumentException e) {
+            return "type " + sqlType;
         }
     }
 }

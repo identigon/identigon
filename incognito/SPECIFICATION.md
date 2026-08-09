@@ -912,20 +912,21 @@ itself** (Appendix D), not via AlterEgo per-field jitter.
 ## Appendix B — `SYNTHESISE` by source type
 
 `SYNTHESISE` has no single generator — it depends on the column's type. **A `QUASI_ID` whose type
-has no mapping below and no custom strategy fails fail-closed with `ConfigException` — never a
-silent passthrough.**
+has no built-in mapping below and no typed hint fails fail-closed with `ConfigException` at discovery
+— never a silent passthrough or shape-fabrication.** The type-specific `VARCHAR` rows
+(postcode/city/street/organisation) are **author-declared**, not auto-detected (ADR 0004): the author
+adds a `directIdStrategy` hint to the `QUASI_ID` column (e.g. `ALTEREGO_POSTCODE`), and Incognito
+routes the value through that typed, guaranteed-fictional generator. Absent a hint, a temporal type
+shifts and a character type shape-preserves ("other `VARCHAR`"); anything else fails closed.
 
 | Source SQL/Java type                   | `SYNTHESISE` generator                                                                                                                                                                                                |
 |:---------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `DATE` / `LocalDate` (e.g. `dob`)      | `ae.shiftDate(wideWindowDays)` with a window wide enough to destroy the identifying part (e.g. ±1825 days ≈ ±5 y for `dob`, so the year no longer pins age). *Not* `shiftDate(YEAR)` for `dob` (keeps the real year). |
-| `VARCHAR` postcode-shaped              | `ae.postcode()`                                                                                                                                                                                                       |
-| `VARCHAR` city                         | `ae.city()`                                                                                                                                                                                                           |
-| `VARCHAR` street/address               | `ae.streetAddress()`                                                                                                                                                                                                  |
-| `VARCHAR` organisation                 | `ae.organisationName()`                                                                                                                                                                                               |
-| other `VARCHAR`                        | `ae.pattern(shape)` (format-preserving)                                                                                                                                                                               |
-| numeric (`INT`/`DECIMAL`, e.g. salary) | **no built-in** → require an explicit custom `Strategy` via `bind(...)`, else `ConfigException`. Do not passthrough a real number.                                                                                    |
+| `VARCHAR` + `directIdStrategy` hint    | the hinted typed generator — `ae.postcode()` / `ae.city()` / `ae.streetAddress()` / `ae.organisationName()` / … (guaranteed-fictional; author-declared, never auto-detected).                                         |
+| other `VARCHAR` (no hint)              | shape-preserving fabrication (format-preserving).                                                                                                                                                                     |
+| numeric (`INT`/`DECIMAL`, e.g. salary) | **no built-in** → require a `directIdStrategy` hint or an explicit custom `Strategy` via `bind(...)`, else `ConfigException`. Do not passthrough or shape-fabricate a real number.                                     |
 | `TIMESTAMP` / `LocalDateTime`          | `ae.shiftDateTime(...)` (day + time components)                                                                                                                                                                       |
-| `boolean` / tiny enum                  | usually operational, not a QI; if declared QI, needs a custom strategy                                                                                                                                                |
+| `boolean` / tiny enum                  | no built-in → needs a hint or custom strategy, else `ConfigException` (usually operational, not a QI)                                                                                                                 |
 
 ---
 

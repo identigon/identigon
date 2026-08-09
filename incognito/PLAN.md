@@ -225,13 +225,19 @@ first: `cd ../lib-alterego && ./gradlew publishToMavenLocal`. (Bump the version 
       postcode-shaped `QUASI_ID` VARCHAR still falls through to shape-preserving fabrication) is a
       **separate, still-unimplemented** gap — no type-based routing exists at all yet. Same
       underlying weakness class as this `DIRECT_ID` gap was, but a distinct fix, tracked below.
-- [ ] **`SYNTHESISE`-by-type routing (SPEC Appendix B).** Today the `SYNTHESISE` branch shifts
-  temporal values and shape-preserves everything else — so a postcode/city/state `QUASI_ID` VARCHAR
-  gets a scramble instead of a guaranteed-fictional value (affects live Chinook/Northwind `city`/
-  `region`/`state` columns), and a numeric `QUASI_ID SYNTHESISE` is shape-fabricated instead of
-  failing closed as Appendix B mandates. Fix: author-declared typed routing (reuse
-  `directIdStrategy` as a `SYNTHESISE` hint) plus a fail-closed abort for unmapped types. Handoff:
-  `docs/tasks/synthesise-by-type.md`.
+- [x] **`SYNTHESISE`-by-type routing (SPEC Appendix B) — done.** A `QUASI_ID SYNTHESISE` column may
+  carry an author-declared `directIdStrategy` hint (e.g. `ALTEREGO_POSTCODE`/`ALTEREGO_CITY`) that
+  routes it through that typed, guaranteed-fictional generator — `TableTransformLoadStage`'s
+  `SYNTHESISE` branch delegates to the DIRECT_ID transformer, so the strategy→primitive switch is
+  not duplicated. Without a hint, temporal types still shift and character types shape-preserve; a
+  non-temporal, non-character type with no hint now **fails closed** at discovery
+  (`SchemaDiscoveryStage`) instead of silently shape-fabricating (Appendix B's "never a silent
+  passthrough"). Auto-detection of "postcode-shaped" was rejected as contrary to fail-closed
+  classification (ADR 0004) — the hint is author-declared. Covered by `SynthesiseByTypeE2ETest` (a
+  typed-city hint yields a real city name; a numeric `SYNTHESISE` aborts with `ConfigException`).
+  Benchmarks were left un-hinted deliberately: a typed city/postcode generator is not length-bounded
+  to a narrow source column (Northwind `city` is `VARCHAR(15)`) — the same width caveat every typed
+  generator carries, out of scope here — and shape-preserving stays correct for un-hinted VARCHARs.
 
 ---
 
