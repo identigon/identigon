@@ -848,8 +848,8 @@ v1.0 targets **PostgreSQL** only; `GenericDialectHandler` is an uncertified ANSI
 
 ## Appendix A — `lib-alterego` integration cheat-sheet
 
-Verified against `../lib-alterego` (artifact `io.github.dconneely:alterego`). An implementer should
-not guess this API.
+Verified against `../lib-alterego` (artifact `org.identigon:alterego`). An implementer should not
+guess this API.
 
 **Construction (once per run, immutable & thread-safe):**
 

@@ -34,9 +34,22 @@ spotless {
 
 repositories {
     mavenCentral()
-    // lib-alterego is consumed as a local -SNAPSHOT until it is published to a shared repository
-    // (see PLAN.md "Build prerequisite").
+    // mavenLocal is kept as the first fallback so a local `publishToMavenLocal`-first build (see
+    // PLAN.md "Build prerequisite") still resolves lib-alterego without any token — and, being listed
+    // before GitHub Packages, means an unauthenticated local build never even queries it.
     mavenLocal()
+    // lib-alterego is published to GitHub Packages (identigon/lib-alterego). GitHub Packages requires
+    // authentication even to READ, so a token with `read:packages` must be on the environment as
+    // GITHUB_ACTOR/GITHUB_TOKEN — in CI the automatic token, locally a PAT. Credentials resolve to
+    // null when unset, so this repo is simply skipped when the artifact is already available above.
+    maven {
+        name = "AlterEgoGitHubPackages"
+        url = uri("https://maven.pkg.github.com/identigon/lib-alterego")
+        credentials {
+            username = providers.environmentVariable("GITHUB_ACTOR").orNull
+            password = providers.environmentVariable("GITHUB_TOKEN").orNull
+        }
+    }
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -134,6 +147,19 @@ publishing {
                     developerConnection = "scm:git:https://github.com/identigon/lib-incognito.git"
                     url = "https://github.com/identigon/lib-incognito"
                 }
+            }
+        }
+    }
+    // Publish to this repository's GitHub Packages Maven registry. `./gradlew publish` pushes here;
+    // credentials come from the environment only (GITHUB_ACTOR/GITHUB_TOKEN), never committed — so
+    // locally `publish` has nowhere authenticated to push unless those are set. Mirrors lib-alterego.
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/identigon/lib-incognito")
+            credentials {
+                username = providers.environmentVariable("GITHUB_ACTOR").orNull
+                password = providers.environmentVariable("GITHUB_TOKEN").orNull
             }
         }
     }

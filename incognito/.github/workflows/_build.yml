@@ -1,0 +1,27 @@
+name: Build
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    # ubuntu-latest ships with Docker, so the Testcontainers PostgreSQL E2Es run for real here (they
+    # skip gracefully only where Docker is absent). Unlike lib-alterego, there is no Windows matrix
+    # entry: the value is the Docker-backed integration tests, which need a Linux Docker daemon.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read   # to resolve lib-alterego from GitHub Packages (auth required even to read)
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: 25
+      - name: Build
+        run: ./gradlew build
+        env:
+          # Consumed by the AlterEgoGitHubPackages repository in build.gradle.kts to fetch
+          # org.identigon:alterego from identigon/lib-alterego's GitHub Packages registry.
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
