@@ -1,17 +1,17 @@
 # Effigies
 
 Effigies is a Java 25 command-line application that sits **above** the
-[lib-incognito](https://github.com/identigon/lib-incognito) anonymisation engine. It is the *authoring
-and orchestration* layer: it inspects a source database's schema, helps you author (and, later, infer)
-the declarative anonymisation policy, and then drives lib-incognito to produce the schema-identical,
-PII-free clone.
+[lib-incognito](https://github.com/identigon/lib-incognito) anonymisation engine. It is the
+*authoring and orchestration* layer: it inspects a source database's schema, helps you author (and,
+later, infer) the declarative anonymisation policy, and then drives lib-incognito to produce the
+schema-identical, PII-free clone.
 
 The name: an *effigy* is a deliberately fake likeness. Effigies makes the likeness; lib-incognito
 carries out the substitution.
 
 > **In one sentence:** *"Point me at a production database and help me produce a reviewable
-> configuration that lib-incognito can run to make an anonymised copy — without me hand-writing Java,
-> and without ever showing a real data value to anything that doesn't need it."*
+> configuration that lib-incognito can run to make an anonymised copy — without me
+> hand-writing Java, and without ever showing a real data value to anything that doesn't need it."*
 
 ## Where it sits (and what stays out)
 
@@ -27,15 +27,15 @@ Two boundaries are deliberate and load-bearing:
 
 - **No model in the engine path.** Any inference — heuristic or agent-driven — is *authoring*. The
   anonymisation itself stays a deterministic, reproducible, model-free lib-incognito run. The policy
-  YAML is the durable, checked-in, reviewable artifact; Effigies helps you write it, then gets out of
-  the way.
+  YAML is the durable, checked-in, reviewable artifact; Effigies helps you write it, then gets out
+  of the way.
 - **Fail-closed survives.** Effigies never assigns a column role behind your back. It *suggests*; an
-  unclassified column still aborts the run (lib-incognito's fail-closed contract, ADR 0004 there). The
-  DPIA report lib-incognito emits — source-value survival, misdeclaration lint, structural findings,
-  and the illustrative sample rows — is the safety net that catches a bad classification.
-- **Metadata only.** Schema discovery and any artifact Effigies produces for a human or an agent carry
-  schema *metadata* (names, types, the FK graph) — never sampled real values. Authoring works from the
-  schema, not the data.
+  unclassified column still aborts the run (lib-incognito's fail-closed contract, ADR 0004 there).
+  The DPIA report lib-incognito emits — source-value survival, misdeclaration lint, structural
+  findings, and the illustrative sample rows — is the safety net that catches a bad classification.
+- **Metadata only.** Schema discovery and any artifact Effigies produces for a human or an agent
+  carry schema *metadata* (names, types, the FK graph) — never sampled real values. Authoring works
+  from the schema, not the data.
 
 See [`docs/adr/0001-authoring-above-the-engine.md`](docs/adr/0001-authoring-above-the-engine.md) for
 the reasoning, [`SPECIFICATION.md`](SPECIFICATION.md) for the behavioural contract, and
@@ -43,8 +43,8 @@ the reasoning, [`SPECIFICATION.md`](SPECIFICATION.md) for the behavioural contra
 
 ## Status
 
-**Skeleton.** The CLI dispatches its planned subcommands (`discover`, `scaffold`, `run`) but they are
-not yet implemented. See `PLAN.md`.
+**Skeleton.** The CLI dispatches its planned subcommands (`discover`, `scaffold`, `run`) but they
+are not yet implemented. See `PLAN.md`.
 
 ## Build & run
 
@@ -60,7 +60,7 @@ cd ../app-effigies  && ./gradlew build
 `./gradlew build` produces a single runnable jar; run it with a bare `java -jar`:
 
 ```
-java -jar build/libs/app-effigies.jar help
+java -jar build/libs/effigies.jar help
 ```
 
 (or `./gradlew run --args="help"` during development).

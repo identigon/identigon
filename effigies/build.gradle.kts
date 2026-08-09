@@ -72,11 +72,16 @@ tasks.test {
     }
 }
 
-// A single runnable ("fat") jar so the tool runs with a bare `java -jar build/libs/app-effigies.jar`
+// A single runnable ("fat") jar so the tool runs with a bare `java -jar build/libs/effigies.jar`
 // — the runtime classpath (lib-incognito, lib-alterego, snakeyaml, JDBC drivers) is bundled in. No
 // shadow plugin needed; plain Gradle assembles it. Signature files from signed dependency jars are
 // dropped, as they would otherwise invalidate the merged jar.
 tasks.jar {
+    // A stable, unversioned filename so `java -jar build/libs/effigies.jar` always works; the
+    // version travels in the manifest (Implementation-Version) instead.
+    // The published/runnable name drops the repo's "app-" prefix, mirroring how lib-alterego and
+    // lib-incognito publish as `alterego`/`incognito` rather than their repo names.
+    archiveFileName = "effigies.jar"
     manifest {
         attributes["Main-Class"] = application.mainClass.get()
         attributes["Implementation-Title"] = "Effigies"

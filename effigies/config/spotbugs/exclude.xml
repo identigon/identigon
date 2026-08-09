@@ -10,6 +10,11 @@
         <Bug pattern="DMI_RANDOM_USED_ONLY_ONCE,URF_UNREAD_FIELD,VA_FORMAT_STRING_USES_NEWLINE,WMI_WRONG_MAP_ITERATOR" />
     </Match>
 
+    <!-- CLI tools intentionally read/write files specified by the user via arguments. -->
+    <Match>
+        <Bug pattern="PATH_TRAVERSAL_IN" />
+    </Match>
+
     <!-- Test scope exclusions -->
     <Match>
         <Bug pattern="DLS_DEAD_LOCAL_STORE,DM_DEFAULT_ENCODING,HARD_CODE_PASSWORD,LG_LOST_LOGGER_DUE_TO_WEAK_REFERENCE" />

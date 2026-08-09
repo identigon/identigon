@@ -50,8 +50,14 @@ public final class EffigiesCli {
                 out.println("Effigies " + version() + " (engine: lib-incognito on classpath)");
                 yield 0;
             }
+            case "discover" -> {
+                yield DiscoverCommand.execute(args, out, err);
+            }
+            case "scaffold" -> {
+                yield ScaffoldCommand.execute(args, out, err);
+            }
             // Planned subcommands — see PLAN.md. Declared here so the surface is visible early.
-            case "discover", "scaffold", "run" -> {
+            case "run" -> {
                 err.println("'" + command + "' is not yet implemented — see PLAN.md.");
                 yield EXIT_NOT_IMPLEMENTED;
             }
@@ -67,7 +73,7 @@ public final class EffigiesCli {
         w.println("""
             Effigies — author and run a lib-incognito anonymisation from a source schema.
 
-            Usage: java -jar app-effigies.jar <command> [options]
+            Usage: java -jar effigies.jar <command> [options]
 
             Commands:
               discover    Inspect a source database and describe its schema (metadata only, no data).
