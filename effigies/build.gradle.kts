@@ -36,9 +36,27 @@ spotless {
 repositories {
     mavenCentral()
     // lib-incognito (and, transitively, lib-alterego) are consumed as local -SNAPSHOTs until they are
-    // published to a shared repository — build them first with `publishToMavenLocal` (see PLAN.md
-    // "Build prerequisite").
     mavenLocal()
+    // lib-incognito and lib-alterego are published to GitHub Packages. GitHub Packages requires
+    // authentication even to READ, so a token with `read:packages` must be on the environment as
+    // GITHUB_ACTOR/GITHUB_TOKEN — in CI the automatic token, locally a PAT. Credentials resolve to
+    // null when unset, so this repo is simply skipped when the artifact is already available above.
+    maven {
+        name = "IncognitoGitHubPackages"
+        url = uri("https://maven.pkg.github.com/identigon/lib-incognito")
+        credentials {
+            username = providers.environmentVariable("GITHUB_ACTOR").orNull
+            password = providers.environmentVariable("GITHUB_TOKEN").orNull
+        }
+    }
+    maven {
+        name = "AlterEgoGitHubPackages"
+        url = uri("https://maven.pkg.github.com/identigon/lib-alterego")
+        credentials {
+            username = providers.environmentVariable("GITHUB_ACTOR").orNull
+            password = providers.environmentVariable("GITHUB_TOKEN").orNull
+        }
+    }
 }
 
 tasks.withType<JavaCompile>().configureEach {
