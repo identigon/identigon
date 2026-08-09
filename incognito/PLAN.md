@@ -489,13 +489,17 @@ start.
   to match `../play-bazlang`: SpotBugs plugin 6.5.9, tool 4.9.8.
 - [ ] Optional / consistency-only: PMD (bug-focused; prefer over Checkstyle, which duplicates the
   `Xdoclint:all` gate) and JaCoCo (a coverage metric — the suite is already thorough by design).
-- [ ] **DpiaArtefactEmitter refactor** — replace the hand-concatenated JSON with a small internal
-  `JsonWriter` (kills the manual comma/brace bookkeeping the `count('{')==count('}')` test guards
-  against) and lift the HTML/Markdown scaffolding into Java text blocks. Behaviour-preserving, zero
-  new dependencies. Mechanical handoff in `docs/tasks/dpia-emitter-refactor.md`; §7 there also
-  scopes a further follow-on — 3 illustrative sample rows per table (generated from AlterEgo with a
-  fixed non-secret salt, so synthetic and drift-free) to show a reader what the data looks like
-  after transformation.
+- [x] **DpiaArtefactEmitter refactor — done.** The hand-concatenated JSON is replaced by a small
+  internal `JsonWriter` (owns commas/braces/escaping, so malformed JSON is impossible by
+  construction — the `count('{')==count('}')` assertion is now belt-and-braces, not load-bearing),
+  and the HTML/Markdown static scaffolding is lifted into Java text blocks. Behaviour-preserving
+  (HTML and Markdown output verified byte-identical against a golden capture; the JSON emitter test
+  passes with unchanged assertions), zero new dependencies. Covered by `JsonWriterTest` +
+  `DpiaArtefactEmitterTest`.
+- [ ] **Illustrative sample rows in the DPIA artefact** (follow-on to the refactor above) — 3
+  synthetic rows per table, generated from AlterEgo with a fixed non-secret salt (so synthetic and
+  drift-free), to show a reader what the data looks like after transformation. Handoff:
+  `docs/tasks/dpia-sample-rows.md`.
 
 ## Post-v1.0 — possible future directions
 

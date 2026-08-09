@@ -23,6 +23,16 @@ public final class DpiaArtefactEmitter {
 
     private DpiaArtefactEmitter() {}
 
+    /** Static HTML scaffolding: document head, CSS, and title, up to the opening {@code <body>}. */
+    private static final String HTML_HEAD = """
+        <!doctype html>
+        <html lang="en"><head><meta charset="utf-8">
+        <title>Incognito Anonymisation Report (DPIA Artifact)</title>
+        <style>body{font-family:system-ui,sans-serif;margin:2rem;max-width:70rem}table{border-collapse:collapse;margin:.5rem 0 1.5rem}th,td{border:1px solid #ccc;padding:.3rem .6rem;text-align:left}th{background:#f2f2f2}.fail{color:#b00}.ok{color:#080}caption{font-weight:bold;text-align:left;padding:.3rem 0}</style>
+        </head><body>
+        <h1>Incognito Anonymisation Report (DPIA Artifact)</h1>
+        """;
+
     // --- JSON ---------------------------------------------------------------------------------
 
     /**
@@ -33,83 +43,102 @@ public final class DpiaArtefactEmitter {
      * @throws IncognitoException if writing fails
      */
     public static void emitJson(AnonymisationReport report, Path outputPath) throws IncognitoException {
-        try (Writer w = Files.newBufferedWriter(outputPath)) {
-            w.write("{\n  \"saltMode\": "
-                + jsonStr(report.saltMode() == null ? null : report.saltMode().name()) + ",\n");
+        JsonWriter jw = new JsonWriter();
+        jw.beginObject();
+        jw.field("saltMode", report.saltMode() == null ? null : report.saltMode().name());
 
-            w.write("  \"survivalFindings\": [");
-            for (int s = 0; s < report.survivalFindings().size(); s++) {
-                AnonymisationReport.SurvivalFinding sf = report.survivalFindings().get(s);
-                w.write((s == 0 ? "" : ", ") + "{\"table\": " + jsonStr(sf.table())
-                    + ", \"column\": " + jsonStr(sf.column())
-                    + ", \"sampledDistinct\": " + sf.sampledDistinct()
-                    + ", \"survived\": " + sf.survived()
-                    + ", \"hardFailure\": " + sf.hardFailure() + "}");
+        jw.name("survivalFindings").beginArray();
+        for (AnonymisationReport.SurvivalFinding sf : report.survivalFindings()) {
+            jw.beginObject()
+                .field("table", sf.table())
+                .field("column", sf.column())
+                .field("sampledDistinct", sf.sampledDistinct())
+                .field("survived", sf.survived())
+                .field("hardFailure", sf.hardFailure())
+                .endObject();
+        }
+        jw.endArray();
+
+        jw.name("lintFindings").beginArray();
+        for (AnonymisationReport.LintFinding lf : report.lintFindings()) {
+            jw.beginObject()
+                .field("table", lf.table())
+                .field("column", lf.column())
+                .field("distinctValues", lf.distinctValues())
+                .field("threshold", lf.threshold())
+                .endObject();
+        }
+        jw.endArray();
+
+        jw.name("structuralFindings").beginArray();
+        for (AnonymisationReport.StructuralUniquenessFinding suf : report.structuralFindings()) {
+            jw.beginObject()
+                .field("parentTable", suf.parentTable())
+                .field("childTable", suf.childTable());
+            jw.name("childColumns").beginArray();
+            for (String col : suf.childColumns()) jw.value(col);
+            jw.endArray();
+            jw.field("distinctParents", suf.distinctParents())
+                .field("maxChildCount", suf.maxChildCount())
+                .field("uniqueFingerprintCount", suf.uniqueFingerprintCount())
+                .field("rareFingerprintCount", suf.rareFingerprintCount())
+                .field("k", suf.k())
+                .endObject();
+        }
+        jw.endArray();
+
+        jw.name("stages").beginArray();
+        for (PipelineStage.StageResult sr : report.stageResults()) {
+            jw.beginObject()
+                .field("stage", sr.stageName())
+                .field("success", sr.success())
+                .field("processed", sr.processedCount())
+                .field("message", sr.message())
+                .endObject();
+        }
+        jw.endArray();
+
+        jw.name("tables").beginArray();
+        for (AnonymisationReport.TableReport tr : report.tables()) {
+            jw.beginObject()
+                .field("table", tr.table())
+                .field("rowsProcessed", tr.rowsProcessed())
+                .field("fictionalityVerified", tr.fictionalityVerified());
+            jw.name("columns").beginArray();
+            for (AnonymisationReport.ColumnAction ca : tr.columns()) {
+                jw.beginObject()
+                    .field("column", ca.column())
+                    .field("role", ca.role().name())
+                    .field("transformation", ca.transformation())
+                    .endObject();
             }
-            w.write("],\n  \"lintFindings\": [");
-            for (int l = 0; l < report.lintFindings().size(); l++) {
-                AnonymisationReport.LintFinding lf = report.lintFindings().get(l);
-                w.write((l == 0 ? "" : ", ") + "{\"table\": " + jsonStr(lf.table())
-                    + ", \"column\": " + jsonStr(lf.column())
-                    + ", \"distinctValues\": " + lf.distinctValues()
-                    + ", \"threshold\": " + lf.threshold() + "}");
+            jw.endArray();
+            jw.name("passthroughFlags").beginArray();
+            for (AnonymisationReport.PassthroughFlag pf : tr.passthroughFlags()) {
+                jw.beginObject()
+                    .field("column", pf.column())
+                    .field("jdbcType", pf.jdbcType())
+                    .field("reason", pf.reason())
+                    .endObject();
             }
-            w.write("],\n  \"structuralFindings\": [");
-            for (int u = 0; u < report.structuralFindings().size(); u++) {
-                AnonymisationReport.StructuralUniquenessFinding suf = report.structuralFindings().get(u);
-                StringBuilder cols = new StringBuilder("[");
-                for (int ci = 0; ci < suf.childColumns().size(); ci++) {
-                    cols.append(ci == 0 ? "" : ", ").append(jsonStr(suf.childColumns().get(ci)));
-                }
-                cols.append("]");
-                w.write((u == 0 ? "" : ", ") + "{\"parentTable\": " + jsonStr(suf.parentTable())
-                    + ", \"childTable\": " + jsonStr(suf.childTable())
-                    + ", \"childColumns\": " + cols
-                    + ", \"distinctParents\": " + suf.distinctParents()
-                    + ", \"maxChildCount\": " + suf.maxChildCount()
-                    + ", \"uniqueFingerprintCount\": " + suf.uniqueFingerprintCount()
-                    + ", \"rareFingerprintCount\": " + suf.rareFingerprintCount()
-                    + ", \"k\": " + suf.k() + "}");
+            jw.endArray();
+            jw.name("inferSuggestions").beginArray();
+            for (AnonymisationReport.InferSuggestion is : tr.inferSuggestions()) {
+                jw.beginObject()
+                    .field("column", is.column())
+                    .field("suggestedRole", is.suggestedRole().name())
+                    .field("matchedHeuristic", is.matchedHeuristic())
+                    .endObject();
             }
-            w.write("],\n  \"stages\": [\n");
-            for (int i = 0; i < report.stageResults().size(); i++) {
-                PipelineStage.StageResult sr = report.stageResults().get(i);
-                w.write("    {\"stage\": " + jsonStr(sr.stageName())
-                    + ", \"success\": " + sr.success()
-                    + ", \"processed\": " + sr.processedCount()
-                    + ", \"message\": " + jsonStr(sr.message()) + "}"
-                    + (i < report.stageResults().size() - 1 ? "," : "") + "\n");
-            }
-            w.write("  ],\n  \"tables\": [\n");
-            for (int t = 0; t < report.tables().size(); t++) {
-                AnonymisationReport.TableReport tr = report.tables().get(t);
-                w.write("    {\n      \"table\": " + jsonStr(tr.table())
-                    + ",\n      \"rowsProcessed\": " + tr.rowsProcessed()
-                    + ",\n      \"fictionalityVerified\": " + tr.fictionalityVerified()
-                    + ",\n      \"columns\": [");
-                for (int c = 0; c < tr.columns().size(); c++) {
-                    AnonymisationReport.ColumnAction ca = tr.columns().get(c);
-                    w.write((c == 0 ? "" : ", ") + "{\"column\": " + jsonStr(ca.column())
-                        + ", \"role\": " + jsonStr(ca.role().name())
-                        + ", \"transformation\": " + jsonStr(ca.transformation()) + "}");
-                }
-                w.write("],\n      \"passthroughFlags\": [");
-                for (int p = 0; p < tr.passthroughFlags().size(); p++) {
-                    AnonymisationReport.PassthroughFlag pf = tr.passthroughFlags().get(p);
-                    w.write((p == 0 ? "" : ", ") + "{\"column\": " + jsonStr(pf.column())
-                        + ", \"jdbcType\": " + jsonStr(pf.jdbcType())
-                        + ", \"reason\": " + jsonStr(pf.reason()) + "}");
-                }
-                w.write("],\n      \"inferSuggestions\": [");
-                for (int s = 0; s < tr.inferSuggestions().size(); s++) {
-                    AnonymisationReport.InferSuggestion is = tr.inferSuggestions().get(s);
-                    w.write((s == 0 ? "" : ", ") + "{\"column\": " + jsonStr(is.column())
-                        + ", \"suggestedRole\": " + jsonStr(is.suggestedRole().name())
-                        + ", \"matchedHeuristic\": " + jsonStr(is.matchedHeuristic()) + "}");
-                }
-                w.write("]\n    }" + (t < report.tables().size() - 1 ? "," : "") + "\n");
-            }
-            w.write("  ]\n}\n");
+            jw.endArray();
+            jw.endObject();
+        }
+        jw.endArray();
+
+        jw.endObject();
+
+        try {
+            Files.writeString(outputPath, jw.toJson());
         } catch (IOException e) {
             throw new IncognitoException("Failed to write DPIA JSON report to " + outputPath, e);
         }
@@ -125,14 +154,7 @@ public final class DpiaArtefactEmitter {
      */
     public static void emitHtml(AnonymisationReport report, Path outputPath) throws IncognitoException {
         try (Writer w = Files.newBufferedWriter(outputPath)) {
-            w.write("<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">\n");
-            w.write("<title>Incognito Anonymisation Report (DPIA Artifact)</title>\n");
-            w.write("<style>body{font-family:system-ui,sans-serif;margin:2rem;max-width:70rem}"
-                + "table{border-collapse:collapse;margin:.5rem 0 1.5rem}"
-                + "th,td{border:1px solid #ccc;padding:.3rem .6rem;text-align:left}"
-                + "th{background:#f2f2f2}.fail{color:#b00}.ok{color:#080}"
-                + "caption{font-weight:bold;text-align:left;padding:.3rem 0}</style>\n");
-            w.write("</head><body>\n<h1>Incognito Anonymisation Report (DPIA Artifact)</h1>\n");
+            w.write(HTML_HEAD);
 
             w.write("<p><b>Salt mode:</b> <code>"
                 + htmlEscape(report.saltMode() == null ? "unknown" : report.saltMode().name())
@@ -227,26 +249,6 @@ public final class DpiaArtefactEmitter {
         }
     }
 
-    private static String jsonStr(String s) {
-        if (s == null) return "null";
-        StringBuilder sb = new StringBuilder("\"");
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            switch (c) {
-                case '"' -> sb.append("\\\"");
-                case '\\' -> sb.append("\\\\");
-                case '\n' -> sb.append("\\n");
-                case '\r' -> sb.append("\\r");
-                case '\t' -> sb.append("\\t");
-                default -> {
-                    if (c < 0x20) sb.append(String.format("\\u%04x", (int) c));
-                    else sb.append(c);
-                }
-            }
-        }
-        return sb.append('"').toString();
-    }
-
     private static String htmlEscape(String s) {
         if (s == null) return "";
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
@@ -286,9 +288,12 @@ public final class DpiaArtefactEmitter {
                 writer.write("No source-value survival, misdeclaration, or structural findings.\n\n");
             }
             if (!report.survivalFindings().isEmpty()) {
-                writer.write("### Source-Value Survival (SPEC §4.3 — singling-out evidence)\n\n");
-                writer.write("| Table | Column | Sampled | Survived | Verdict |\n");
-                writer.write("|---|---|---|---|---|\n");
+                writer.write("""
+                    ### Source-Value Survival (SPEC §4.3 — singling-out evidence)
+
+                    | Table | Column | Sampled | Survived | Verdict |
+                    |---|---|---|---|---|
+                    """);
                 for (AnonymisationReport.SurvivalFinding sf : report.survivalFindings()) {
                     writer.write(String.format("| %s | %s | %d | %d | %s |%n",
                         sf.table(), sf.column(), sf.sampledDistinct(), sf.survived(),
@@ -297,9 +302,12 @@ public final class DpiaArtefactEmitter {
                 writer.write("\n");
             }
             if (!report.lintFindings().isEmpty()) {
-                writer.write("### Misdeclaration Lint (SPEC §4.1 — distinguishing:false kept opaque)\n\n");
-                writer.write("| Table | Column | Distinct Values | Threshold |\n");
-                writer.write("|---|---|---|---|\n");
+                writer.write("""
+                    ### Misdeclaration Lint (SPEC §4.1 — distinguishing:false kept opaque)
+
+                    | Table | Column | Distinct Values | Threshold |
+                    |---|---|---|---|
+                    """);
                 for (AnonymisationReport.LintFinding lf : report.lintFindings()) {
                     writer.write(String.format("| %s | %s | %d | %d |%n",
                         lf.table(), lf.column(), lf.distinctValues(), lf.threshold()));
@@ -307,10 +315,12 @@ public final class DpiaArtefactEmitter {
                 writer.write("\n");
             }
             if (!report.structuralFindings().isEmpty()) {
-                writer.write("### Structural Re-identification Risk (SPEC §2.4 — relational fingerprints)\n\n");
-                writer.write("| Parent Table | Child Table | FK Column(s) | Distinct Parents |"
-                    + " Max Child Count | Unique Fingerprints | Rare Fingerprints (<k) | k |\n");
-                writer.write("|---|---|---|---|---|---|---|---|\n");
+                writer.write("""
+                    ### Structural Re-identification Risk (SPEC §2.4 — relational fingerprints)
+
+                    | Parent Table | Child Table | FK Column(s) | Distinct Parents | Max Child Count | Unique Fingerprints | Rare Fingerprints (<k) | k |
+                    |---|---|---|---|---|---|---|---|
+                    """);
                 for (AnonymisationReport.StructuralUniquenessFinding suf : report.structuralFindings()) {
                     writer.write(String.format("| %s | %s | %s | %d | %d | %d | %d | %d |%n",
                         suf.parentTable(), suf.childTable(), String.join(", ", suf.childColumns()),
@@ -337,18 +347,24 @@ public final class DpiaArtefactEmitter {
                 writer.write(String.format("- Rows Processed: %d\n", tr.rowsProcessed()));
                 writer.write(String.format("- Fictionality Verified: %b\n\n", tr.fictionalityVerified()));
 
-                writer.write("#### Column Actions\n\n");
-                writer.write("| Column | Role | Transformation |\n");
-                writer.write("|---|---|---|\n");
+                writer.write("""
+                    #### Column Actions
+
+                    | Column | Role | Transformation |
+                    |---|---|---|
+                    """);
                 for (AnonymisationReport.ColumnAction ca : tr.columns()) {
                     writer.write(String.format("| %s | %s | %s |\n", ca.column(), ca.role(), ca.transformation()));
                 }
                 writer.write("\n");
 
                 if (!tr.inferSuggestions().isEmpty()) {
-                    writer.write("#### Inference Suggestions (Not Auto-Applied)\n\n");
-                    writer.write("| Column | Suggested Role | Heuristic |\n");
-                    writer.write("|---|---|---|\n");
+                    writer.write("""
+                        #### Inference Suggestions (Not Auto-Applied)
+
+                        | Column | Suggested Role | Heuristic |
+                        |---|---|---|
+                        """);
                     for (AnonymisationReport.InferSuggestion is : tr.inferSuggestions()) {
                         writer.write(String.format("| %s | %s | %s |\n", is.column(), is.suggestedRole(), is.matchedHeuristic()));
                     }
@@ -356,9 +372,12 @@ public final class DpiaArtefactEmitter {
                 }
 
                 if (!tr.passthroughFlags().isEmpty()) {
-                    writer.write("#### Passthrough Flags (Opaque Data Types)\n\n");
-                    writer.write("| Column | JDBC Type | Reason |\n");
-                    writer.write("|---|---|---|\n");
+                    writer.write("""
+                        #### Passthrough Flags (Opaque Data Types)
+
+                        | Column | JDBC Type | Reason |
+                        |---|---|---|
+                        """);
                     for (AnonymisationReport.PassthroughFlag pf : tr.passthroughFlags()) {
                         writer.write(String.format("| %s | %s | %s |\n", pf.column(), pf.jdbcType(), pf.reason()));
                     }
