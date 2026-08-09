@@ -9,17 +9,20 @@ identifiers/quasi-identifiers via `lib-alterego` — **not** k-anonymity / l-div
 (explicit non-goals; no statistical analysis of the clone); no JSON/JSONB, spatial, biometric/media,
 array, or INET transformations; single-threaded.
 
-**Build prerequisite:** `lib-alterego` is consumed from the local Maven repo as
-`org.identigon:alterego:0.4.0-SNAPSHOT`. Until it is published to a shared repository, build it
-first: `cd ../lib-alterego && ./gradlew publishToMavenLocal`. (Bump the version in
-`build.gradle.kts` if lib-alterego advances.)
+**Build prerequisite:** `lib-incognito` depends on `alterego` `0.5.0-SNAPSHOT`. It
+resolves from **GitHub Packages** (identigon/lib-alterego) in CI — which needs a token with
+`read:packages` on the environment as `GITHUB_ACTOR`/`GITHUB_TOKEN` (GitHub Packages requires auth
+even to read). For local builds, `mavenLocal` is tried first, so building lib-alterego once with
+`cd ../lib-alterego && ./gradlew publishToMavenLocal` still works with no token. (Bump the version in
+`build.gradle.kts` if lib-alterego advances.) lib-incognito itself publishes to GitHub Packages on a
+push to `main` (`./gradlew publish`).
 
 ---
 
 ## Phase 1: Project Foundation & Core API Interfaces
 
-- [x] Set up Java 25 build (`build.gradle.kts` / `settings.gradle.kts`) with a Java 25 toolchain.
-  `io.github.dconneely:alterego:0.2.0-SNAPSHOT` dependency. `./gradlew test` is green.
+- [x] Set up Java 25 build (`build.gradle.kts` / `settings.gradle.kts`) with a Java 25 toolchain and
+  an `alterego` dependency. `./gradlew test` is green.
 - [x] Add `lib-alterego` and SnakeYAML dependencies (SnakeYAML bundled in core; module split tracked
   in Phase 3). **No Jedis / Redis in v1.0** (in-memory `KeyTranslationStore` only).
 - [x] Create package structure: `org.identigon.incognito.{api,core,spi,policy,engine}`.

@@ -7,9 +7,9 @@ import javax.sql.DataSource;
 import org.identigon.incognito.policy.AnonymisationPolicy;
 
 /**
- * Package-private builder for {@link IncognitoPipeline}. Collects configuration and validates it;
- * the returned pipeline's stage execution is not yet implemented (Phases 2–6). Kept in the api
- * package so {@link IncognitoPipeline#builder()} does not create an api -&gt; core cycle.
+ * Package-private builder for {@link IncognitoPipeline}. Collects configuration and validates it,
+ * then assembles the discovery, transform/load, and verification stages. Kept in the api package so
+ * {@link IncognitoPipeline#builder()} does not create an api -&gt; core cycle.
  */
 final class IncognitoPipelineBuilder implements IncognitoPipeline.Builder {
 
