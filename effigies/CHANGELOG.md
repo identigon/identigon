@@ -15,7 +15,7 @@ Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Secrets stay out of the config.** Credentials and fixed/`persistent` salt bytes are injected
   out-of-band, never written into the policy or any committed file.
 
-## [Unreleased]
+## [1.0.0] - 2026-08-09
 
 ### Added
 

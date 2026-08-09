@@ -34,7 +34,7 @@ lib-incognito 2.0 lands (which removes the inference migrating here — see Phas
 - [x] `EffigiesCli` dispatch stub: `discover` / `scaffold` / `run` declared (return "not yet
   implemented"), plus `help` / `version`; covered by `EffigiesCliTest`.
 - [x] Base docs: `README.md`, `SPECIFICATION.md`, this plan, `CHANGELOG.md`, `docs/adr/` (with ADR
-  0001), `docs/tasks/`.
+  0001).
 
 ## Phase 1: Schema discovery (`discover`)
 
@@ -42,7 +42,7 @@ lib-incognito 2.0 lands (which removes the inference migrating here — see Phas
   committed secret) and inspect its schema by **reusing lib-incognito's `SchemaInspector`** (tables,
   columns, PKs, FKs, unique indexes, SQL types). Metadata only — no `SELECT` of row data.
 - [x] Emit a human-readable schema summary and a machine-readable form (the shape the later phases
-  and an agent consume). See `docs/tasks/001-schema-discovery-and-scaffold-yaml.md`.
+  and an agent consume).
 - [x] Decide connection-config format and where credentials come from (documented: env/secret, not
   the config file).
 
