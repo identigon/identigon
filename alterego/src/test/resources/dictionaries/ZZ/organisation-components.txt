@@ -1,0 +1,11 @@
+# source: AlterEgo test fixtures: synthetic organisation-name component list
+# data-url: https://example.invalid/test-fixtures/organisation-components
+# licence: TEST-LICENCE
+# licence-url: https://example.invalid/test-fixtures/licence
+# retrieved: 2026-07-14
+Fixtureland	MODIFIER
+Mocking	NOUN
+Sampleshire	MODIFIER
+Stubbing	NOUN
+Testing	NOUN
+Widgets	NOUN

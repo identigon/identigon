@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="AlterEgo PMD Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>PMD rules for AlterEgo project</description>
+
+    <!-- Best Practices -->
+    <rule ref="category/java/bestpractices.xml">
+        <!-- Style preferences -->
+        <exclude name="AvoidStringBufferField"/>
+        <exclude name="ConstantsInInterface"/>
+        <exclude name="LiteralsFirstInComparisons"/>
+        <!-- Exception translation: domain exception replaces original -->
+        <exclude name="PreserveStackTrace"/>
+        <exclude name="SimplifiableTestAssertion"/>
+        <exclude name="SystemPrintln"/>
+        <!-- Test rules -->
+        <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
+        <exclude name="UnitTestContainsTooManyAsserts"/>
+        <exclude name="UnitTestShouldIncludeAssert"/>
+        <!-- Exclusions for existing codebase -->
+        <exclude name="UseVarargs"/>
+        <exclude name="ArrayIsStoredDirectly"/>
+        <exclude name="UnusedPrivateField"/>
+        <exclude name="UnusedLocalVariable"/>
+    </rule>
+
+    <!-- Code Style -->
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="CallSuperInConstructor"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="ConfusingTernary"/>
+        <exclude name="FieldDeclarationsShouldBeAtStartOfClass"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="LongVariable"/>
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="ShortClassName"/>
+        <exclude name="ShortMethodName"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="TooManyStaticImports"/>
+        <exclude name="UnnecessaryCast"/>
+        <exclude name="UseExplicitTypes"/>
+        <exclude name="UselessParentheses"/>
+        <exclude name="PrematureDeclaration"/>
+        <!-- Exclusions for existing codebase -->
+        <exclude name="UnnecessaryFullyQualifiedName"/>
+        <exclude name="ControlStatementBraces"/>
+        <exclude name="UseUnderscoresInNumericLiterals"/>
+        <exclude name="LinguisticNaming"/>
+    </rule>
+
+    <!-- Design -->
+    <rule ref="category/java/design.xml">
+        <exclude name="CognitiveComplexity"/>
+        <exclude name="CouplingBetweenObjects"/>
+        <exclude name="CyclomaticComplexity"/>
+        <exclude name="ExcessivePublicCount"/>
+        <exclude name="GodClass"/>
+        <exclude name="NPathComplexity"/>
+        <exclude name="TooManyMethods"/>
+        <exclude name="AvoidDeeplyNestedIfStmts"/>
+        <exclude name="DataClass"/>
+        <exclude name="LawOfDemeter"/>
+        <exclude name="LoosePackageCoupling"/>
+        <exclude name="SingularField"/>
+        <exclude name="UseUtilityClass"/>
+        <!-- Exclusions for existing codebase -->
+        <exclude name="ExcessiveParameterList"/>
+        <exclude name="ExceptionAsFlowControl"/>
+        <exclude name="PublicMemberInNonPublicType"/>
+        <exclude name="AvoidThrowingRawExceptionTypes"/>
+    </rule>
+
+    <!-- Error Prone -->
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AssignmentInOperand"/>
+        <exclude name="AvoidDuplicateLiterals"/>
+        <exclude name="AvoidFieldNameMatchingMethodName"/>
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <exclude name="CloseResource"/>
+        <exclude name="DoNotTerminateVM"/>
+        <exclude name="EmptyCatchBlock"/>
+        <exclude name="MissingSerialVersionUID"/>
+        <exclude name="NullAssignment"/>
+        <exclude name="TestClassWithoutTestCases"/>
+        <exclude name="UseLocaleWithCaseConversions"/>
+        <!-- Exclusions for existing codebase -->
+        <exclude name="AvoidCatchingGenericException"/>
+    </rule>
+
+    <!-- Multithreading -->
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="DoNotUseThreads"/>
+        <exclude name="UseConcurrentHashMap"/>
+        <exclude name="AvoidUsingVolatile"/>
+        <!-- Exclusions for existing codebase -->
+        <exclude name="AvoidSynchronizedStatement"/>
+        <exclude name="AvoidSynchronizedAtMethodLevel"/>
+    </rule>
+
+    <!-- Performance -->
+    <rule ref="category/java/performance.xml">
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+        <exclude name="RedundantFieldInitializer"/>
+        <!-- Exclusions for existing codebase -->
+        <exclude name="BigIntegerInstantiation"/>
+    </rule>
+
+    <!-- Security -->
+    <rule ref="category/java/security.xml"/>
+</ruleset>

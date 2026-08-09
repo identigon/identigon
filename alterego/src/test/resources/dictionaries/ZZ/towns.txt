@@ -1,0 +1,8 @@
+# source: AlterEgo test fixtures: synthetic town list
+# data-url: https://example.invalid/test-fixtures/towns
+# licence: TEST-LICENCE
+# licence-url: https://example.invalid/test-fixtures/licence
+# retrieved: 2026-07-14
+Fixtureburgh	FX	SCOTLAND
+Sampletown	SM	WALES
+Testford	TF	ENGLAND

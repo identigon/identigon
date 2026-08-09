@@ -1,0 +1,29 @@
+# source: AlterEgo project: authored, deliberately fictional street-name theme words — not sourced from real UK street-name frequency data (see docs/dictionaries.md, "Street names", and ADR 0010)
+# data-url: https://github.com/identigon/lib-alterego/blob/main/docs/dictionaries.md
+# licence: MIT
+# licence-url: https://github.com/identigon/lib-alterego/blob/main/LICENCE
+# retrieved: 2026-07-26
+Artificial
+Bluff
+Bogus
+Counterfeit
+Demo
+Dummy
+Example
+Fabricated
+Fake
+Fictional
+Hypothetical
+Imaginary
+Invented
+Madeup
+Nonexistent
+Notreal
+Phony
+Placeholder
+Pretend
+Sample
+Somewhere
+Specimen
+Synthetic
+Unreal

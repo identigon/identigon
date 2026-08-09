@@ -1,0 +1,8 @@
+# source: AlterEgo test fixtures: synthetic street theme list
+# data-url: https://example.invalid/test-fixtures/street-themes
+# licence: TEST-LICENCE
+# licence-url: https://example.invalid/test-fixtures/licence
+# retrieved: 2026-07-14
+Fixture
+Mock
+Sample

@@ -1,0 +1,10 @@
+# source: AlterEgo test fixtures: synthetic first-name list
+# data-url: https://example.invalid/test-fixtures/first-names
+# licence: TEST-LICENCE
+# licence-url: https://example.invalid/test-fixtures/licence
+# retrieved: 2026-07-14
+Alice
+Bob
+Carol
+Dave
+Eve

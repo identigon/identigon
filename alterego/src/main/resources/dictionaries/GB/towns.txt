@@ -1,0 +1,32 @@
+# source: ONS 2021 Census built-up area populations (England); 2021 Census local-authority figures (Wales); National Records of Scotland city-population estimates (Scotland); NISRA-sourced 2021 Census figures (Northern Ireland); postcode areas cross-checked against Royal Mail-derived reference sources. See docs/dictionaries.md for the full per-nation source breakdown; England's figures are more precisely sourced than Scotland/NI/Wales's.
+# data-url: https://en.wikipedia.org/wiki/List_of_ONS_built-up_areas_in_England_by_population (and equivalent per-nation sources cited in docs/dictionaries.md)
+# licence: OGL-v3
+# licence-url: http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+# retrieved: 2026-07-14
+Belfast	BT	NORTHERN_IRELAND
+Birmingham	B	ENGLAND
+Bradford	BD	ENGLAND
+Brighton and Hove	BN	ENGLAND
+Bristol	BS	ENGLAND
+Cardiff	CF	WALES
+Coventry	CV	ENGLAND
+Derby	DE	ENGLAND
+Edinburgh	EH	SCOTLAND
+Glasgow	G	SCOTLAND
+Kingston upon Hull	HU	ENGLAND
+Leeds	LS	ENGLAND
+Leicester	LE	ENGLAND
+Liverpool	L	ENGLAND
+London	E	ENGLAND
+London	EC	ENGLAND
+London	N	ENGLAND
+London	NW	ENGLAND
+London	SE	ENGLAND
+London	SW	ENGLAND
+London	W	ENGLAND
+London	WC	ENGLAND
+Manchester	M	ENGLAND
+Newcastle upon Tyne	NE	ENGLAND
+Nottingham	NG	ENGLAND
+Plymouth	PL	ENGLAND
+Sheffield	S	ENGLAND
