@@ -1,4 +1,4 @@
-name: Build
+name: _Build
 
 on:
   workflow_call:
