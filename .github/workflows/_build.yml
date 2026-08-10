@@ -8,10 +8,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Windows is a first-class target: FileMappingStore relies on FileChannel
-        # locking, whose semantics differ from POSIX, and development happens on Windows.
+        # One Gradle build for all three subprojects, run on both:
+        # - windows-latest: alterego treats Windows as a first-class target (FileMappingStore
+        #   relies on FileChannel locking, whose semantics differ from POSIX).
+        # - ubuntu-latest: ships with Docker, so incognito's Testcontainers PostgreSQL E2Es run for
+        #   real here. They skip gracefully on windows-latest, which has no Docker daemon.
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

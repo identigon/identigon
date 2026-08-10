@@ -1,9 +1,0 @@
-name: Main
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  build:
-    uses: ./.github/workflows/_build.yml
