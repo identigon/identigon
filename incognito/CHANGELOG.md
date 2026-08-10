@@ -25,7 +25,7 @@ meaningful rather than just a feature list:
 ### Added
 
 - **`DirectIdStrategy`: `ALTEREGO_POSTCODE`, `ALTEREGO_DOMAIN`, `ALTEREGO_URL`.** Three previously
-  unexposed `lib-alterego` typed generators (`postcode()`, `domainName()`, `url()`) are now
+  unexposed `alterego` typed generators (`postcode()`, `domainName()`, `url()`) are now
   reachable from policy. `VerificationStage` positively asserts each strategy's fictionality
   guarantee on the target (GB postcode inward-code letter; RFC 2606 reserved domain/TLD for
   domain/URL), and these strategies are excluded from the generic DIRECT_ID survival check, same as
@@ -43,7 +43,7 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
   unique candidate keys, identity vs generated columns); `TableDependencyGraph` topological
   ordering; fail-closed classification with advisory `PolicyInferrer` suggestions.
 - **Fabrication engine** (Phase 4): streaming transform+load; `DIRECT_ID` / `UNIQUE_CANDIDATE_KEY`
-  via `lib-alterego` with a length-preserving collision fallback; `QUASI_ID` temporal jitter,
+  via `alterego` with a length-preserving collision fallback; `QUASI_ID` temporal jitter,
   including one salt-keyed delta per coherence group inherited by descendants (ADR 0005); declared
   `distinguishing` handling for `SENSITIVE` columns (ADR 0003); root-ancestor `INHERITED_ATTRIBUTE`
   resolution (ADR 0007); primary-key surrogates and foreign-key rewriting.
@@ -58,7 +58,7 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
   tolerances, the default-on misdeclaration lint, and a source-value survival net);
   `AnonymisationReportBuilder` (with the §7.2 opaque-type passthrough audit) and a
   `DpiaArtefactEmitter` that writes JSON, HTML, or Markdown.
-- **lib-alterego 0.3.0 adoption:** **type-aware redaction** — `CONSTANT`/`MASK` now delegate to
+- **alterego 0.3.0 adoption:** **type-aware redaction** — `CONSTANT`/`MASK` now delegate to
   `AlterEgo.redact(Class<T>)`/`constant`/`mask`, so numeric, temporal, boolean and opaque
   `SENSITIVE`
   columns get a type-appropriate constant instead of failing at insert; **salt destruction** — the
@@ -91,7 +91,7 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
   closed — `FailClosedGuardE2ETest`).
 - Generic shape-preserving fabrication (`ALTEREGO_GENERIC` / string-`SYNTHESISE`) carries no
   fictionality guarantee — inherent for an arbitrary shape; use a typed strategy where the guarantee
-  matters (see PLAN.md). It runs on lib-alterego's `bind` extension API (salt-keyed, deterministic)
+  matters (see PLAN.md). It runs on alterego's `bind` extension API (salt-keyed, deterministic)
   and lives in Incognito by decision — not a delegation gap.
 - Declarative table **partitioning** is not cloned (partition children are discovered but the
   partitioned parent isn't specially handled); the Pagila benchmark excludes its partitioned

@@ -5,17 +5,15 @@ schema-identical test database with all PII replaced by **clearly fictional** da
 volumes and inter-entity relationships. See `SPECIFICATION.md` §1 for goals/non-goals.
 
 **v1.0 scope (locked):** PostgreSQL only; in-memory `KeyTranslationStore` only; **fabrication** of
-identifiers/quasi-identifiers via `lib-alterego` — **not** k-anonymity / l-diversity / t-closeness
+identifiers/quasi-identifiers via `alterego` — **not** k-anonymity / l-diversity / t-closeness
 (explicit non-goals; no statistical analysis of the clone); no JSON/JSONB, spatial, biometric/media,
 array, or INET transformations; single-threaded.
 
-**Build prerequisite:** `lib-incognito` depends on `alterego` `0.5.0-SNAPSHOT`. It
-resolves from **GitHub Packages** (identigon/lib-alterego) in CI — which needs a token with
-`read:packages` on the environment as `GITHUB_ACTOR`/`GITHUB_TOKEN` (GitHub Packages requires auth
-even to read). For local builds, `mavenLocal` is tried first, so building lib-alterego once with
-`cd ../lib-alterego && ./gradlew publishToMavenLocal` still works with no token. (Bump the version in
-`build.gradle.kts` if lib-alterego advances.) lib-incognito itself publishes to GitHub Packages on a
-push to `main` (`./gradlew publish`).
+**Build prerequisite:** `incognito` depends on `alterego` as a sibling Gradle subproject
+(`project(":alterego")` — see the monorepo root `settings.gradle.kts`), so `./gradlew build` at the
+repo root builds both in dependency order automatically; no separate publish/resolve step is needed
+for local development. `incognito` still publishes its own artifact to GitHub Packages on a push to
+`main` (`./gradlew publish`), for external Maven consumers.
 
 ---
 
@@ -23,7 +21,7 @@ push to `main` (`./gradlew publish`).
 
 - [x] Set up Java 25 build (`build.gradle.kts` / `settings.gradle.kts`) with a Java 25 toolchain and
   an `alterego` dependency. `./gradlew test` is green.
-- [x] Add `lib-alterego` and SnakeYAML dependencies (SnakeYAML bundled in core; module split tracked
+- [x] Add `alterego` and SnakeYAML dependencies (SnakeYAML bundled in core; module split tracked
   in Phase 3). **No Jedis / Redis in v1.0** (in-memory `KeyTranslationStore` only).
 - [x] Create package structure: `org.identigon.incognito.{api,core,spi,policy,engine}`.
 - [x] Core API **interfaces & records**:
@@ -143,7 +141,7 @@ push to `main` (`./gradlew publish`).
   implemented. The advanced relational paths (root-ancestor `INHERITED_ATTRIBUTE`, coherent group
   jitter) now have **end-to-end coverage** via `CoherenceE2ETest` (`firm → contract → schedule`:
   grandparent inheritance + preserved parent-child intervals), beyond the store/fallback unit tests.
-    - `DIRECT_ID` via `lib-alterego` (`DirectIdStrategy`); `UNIQUE_CANDIDATE_KEY` via
+    - `DIRECT_ID` via `alterego` (`DirectIdStrategy`); `UNIQUE_CANDIDATE_KEY` via
       `AlterEgo.unique()` with a **length-preserving** collision fallback (zero-padded sequence
       overlaid on the value's tail — never widens a fixed-width/`CHECK` column; numeric columns fall
       back to a bare sequence).
@@ -205,7 +203,7 @@ push to `main` (`./gradlew publish`).
   `VerificationStage` runs `COUNT(DISTINCT)` (with a `pg_stats` pre-filter) on every
   `distinguishing: false` SENSITIVE column; `WARN` reports, `ERROR` throws, `OFF` skips. Never the
   gate. Covered by `DistinguishingLintTest`.
-- [x] **Expose `postcode()` / `domainName()` / `url()` from `lib-alterego` — done.**
+- [x] **Expose `postcode()` / `domainName()` / `url()` from `alterego` — done.**
   `DirectIdStrategy` previously wired 8 of AlterEgo 0.3.0's typed generators but stopped short of
   these three, even though `postcode()` was already named as a QI example in the YAML sample (SPEC
   §6). Added `ALTEREGO_POSTCODE`, `ALTEREGO_DOMAIN`, `ALTEREGO_URL` (SPEC §7, Appendix A) and wired
@@ -219,7 +217,7 @@ push to `main` (`./gradlew publish`).
   asserts the target values are GB-format postcodes carrying the guaranteed-fictional inward-code
   letter (or, for `homepage`, a fictional RFC 2606 URL) — all three affected benchmarks (Chinook,
   Northwind, Pagila) pass against real Testcontainers PostgreSQL.
-    - `postcode()`'s GB-only resolution (lib-alterego ships no other country's postcode table) is
+    - `postcode()`'s GB-only resolution (alterego ships no other country's postcode table) is
       not a new restriction — every typed generator in this enum is GB-only today, since only GB
       dictionaries are bundled; every benchmark runs under Incognito's default `Locale.UK`, so this
       did not block adoption.
@@ -324,7 +322,7 @@ push to `main` (`./gradlew publish`).
   now enforces the full `Xdoclint:all` group (`+ -Xwerror`), so a doc comment / `@param` /
   `@return` / `@throws` on **every** public element (the `api` interfaces/enums,
   `IncognitoException`, the strategy enums, and the `core`/`engine` stages, handlers, stores and
-  records) is required and the published javadoc jar is warning-free — matching lib-alterego's
+  records) is required and the published javadoc jar is warning-free — matching alterego's
   standard.
 - [x] **JITTER_DAYS volume check uses yearly buckets** — a ±N-day jitter crosses month boundaries,
   so the old monthly ±2% check raised spurious drift *warnings* (cosmetic, never a failure); yearly
@@ -434,7 +432,7 @@ coherent jitter (`CoherenceE2ETest`); and the opaque-type passthrough audit
   **unshifted** under the non-`SYNTHESISE` branches — a real QI surviving (§7.3). The shared
   helper's timestamp path is exercised via Chinook (`SYNTHESISE` on a `TIMESTAMP` DOB); the jitter
   branches reuse it.
-- [x] **`shiftInstant` domain bug — fixed upstream** (lib-alterego `082a4a5`). It built a domain
+- [x] **`shiftInstant` domain bug — fixed upstream** (alterego `082a4a5`). It built a domain
   containing `=` that failed AlterEgo's own domain regex and threw for any arguments; it now routes
   through the same fragment helpers as `shiftDateTime`. Incognito nonetheless shifts `Instant` via
   `shiftDateTime` at UTC **by design** — one path covers every jitter mode, and `shiftInstant` has
@@ -476,8 +474,7 @@ coherent jitter (`CoherenceE2ETest`); and the opaque-type passthrough audit
 
 ## Code hygiene tooling
 
-Kept in step with the sibling repos (`../play-bazlang`, `../lib-alterego`); deliberately minimal to
-start.
+Kept in step with the `alterego` subproject; deliberately minimal to start.
 
 - [x] **Spotless (tidy-only)** — `importOrder`, `removeUnusedImports`, trailing-whitespace, EOF
   newline; **no** `googleJavaFormat` (it would reflow the hand-maintained style). `spotlessCheck`
@@ -488,8 +485,8 @@ start.
   omitted (too slow for a commit hook).
 - [x] **SpotBugs + find-sec-bugs** (CI, `ignoreFailures = false`) — the security-focused follow-up.
   The first run will flag the ~18 SQL-by-string-concatenation sites (catalog identifiers, not user
-  input); resolve by quoting the identifiers or a justified `config/spotbugs/exclude.xml`. Versions
-  to match `../play-bazlang`: SpotBugs plugin 6.5.9, tool 4.9.8.
+  input); resolve by quoting the identifiers or a justified `config/spotbugs/exclude.xml`. SpotBugs
+  plugin 6.5.9, tool 4.9.8.
 - [ ] Optional / consistency-only: PMD (bug-focused; prefer over Checkstyle, which duplicates the
   `Xdoclint:all` gate) and JaCoCo (a coverage metric — the suite is already thorough by design).
 - [x] **DpiaArtefactEmitter refactor — done.** The hand-concatenated JSON is replaced by a small

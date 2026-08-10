@@ -4,7 +4,7 @@ Status: accepted (2026-07-31)
 
 ## Context
 
-A proposed feature for `lib-alterego` was "Tagged name dictionaries", which would include gendered name lists (e.g., mapping "Male" records to male fictional names and "Female" to female fictional names).
+A proposed feature for `alterego` was "Tagged name dictionaries", which would include gendered name lists (e.g., mapping "Male" records to male fictional names and "Female" to female fictional names).
 
 While generating gender-aligned names might seem to improve the realism of pseudonymised records, doing so natively in the library presents three major complications:
 
@@ -14,7 +14,7 @@ While generating gender-aligned names might seem to improve the realism of pseud
 
 ## Decision
 
-Reject the addition of gender-partitioned dictionaries and any parameterized `firstName(Gender)` API. `lib-alterego` will continue to map all names deterministically from a single, unified, gender-agnostic pool of diverse fictional names.
+Reject the addition of gender-partitioned dictionaries and any parameterized `firstName(Gender)` API. `alterego` will continue to map all names deterministically from a single, unified, gender-agnostic pool of diverse fictional names.
 
 ## Consequences
 

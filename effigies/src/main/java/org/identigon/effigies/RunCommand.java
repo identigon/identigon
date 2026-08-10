@@ -58,7 +58,7 @@ class RunCommand {
             return 1;
         }
 
-        // Parse salt mode directly from YAML since lib-incognito's YamlPolicyParser doesn't handle it
+        // Parse salt mode directly from YAML since incognito's YamlPolicyParser doesn't handle it
         String saltMode = "ephemeral";
         try (InputStream is = Files.newInputStream(policyPath)) {
             Yaml yaml = new Yaml(new SafeConstructor(new org.yaml.snakeyaml.LoaderOptions()));

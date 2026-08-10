@@ -1,7 +1,7 @@
 package org.identigon.incognito.api;
 
 /**
- * Selects which {@code lib-alterego} generator backs a {@link ColumnRole#DIRECT_ID} or
+ * Selects which {@code alterego} generator backs a {@link ColumnRole#DIRECT_ID} or
  * {@link ColumnRole#UNIQUE_CANDIDATE_KEY} column.
  */
 public enum DirectIdStrategy {
@@ -18,7 +18,7 @@ public enum DirectIdStrategy {
     /** Street-address generator ({@code AlterEgo.streetAddress()}) — authored, obviously-fictional streets (ADR 0010). */
     ALTEREGO_STREET_ADDRESS,
     /**
-     * Postcode generator ({@code AlterEgo.postcode()}) — GB format only. {@code lib-alterego} ships
+     * Postcode generator ({@code AlterEgo.postcode()}) — GB format only. {@code alterego} ships
      * no other country's postcode table yet; this is the same GB-only reality every typed generator
      * in this enum already has, since only GB dictionaries are bundled.
      */

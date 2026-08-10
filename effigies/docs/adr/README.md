@@ -11,4 +11,4 @@ and marks the old one superseded rather than editing it.
 
 | ADR | Decision |
 | :--- | :--- |
-| [0001](0001-authoring-above-the-engine.md) | Authoring/inference lives in Effigies, above a deterministic, model-free lib-incognito |
+| [0001](0001-authoring-above-the-engine.md) | Authoring/inference lives in Effigies, above a deterministic, model-free incognito |

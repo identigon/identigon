@@ -46,7 +46,7 @@ tasks.withType<Javadoc>().configureEach {
     options.encoding = "UTF-8"
     (options as StandardJavadocDocletOptions).apply {
         // A doclint warning fails the build instead of the backlog quietly accumulating (mirrors
-        // lib-alterego). The full `all` group is enforced — including `missing` (a doc comment /
+        // alterego). The full `all` group is enforced — including `missing` (a doc comment /
         // @param / @return / @throws on every public element) — so the published javadoc jar is
         // complete and warning-free.
         addBooleanOption("Xdoclint:all", true)
@@ -109,17 +109,17 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-            artifactId = "incognito" // the library's own name, distinct from the lib-incognito repo/directory name
+            artifactId = "incognito"
 
             pom {
                 name = "Incognito"
                 description = "A Java library that clones a production database into a schema-identical " +
                     "test database with all PII replaced by clearly fictional data."
-                url = "https://github.com/identigon/lib-incognito"
+                url = "https://github.com/identigon/identigon/tree/main/incognito"
                 licenses {
                     license {
                         name = "MIT License"
-                        url = "https://github.com/identigon/lib-incognito/blob/main/LICENCE"
+                        url = "https://github.com/identigon/identigon/blob/main/LICENCE"
                     }
                 }
                 developers {
@@ -129,20 +129,20 @@ publishing {
                     }
                 }
                 scm {
-                    connection = "scm:git:https://github.com/identigon/lib-incognito.git"
-                    developerConnection = "scm:git:https://github.com/identigon/lib-incognito.git"
-                    url = "https://github.com/identigon/lib-incognito"
+                    connection = "scm:git:https://github.com/identigon/identigon.git"
+                    developerConnection = "scm:git:https://github.com/identigon/identigon.git"
+                    url = "https://github.com/identigon/identigon/tree/main/incognito"
                 }
             }
         }
     }
     // Publish to this repository's GitHub Packages Maven registry. `./gradlew publish` pushes here;
     // credentials come from the environment only (GITHUB_ACTOR/GITHUB_TOKEN), never committed — so
-    // locally `publish` has nowhere authenticated to push unless those are set. Mirrors lib-alterego.
+    // locally `publish` has nowhere authenticated to push unless those are set. Mirrors alterego.
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/identigon/lib-incognito")
+            url = uri("https://maven.pkg.github.com/identigon/identigon")
             credentials {
                 username = providers.environmentVariable("GITHUB_ACTOR").orNull
                 password = providers.environmentVariable("GITHUB_TOKEN").orNull

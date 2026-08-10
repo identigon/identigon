@@ -17,12 +17,12 @@ See [`SPECIFICATION.md`](SPECIFICATION.md) for the full behavioural contract, [`
 for the implementation phases, [`docs/adr/`](docs/adr/) for the key design decisions and why they
 were made, and [`CHANGELOG.md`](CHANGELOG.md) for what has changed between versions.
 
-## Relationship to `lib-alterego`
+## Relationship to `alterego`
 
 Incognito delegates all **field-value** transformation to its sibling library
-[`lib-alterego`](../lib-alterego) and owns everything relational on top:
+[`alterego`](../alterego) and owns everything relational on top:
 
-|                 | `lib-alterego`                                                                                        | Incognito                                                                               |
+|                 | `alterego`                                                                                        | Incognito                                                                               |
 |:----------------|:------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|
 | **Scope**       | one value, or the fields of one record                                                                | a whole relational database                                                             |
 | **Job**         | fabricate a replacement value (name, e-mail, date shift, …), deterministic in `(salt, domain, value)` | clone a schema and load it while keeping every cross-row / cross-table invariant intact |
@@ -134,13 +134,8 @@ mode) exactly like a credential.
 
 ## Building
 
-Java 25 and Gradle. Incognito depends on `lib-alterego` as a local `-SNAPSHOT`; build it into your
-local Maven repo first:
-
-```
-cd ../lib-alterego && ./gradlew publishToMavenLocal
-cd ../lib-incognito && ./gradlew build
-```
+Java 25 and Gradle. Incognito depends on `alterego` as a sibling Gradle subproject; from the
+monorepo root, `./gradlew build` builds both in dependency order automatically.
 
 The integration tests use [Testcontainers](https://testcontainers.com/) and require Docker; they
 skip gracefully where Docker is unavailable.

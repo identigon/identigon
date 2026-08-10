@@ -4,13 +4,13 @@ Status: accepted (2026-08-09)
 
 ## Context
 
-Using lib-incognito requires a fully-classified anonymisation policy: every column assigned a role
+Using incognito requires a fully-classified anonymisation policy: every column assigned a role
 and strategy, or the run fails closed (that project's ADR 0004). Producing that policy is real work
 — inspecting the schema, judging what each column is, writing YAML — and it is exactly the kind of
 judgment that is tedious for a human and well-suited to heuristics or an LLM/agent.
 
 There is pressure to push that judgment *down* into the engine: auto-infer roles, let a model
-classify columns, "just make it work" from a connection string. lib-incognito already carries a
+classify columns, "just make it work" from a connection string. incognito already carries a
 small piece of this (`PolicyInferrer` and an `autoInfer` flag) — but, by its fail-closed design,
 inference there only ever *suggests*; it never assigns a role, so it has no effect on what the
 engine produces. It is a half-exposed authoring feature sitting inside an execution engine.
@@ -24,16 +24,16 @@ to evolve — regex heuristics today, an agent tomorrow.
 
 Split the responsibilities across a fixed boundary:
 
-- **The engine (lib-incognito) stays deterministic, model-free, and judgment-free.** It discovers
+- **The engine (incognito) stays deterministic, model-free, and judgment-free.** It discovers
   the schema (it must, to execute), validates a *finished* policy fail-closed, orchestrates the
   load, and emits the DPIA report. No inference, no defaults-that-guess.
 - **All authoring lives in Effigies, above the engine.** Effigies *reuses* the engine's schema
   discovery and policy model, and *owns* everything judgment-shaped: inference, scaffolding, and the
   artifact handed to an agent. Its output is a reviewed `policy.yaml`; the run itself is a plain
-  lib-incognito execution.
-- **Inference migrates out of lib-incognito into Effigies.** Because inference there was execution-
+  incognito execution.
+- **Inference migrates out of incognito into Effigies.** Because inference there was execution-
   inert (fail-closed meant it never assigned a role), moving it changes zero engine behaviour. This
-  pairs with lib-incognito's 2.0, which removes that public API.
+  pairs with incognito's 2.0, which removes that public API.
 
 Corollary constraints (recorded in `SPECIFICATION.md §2`): Effigies reads schema **metadata only,
 never row data**; it never emits a runnable policy that silently defaults a column; and secrets
@@ -48,5 +48,5 @@ never row data**; it never emits a runnable policy that silently defaults a colu
   engine or its reproducibility/fail-closed guarantees.
 - A model may participate in *authoring* a config, but never in *running* one; the `policy.yaml` is
   the durable, reviewable boundary between the two.
-- Cost: a second artifact (Effigies) to build and version, and a breaking change to lib-incognito
+- Cost: a second artifact (Effigies) to build and version, and a breaking change to incognito
   (the removal of `PolicyInferrer` / `autoInfer`), taken as its 2.0. Accepted deliberately.

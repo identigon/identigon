@@ -91,9 +91,9 @@ fictionality net), a self-referential `employee.reports_to` FK, and a `TIMESTAMP
 - **Licence:** MIT — <https://github.com/lerocha/chinook-database/blob/master/LICENSE.md> (copy:
   `LICENCES/MIT-Chinook.txt`).
 
-## Notes on the model (improvements over `lib-alterego`'s)
+## Notes on the model (improvements over `alterego`'s)
 
-`lib-alterego` vendors small curated dictionaries that ship *inside the JAR*, so its `NOTICE` is
+`alterego` vendors small curated dictionaries that ship *inside the JAR*, so its `NOTICE` is
 top-level and packaged into `META-INF`. These fixtures are **test-only**, so the whole set is scoped
 under `benchmarks/` and kept out of the artifact. One addition beyond that model: the **licence URL**
 is recorded next to the data URL (not just the data provenance). Every fixture is vendored the same

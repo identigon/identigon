@@ -6,7 +6,7 @@ import org.identigon.incognito.api.ColumnRole;
 
 /**
  * Auto-infers baseline column roles based on column name heuristics and regex patterns.
- * Migrated from lib-incognito to Effigies to preserve fail-closed engine execution.
+ * Migrated from incognito to Effigies to preserve fail-closed engine execution.
  */
 public class PolicyInferrer {
 

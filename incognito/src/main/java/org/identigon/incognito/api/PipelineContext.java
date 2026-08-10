@@ -37,7 +37,7 @@ public interface PipelineContext {
     AttributeCascadeStore cascadeStore();
 
     /**
-     * Returns the {@code lib-alterego} instance backing all value fabrication.
+     * Returns the {@code alterego} instance backing all value fabrication.
      *
      * @return the AlterEgo instance
      */

@@ -1,26 +1,23 @@
 # Effigies — Implementation Plan
 
 Phased plan for **Effigies**, the authoring/orchestration CLI above
-[lib-incognito](https://github.com/identigon/lib-incognito). See `SPECIFICATION.md` for the
+[incognito](../incognito). See `SPECIFICATION.md` for the
 behavioural contract and `docs/adr/0001-authoring-above-the-engine.md` for the boundary that shapes
 everything below.
 
 **Scope (locked):** Effigies never anonymises anything itself — it *discovers* a schema, *authors*
-(and *infers*) a lib-incognito policy, and *drives* the engine. The engine stays deterministic and
+(and *infers*) an incognito policy, and *drives* the engine. The engine stays deterministic and
 model-free; every judgment lives here. Effigies reads schema **metadata only**, never row data, and
-never assigns a column role behind the user's back (fail-closed is lib-incognito's, and is
+never assigns a column role behind the user's back (fail-closed is incognito's, and is
 preserved).
 
-**Build prerequisite:** lib-incognito (and, transitively, lib-alterego) are consumed from the local
-Maven repo until they are published to a shared repository. Build them first, upstream-first:
+**Build prerequisite:** `effigies` depends on `incognito` (and, transitively, `alterego`) as sibling
+Gradle subprojects (`project(":incognito")` — see the monorepo root `settings.gradle.kts`), so
+`./gradlew build` at the repo root builds all three in dependency order automatically; no separate
+publish/resolve step is needed for local development.
 
-```
-cd ../lib-alterego  && ./gradlew publishToMavenLocal
-cd ../lib-incognito && ./gradlew publishToMavenLocal
-```
-
-Effigies currently pins `incognito` `1.1.0-SNAPSHOT`; it moves to `2.0.x` once
-lib-incognito 2.0 lands (which removes the inference migrating here — see Phase 3 and the ADR).
+Effigies moves to a 2.0.x incognito once that lands (which removes the inference migrating here —
+see Phase 3 and the ADR).
 
 ---
 
@@ -30,7 +27,7 @@ lib-incognito 2.0 lands (which removes the inference migrating here — see Phas
   ("fat") jar so the tool runs via `java -jar build/libs/effigies.jar`.
 - [x] Code hygiene in step with the sibling repos: Spotless (tidy-only), SpotBugs + find-sec-bugs,
   `.pre-commit-config.yaml` (spotless + compile + gitleaks + native hooks), and a CI workflow that
-  builds lib-alterego and lib-incognito to Maven local first, then builds Effigies.
+  builds alterego and incognito to Maven local first, then builds Effigies.
 - [x] `EffigiesCli` dispatch stub: `discover` / `scaffold` / `run` declared (return "not yet
   implemented"), plus `help` / `version`; covered by `EffigiesCliTest`.
 - [x] Base docs: `README.md`, `SPECIFICATION.md`, this plan, `CHANGELOG.md`, `docs/adr/` (with ADR
@@ -39,7 +36,7 @@ lib-incognito 2.0 lands (which removes the inference migrating here — see Phas
 ## Phase 1: Schema discovery (`discover`)
 
 - [x] Connect to a source database (connection details from CLI args / env / a config file — never a
-  committed secret) and inspect its schema by **reusing lib-incognito's `SchemaInspector`** (tables,
+  committed secret) and inspect its schema by **reusing incognito's `SchemaInspector`** (tables,
   columns, PKs, FKs, unique indexes, SQL types). Metadata only — no `SELECT` of row data.
 - [x] Emit a human-readable schema summary and a machine-readable form (the shape the later phases
   and an agent consume).
@@ -52,17 +49,17 @@ lib-incognito 2.0 lands (which removes the inference migrating here — see Phas
   type/PK/FK metadata as comments, and **every column left unclassified** so a run still fails
   closed until a human (or Phase 3) fills it in. The scaffold is a *draft*, never a runnable config.
 
-## Phase 3: Inference (migrated from lib-incognito)
+## Phase 3: Inference (migrated from incognito)
 
 - [x] Move the role-inference heuristics (`PolicyInferrer` and the `autoInfer` concept) out of
-  lib-incognito into Effigies — inference is authoring, and because lib-incognito is fail-closed it
+  incognito into Effigies — inference is authoring, and because incognito is fail-closed it
   never affected execution, so the move is behaviour-neutral for the engine (ADR 0001). This pairs
-  with lib-incognito's 2.0 removal of that API.
+  with incognito's 2.0 removal of that API.
 - [x] Pre-fill the scaffold's suggestions, **clearly marked as suggestions**, never auto-applied.
 
 ## Phase 4: Orchestration (`run`)
 
-- [x] Given a finished `policy.yaml` plus source/target connection details, drive lib-incognito
+- [x] Given a finished `policy.yaml` plus source/target connection details, drive incognito
   (`YamlPolicyParser` → `IncognitoPipeline`) to produce the clone, and surface the DPIA report
   (JSON/HTML/Markdown) it emits.
 - [x] Salt handling per `SPECIFICATION.md`: the config declares the salt **mode** (`ephemeral`
@@ -91,11 +88,11 @@ lib-incognito 2.0 lands (which removes the inference migrating here — see Phas
 ## Code hygiene tooling
 
 - [x] Spotless (tidy-only), SpotBugs + find-sec-bugs (CI, `ignoreFailures = false`), pre-commit
-  hooks, gitleaks — mirroring lib-incognito.
+  hooks, gitleaks — mirroring incognito.
 - [ ] Optional / consistency-only: PMD, JaCoCo.
 
 ## Post-v1.0 — possible future directions
 
 - [ ] A non-interactive "authoring session" mode that runs discover → scaffold → (agent) → run in
   one invocation, with the DPIA report fed back for iteration.
-- [ ] Support for engines lib-incognito adds beyond PostgreSQL, without change here.
+- [ ] Support for engines incognito adds beyond PostgreSQL, without change here.

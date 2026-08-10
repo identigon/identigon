@@ -122,16 +122,16 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-            artifactId = "alterego" // the library's own name, distinct from the lib-alterego repo/directory name
+            artifactId = "alterego"
 
             pom {
                 name = "AlterEgo"
                 description = "A zero-dependency Java library for deterministic pseudonymisation."
-                url = "https://github.com/identigon/lib-alterego"
+                url = "https://github.com/identigon/identigon/tree/main/alterego"
                 licenses {
                     license {
                         name = "MIT License"
-                        url = "https://github.com/identigon/lib-alterego/blob/main/LICENCE"
+                        url = "https://github.com/identigon/identigon/blob/main/alterego/LICENCE"
                     }
                 }
                 developers {
@@ -141,9 +141,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = "scm:git:https://github.com/identigon/lib-alterego.git"
-                    developerConnection = "scm:git:https://github.com/identigon/lib-alterego.git"
-                    url = "https://github.com/identigon/lib-alterego"
+                    connection = "scm:git:https://github.com/identigon/identigon.git"
+                    developerConnection = "scm:git:https://github.com/identigon/identigon.git"
+                    url = "https://github.com/identigon/identigon/tree/main/alterego"
                 }
             }
         }
@@ -151,7 +151,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/identigon/lib-alterego")
+            url = uri("https://maven.pkg.github.com/identigon/identigon")
             credentials {
                 username = providers.environmentVariable("GITHUB_ACTOR").orNull
                 password = providers.environmentVariable("GITHUB_TOKEN").orNull

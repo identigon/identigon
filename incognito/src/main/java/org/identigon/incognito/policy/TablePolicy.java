@@ -112,11 +112,11 @@ public record TablePolicy(
         }
 
         /**
-         * Declares a {@code DIRECT_ID} / {@code UNIQUE_CANDIDATE_KEY} column with its lib-alterego generator.
+         * Declares a {@code DIRECT_ID} / {@code UNIQUE_CANDIDATE_KEY} column with its alterego generator.
          *
          * @param columnName the column name
          * @param role the column role
-         * @param strategy the lib-alterego generator strategy
+         * @param strategy the alterego generator strategy
          * @return this builder
          */
         public Builder column(String columnName, ColumnRole role, DirectIdStrategy strategy) {

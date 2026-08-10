@@ -4,7 +4,7 @@ Status: accepted (2026-07-30, backfilled)
 
 ## Context
 
-Incognito is a distinct library from `lib-alterego`. The original justification ("Alterego works on
+Incognito is a distinct library from `alterego`. The original justification ("Alterego works on
 records, Incognito works on datasets") was a k-anonymity-era assumption — that Incognito needed a
 global statistical view. With fabrication (ADR 0001) there is no such pass, so that framing no
 longer holds and the real reason for the split had to be restated.
@@ -13,7 +13,7 @@ longer holds and the real reason for the split had to be restated.
 
 Split by **responsibility**, not batch size:
 
-- **`lib-alterego`** transforms a single value or the fields of one record — deterministic in
+- **`alterego`** transforms a single value or the fields of one record — deterministic in
   `(salt, domain, value)`, stateless with respect to the dataset, and DB-agnostic (reusable on a
   CSV, an API payload, or a message).
 - **Incognito** owns everything relational: schema discovery and role classification, topological

@@ -54,7 +54,7 @@ public final class VerificationStage implements PipelineStage {
     );
 
     /**
-     * Matches exactly the domains {@code DomainNameStrategy} (lib-alterego) can produce: one of its
+     * Matches exactly the domains {@code DomainNameStrategy} (alterego) can produce: one of its
      * three reserved second-level domains, or a freshly-minted subdomain of one of its three
      * reserved TLDs (RFC 2606).
      */
@@ -66,7 +66,7 @@ public final class VerificationStage implements PipelineStage {
         "^https?://(example\\.com|example\\.net|example\\.org|[a-z]+\\.(test|example|invalid))(/.*)?$";
 
     /**
-     * {@code PostcodeStrategy}'s default (non-{@code realistic}) guarantee (ADR 0005, lib-alterego):
+     * {@code PostcodeStrategy}'s default (non-{@code realistic}) guarantee (ADR 0005, alterego):
      * the inward code's last letter is drawn only from these — letters Royal Mail never uses there
      * — so the output can never coincide with a real, deliverable postcode.
      */

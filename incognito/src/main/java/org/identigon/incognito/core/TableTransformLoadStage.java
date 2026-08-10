@@ -535,7 +535,7 @@ public final class TableTransformLoadStage implements PipelineStage {
     }
 
     /**
-     * A type-appropriate redacted constant, produced by lib-alterego ({@code AlterEgo.redact}/
+     * A type-appropriate redacted constant, produced by alterego ({@code AlterEgo.redact}/
      * {@code constant}) so a {@code CONSTANT}/{@code MASK} redaction fits a numeric, temporal,
      * boolean or opaque column rather than only text (SPEC §1.4 — value production is AlterEgo's).
      */
@@ -556,7 +556,7 @@ public final class TableTransformLoadStage implements PipelineStage {
     }
 
     /**
-     * Applies the matching lib-alterego shift to a temporal value, preserving its Java/JDBC type:
+     * Applies the matching alterego shift to a temporal value, preserving its Java/JDBC type:
      * {@code LocalDate}/{@code java.sql.Date} via {@code dateT}; {@code java.sql.Timestamp}/{@code
      * LocalDateTime} via {@code dateTimeT}; and {@code Instant} via {@code dateTimeT} at UTC. Returns
      * {@code null} for a non-temporal value so the caller can choose a fallback. Routing date-time
@@ -676,7 +676,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                 }
                 String domain = "incognito:synth:" + tableName + ":" + colPolicy.columnName();
                 // A temporal QI is shifted within a ±5y window (destroys the identifying year, SPEC
-                // Appendix B) through the type-matched lib-alterego primitive; a non-temporal value is
+                // Appendix B) through the type-matched alterego primitive; a non-temporal value is
                 // shape-fabricated. shiftDateTime (seconds=0) keeps the time-of-day and fits
                 // TIMESTAMP/TIMESTAMPTZ columns, which shiftDate alone cannot. A non-temporal type with
                 // no mapping and no hint is rejected fail-closed at discovery (SchemaDiscoveryStage).
@@ -774,7 +774,7 @@ public final class TableTransformLoadStage implements PipelineStage {
      * Length-preserving uniqueness fallback for a string {@code UNIQUE_CANDIDATE_KEY} once AlterEgo's
      * {@code unique()} retry budget is exhausted: overlays a zero-padded sequence onto the TAIL of the
      * fabricated value, keeping the exact original length so a fixed-width / CHECK constraint still
-     * holds (Goal 1). Interim — full format-preserving generation is the deferred lib-alterego
+     * holds (Goal 1). Interim — full format-preserving generation is the deferred alterego
      * delegation (see PLAN).
      */
     static String uniquenessFallback(String base, long seq) {

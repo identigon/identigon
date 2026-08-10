@@ -4,7 +4,7 @@ import java.io.PrintStream;
 
 /**
  * Command-line entry point for <b>Effigies</b> — a thin authoring and orchestration front-end above
- * <a href="https://github.com/identigon/lib-incognito">lib-incognito</a>. Effigies discovers a source
+ * <a href="https://github.com/identigon/identigon/tree/main/incognito">incognito</a>. Effigies discovers a source
  * schema, helps author (and, later, infer) the declarative anonymisation policy, and drives the engine
  * to produce the anonymised clone. The engine stays deterministic and judgment-free; all inference and
  * scaffolding lives here (see {@code docs/adr/0001-authoring-above-the-engine.md}).
@@ -45,7 +45,7 @@ public final class EffigiesCli {
                 yield 0;
             }
             case "version", "--version" -> {
-                out.println("Effigies " + version() + " (engine: lib-incognito on classpath)");
+                out.println("Effigies " + version() + " (engine: incognito on classpath)");
                 yield 0;
             }
             case "discover" -> {
@@ -67,14 +67,14 @@ public final class EffigiesCli {
 
     private static void printUsage(PrintStream w) {
         w.println("""
-            Effigies — author and run a lib-incognito anonymisation from a source schema.
+            Effigies — author and run an incognito anonymisation from a source schema.
 
             Usage: java -jar effigies.jar <command> [options]
 
             Commands:
               discover    Inspect a source database and describe its schema (metadata only, no data).
               scaffold    Emit a starter policy.yaml (fail-closed: every column left to be classified).
-              run         Execute lib-incognito against a finished policy.yaml to produce the clone.
+              run         Execute incognito against a finished policy.yaml to produce the clone.
               version     Print the version.
               help        Show this help.""");
     }

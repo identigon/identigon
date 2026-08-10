@@ -12,7 +12,7 @@ to be avoided: an *independent* per-field delta (breaks coherence), and a delta 
 
 ## Decision
 
-Derive **one shared day-delta per entity** from `lib-alterego`'s salt-keyed HMAC stream (never
+Derive **one shared day-delta per entity** from `alterego`'s salt-keyed HMAC stream (never
 `hashCode`), namespaced by a **coherence group**. A child inherits its **parent's** delta, looked up
 by the parent's **source** id and scoped to the group, and applies the same shift to its own dates.
 Each entity re-publishes its effective delta under its own id, so a grandchild inherits the same
