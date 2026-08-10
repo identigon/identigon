@@ -57,6 +57,10 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher") // required by the Gradle 9.x test runner
+    // A real, in-process JDBC target for discover/run command tests -- exercises SchemaInspector
+    // and IncognitoPipeline against genuine metadata instead of hand-mocking JDBC. Same version as
+    // incognito's own test-scope usage.
+    testImplementation("com.h2database:h2:2.2.224")
 
     spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0")
 }

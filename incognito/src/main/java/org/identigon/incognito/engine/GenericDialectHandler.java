@@ -21,9 +21,9 @@ public final class GenericDialectHandler implements DialectHandler {
 
     @Override
     public String buildInsertSql(String tableName, List<String> columns, boolean hasIdentityPk) {
-        String cols = String.join(", ", columns);
+        String cols = columns.stream().map(GenericDialectHandler::quoteIdent).collect(Collectors.joining(", "));
         String placeholders = columns.stream().map(c -> "?").collect(Collectors.joining(", "));
-        return "INSERT INTO " + tableName + " (" + cols + ") VALUES (" + placeholders + ")";
+        return "INSERT INTO " + quoteIdent(tableName) + " (" + cols + ") VALUES (" + placeholders + ")";
     }
 
     @Override
@@ -34,5 +34,10 @@ public final class GenericDialectHandler implements DialectHandler {
     @Override
     public void resyncSequence(Connection targetConn, String tableName, String pkCol) throws SQLException {
         // No-op. Generic ANSI SQL has no standard way to resync sequences.
+    }
+
+    /** Double-quotes an SQL identifier, the ANSI-standard delimited-identifier form. */
+    private static String quoteIdent(String ident) {
+        return '"' + ident.replace("\"", "\"\"") + '"';
     }
 }

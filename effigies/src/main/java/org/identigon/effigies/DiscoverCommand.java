@@ -1,8 +1,8 @@
 package org.identigon.effigies;
 
 import java.io.PrintStream;
-import java.sql.JDBCType;
 import java.util.List;
+import javax.sql.DataSource;
 import org.identigon.incognito.engine.SchemaInspector;
 
 class DiscoverCommand {
@@ -27,35 +27,28 @@ class DiscoverCommand {
             return EffigiesCli.EXIT_USAGE;
         }
 
-        SimpleDataSource dataSource = new SimpleDataSource(url, user, password);
+        return run(new SimpleDataSource(url, user, password), out, err);
+    }
+
+    /**
+     * The testable core: given an already-resolved {@link DataSource}, inspects and prints its
+     * schema. Split out from {@link #execute} so tests can exercise it directly against a real
+     * database without needing to fake environment variables.
+     */
+    static int run(DataSource dataSource, PrintStream out, PrintStream err) {
         SchemaInspector inspector = new SchemaInspector();
         try {
             List<SchemaInspector.TableMetadata> tables = inspector.inspect(dataSource);
             for (SchemaInspector.TableMetadata table : tables) {
                 out.println("Table: " + table.tableName());
                 for (String col : table.columns()) {
-                    StringBuilder md = new StringBuilder();
-                    Integer typeCode = table.columnTypes().get(col);
-                    if (typeCode != null) {
-                        try {
-                            md.append("type: ").append(JDBCType.valueOf(typeCode).getName());
-                        } catch (IllegalArgumentException e) {
-                            md.append("type: ").append(typeCode);
-                        }
-                    }
-                    if (table.primaryKeyColumns().contains(col)) {
-                        md.append(", pk");
-                    }
-                    if (table.foreignKeys().containsKey(col)) {
-                        md.append(", fk -> ").append(table.foreignKeys().get(col));
-                    }
-                    out.println("  " + col + " (" + md + ")");
+                    out.println("  " + col + " (" + ColumnMetadataFormatter.format(table, col) + ")");
                 }
                 out.println();
             }
             return 0;
         } catch (Exception e) {
-            err.println("Error: " + e.getMessage());
+            err.println("Error: " + e);
             return 1;
         }
     }

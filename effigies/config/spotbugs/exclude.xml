@@ -15,8 +15,8 @@
         <Bug pattern="PATH_TRAVERSAL_IN" />
     </Match>
 
-    <!-- Test scope exclusions -->
+    <!-- Test scope exclusions, including the empty "sa" password H2's own in-memory-test convention uses -->
     <Match>
-        <Bug pattern="DLS_DEAD_LOCAL_STORE,DM_DEFAULT_ENCODING,HARD_CODE_PASSWORD,LG_LOST_LOGGER_DUE_TO_WEAK_REFERENCE" />
+        <Bug pattern="DLS_DEAD_LOCAL_STORE,DM_DEFAULT_ENCODING,DMI_EMPTY_DB_PASSWORD,HARD_CODE_PASSWORD,LG_LOST_LOGGER_DUE_TO_WEAK_REFERENCE" />
     </Match>
 </FindBugsFilter>

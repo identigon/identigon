@@ -1,11 +1,13 @@
 package org.identigon.effigies;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.sql.JDBCType;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.Optional;
 import org.identigon.incognito.engine.SchemaInspector;
 
 class ScaffoldCommand {
@@ -47,13 +49,17 @@ class ScaffoldCommand {
             out.println("Scaffold written to " + outFile);
             return 0;
         } catch (Exception e) {
-            err.println("Error: " + e.getMessage());
+            err.println("Error: " + e);
             return 1;
         }
     }
 
     static void writeScaffold(File file, List<SchemaInspector.TableMetadata> tables) throws IOException {
-        try (FileWriter writer = new FileWriter(file)) {
+        // Explicit UTF-8, not the platform-default charset a bare FileWriter would use -- a schema
+        // with non-ASCII table/column names must round-trip correctly regardless of the OS this
+        // runs on (the platform default is not UTF-8 on Windows).
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
+            PolicyInferrer inferrer = new PolicyInferrer();
             writer.write("autoInfer: false\n");
             writer.write("tables:\n");
             for (SchemaInspector.TableMetadata table : tables) {
@@ -63,24 +69,10 @@ class ScaffoldCommand {
                     if (table.generatedColumns().contains(col)) {
                         continue;
                     }
-                    StringBuilder md = new StringBuilder();
-                    Integer typeCode = table.columnTypes().get(col);
-                    if (typeCode != null) {
-                        try {
-                            md.append("type: ").append(JDBCType.valueOf(typeCode).getName());
-                        } catch (IllegalArgumentException e) {
-                            md.append("type: ").append(typeCode);
-                        }
-                    }
-                    if (table.primaryKeyColumns().contains(col)) {
-                        md.append(", pk");
-                    }
-                    if (table.foreignKeys().containsKey(col)) {
-                        md.append(", fk -> ").append(table.foreignKeys().get(col));
-                    }
-                    writer.write("      " + col + ":            # " + md + "\n");
+                    writer.write("      " + col + ":            # "
+                        + ColumnMetadataFormatter.format(table, col) + "\n");
 
-                    java.util.Optional<PolicyInferrer.InferredRole> inferred = new PolicyInferrer().inferRole(col);
+                    Optional<PolicyInferrer.InferredRole> inferred = inferrer.inferRole(col);
                     if (inferred.isPresent()) {
                         writer.write("        role:              # TODO classify (Suggestion: " + inferred.get().role() + " based on " + inferred.get().heuristic() + ")\n");
                     } else {

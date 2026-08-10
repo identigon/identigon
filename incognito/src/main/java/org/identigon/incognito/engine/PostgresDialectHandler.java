@@ -46,7 +46,7 @@ public final class PostgresDialectHandler implements DialectHandler {
                 "session_replication_role unavailable (SQLState {0}); falling back to owner-mode DISABLE TRIGGER on {1}",
                 e.getSQLState(), tableName);
             try (Statement stmt = targetConn.createStatement()) {
-                stmt.execute("ALTER TABLE " + tableName + " DISABLE TRIGGER USER");
+                stmt.execute("ALTER TABLE " + quoteIdent(tableName) + " DISABLE TRIGGER USER");
             } catch (SQLException fallbackFailure) {
                 // Keep the original cause visible rather than letting the fallback's own failure
                 // silently replace it — whoever debugs this needs both.
@@ -58,9 +58,9 @@ public final class PostgresDialectHandler implements DialectHandler {
 
     @Override
     public String buildInsertSql(String tableName, List<String> columns, boolean hasIdentityPk) {
-        String cols = String.join(", ", columns);
+        String cols = columns.stream().map(PostgresDialectHandler::quoteIdent).collect(Collectors.joining(", "));
         String placeholders = columns.stream().map(c -> "?").collect(Collectors.joining(", "));
-        String sql = "INSERT INTO " + tableName + " (" + cols + ") ";
+        String sql = "INSERT INTO " + quoteIdent(tableName) + " (" + cols + ") ";
         if (hasIdentityPk) {
             sql += "OVERRIDING SYSTEM VALUE ";
         }
@@ -72,7 +72,7 @@ public final class PostgresDialectHandler implements DialectHandler {
     public void postLoadTable(Connection targetConn, String tableName) throws SQLException {
         // Safe to call even if we didn't disable triggers this way, to ensure they are enabled
         try (Statement stmt = targetConn.createStatement()) {
-            stmt.execute("ALTER TABLE " + tableName + " ENABLE TRIGGER USER");
+            stmt.execute("ALTER TABLE " + quoteIdent(tableName) + " ENABLE TRIGGER USER");
         } catch (SQLException e) {
             // Often benign: on the superuser session_replication_role path triggers were never disabled
             // via ALTER TABLE, so re-enabling can fail harmlessly. Surface at DEBUG for diagnosis only.
@@ -95,14 +95,25 @@ public final class PostgresDialectHandler implements DialectHandler {
     @Override
     public void resyncSequence(Connection targetConn, String tableName, String pkCol) throws SQLException {
         try (Statement stmt = targetConn.createStatement()) {
-            // Find the sequence associated with the column and resync it
+            // pg_get_serial_sequence's two arguments are NOT symmetric, confirmed empirically (this
+            // isn't clearly documented): the table argument's *content* is parsed the same way an
+            // identifier would be -- an unquoted name inside the string gets folded to lowercase, so
+            // a case-sensitive/reserved-word table name needs the double-quotes embedded in the
+            // literal's content (quoteLiteral(quoteIdent(...))). The column argument, by contrast, is
+            // compared directly against the catalog's stored name -- quoting it makes Postgres look
+            // for a column literally named `"Id"`, quote characters included, which doesn't exist.
             try (ResultSet rs = stmt.executeQuery(
-                    "SELECT pg_get_serial_sequence('" + tableName + "', '" + pkCol + "')")) {
+                    "SELECT pg_get_serial_sequence(" + quoteLiteral(quoteIdent(tableName)) + ", "
+                        + quoteLiteral(pkCol) + ")")) {
                 if (rs.next()) {
                     String seqName = rs.getString(1);
                     if (seqName != null) {
-                        stmt.execute("SELECT setval('" + seqName + "', "
-                            + "(SELECT COALESCE(MAX(" + pkCol + "), 1) FROM " + tableName + "))");
+                        // setval's first argument is also a text literal (cast to regclass); the
+                        // nested SELECT's MAX(...)/FROM ... are raw identifier usage and need
+                        // quoteIdent instead.
+                        stmt.execute("SELECT setval(" + quoteLiteral(seqName) + ", "
+                            + "(SELECT COALESCE(MAX(" + quoteIdent(pkCol) + "), 1) FROM "
+                            + quoteIdent(tableName) + "))");
                     }
                 }
             }
@@ -173,5 +184,10 @@ public final class PostgresDialectHandler implements DialectHandler {
     /** Double-quotes an SQL identifier so an arbitrary catalog name is reused verbatim. */
     private static String quoteIdent(String ident) {
         return '"' + ident.replace("\"", "\"\"") + '"';
+    }
+
+    /** Single-quotes an SQL string literal (e.g. a text argument to a system function). */
+    private static String quoteLiteral(String literal) {
+        return "'" + literal.replace("'", "''") + "'";
     }
 }

@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import javax.sql.DataSource;
 import org.identigon.incognito.api.IncognitoPipeline;
 import org.identigon.incognito.api.PipelineResult;
 import org.identigon.incognito.core.DpiaArtefactEmitter;
@@ -70,29 +71,53 @@ class RunCommand {
             err.println("Warning: failed to peek saltMode from YAML, defaulting to ephemeral: " + e.getMessage());
         }
 
-        try {
-            SimpleDataSource sourceDs = new SimpleDataSource(srcUrl, srcUser, srcPass);
-            SimpleDataSource targetDs = new SimpleDataSource(tgtUrl, tgtUser, tgtPass);
+        byte[] salt = null;
+        Long seed = null;
+        if ("persistent".equals(saltMode) || "reproducible".equals(saltMode)) {
+            String saltStr = System.getenv("IDENTIGON_SALT");
+            if (saltStr == null) {
+                err.println("Error: IDENTIGON_SALT environment variable is required for saltMode=" + saltMode);
+                return 1;
+            }
+            salt = saltStr.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            if ("reproducible".equals(saltMode)) {
+                String seedStr = System.getenv("IDENTIGON_SEED");
+                if (seedStr != null) {
+                    try {
+                        seed = Long.parseLong(seedStr);
+                    } catch (NumberFormatException e) {
+                        err.println("Error: IDENTIGON_SEED must be a valid long, got: " + seedStr);
+                        return 1;
+                    }
+                } else {
+                    seed = 0L;
+                }
+            }
+        }
 
+        SimpleDataSource sourceDs = new SimpleDataSource(srcUrl, srcUser, srcPass);
+        SimpleDataSource targetDs = new SimpleDataSource(tgtUrl, tgtUser, tgtPass);
+        return run(sourceDs, targetDs, policyPath, saltMode, salt, seed, out, err);
+    }
+
+    /**
+     * The testable core: given already-resolved connections, a policy file, and salt
+     * configuration, builds and executes the pipeline and emits the DPIA artefacts. Split out from
+     * {@link #execute} so tests can exercise it directly against real databases without needing to
+     * fake environment variables.
+     */
+    static int run(DataSource sourceDs, DataSource targetDs, Path policyPath, String saltMode,
+            byte[] salt, Long seed, PrintStream out, PrintStream err) {
+        try {
             IncognitoPipeline.Builder builder = IncognitoPipeline.builder()
                 .source(sourceDs)
                 .target(targetDs)
                 .policy(new YamlPolicyParser().parse(policyPath));
 
-            if ("persistent".equals(saltMode) || "reproducible".equals(saltMode)) {
-                String saltStr = System.getenv("IDENTIGON_SALT");
-                if (saltStr == null) {
-                    err.println("Error: IDENTIGON_SALT environment variable is required for saltMode=" + saltMode);
-                    return 1;
-                }
-                byte[] salt = saltStr.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-                if ("reproducible".equals(saltMode)) {
-                    String seedStr = System.getenv("IDENTIGON_SEED");
-                    long seed = seedStr != null ? Long.parseLong(seedStr) : 0L;
-                    builder.reproducible(salt, seed);
-                } else {
-                    builder.persistentSalt(salt);
-                }
+            if ("persistent".equals(saltMode)) {
+                builder.persistentSalt(salt);
+            } else if ("reproducible".equals(saltMode)) {
+                builder.reproducible(salt, seed != null ? seed : 0L);
             } else {
                 builder.ephemeralSalt();
             }
@@ -121,7 +146,7 @@ class RunCommand {
 
             return 0;
         } catch (Exception e) {
-            err.println("Error executing pipeline: " + e.getMessage());
+            err.println("Error executing pipeline: " + e);
             return 1;
         }
     }

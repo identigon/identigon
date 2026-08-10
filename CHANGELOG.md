@@ -12,6 +12,29 @@ rather than by change type.
 Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGELOG.md`,
 `effigies/CHANGELOG.md`) covers everything before this file took over at 1.0.0.
 
+## [Unreleased]
+
+### incognito
+
+- **Identifier quoting fixed in both dialect handlers.** `PostgresDialectHandler` (`buildInsertSql`,
+  `preLoadTable`'s owner-mode fallback, `postLoadTable`, `resyncSequence`) and
+  `GenericDialectHandler.buildInsertSql` now quote every raw table/column identifier — previously
+  only the FK drop/recreate path did. A reserved-word or mixed-case table/column name broke
+  inconsistently depending on which code path touched it; none of the benchmark fixtures happen to
+  use such names, so this was silent until now.
+
+### effigies
+
+- `PolicyInferrer` gains heuristics for postcodes (`QUASI_ID`), passport numbers, driving licence
+  numbers, and credit card numbers (`DIRECT_ID`), and anchors the email/phone patterns to the end
+  of the column name so a boolean like `email_verified` no longer gets suggested as DIRECT_ID.
+- `ScaffoldCommand` writes its output as UTF-8 explicitly, not the platform-default charset (not
+  UTF-8 on Windows) a bare `FileWriter` used.
+- CLI error paths report the exception itself, not just its (often empty) message.
+- Added tests for `RunCommand`, `DiscoverCommand`, `PolicyInferrer`, and `SimpleDataSource`
+  (previously untested), splitting the CLI commands into a directly-testable core to do it without
+  needing to fake environment variables.
+
 ## [1.0.0] — 2026-08-10
 
 ### alterego
