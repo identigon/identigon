@@ -3,6 +3,10 @@
 All notable changes to Incognito are recorded here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+> As of 1.0.0, incognito versions in lockstep with `alterego` and `effigies` as part of the
+> `identigon` monorepo. Entries from 1.0.0 onward live in the root [`CHANGELOG.md`](../CHANGELOG.md)
+> instead — this file covers everything before that point.
+
 ## Output-stability guarantees
 
 These hold for every release within a major version, and are what make an entry in this file
@@ -19,17 +23,6 @@ meaningful rather than just a feature list:
   salt and seed.
 - **Relational coherence is preserved**: referential integrity, foreign-key topology, per-period
   volumes, coherent parent–child date deltas, and root-ancestor inherited attributes.
-
-## [Unreleased]
-
-### Added
-
-- **`DirectIdStrategy`: `ALTEREGO_POSTCODE`, `ALTEREGO_DOMAIN`, `ALTEREGO_URL`.** Three previously
-  unexposed `alterego` typed generators (`postcode()`, `domainName()`, `url()`) are now
-  reachable from policy. `VerificationStage` positively asserts each strategy's fictionality
-  guarantee on the target (GB postcode inward-code letter; RFC 2606 reserved domain/TLD for
-  domain/URL), and these strategies are excluded from the generic DIRECT_ID survival check, same as
-  `ALTEREGO_EMAIL`.
 
 ## [1.0.0] — 2026-08-02
 

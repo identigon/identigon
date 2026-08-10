@@ -3,6 +3,10 @@
 All notable changes to AlterEgo are recorded here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+> As of 1.0.0, alterego versions in lockstep with `incognito` and `effigies` as part of the
+> `identigon` monorepo. Entries from 1.0.0 onward live in the root [`CHANGELOG.md`](../CHANGELOG.md)
+> instead — this file covers everything before that point.
+
 ## Output-stability guarantees
 
 These hold for every release within a major version (spec section 3.4), and are what make an entry
@@ -19,8 +23,6 @@ in this file meaningful rather than just a feature list:
   treated as a routine data update.
 - The `GoldenOutputsTest` suite pins exact expected outputs for a reference salt across every
   built-in, to catch accidental drift in the algorithms or dictionaries between releases.
-
-## [0.5.0] — (unreleased)
 
 ## [0.4.0] — 2026-08-09
 

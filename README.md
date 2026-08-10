@@ -12,8 +12,10 @@ and documented independently:
 | [`effigies/`](effigies) | A CLI that discovers a schema, authors (and helps infer) the declarative policy `incognito` runs from, and drives the engine to produce the clone. | `incognito` |
 
 Each subproject has its own `SPECIFICATION.md` (behavioural contract), `PLAN.md` (implementation
-plan and backlog), `docs/adr/` (design decisions), and `CHANGELOG.md` (release history) — see the
-subproject's own README for what it does and how to use it.
+plan and backlog), and `docs/adr/` (design decisions) — see the subproject's own README for what it
+does and how to use it. Release history is split at the point the three merged: each subproject's
+own `CHANGELOG.md` covers everything before 1.0.0, and the root [`CHANGELOG.md`](CHANGELOG.md)
+covers every release from 1.0.0 onward.
 
 ## Building
 

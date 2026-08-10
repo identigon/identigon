@@ -3,6 +3,10 @@
 All notable changes to Effigies are recorded here. Format loosely follows [Keep a
 Changelog](https://keepachangelog.com/en/1.1.0/).
 
+> As of 1.0.0, effigies versions in lockstep with `alterego` and `incognito` as part of the
+> `identigon` monorepo. Entries from 1.0.0 onward live in the root [`CHANGELOG.md`](../CHANGELOG.md)
+> instead — this file covers everything before that point.
+
 ## Invariants (hold across every release within a major version)
 
 - **Metadata only.** Discovery and every emitted artifact carry schema metadata, never sampled real

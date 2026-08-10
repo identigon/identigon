@@ -95,8 +95,21 @@ tasks.jar {
     })
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "META-INF/*.kotlin_module")
-    // The LICENCE travels inside the artifact — most consumers receive only the jar, never the repo.
-    from(rootProject.file("LICENCE")) {
+    // Both alterego's and incognito's own jars carry a META-INF/LICENCE of their own (different
+    // content -- see below), zipTree'd in above along with everything else on the runtime
+    // classpath. Drop whichever one the merge would otherwise pick (order/precedence between a
+    // zipTree'd entry and an explicit from() is not something to rely on) and add our own
+    // deliberately, so which LICENCE/NOTICE end up in this jar is unambiguous.
+    exclude("META-INF/LICENCE", "META-INF/NOTICE")
+    // This is alterego's LICENCE, not the root's, deliberately: this fat jar physically bundles
+    // alterego's classes and its OGL-derived dictionary data (zipTree'd in above from the runtime
+    // classpath), so the plain root LICENCE alone would omit the OGL attribution clause that data
+    // requires. alterego's LICENCE is a superset -- the same plain MIT text, plus that clause -- so
+    // it correctly covers effigies' and incognito's own MIT-only code too.
+    from(rootProject.file("alterego/LICENCE")) {
+        into("META-INF")
+    }
+    from(rootProject.file("alterego/NOTICE")) {
         into("META-INF")
     }
 }
