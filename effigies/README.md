@@ -88,10 +88,8 @@ The engine will execute the pipeline and surface the DPIA accountability report 
 
 ## Build & run
 
-Effigies depends on incognito, which depends on alterego, as sibling Gradle subprojects; from the
-monorepo root, `./gradlew build` builds all three in dependency order automatically.
-
-`./gradlew build` produces a single runnable jar; run it with a bare `java -jar`:
+`./gradlew build` (from the monorepo root) produces a single runnable jar; run it with a bare
+`java -jar`:
 
 ```
 java -jar build/libs/effigies.jar help
@@ -101,4 +99,4 @@ java -jar build/libs/effigies.jar help
 
 ## Licence
 
-MIT — see [`LICENCE`](LICENCE).
+MIT — see the [root LICENCE](../LICENCE).

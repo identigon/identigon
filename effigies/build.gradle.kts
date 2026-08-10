@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "org.identigon"
-version = "1.0.0"
+// version comes from the root project -- lockstep versioning across the monorepo, see docs/adr/.
 
 java {
     toolchain {

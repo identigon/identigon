@@ -12,3 +12,4 @@ and marks the old one superseded rather than editing it.
 | ADR | Decision |
 | :--- | :--- |
 | [0001](0001-authoring-above-the-engine.md) | Authoring/inference lives in Effigies, above a deterministic, model-free incognito |
+| [0002](0002-lockstep-versioning.md) | Lockstep versioning across the identigon monorepo, starting at 1.0.0 |

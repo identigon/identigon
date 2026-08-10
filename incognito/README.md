@@ -134,9 +134,6 @@ mode) exactly like a credential.
 
 ## Building
 
-Java 25 and Gradle. Incognito depends on `alterego` as a sibling Gradle subproject; from the
-monorepo root, `./gradlew build` builds both in dependency order automatically.
-
 The integration tests use [Testcontainers](https://testcontainers.com/) and require Docker; they
 skip gracefully where Docker is unavailable.
 
@@ -147,7 +144,7 @@ so it's a connection-config recommendation on your side.
 
 ## Licence
 
-The source code is MIT-licensed — see [`LICENCE`](LICENCE).
+MIT — see the [root LICENCE](../LICENCE).
 
 ### Benchmark test data
 

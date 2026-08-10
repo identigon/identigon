@@ -18,3 +18,4 @@ adds a new ADR and marks the old one superseded rather than editing it.
 | [0005](0005-coherent-temporal-jitter.md) | Coherent temporal jitter keyed on the parent's source id |
 | [0006](0006-cyclic-fk-two-pass-load.md) | Cyclic foreign keys via Tarjan SCC + placeholder + 2-pass UPDATE |
 | [0007](0007-inherited-attribute-root-ancestor.md) | INHERITED_ATTRIBUTE resolved from the root ancestor, fail-closed |
+| [0008](0008-lockstep-versioning.md) | Lockstep versioning across the identigon monorepo, starting at 1.0.0 |
