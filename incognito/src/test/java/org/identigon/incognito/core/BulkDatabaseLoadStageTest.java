@@ -55,6 +55,11 @@ class BulkDatabaseLoadStageTest {
             "the statement-close failure must be kept as a suppressed exception, not discarded");
     }
 
+    // == is the correct implementation of Object.equals() semantics for a proxy with no identity
+    // of its own; and the test's own classloader is the right (and simplest) choice to resolve the
+    // JDK interfaces below -- both PMD.CompareObjectsWithEquals and PMD.UseProperClassLoader are
+    // false positives on this idiom.
+    @SuppressWarnings({"PMD.CompareObjectsWithEquals", "PMD.UseProperClassLoader"})
     private static PreparedStatement fakePreparedStatement() {
         InvocationHandler handler = (proxy, method, args) -> switch (method.getName()) {
             case "executeBatch" -> throw BATCH_FAILURE;
@@ -69,6 +74,7 @@ class BulkDatabaseLoadStageTest {
             BulkDatabaseLoadStageTest.class.getClassLoader(), new Class<?>[] {PreparedStatement.class}, handler);
     }
 
+    @SuppressWarnings({"PMD.CompareObjectsWithEquals", "PMD.UseProperClassLoader"})
     private static Connection fakeConnection(PreparedStatement stmt) {
         InvocationHandler handler = (proxy, method, args) -> switch (method.getName()) {
             case "prepareStatement" -> stmt;

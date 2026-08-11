@@ -158,7 +158,8 @@ class NorthwindBenchmarkE2ETest {
             // Opaque bytea columns kept and surfaced in the DPIA report's passthrough audit (§7.2).
             List<String> catFlags = result.report().tables().stream()
                 .filter(tr -> tr.table().equals("categories")).findFirst().orElseThrow()
-                .passthroughFlags().stream().map(pf -> pf.column()).toList();
+                .passthroughFlags().stream()
+                .map(org.identigon.incognito.api.AnonymisationReport.PassthroughFlag::column).toList();
             assertTrue(catFlags.contains("picture"), "categories.picture (bytea) flagged as passthrough");
         }
     }

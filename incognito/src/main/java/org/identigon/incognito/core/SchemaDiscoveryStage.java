@@ -19,6 +19,9 @@ import org.identigon.incognito.policy.TablePolicy;
  * topological execution plan for table processing. Results are stored in the pipeline
  * context's {@code attributes()} map for downstream stages.
  */
+// Uses the deprecated (forRemoval) PolicyInferrer throughout, deliberately, for the fail-closed
+// error-message hint until incognito's next major version removes it -- see PolicyInferrer's Javadoc.
+@SuppressWarnings("removal")
 public final class SchemaDiscoveryStage implements PipelineStage {
 
     /** Key used to store the discovered schema metadata in the pipeline context attributes. */
@@ -68,7 +71,7 @@ public final class SchemaDiscoveryStage implements PipelineStage {
         AnonymisationPolicy policy = context.policy();
         for (SchemaInspector.TableMetadata table : metadata) {
             policy.table(table.tableName()).ifPresent(tablePolicy ->
-                validateTablePolicy(table, tablePolicy, policy.autoInfer(), suggestions)
+                validateTablePolicy(table, tablePolicy, suggestions)
             );
         }
 
@@ -96,7 +99,6 @@ public final class SchemaDiscoveryStage implements PipelineStage {
     private void validateTablePolicy(
             SchemaInspector.TableMetadata table,
             TablePolicy tablePolicy,
-            boolean autoInfer,
             java.util.Map<String, java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion>> allSuggestions) {
 
         java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion> tableSuggestions = new java.util.ArrayList<>();
@@ -120,8 +122,14 @@ public final class SchemaDiscoveryStage implements PipelineStage {
             // alone would silently miss the latter, since a ColumnPolicy still exists for it.
             if (declared.isEmpty() || declared.get().role() == null) {
                 // Auto-inference only SUGGESTS a role; it never silently assigns one, so an
-                // unclassified column ALWAYS fails-closed (SPEC §7.2) — it must never pass through
-                // as real data. With autoInfer on, the suggestion is added to the message to help.
+                // unclassified column ALWAYS fails-closed (SPEC §7.2) regardless of the policy's
+                // autoInfer setting — it must never pass through as real data. SPEC §7.2's "opt-in"
+                // language governs whether a suggestion reaches the REPORT (ATTR_INFER_SUGGESTIONS,
+                // which — see its Javadoc — is moot here anyway: a fail-closed run never returns
+                // one); it says nothing about this MESSAGE. The hint below is deliberately shown
+                // unconditionally: it never assigns anything, so autoInfer gates nothing it needs
+                // to gate, and suppressing it when autoInfer is off (the default) would make the
+                // common case's error message less helpful, not more correct.
                 var inferred = inferrer.inferRole(column);
                 String hint = inferred
                     .map(r -> " (auto-infer suggests " + r.role() + " via " + r.heuristic() + ")")

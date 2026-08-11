@@ -26,4 +26,49 @@ version = if (isExactlyTagged) baseVersion else "$baseVersion-SNAPSHOT"
 
 subprojects {
     version = rootProject.version
+
+    // Spotless: identical tidy-only config for every subproject that applies it -- imports,
+    // whitespace, EOF newline only, never a full reflow (which would fight the hand-maintained
+    // style). Declared once here instead of copy-pasted per subproject.
+    plugins.withId("com.diffplug.spotless") {
+        configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+            java {
+                importOrder()
+                removeUnusedImports()
+                trimTrailingWhitespace()
+                endWithNewline()
+            }
+        }
+    }
+
+    // SpotBugs: toolVersion, ignoreFailures, and report shape are identical everywhere. Only the
+    // excludeFilter is genuinely per-subproject (config/spotbugs/exclude-<name>.xml) -- the
+    // suppressions it encodes don't transfer between subprojects, so that stays declared in each
+    // subproject's own build.gradle.kts.
+    plugins.withId("com.github.spotbugs") {
+        configure<com.github.spotbugs.snom.SpotBugsExtension> {
+            toolVersion = "4.9.8"
+            ignoreFailures = false
+        }
+        tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
+            reports {
+                create("html") { required = true }
+                create("xml") { required = false }
+            }
+        }
+        // find-sec-bugs is identical across every subproject too.
+        dependencies.add("spotbugsPlugins", "com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0")
+    }
+
+    // PMD: fully identical everywhere -- one shared ruleset (config/pmd/ruleset.xml), nothing left
+    // to differ per subproject.
+    plugins.withId("pmd") {
+        configure<org.gradle.api.plugins.quality.PmdExtension> {
+            toolVersion = "7.22.0"
+            isConsoleOutput = true
+            isIgnoreFailures = false
+            ruleSets = emptyList()
+            ruleSetFiles = files(rootProject.file("config/pmd/ruleset.xml"))
+        }
+    }
 }

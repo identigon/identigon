@@ -5,7 +5,16 @@ import org.identigon.incognito.api.ColumnRole;
 
 /**
  * Auto-infers baseline column roles based on column name heuristics and regex patterns.
+ *
+ * @deprecated inference is authoring, not execution (fail-closed classification means it never
+ *     affected engine output — see SPEC §7.2). The maintained version lives in {@code effigies}'
+ *     own {@code PolicyInferrer}, which is what interviews users during authoring; this copy is
+ *     retained only for {@code SchemaDiscoveryStage}'s fail-closed error-message hint and is
+ *     scheduled for removal, together with {@code AnonymisationPolicy.Builder.autoInfer(boolean)},
+ *     at incognito's next major version — see
+ *     {@code effigies/docs/adr/0001-authoring-above-the-engine.md}.
  */
+@Deprecated(forRemoval = true)
 public class PolicyInferrer {
 
     /** Creates a policy inferrer with the built-in name heuristics. */

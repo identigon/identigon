@@ -43,7 +43,9 @@ public class YamlPolicyParser {
      * @return Parsed AnonymisationPolicy object.
      * @throws IncognitoException.ConfigException if parsing fails or YAML is invalid.
      */
-    @SuppressWarnings("unchecked")
+    // "removal": still parses the deprecated autoInfer key for policy.yaml back-compat until
+    // incognito's next major version removes it (see AnonymisationPolicy.Builder#autoInfer).
+    @SuppressWarnings({"unchecked", "removal"})
     public AnonymisationPolicy parse(InputStream inputStream) throws IncognitoException.ConfigException {
         try {
             Yaml yaml = new Yaml(new SafeConstructor(new org.yaml.snakeyaml.LoaderOptions()));

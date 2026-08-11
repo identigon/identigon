@@ -3,6 +3,7 @@ package org.identigon.incognito.core;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import org.identigon.alterego.AlterEgo;
@@ -20,7 +21,7 @@ class SaltLifecycleTest {
 
     @Test
     void saltIsZeroedAndAlterEgoClosedOnCompletion() {
-        byte[] salt = "0123456789abcdef0123456789abcdef".getBytes();
+        byte[] salt = "0123456789abcdef0123456789abcdef".getBytes(StandardCharsets.UTF_8);
         byte[] saltToClear = salt.clone();
         AlterEgo alterEgo = AlterEgo.builder().salt(salt).build();
 

@@ -89,7 +89,20 @@ see Phase 3 and the ADR).
 
 - [x] Spotless (tidy-only), SpotBugs + find-sec-bugs (CI, `ignoreFailures = false`), pre-commit
   hooks, gitleaks — mirroring incognito.
-- [ ] Optional / consistency-only: PMD, JaCoCo.
+- [x] **PMD — done.** Shares the root `config/pmd/ruleset.xml` with `alterego`/`incognito`.
+  `ignoreFailures = false`, wired into `check`. Only cosmetic findings here (a `StringBuilder`
+  under-sized for what it accumulates); the CLI's `args[++i]` flag-parsing idiom and known-single-row
+  `rs.next()` lookups are covered by the shared ruleset's existing ignore list, not a per-project
+  exception.
+- [x] **Spotless/SpotBugs/PMD config consolidated to the monorepo root — done.** Mirrors incognito:
+  SpotBugs's `exclude.xml` moved to `config/spotbugs/exclude-effigies.xml` at the root; Spotless's
+  `java { }` block, SpotBugs's `toolVersion`/`ignoreFailures`/report shape, and PMD's whole block
+  now live once in the root `build.gradle.kts`'s `subprojects { }` instead of being copy-pasted per
+  subproject. The `excludeFilter` path is the only SpotBugs setting that stays in this subproject's
+  own `build.gradle.kts` — its suppressions are deliberately not unioned with alterego's/incognito's.
+  The find-sec-bugs plugin dependency moved into the same root guard too. JUnit BOM brought up to
+  `6.1.3` (was `5.10.2`).
+- [ ] Optional / consistency-only: JaCoCo.
 
 ## Post-v1.0 — possible future directions
 

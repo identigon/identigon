@@ -141,7 +141,9 @@ class EmployeesBenchmarkE2ETest {
                 "employee forenames must be fabricated");
 
             // Views were excluded from the clone (not treated as base tables)...
-            Set<String> reported = result.report().tables().stream().map(tr -> tr.table()).collect(java.util.stream.Collectors.toSet());
+            Set<String> reported = result.report().tables().stream()
+                .map(org.identigon.incognito.api.AnonymisationReport.TableReport::table)
+                .collect(java.util.stream.Collectors.toSet());
             assertTrue(reported.containsAll(TABLES), "all base tables reported");
             assertFalse(reported.contains("current_dept_emp"), "view current_dept_emp not cloned");
             assertFalse(reported.contains("dept_emp_latest_date"), "view dept_emp_latest_date not cloned");

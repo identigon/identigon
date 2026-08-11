@@ -156,6 +156,7 @@ class DiamondE2ETest {
 
     // --- helpers ---
 
+    @FunctionalInterface
     private interface Seeder { void seed(Connection conn) throws SQLException; }
 
     /** Creates fresh source+target databases (schema-identical), seeds the source, returns [source, target]. */

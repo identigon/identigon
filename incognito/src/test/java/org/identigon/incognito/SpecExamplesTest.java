@@ -20,6 +20,9 @@ import org.junit.jupiter.api.Test;
 class SpecExamplesTest {
 
     @Test
+    // autoInfer(boolean) is deprecated (scheduled for removal at incognito's next major version)
+    // but still exercised here deliberately, matching the SPECIFICATION.md example verbatim.
+    @SuppressWarnings("removal")
     void policyExampleBuilds() {
         AnonymisationPolicy policy = AnonymisationPolicy.builder()
             .autoInfer(false)

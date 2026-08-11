@@ -735,6 +735,14 @@ accepted inferred role **fails the run** with `IncognitoException.ConfigExceptio
 copies an unclassified column assuming it is harmless. This is the mechanism that stops an unspotted
 identifier leaking through as `PAYLOAD`.
 
+**`autoInfer` / `PolicyInferrer` are deprecated (`forRemoval = true`).** Inference is authoring, not
+execution — fail-closed classification means it never affected engine output — and it now lives in
+`effigies`' own `PolicyInferrer`, which is what actually interviews users during authoring. This
+copy is retained only for the fail-closed error message's diagnostic hint and is scheduled for
+removal at incognito's next major version; see `effigies/docs/adr/0001-authoring-above-the-engine.md`
+for the reasoning and `effigies/docs/adr/0002-lockstep-versioning.md` for how that major lands across
+the monorepo.
+
 A `PAYLOAD` (or kept `SENSITIVE`) column whose JDBC type is complex/opaque and untransformable in
 v1.0 (geometry, `JSONB`, array, `INET`, BLOB) is flagged in the report as *"untransformed
 potentially-identifying type"* — visible to the DPIA, not silently leaked. This is how the deferred

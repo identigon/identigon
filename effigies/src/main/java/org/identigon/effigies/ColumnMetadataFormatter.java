@@ -13,7 +13,7 @@ final class ColumnMetadataFormatter {
     private ColumnMetadataFormatter() {}
 
     static String format(SchemaInspector.TableMetadata table, String col) {
-        StringBuilder md = new StringBuilder();
+        StringBuilder md = new StringBuilder(48);
         Integer typeCode = table.columnTypes().get(col);
         if (typeCode != null) {
             try {

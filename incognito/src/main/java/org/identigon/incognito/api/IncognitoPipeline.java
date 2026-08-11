@@ -6,6 +6,10 @@ import org.identigon.incognito.policy.AnonymisationPolicy;
 /**
  * Entry point for executing a relational database anonymisation pipeline.
  */
+// Not a lambda target: intentionally not @FunctionalInterface -- {@link #builder()} is a static
+// factory, not the intended construction path for implementations, and the single-method shape
+// is incidental rather than a contract to preserve.
+@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface IncognitoPipeline {
 
     /**

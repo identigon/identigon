@@ -487,8 +487,27 @@ Kept in step with the `alterego` subproject; deliberately minimal to start.
   The first run will flag the ~18 SQL-by-string-concatenation sites (catalog identifiers, not user
   input); resolve by quoting the identifiers or a justified `config/spotbugs/exclude.xml`. SpotBugs
   plugin 6.5.9, tool 4.9.8.
-- [ ] Optional / consistency-only: PMD (bug-focused; prefer over Checkstyle, which duplicates the
-  `Xdoclint:all` gate) and JaCoCo (a coverage metric — the suite is already thorough by design).
+- [x] **PMD — done.** Shares the root `config/pmd/ruleset.xml` with `alterego`/`effigies` (not a
+  per-subproject copy — the rule selection was identical across all three, so keeping one file
+  avoids drift). `ignoreFailures = false`, wired into `check`. The first run surfaced a real, if
+  inert, bug — a `validateTablePolicy` parameter that never gated anything — and a handful of
+  genuine cleanups (declared-type-vs-`ConcurrentHashMap` looseness, a dead-store initializer, a
+  redundant catch-and-rethrow); the rest were fixed inline or suppressed at the call site with a
+  one-line reason where PMD's suggestion would have been wrong (e.g. reordering salt destruction
+  ahead of failure compensation). Optional / consistency-only: JaCoCo (a coverage metric — the
+  suite is already thorough by design).
+- [x] **Spotless/SpotBugs/PMD config consolidated to the monorepo root — done.** SpotBugs's
+  `config/spotbugs/exclude-<subproject>.xml` files moved out of each subproject's own `config/` to
+  sit alongside `config/pmd/ruleset.xml`. Spotless's `java { }` block, SpotBugs's
+  `toolVersion`/`ignoreFailures`/report shape, and PMD's whole block are now declared once in the
+  root `build.gradle.kts`'s `subprojects { }`, not copy-pasted three times. Each subproject's own
+  `build.gradle.kts` keeps only what's genuinely per-subproject: the SpotBugs `excludeFilter` path
+  — the suppressions themselves stay separate, deliberately not unioned (e.g. incognito's
+  dynamic-SQL exclusions don't apply to alterego/effigies, and unioning would silently disable a
+  real check where it would still be catching something). The find-sec-bugs plugin dependency was
+  also identical in all three `dependencies { }` blocks; moved into the same root
+  `plugins.withId("com.github.spotbugs")` guard. JUnit BOM brought up to `6.1.3` (was `5.10.2` here,
+  `5.11.4` in alterego) while at it — same version everywhere now.
 - [x] **DpiaArtefactEmitter refactor — done.** The hand-concatenated JSON is replaced by a small
   internal `JsonWriter` (owns commas/braces/escaping, so malformed JSON is impossible by
   construction — the `count('{')==count('}')` assertion is now belt-and-braces, not load-bearing),
@@ -507,6 +526,18 @@ Kept in step with the `alterego` subproject; deliberately minimal to start.
   shifted date, and a non-temporal QUASI_ID shows `‹synthesised›` rather than misrepresenting a text
   column as a date; kept/link/inherited columns show `‹kept›`/`‹link›`/`‹inherited›`. Covered by
   `DpiaArtefactEmitterTest`; exercised by every benchmark's emitted report.
+
+## Planned breaking changes (next major)
+
+Unlike the backlog below, this one is committed, not speculative:
+
+- **Remove `PolicyInferrer` and `AnonymisationPolicy.Builder.autoInfer(boolean)`.** Both are marked
+  `@Deprecated(forRemoval = true)` now. Inference is authoring, not execution (fail-closed means it
+  never affected engine output), and the maintained version lives in `effigies`' own `PolicyInferrer`
+  — this copy only survives today for the fail-closed error message's diagnostic hint. Decision and
+  reasoning recorded in `effigies/docs/adr/0001-authoring-above-the-engine.md`; the version-bump
+  mechanics (effigies rides along to `2.0.x` too) in `effigies/docs/adr/0002-lockstep-versioning.md`.
+  SPEC §7.2 carries the same pointer.
 
 ## Post-v1.0 — possible future directions
 

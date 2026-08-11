@@ -132,8 +132,8 @@ public final class VerificationStage implements PipelineStage {
                     String parentTable = fk.parentTable();
                     if (metadataByName.get(parentTable) == null) continue;
 
-                    StringBuilder join = new StringBuilder();
-                    StringBuilder notNull = new StringBuilder();
+                    StringBuilder join = new StringBuilder(32);
+                    StringBuilder notNull = new StringBuilder(32);
                     for (int i = 0; i < fk.childColumns().size(); i++) {
                         if (i > 0) { join.append(" AND "); notNull.append(" AND "); }
                         join.append("p.").append(fk.parentColumns().get(i)).append(" = c.").append(fk.childColumns().get(i));
@@ -218,9 +218,9 @@ public final class VerificationStage implements PipelineStage {
                         }
                     }
                 }
-            } catch (IncognitoException e) {
-                throw e; // re-throw ConstraintException from ERROR mode
             } catch (SQLException e) {
+                // IncognitoException (e.g. the ConstraintException ERROR mode throws above)
+                // propagates unchanged -- it isn't a SQLException, so it never reaches this catch.
                 throw new IncognitoException.SchemaException(
                     "Misdeclaration lint failed querying source database", e);
             }
@@ -403,14 +403,12 @@ public final class VerificationStage implements PipelineStage {
                      + "' AND attname = '" + columnName + "'")) {
             if (rs.next()) {
                 float nDistinct = rs.getFloat(1);
-                if (!rs.wasNull()) {
-                    if (nDistinct >= 0 && nDistinct < threshold / PG_STATS_MARGIN) {
-                        // Comfortably below threshold — pg_stats says it's low-cardinality.
-                        return (long) nDistinct;
-                    }
-                    // Near or above threshold, or negative (fraction-of-rows, likely high) — fall
-                    // through to the exact count.
+                if (!rs.wasNull() && nDistinct >= 0 && nDistinct < threshold / PG_STATS_MARGIN) {
+                    // Comfortably below threshold — pg_stats says it's low-cardinality.
+                    return (long) nDistinct;
                 }
+                // Otherwise: null, near/above threshold, or negative (fraction-of-rows, likely
+                // high) — fall through to the exact count.
             }
         } catch (SQLException e) {
             // Not PostgreSQL, or pg_stats not accessible — pg_stats is only an optimisation, never the
@@ -558,8 +556,8 @@ public final class VerificationStage implements PipelineStage {
         // String literals are safe here: the values come from our own source DB, quotes escaped.
         StringBuilder inClause = new StringBuilder();
         for (int i = 0; i < sourceValues.size(); i++) {
-            if (i > 0) inClause.append(",");
-            inClause.append("'").append(sourceValues.get(i).replace("'", "''")).append("'");
+            if (i > 0) inClause.append(',');
+            inClause.append('\'').append(sourceValues.get(i).replace("'", "''")).append('\'');
         }
         String checkSql = "SELECT COUNT(DISTINCT " + columnName + ") FROM " + tableName
             + " WHERE " + columnName + " IN (" + inClause + ")";

@@ -14,14 +14,41 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
 
 ## [Unreleased]
 
+### alterego
+
+- **Spotless/SpotBugs/PMD build config consolidated to the monorepo root.** `config/spotbugs/exclude.xml`
+  moved to the shared root `config/spotbugs/exclude-alterego.xml` (alongside `config/pmd/ruleset.xml`);
+  the identical Spotless/SpotBugs/PMD settings that were copy-pasted into each subproject's
+  `build.gradle.kts` are now declared once in the root's `subprojects { }` block. Only the SpotBugs
+  `excludeFilter` path — genuinely different per subproject — stays local. One user-visible build
+  change: the SpotBugs XML report is no longer produced here (only HTML), matching incognito/effigies;
+  nothing was consuming it. The find-sec-bugs plugin dependency (identical in all three
+  `dependencies { }` blocks) moved into the same root config. JUnit BOM aligned to `6.1.3` across all
+  three subprojects (was `5.11.4` here, `5.10.2` in incognito/effigies).
+
 ### incognito
 
+- **Spotless/SpotBugs config consolidated to the monorepo root** alongside the PMD move below —
+  `config/spotbugs/exclude-incognito.xml`; see the alterego entry above for the mechanics, including
+  the find-sec-bugs and JUnit BOM alignment.
+- **`PolicyInferrer` and `AnonymisationPolicy.Builder.autoInfer(boolean)` are now
+  `@Deprecated(forRemoval = true)`.** Inference is authoring, not execution — the maintained version
+  has lived in `effigies`' own `PolicyInferrer` since the 1.0.0 split — and this copy is scheduled
+  for removal at incognito's next major version (see `effigies/docs/adr/0001-authoring-above-the-engine.md`).
+  No behavioural change yet; this is the deprecation notice ahead of that removal.
 - **Identifier quoting fixed in both dialect handlers.** `PostgresDialectHandler` (`buildInsertSql`,
   `preLoadTable`'s owner-mode fallback, `postLoadTable`, `resyncSequence`) and
   `GenericDialectHandler.buildInsertSql` now quote every raw table/column identifier — previously
   only the FK drop/recreate path did. A reserved-word or mixed-case table/column name broke
   inconsistently depending on which code path touched it; none of the benchmark fixtures happen to
   use such names, so this was silent until now.
+- **PMD added to the build**, sharing a root `config/pmd/ruleset.xml` with `alterego`/`effigies`.
+  Fixed what it found: a `SchemaDiscoveryStage.validateTablePolicy` parameter that never actually
+  gated anything (the fail-closed suggestion hint was always included, regardless of `autoInfer`);
+  `DefaultIncognitoPipeline`'s catch split into `IncognitoException`/`Exception` branches instead of
+  an `instanceof` check; the in-memory stores declare `Map` fields instead of `ConcurrentHashMap`; a
+  couple of dead/redundant bits of code (an always-overwritten initializer, a no-op catch-and-rethrow).
+  No behavioural change.
 
 ### effigies
 
@@ -34,6 +61,11 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
 - Added tests for `RunCommand`, `DiscoverCommand`, `PolicyInferrer`, and `SimpleDataSource`
   (previously untested), splitting the CLI commands into a directly-testable core to do it without
   needing to fake environment variables.
+- **PMD added to the build**, sharing a root `config/pmd/ruleset.xml` with `alterego`/`incognito`.
+  No behavioural change here — only a `StringBuilder` under-sized for what it accumulates.
+- **Spotless/SpotBugs config consolidated to the monorepo root** — `config/spotbugs/exclude-effigies.xml`;
+  see the alterego entry in this section for the mechanics, including the find-sec-bugs and JUnit
+  BOM alignment.
 
 ## [1.0.0] — 2026-08-10
 

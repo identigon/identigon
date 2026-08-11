@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -46,7 +47,7 @@ class JitterDaysVolumeE2ETest {
         """;
 
     // Fixed salt + seed so the (salt-keyed) jitter is deterministic and the test is stable.
-    private static final byte[] SALT = "0123456789abcdef0123456789abcdef".getBytes();
+    private static final byte[] SALT = "0123456789abcdef0123456789abcdef".getBytes(StandardCharsets.UTF_8);
 
     private PostgreSQLContainer pg;
     private DataSource sourceDs;

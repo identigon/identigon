@@ -100,7 +100,8 @@ class PagilaBenchmarkE2ETest {
             .stage(new VerificationStage())
             .build().execute();
         String verifyMsg = result.report().stageResults().stream()
-            .filter(r -> r.stageName().equals("VerificationStage")).findFirst().map(r -> r.message()).orElse("");
+            .filter(r -> r.stageName().equals("VerificationStage")).findFirst()
+            .map(org.identigon.incognito.api.PipelineStage.StageResult::message).orElse("");
         assertTrue(result.success(), "Pagila should clone successfully; verification: " + verifyMsg);
 
         emitAndVerifyDpiaReport(result.report(), "pagila");
@@ -148,7 +149,9 @@ class PagilaBenchmarkE2ETest {
                 "address.postal_code must use the guaranteed-fictional inward-code letter");
 
             // Views were excluded from the clone (not treated as base tables).
-            Set<String> reported = result.report().tables().stream().map(tr -> tr.table()).collect(Collectors.toSet());
+            Set<String> reported = result.report().tables().stream()
+                .map(org.identigon.incognito.api.AnonymisationReport.TableReport::table)
+                .collect(Collectors.toSet());
             assertFalse(reported.contains("customer_list"), "view customer_list not cloned");
             assertFalse(reported.contains("staff_list"), "view staff_list not cloned");
         }

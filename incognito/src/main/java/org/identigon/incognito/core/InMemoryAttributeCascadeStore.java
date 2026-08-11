@@ -1,5 +1,6 @@
 package org.identigon.incognito.core;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,8 +45,8 @@ public final class InMemoryAttributeCascadeStore implements AttributeCascadeStor
     /** Composite key for a group-scoped, per-entity jitter delta (SPEC §4.2). */
     private record JitterKey(String coherenceGroup, String parentTable, Object parentId) {}
 
-    private final ConcurrentHashMap<AttributeKey, Object> attributes = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<JitterKey, Long> jitterDeltas = new ConcurrentHashMap<>();
+    private final Map<AttributeKey, Object> attributes = new ConcurrentHashMap<>();
+    private final Map<JitterKey, Long> jitterDeltas = new ConcurrentHashMap<>();
 
     @Override
     public void put(String parentTable, Object parentId, String attributeName, Object value) {

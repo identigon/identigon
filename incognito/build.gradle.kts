@@ -1,11 +1,11 @@
 plugins {
     `java-library`
     `maven-publish`
-    // Minimal code hygiene, kept in step with the sibling subprojects (alterego, effigies).
-    // Tidy-only (no googleJavaFormat) so it does not reflow the hand-maintained style. SpotBugs +
-    // find-sec-bugs is a tracked follow-up (see PLAN).
+    // Code hygiene, kept in step with the sibling subprojects (alterego, effigies) -- see the
+    // root build.gradle.kts's `subprojects { }` block for the shared Spotless/SpotBugs/PMD config.
     id("com.diffplug.spotless") // version pinned at the root
     id("com.github.spotbugs") // version pinned at the root
+    id("pmd")
 }
 
 group = "org.identigon"
@@ -18,18 +18,6 @@ java {
     // Maven Central requires both alongside the binary jar.
     withSourcesJar()
     withJavadocJar()
-}
-
-// Light, non-reflowing hygiene: tidy imports/whitespace only, never a full reformat (which would
-// fight the hand-maintained style). `spotlessCheck` runs as part of `check`; `spotlessApply` fixes.
-spotless {
-    java {
-        target("src/**/*.java")
-        importOrder()
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
 }
 
 repositories {
@@ -64,7 +52,7 @@ dependencies {
     implementation("org.yaml:snakeyaml:2.2")
 
     // Testing dependencies
-    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher") // required by the Gradle 9.x test runner
     testImplementation("com.h2database:h2:2.2.224")
@@ -79,7 +67,6 @@ dependencies {
     // PostgreSQL JDBC driver — the integration tests connect via raw DriverManager.
     testRuntimeOnly("org.postgresql:postgresql:42.7.3")
 
-    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0")
 }
 
 tasks.test {
@@ -152,18 +139,5 @@ publishing {
 }
 
 spotbugs {
-    toolVersion = "4.9.8"
-    ignoreFailures = false
-    excludeFilter = file("config/spotbugs/exclude.xml")
-}
-
-tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
-    reports {
-        create("html") {
-            required = true
-        }
-        create("xml") {
-            required = false
-        }
-    }
+    excludeFilter = rootProject.file("config/spotbugs/exclude-incognito.xml")
 }

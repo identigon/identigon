@@ -60,12 +60,9 @@ public final class PostgresDialectHandler implements DialectHandler {
     public String buildInsertSql(String tableName, List<String> columns, boolean hasIdentityPk) {
         String cols = columns.stream().map(PostgresDialectHandler::quoteIdent).collect(Collectors.joining(", "));
         String placeholders = columns.stream().map(c -> "?").collect(Collectors.joining(", "));
-        String sql = "INSERT INTO " + quoteIdent(tableName) + " (" + cols + ") ";
-        if (hasIdentityPk) {
-            sql += "OVERRIDING SYSTEM VALUE ";
-        }
-        sql += "VALUES (" + placeholders + ")";
-        return sql;
+        return "INSERT INTO " + quoteIdent(tableName) + " (" + cols + ") "
+            + (hasIdentityPk ? "OVERRIDING SYSTEM VALUE " : "")
+            + "VALUES (" + placeholders + ")";
     }
 
     @Override

@@ -14,7 +14,8 @@ import java.util.function.Consumer;
  * ({@code distinguishingLint}: WARN | ERROR | OFF) that flags a {@code distinguishing: false} column
  * looking free-text — it is not the gate.
  *
- * @param autoInfer whether auto-inference may suggest roles (it never assigns them); default {@code false}
+ * @param autoInfer whether auto-inference may suggest roles (it never assigns them); default
+ *     {@code false}. Deprecated — see {@link Builder#autoInfer(boolean)}.
  * @param maxCategoricalCardinality the distinct-count threshold for the misdeclaration lint (§4.1)
  * @param distinguishingLint how the misdeclaration lint behaves (WARN / ERROR / OFF)
  * @param structuralUniqueness whether {@code VerificationStage} computes relational-fingerprint
@@ -77,7 +78,11 @@ public record AnonymisationPolicy(
          *
          * @param autoInfer whether to enable auto-inference
          * @return this builder
+         * @deprecated inference is authoring, not execution; {@code effigies} owns it now and this
+         *     fail-closed engine's own copy is scheduled for removal at incognito's next major
+         *     version — see {@code effigies/docs/adr/0001-authoring-above-the-engine.md}.
          */
+        @Deprecated(forRemoval = true)
         public Builder autoInfer(boolean autoInfer) {
             this.autoInfer = autoInfer;
             return this;

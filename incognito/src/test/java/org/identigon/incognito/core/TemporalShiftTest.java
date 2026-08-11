@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
@@ -26,11 +27,14 @@ class TemporalShiftTest {
     private static final int WINDOW = 1825; // the SYNTHESISE ±5y window
 
     private final AlterEgo ae = AlterEgo.builder()
-        .salt("incognito-temporal-shift-test-salt".getBytes()).build();
+        .salt("incognito-temporal-shift-test-salt".getBytes(StandardCharsets.UTF_8)).build();
     private final Transformation<LocalDate> dateT = ae.shiftDate(WINDOW);
     private final Transformation<LocalDateTime> dateTimeT = ae.shiftDateTime(WINDOW, 0);
 
     @Test
+    // java.sql.Timestamp is the actual JDBC read-path type under test (see class Javadoc), not a
+    // stand-in for java.time -- java.sql.Timestamp extends java.util.Date, which PMD flags here.
+    @SuppressWarnings("PMD.ReplaceJavaUtilDate")
     void shiftsEveryTemporalTypePreservingTypeAndTimeOfDay() {
         // LocalDate → LocalDate
         assertInstanceOf(LocalDate.class,

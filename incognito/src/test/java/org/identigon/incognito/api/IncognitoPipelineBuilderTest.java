@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +14,7 @@ import org.junit.jupiter.api.Test;
  */
 class IncognitoPipelineBuilderTest {
 
-    private static final byte[] SALT = "0123456789abcdef".getBytes();
+    private static final byte[] SALT = "0123456789abcdef".getBytes(StandardCharsets.UTF_8);
 
     @Test
     void sameSaltAndSeedDeriveIdenticalOutput() {

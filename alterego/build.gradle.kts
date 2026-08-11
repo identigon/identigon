@@ -20,40 +20,17 @@ java {
     withJavadocJar()
 }
 
-spotless {
-    java {
-        importOrder()
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
-}
-
+// Spotless, SpotBugs (toolVersion/ignoreFailures/report shape), and PMD are configured for every
+// subproject from the root build.gradle.kts's `subprojects { }` block. Only the SpotBugs
+// excludeFilter is genuinely per-subproject.
 spotbugs {
-    toolVersion = "4.9.8"
-    ignoreFailures = false
+    excludeFilter.set(rootProject.file("config/spotbugs/exclude-alterego.xml"))
 }
 
-tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
-    excludeFilter.set(file("config/spotbugs/exclude.xml"))
-    reports {
-        create("html") { required.set(true) }
-        create("xml") { required.set(true) }
-    }
-}
-
+// The SpotBugs plugin already wires `check` to depend on spotbugsMain/spotbugsTest itself; only
+// the JaCoCo half of this needs to be declared explicitly.
 tasks.named("check") {
-    dependsOn(tasks.withType<com.github.spotbugs.snom.SpotBugsTask>())
     dependsOn(tasks.withType<JacocoReport>())
-}
-
-// PMD
-pmd {
-    toolVersion = "7.22.0"
-    isConsoleOutput = true
-    isIgnoreFailures = false
-    ruleSets = emptyList()
-    ruleSetFiles = files("config/pmd/ruleset.xml")
 }
 
 // JaCoCo
@@ -84,10 +61,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.11.4"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0")
 }
 
 tasks.test {

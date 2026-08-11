@@ -201,7 +201,7 @@ public final class TableTransformLoadStage implements PipelineStage {
         boolean compositePk = pkCols.size() > 1;
 
         AtomicLong surrogateCounter = new AtomicLong(1);
-        long rowCount = 0;
+        long rowCount;
 
         try (Connection sourceConn = context.source().getConnection();
              Connection targetConn = context.target().getConnection()) {

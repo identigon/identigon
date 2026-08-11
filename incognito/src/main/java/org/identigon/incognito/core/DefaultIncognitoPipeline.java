@@ -34,6 +34,11 @@ public final class DefaultIncognitoPipeline implements IncognitoPipeline {
     }
 
     @Override
+    // Not a try-with-resources candidate: the AlterEgo clone must be closed AFTER
+    // IncognitoCleanUpHandler.compensate() runs in the catch below (compensation needs a still-live
+    // pipeline), which try-with-resources cannot express -- it closes resources before the catch
+    // clause runs, reordering the salt destruction ahead of compensation.
+    @SuppressWarnings("PMD.UseTryWithResources")
     public PipelineResult execute() throws IncognitoException {
         long startNanos = System.nanoTime();
         try {
@@ -61,11 +66,11 @@ public final class DefaultIncognitoPipeline implements IncognitoPipeline {
                 Duration.ofNanos(System.nanoTime() - startNanos),
                 org.identigon.incognito.core.AnonymisationReportBuilder.build(context, stageResults)
             );
+        } catch (IncognitoException e) {
+            org.identigon.incognito.core.IncognitoCleanUpHandler.compensate(context);
+            throw e;
         } catch (Exception e) {
             org.identigon.incognito.core.IncognitoCleanUpHandler.compensate(context);
-            if (e instanceof IncognitoException) {
-                throw (IncognitoException) e;
-            }
             throw new IncognitoException("Pipeline execution failed", e);
         } finally {
             if (saltToClear != null) {

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ruleset name="AlterEgo PMD Rules"
+<ruleset name="Identigon PMD Rules"
          xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
 
-    <description>PMD rules for AlterEgo project</description>
+    <description>Shared PMD rules for the identigon monorepo (alterego, incognito, effigies)</description>
 
     <!-- Best Practices -->
     <rule ref="category/java/bestpractices.xml">
@@ -25,6 +25,12 @@
         <exclude name="ArrayIsStoredDirectly"/>
         <exclude name="UnusedPrivateField"/>
         <exclude name="UnusedLocalVariable"/>
+        <!-- `args[++i]` to consume a flag's value is the standard CLI arg-parsing idiom (effigies). -->
+        <exclude name="AvoidReassigningLoopVariables"/>
+        <!-- A query known to return exactly one row (an aggregate, or a row just inserted by the
+             same test) does not need its rs.next() checked; a missing row already fails the very
+             next getter loudly. -->
+        <exclude name="CheckResultSet"/>
     </rule>
 
     <!-- Code Style -->
@@ -73,6 +79,17 @@
         <exclude name="ExceptionAsFlowControl"/>
         <exclude name="PublicMemberInNonPublicType"/>
         <exclude name="AvoidThrowingRawExceptionTypes"/>
+        <!-- Declaring an unchecked domain exception (IncognitoException & friends, all
+             RuntimeException) in `throws` is deliberate self-documentation, paired with the
+             Xdoclint:all-enforced @throws Javadoc — not an oversight. -->
+        <exclude name="AvoidUncheckedExceptionsInSignatures"/>
+        <!-- Matches the existing CognitiveComplexity/CyclomaticComplexity/NPathComplexity/GodClass
+             exclusions above: a streaming per-table pipeline method is kept together deliberately
+             rather than split for its own sake (see incognito PLAN.md). -->
+        <exclude name="NcssCount"/>
+        <!-- `throws Exception` on a @Test method is the standard JUnit convention; the test body
+             calls varied checked-exception-throwing JDBC/IO APIs without needing to enumerate them. -->
+        <exclude name="SignatureDeclareThrowsException"/>
     </rule>
 
     <!-- Error Prone -->

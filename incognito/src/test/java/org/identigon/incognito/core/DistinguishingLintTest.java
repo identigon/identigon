@@ -76,7 +76,7 @@ class DistinguishingLintTest {
                     // per row (100 distinct values >> default threshold of 64).
                     StringBuilder sb = new StringBuilder("INSERT INTO customers (email, dob, flag, notes) VALUES ");
                     for (int i = 0; i < 100; i++) {
-                        if (i > 0) sb.append(",");
+                        if (i > 0) sb.append(',');
                         String flagVal = (i % 2 == 0) ? "YES" : "NO";
                         sb.append(String.format("('user%d@realcorp.com', '1990-01-01', '%s', 'Note #%03d unique text')",
                             i, flagVal, i));
@@ -144,7 +144,7 @@ class DistinguishingLintTest {
     }
 
     @Test
-    void warnMode_completesWithWarning() throws Exception {
+    void warnModeCompletesWithWarning() throws Exception {
         Assumptions.assumeTrue(sourceDs != null, "Docker/PostgreSQL not available");
         truncateTarget();
 
@@ -170,7 +170,7 @@ class DistinguishingLintTest {
     }
 
     @Test
-    void errorMode_failsOnMisdeclaredColumn() {
+    void errorModeFailsOnMisdeclaredColumn() {
         Assumptions.assumeTrue(sourceDs != null, "Docker/PostgreSQL not available");
         try { truncateTarget(); } catch (SQLException ignored) {}
 
@@ -185,7 +185,7 @@ class DistinguishingLintTest {
     }
 
     @Test
-    void offMode_skipsCheckEntirely() throws Exception {
+    void offModeSkipsCheckEntirely() throws Exception {
         Assumptions.assumeTrue(sourceDs != null, "Docker/PostgreSQL not available");
         truncateTarget();
 
