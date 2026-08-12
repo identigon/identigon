@@ -1,9 +1,9 @@
 // Applied `false` here: this only resolves the plugin classpath once, at the monorepo root, so
-// each subproject (alterego, incognito, effigies) can `id(...)` these without repeating a version
-// and risking drift between them.
+// each subproject (alterego, incognito, effigies) can apply these without repeating a version and
+// risking drift between them. Versions themselves live in gradle/libs.versions.toml.
 plugins {
-    id("com.diffplug.spotless") version "8.8.0" apply false
-    id("com.github.spotbugs") version "6.5.9" apply false
+    alias(libs.plugins.spotless) apply false
+    alias(libs.plugins.spotbugs) apply false
 }
 
 // Lockstep versioning: one version for the whole monorepo, not one per subproject (see each
@@ -47,7 +47,7 @@ subprojects {
     // subproject's own build.gradle.kts.
     plugins.withId("com.github.spotbugs") {
         configure<com.github.spotbugs.snom.SpotBugsExtension> {
-            toolVersion = "4.9.8"
+            toolVersion = libs.versions.spotbugsTool.get()
             ignoreFailures = false
         }
         tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
@@ -57,14 +57,14 @@ subprojects {
             }
         }
         // find-sec-bugs is identical across every subproject too.
-        dependencies.add("spotbugsPlugins", "com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0")
+        dependencies.add("spotbugsPlugins", libs.findsecbugs.plugin)
     }
 
     // PMD: fully identical everywhere -- one shared ruleset (config/pmd/ruleset.xml), nothing left
     // to differ per subproject.
     plugins.withId("pmd") {
         configure<org.gradle.api.plugins.quality.PmdExtension> {
-            toolVersion = "7.22.0"
+            toolVersion = libs.versions.pmdTool.get()
             isConsoleOutput = true
             isIgnoreFailures = false
             ruleSets = emptyList()

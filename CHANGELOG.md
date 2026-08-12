@@ -101,6 +101,17 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
   done here.
 - **Dependabot added** (`gradle` + `github-actions`, weekly) to keep dependency versions current
   across the monorepo.
+- **CI reports made downloadable.** `_build.yml` uploads each matrix leg's (`ubuntu-latest`/
+  `windows-latest`) JUnit XML, JaCoCo (HTML/XML/CSV), PMD (HTML/XML), and SpotBugs (HTML) reports
+  as a `build-reports-<os>` artifact via `actions/upload-artifact`, even when the build step fails
+  — previously these only existed buried in the raw Gradle log.
+- **Gradle version catalog added** (`gradle/libs.versions.toml`). Every shared version — root
+  plugin versions, SpotBugs/PMD `toolVersion`s, find-sec-bugs, the JUnit BOM, snakeyaml, H2, the
+  Testcontainers BOM, the Postgres driver — was a literal string repeated in one or more
+  `build.gradle.kts` files; all ten now have exactly one declaration. No version actually changed
+  (verified: the published `incognito` POM still resolves `snakeyaml` to `2.2`, matching before).
+  CI's downloadable per-run artifact (see above) makes this easy to spot-check going forward: the
+  JaCoCo/PMD/SpotBugs reports inside it reflect whatever the catalog resolved.
 
 ## [1.0.0] — 2026-08-10
 

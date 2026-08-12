@@ -1,0 +1,35 @@
+# Single source of truth for every version shared across the monorepo's subprojects. Gradle
+# auto-detects this file and generates the `libs` accessor for every project (root + subprojects)
+# without any wiring in settings.gradle.kts. Per-subproject-only dependencies (e.g. incognito's
+# Testcontainers usage is shared with no one) still live in that subproject's own build.gradle.kts,
+# just via a catalog entry instead of a literal string, so a future second consumer costs one line.
+
+[versions]
+spotless = "8.8.0"
+spotbugsPlugin = "6.5.9"
+spotbugsTool = "4.9.8"
+findsecbugs = "1.13.0"
+pmdTool = "7.22.0"
+junit = "6.1.3"
+snakeyaml = "2.2"
+h2 = "2.2.224"
+testcontainers = "2.0.5"
+postgresql = "42.7.3"
+
+[libraries]
+findsecbugs-plugin = { module = "com.h3xstream.findsecbugs:findsecbugs-plugin", version.ref = "findsecbugs" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+# Version-less: managed by the junit-bom platform above wherever it's declared alongside these.
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
+h2 = { module = "com.h2database:h2", version.ref = "h2" }
+testcontainers-bom = { module = "org.testcontainers:testcontainers-bom", version.ref = "testcontainers" }
+# Version-less: managed by the testcontainers-bom platform above.
+testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter" }
+testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+
+[plugins]
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+spotbugs = { id = "com.github.spotbugs", version.ref = "spotbugsPlugin" }

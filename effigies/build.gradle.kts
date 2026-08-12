@@ -2,8 +2,8 @@ plugins {
     application
     // Code hygiene, kept in step with the sibling subprojects (incognito, alterego) -- see the
     // root build.gradle.kts's `subprojects { }` block for the shared Spotless/SpotBugs/PMD config.
-    id("com.diffplug.spotless") // version pinned at the root
-    id("com.github.spotbugs") // version pinned at the root
+    alias(libs.plugins.spotless) // version pinned at the root
+    alias(libs.plugins.spotbugs) // version pinned at the root
     id("pmd")
     id("jacoco")
 }
@@ -41,16 +41,16 @@ dependencies {
     implementation(project(":incognito"))
 
     // Reads/writes the declarative policy YAML that incognito consumes.
-    implementation("org.yaml:snakeyaml:2.2")
+    implementation(libs.snakeyaml)
 
     // Testing dependencies
-    testImplementation(platform("org.junit:junit-bom:6.1.3"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher") // required by the Gradle 9.x test runner
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher) // required by the Gradle 9.x test runner
     // A real, in-process JDBC target for discover/run command tests -- exercises SchemaInspector
     // and IncognitoPipeline against genuine metadata instead of hand-mocking JDBC. Same version as
     // incognito's own test-scope usage.
-    testImplementation("com.h2database:h2:2.2.224")
+    testImplementation(libs.h2)
 
 }
 

@@ -6,13 +6,6 @@ place for. See the root `CHANGELOG.md` for what's already shipped in this catego
 
 ## Outstanding
 
-- [ ] **Gradle version catalog (`gradle/libs.versions.toml`).** Every shared version — root plugin
-  versions, SpotBugs/PMD `toolVersion`s, find-sec-bugs, the JUnit BOM, H2, the Testcontainers BOM,
-  the Postgres driver — is currently a literal string in one or more `build.gradle.kts` files. A
-  catalog would be the idiomatic Gradle-native single source of truth for all of it at once. Bigger
-  and more structural than the `subprojects { }` consolidation already done (moving config into a
-  shared block vs. introducing a new file format/convention), so tracked here separately rather than
-  folded into that work.
 - [ ] **Consider turning on more of `markdownlint-cli2`'s rule set, not just line length.**
   `.markdownlint-cli2.jsonc` currently enables only `MD013` (`default: false`) — deliberately
   narrow, matching what was actually asked for when the hook was added. Checked read-only with

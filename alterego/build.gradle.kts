@@ -2,8 +2,8 @@ plugins {
     `java-library`
     `maven-publish`
     signing
-    id("com.diffplug.spotless") // version pinned at the root
-    id("com.github.spotbugs") // version pinned at the root
+    alias(libs.plugins.spotless) // version pinned at the root
+    alias(libs.plugins.spotbugs) // version pinned at the root
     id("pmd")
     id("jacoco")
 }
@@ -42,9 +42,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:6.1.3"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks.test {

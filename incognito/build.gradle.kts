@@ -3,8 +3,8 @@ plugins {
     `maven-publish`
     // Code hygiene, kept in step with the sibling subprojects (alterego, effigies) -- see the
     // root build.gradle.kts's `subprojects { }` block for the shared Spotless/SpotBugs/PMD config.
-    id("com.diffplug.spotless") // version pinned at the root
-    id("com.github.spotbugs") // version pinned at the root
+    alias(libs.plugins.spotless) // version pinned at the root
+    alias(libs.plugins.spotbugs) // version pinned at the root
     id("pmd")
     id("jacoco")
 }
@@ -41,23 +41,23 @@ dependencies {
 
     // Declarative YAML policy parser — an internal detail. TODO: move to a separate incognito-yaml
     // module so the core stays dependency-lean (SPECIFICATION.md §1); currently bundled in core.
-    implementation("org.yaml:snakeyaml:2.2")
+    implementation(libs.snakeyaml)
 
     // Testing dependencies
-    testImplementation(platform("org.junit:junit-bom:6.1.3"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher") // required by the Gradle 9.x test runner
-    testImplementation("com.h2database:h2:2.2.224")
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher) // required by the Gradle 9.x test runner
+    testImplementation(libs.h2)
 
     // Testcontainers for PostgreSQL integration testing (v1.0 Tier-1 engine).
     // 2.x is required for Docker Engine 29.x (older docker-java probes API 1.32, which the daemon
     // rejects; needs ≥1.40). NOTE 2.x renamed the module artifacts (testcontainers-* prefix) and
     // moved PostgreSQLContainer to package org.testcontainers.postgresql.
-    testImplementation(platform("org.testcontainers:testcontainers-bom:2.0.5"))
-    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
-    testImplementation("org.testcontainers:testcontainers-postgresql")
+    testImplementation(platform(libs.testcontainers.bom))
+    testImplementation(libs.testcontainers.junit.jupiter)
+    testImplementation(libs.testcontainers.postgresql)
     // PostgreSQL JDBC driver — the integration tests connect via raw DriverManager.
-    testRuntimeOnly("org.postgresql:postgresql:42.7.3")
+    testRuntimeOnly(libs.postgresql)
 
 }
 
