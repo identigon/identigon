@@ -1,0 +1,18 @@
+{
+  // Line-length gate only (MD013). This repo's convention (CLAUDE.md's Code style section) is a
+  // 100-column wrap for Markdown prose, with tables and code blocks exempt because there's no
+  // sensible way to "wrap" either without corrupting them, and headings exempt because a heading
+  // is one line by construction -- there's no wrap to apply, only a rename, which isn't this
+  // tool's job. Everything else markdownlint checks (heading structure, list style, blank-line
+  // conventions, etc.) is deliberately left off: nobody's asked for that yet, and this repo's
+  // existing docs have never been audited against it.
+  "config": {
+    "default": false,
+    "MD013": {
+      "line_length": 100,
+      "code_blocks": false,
+      "tables": false,
+      "headings": false
+    }
+  }
+}

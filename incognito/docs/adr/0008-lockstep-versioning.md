@@ -16,10 +16,11 @@ a real question: a git tag on a monorepo commit describes the whole repo's state
 subproject's, so three independently-drifting version numbers stop making sense at the point of
 tagging a release — there is nowhere to hang three different numbers on one tag.
 
-One thing this decision deliberately does **not** do: spend incognito's own earmarked breaking-change
-release. [ADR 0002](0002-two-libraries-two-responsibilities.md)/effigies' ADR 0001 already designate
-incognito's *next* major as the release that removes `PolicyInferrer`/`autoInfer` — that removal
-has not happened yet (the code is still here). This re-baseline to `1.0.0` is not that release.
+One thing this decision deliberately does **not** do: spend incognito's own earmarked
+breaking-change release. [ADR 0002](0002-two-libraries-two-responsibilities.md)/effigies' ADR
+0001 already designate incognito's *next* major as the release that removes
+`PolicyInferrer`/`autoInfer` — that removal has not happened yet (the code is still here).
+This re-baseline to `1.0.0` is not that release.
 
 ## Decision
 

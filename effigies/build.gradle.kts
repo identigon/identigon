@@ -63,17 +63,22 @@ tasks.test {
     }
 }
 
-// A single runnable ("fat") jar so the tool runs with a bare `java -jar build/libs/effigies.jar`
+// A single runnable ("fat") jar so the tool runs with a bare `java -jar build/libs/identigon.jar`
 // — the runtime classpath (incognito, alterego, snakeyaml, JDBC drivers) is bundled in. No
 // shadow plugin needed; plain Gradle assembles it. Signature files from signed dependency jars are
 // dropped, as they would otherwise invalidate the merged jar.
+//
+// Named "identigon.jar", not "effigies.jar": consumers run this one artifact and never touch
+// incognito/alterego directly, so the jar (and the CLI's own --version/--help banner, see
+// EffigiesCli) present the project's public name. "effigies" stays as the internal module/package
+// name only -- see the module's own Javadoc and ADR 0001 for why the three-subproject split exists.
 tasks.jar {
-    // A stable, unversioned filename so `java -jar build/libs/effigies.jar` always works; the
+    // A stable, unversioned filename so `java -jar build/libs/identigon.jar` always works; the
     // version travels in the manifest (Implementation-Version) instead.
-    archiveFileName = "effigies.jar"
+    archiveFileName = "identigon.jar"
     manifest {
         attributes["Main-Class"] = application.mainClass.get()
-        attributes["Implementation-Title"] = "Effigies"
+        attributes["Implementation-Title"] = "Identigon"
         attributes["Implementation-Version"] = project.version.toString()
     }
     // Now that incognito/alterego are sibling project() dependencies rather than external Maven

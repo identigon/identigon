@@ -4,12 +4,12 @@ Status: accepted (2026-07-30, backfilled)
 
 ## Context
 
-After fabrication, some `SENSITIVE` columns can safely be kept real — a boolean or a small code set
-singles out no one — while others cannot: a rare code, an unusual amount, or free-text narrative can
-itself identify a person, making it effectively a quasi-identifier. An earlier design decided this
-automatically with a `COUNT(DISTINCT)` cardinality gate. That gate was a k-anonymity-era residue and,
-critically, the **last place the privacy path read source values** — a dataset-level probe we wanted
-gone.
+After fabrication, some `SENSITIVE` columns can safely be kept real — a boolean or a small
+code set singles out no one — while others cannot: a rare code, an unusual amount, or
+free-text narrative can itself identify a person, making it effectively a quasi-identifier.
+An earlier design decided this automatically with a `COUNT(DISTINCT)` cardinality gate. That
+gate was a k-anonymity-era residue and, critically, the **last place the privacy path read
+source values** — a dataset-level probe we wanted gone.
 
 ## Decision
 
@@ -27,8 +27,8 @@ lint).
 
 ## Consequences
 
-- The privacy decision no longer reads any source value — it acts purely on the flag and the presence
-  of a strategy, checked before load.
+- The privacy decision no longer reads any source value — it acts purely on the flag and the
+  presence of a strategy, checked before load.
 - Keep-vs-fabricate is an explicit, reviewable, one-word author decision rather than an emergent
   property of the data.
 - A mislabelled column is caught by the lint (or fails, in `ERROR` mode) without the lint ever

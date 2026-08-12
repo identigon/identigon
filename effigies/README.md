@@ -54,16 +54,18 @@ Inspect the source database to emit a starter (fail-closed) `policy.yaml`:
 ```bash
 # Read the source schema (metadata only)
 export IDENTIGON_SOURCE_PASSWORD="secret"
-java -jar build/libs/effigies.jar discover --source-url "jdbc:postgresql://..." --source-user "admin"
+java -jar build/libs/identigon.jar discover --source-url "jdbc:postgresql://..." --source-user "admin"
 
 # Generate a starter policy.yaml with deterministic heuristics (Phase 3)
-java -jar build/libs/effigies.jar scaffold --source-url "jdbc:postgresql://..." --source-user "admin" --out ./policy.draft.yaml
+java -jar build/libs/identigon.jar scaffold --source-url "jdbc:postgresql://..." --source-user "admin" --out ./policy.draft.yaml
 ```
 
 ### 2. Interactive Policy Authoring (The Agent Skill)
-Effigies ships with a built-in Agent Skill for AI assistants (Claude, Antigravity, Copilot, etc.) that interactively interviews you to safely classify the remaining columns.
+Effigies ships with a built-in Agent Skill for AI assistants (Claude, Antigravity, Copilot, etc.)
+that interactively interviews you to safely classify the remaining columns.
 
-Activate the skill in your agent (located at `.agents/skills/identigon-policy-author/SKILL.md`). The agent will:
+Activate the skill in your agent (located at
+`.agents/skills/identigon-policy-author/SKILL.md`). The agent will:
 - Read your scaffolded `policy.yaml`.
 - Batch related columns (e.g., all audit timestamps) to prevent fatigue.
 - Ask for your explicit confirmation before applying roles (maintaining the fail-closed guarantee).
@@ -75,9 +77,9 @@ export IDENTIGON_SOURCE_PASSWORD="secret"
 export IDENTIGON_TARGET_PASSWORD="secret"
 
 # Required for persistent/reproducible salt modes (configured in policy.yaml)
-export IDENTIGON_SALT="my-secret-salt-bytes" 
+export IDENTIGON_SALT="my-secret-salt-bytes"
 
-java -jar build/libs/effigies.jar run \
+java -jar build/libs/identigon.jar run \
   --policy ./policy.yaml \
   --source-url "jdbc:postgresql://..." --source-user "admin" \
   --target-url "jdbc:postgresql://..." --target-user "admin"
@@ -92,7 +94,7 @@ The engine will execute the pipeline and surface the DPIA accountability report 
 `java -jar`:
 
 ```
-java -jar build/libs/effigies.jar help
+java -jar build/libs/identigon.jar help
 ```
 
 (or `./gradlew run --args="help"` during development).

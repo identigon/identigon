@@ -45,7 +45,7 @@ public final class EffigiesCli {
                 yield 0;
             }
             case "version", "--version" -> {
-                out.println("Effigies " + version() + " (engine: incognito on classpath)");
+                out.println("Identigon " + version() + " (engine: incognito on classpath)");
                 yield 0;
             }
             case "discover" -> {
@@ -67,9 +67,9 @@ public final class EffigiesCli {
 
     private static void printUsage(PrintStream w) {
         w.println("""
-            Effigies — author and run an incognito anonymisation from a source schema.
+            Identigon — author and run an incognito anonymisation from a source schema.
 
-            Usage: java -jar effigies.jar <command> [options]
+            Usage: java -jar identigon.jar <command> [options]
 
             Commands:
               discover    Inspect a source database and describe its schema (metadata only, no data).

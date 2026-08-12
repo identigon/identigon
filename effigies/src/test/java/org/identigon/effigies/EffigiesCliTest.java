@@ -33,7 +33,7 @@ class EffigiesCliTest {
     void versionSucceeds() {
         Result r = invoke("version");
         assertEquals(0, r.code());
-        assertTrue(r.out().startsWith("Effigies "), "prints the version line");
+        assertTrue(r.out().startsWith("Identigon "), "prints the version line");
     }
 
     @Test

@@ -1,0 +1,14 @@
+# Keep dependency versions current across the monorepo. Gradle picks up the root build plus all
+# three subprojects (alterego/incognito/effigies) from the single root directory; github-actions
+# covers the pinned SHAs (with their trailing `# vX.Y.Z` comments) in .github/workflows/.
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

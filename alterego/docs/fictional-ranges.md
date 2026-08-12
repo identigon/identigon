@@ -70,7 +70,8 @@ Rules with self-contained provenance, not repeated here:
 - **Source**: HM Passport Office guidance via gov.uk ("Basic passport checks"); UK passport
   numbers have been 9 numeric digits since 1988. Statement relied on: the passport number is the
   9-digit numeric code at the top of the photo page.
-- **URL**: https://assets.publishing.service.gov.uk/media/5a7a3bc5ed915d1a6421c00a/basic-passport-checks.pdf
+- **URL**:
+  https://assets.publishing.service.gov.uk/media/5a7a3bc5ed915d1a6421c00a/basic-passport-checks.pdf
 
 ## drivingLicenceNumber() — `99999` surname block impossible
 

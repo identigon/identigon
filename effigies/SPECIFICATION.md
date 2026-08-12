@@ -46,7 +46,7 @@ respect incognito's own contract.
 
 ## 3. Commands (intended contract)
 
-The CLI is `java -jar effigies.jar <command> [options]`. `discover`, `scaffold`, `run`, `version`,
+The CLI is `java -jar identigon.jar <command> [options]`. `discover`, `scaffold`, `run`, `version`,
 and `help` are implemented; a bad or unknown invocation returns exit code 2.
 
 - **`discover`** — inspect a source database and describe its schema (metadata only). Produces a

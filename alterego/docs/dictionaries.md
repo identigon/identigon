@@ -96,13 +96,15 @@ each nation's naming rather than token it, without creating a distortion in the 
   Statistics. Top 20 boys' + top 20 girls' names for both 2025 (the most recent year published)
   and 1996 (the first year this ONS series covers) used.
   Data: https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/livebirths/datasets/babynamesinenglandandwalesfrom1996
-  Licence: Open Government Licence v3.0 — http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+  Licence: Open Government Licence v3.0 —
+  http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
   Retrieved: 2026-07-14
 
 - **Scotland**: "Babies' First Names, 2025" — National Records of Scotland. Top 10 boys' + top
   10 girls' names, single current year only.
   Data: https://www.nrscotland.gov.uk/publications/babies-first-names-2025/
-  Licence: Open Government Licence v3.0 — http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+  Licence: Open Government Licence v3.0 —
+  http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
   Retrieved: 2026-07-14
 
 - **Northern Ireland**: "Top 10 Baby Names, 1997 to 2025" — Northern Ireland Statistics and

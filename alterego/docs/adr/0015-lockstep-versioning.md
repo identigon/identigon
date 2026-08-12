@@ -41,7 +41,7 @@ one here too.
   `CHANGELOG.md` keeps recording what changed in this subproject specifically, but the version
   number itself is now decided monorepo-wide, not by alterego alone.
 - A future breaking change to alterego alone still forces a monorepo-wide major bump, even if
-  incognito and effigies are unaffected by it — the trade-off lockstep versioning makes deliberately,
-  for one number to reason about and one tag per release.
+  incognito and effigies are unaffected by it — the trade-off lockstep versioning makes
+  deliberately, for one number to reason about and one tag per release.
 - The published artifact coordinate (`org.identigon:alterego`) is unaffected; only where its version
   comes from changes.

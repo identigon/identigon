@@ -14,7 +14,8 @@ realistic need, and an open SPI invites non-injective or unstable encodings from
 Support a fixed set of types — `String`, `Integer`, `Long`, `Boolean`, `LocalDate`,
 `LocalDateTime`, `Instant`, `UUID`, and any enum — with pinned canonical encodings (the JDK
 `toString()` / `name()` forms; SPECIFICATION.md section 2.6). The set mirrors what database
-columns typically store: text, numbers, dates, timestamps, flags, identifiers, and coded values. Non-String types are bound with a class token:
+columns typically store: text, numbers, dates, timestamps, flags, identifiers, and coded
+values. Non-String types are bound with a class token:
 `alterego.bind(domain, UUID.class, strategy)`. Unsupported types fail at bind time with
 `AlterEgoConfigException`.
 

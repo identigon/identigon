@@ -531,13 +531,14 @@ Kept in step with the `alterego` subproject; deliberately minimal to start.
 
 Unlike the backlog below, this one is committed, not speculative:
 
-- **Remove `PolicyInferrer` and `AnonymisationPolicy.Builder.autoInfer(boolean)`.** Both are marked
-  `@Deprecated(forRemoval = true)` now. Inference is authoring, not execution (fail-closed means it
-  never affected engine output), and the maintained version lives in `effigies`' own `PolicyInferrer`
-  — this copy only survives today for the fail-closed error message's diagnostic hint. Decision and
-  reasoning recorded in `effigies/docs/adr/0001-authoring-above-the-engine.md`; the version-bump
-  mechanics (effigies rides along to `2.0.x` too) in `effigies/docs/adr/0002-lockstep-versioning.md`.
-  SPEC §7.2 carries the same pointer.
+- **Remove `PolicyInferrer` and `AnonymisationPolicy.Builder.autoInfer(boolean)`.** Both are
+  marked `@Deprecated(forRemoval = true)` now. Inference is authoring, not execution
+  (fail-closed means it never affected engine output), and the maintained version lives in
+  `effigies`' own `PolicyInferrer` — this copy only survives today for the fail-closed error
+  message's diagnostic hint. Decision and reasoning recorded in
+  `effigies/docs/adr/0001-authoring-above-the-engine.md`; the version-bump mechanics (effigies
+  rides along to `2.0.x` too) in `effigies/docs/adr/0002-lockstep-versioning.md`. SPEC §7.2
+  carries the same pointer.
 
 ## Post-v1.0 — possible future directions
 

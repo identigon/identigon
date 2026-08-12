@@ -29,7 +29,30 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
+      # Frozen test vectors and vendored third-party fixtures must stay byte-identical to what was
+      # generated/fetched -- CLAUDE.md's hard invariant for the vectors, and SOURCES.md's recorded
+      # SHA-256 provenance for the fixtures both depend on it. Auto-fixing whitespace/EOF in either
+      # would silently violate that (found the hard way: a first `--all-files` run trimmed trailing
+      # spaces and normalized EOF newlines across both before this exclude existed).
       - id: trailing-whitespace
+        exclude: &vendored-fixtures |
+          (?x)^(
+            alterego/src/test/resources/vectors/|
+            incognito/src/test/resources/benchmarks/LICENCES/|
+            incognito/src/test/resources/benchmarks/.*\.sql
+          )
       - id: end-of-file-fixer
+        exclude: *vendored-fixtures
       - id: check-yaml
       - id: check-added-large-files  # guards the "fetch, don't vendor" discipline for large fixtures
+
+  # Line-length gate only (see .markdownlint-cli2.jsonc) -- catches >100-column Markdown, doesn't
+  # fix it; MD013 has no auto-fix in any markdownlint implementation (checked directly: neither
+  # this, the npm markdownlint-cli, nor the Ruby mdl gem rewrap a line). Pure prek/Node dependency,
+  # no footprint in this repo (same pattern as gitleaks above) -- note this specifically needs the
+  # Node-language hook, not the Ruby mdl gem: prek's Ruby support has no Windows auto-install path
+  # (confirmed), while its Node support works cross-platform including Windows (also confirmed).
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.23.2
+    hooks:
+      - id: markdownlint-cli2
