@@ -27,34 +27,15 @@ spotbugs {
     excludeFilter.set(rootProject.file("config/spotbugs/exclude-alterego.xml"))
 }
 
-// The SpotBugs plugin already wires `check` to depend on spotbugsMain/spotbugsTest itself; only
-// the JaCoCo half of this needs to be declared explicitly.
-tasks.named("check") {
-    dependsOn(tasks.withType<JacocoReport>())
-}
-
-// JaCoCo
-tasks.withType<JacocoReport>().configureEach {
-    dependsOn(tasks.withType<Test>())
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-        csv.required.set(true)
-    }
-}
+// JaCoCo's report shape and check-task wiring are shared with every subproject that applies the
+// plugin, in the root build.gradle.kts's `subprojects { }` block.
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
-tasks.withType<Javadoc>().configureEach {
-    options.encoding = "UTF-8"
-    (options as StandardJavadocDocletOptions).apply {
-        // Enforced from M5 (CLAUDE.md): a doclint warning fails the build instead of the M1-M4
-        // backlog quietly accumulating (100 warnings had, by M5, gone unnoticed).
-        addBooleanOption("Xwerror", true)
-    }
-}
+// Javadoc/doclint config (Xdoclint:all + Xwerror) is shared with every subproject that publishes
+// a javadoc jar, in the root build.gradle.kts's `subprojects { }` block.
 
 repositories {
     mavenCentral()

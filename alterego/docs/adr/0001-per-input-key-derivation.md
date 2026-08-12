@@ -14,7 +14,7 @@ That breaks the core promise of deterministic pseudonymisation.
 
 Derive a fresh 256-bit key for every input value:
 
-```
+```text
 key = HMAC-SHA256(salt, purpose || 0x00 || domain || 0x00 || canonical(input) || 0x00 || counter)
 ```
 

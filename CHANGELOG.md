@@ -26,6 +26,13 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
   find-sec-bugs plugin dependency (identical in all three `dependencies { }` blocks) moved into the
   same root config. JUnit BOM aligned to `6.1.3` across all three subprojects (was `5.11.4` here,
   `5.10.2` in incognito/effigies).
+- **JaCoCo and Javadoc/doclint config also elevated to the root `subprojects { }` block.** JaCoCo's
+  report shape (`xml`/`html`/`csv`) and `check`-task wiring moved out of this subproject's own
+  `build.gradle.kts` into the shared block (`plugins.withId("jacoco")`); alterego now applies only
+  `id("jacoco")` locally. Doclint's `Xdoclint:all`/`Xwerror` similarly moved into a
+  `plugins.withId("maven-publish")` guard, which correctly reaches alterego/incognito (both
+  publish a javadoc jar) and skips effigies (a CLI, deliberately not published) without a bespoke
+  flag. No behavioural change to alterego's own reports or doclint enforcement.
 
 ### incognito
 
@@ -51,6 +58,8 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
   an `instanceof` check; the in-memory stores declare `Map` fields instead of `ConcurrentHashMap`; a
   couple of dead/redundant bits of code (an always-overwritten initializer, a no-op
   catch-and-rethrow). No behavioural change.
+- **JaCoCo added to the build**, sharing the root `subprojects { }` block's report/`check`-task
+  config with alterego/effigies (previously alterego-only; see the alterego entry above).
 
 ### effigies
 
@@ -74,14 +83,22 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
   "Identigon" instead of "Effigies". The Gradle module, its `org.identigon.effigies` package, and
   the `EffigiesCli` class name are unchanged — this is the public artifact name only, not a module
   rename.
+- **JaCoCo added to the build**, sharing the root `subprojects { }` block's report/`check`-task
+  config with alterego/incognito (previously alterego-only; see the alterego entry in that
+  section). Javadoc/doclint enforcement stays deliberately absent here — effigies is a CLI, not a
+  published library.
 
 ### monorepo
 
 - **Markdown line-length lint added.** `.markdownlint-cli2.jsonc` runs `markdownlint-cli2` as a
   pre-commit hook, `MD013` only (100-column line length; code blocks, tables, and headings
   exempt) — deliberately narrow, matching what was actually asked for when the hook was added.
-  Existing violations across the repo were fixed in the same change. Widening the rule set is
-  tracked in `PLAN.md`, not done here.
+  Existing violations across the repo were fixed in the same change. Two more rules were checked
+  read-only (full default rule set) and fixed directly since they were mechanical: every bare
+  fenced code block now has a `text`/`sh` language tag (`MD040`), and every bare citation URL is
+  wrapped in `<...>` (`MD034`). The rest of the default rule set (table/list formatting, heading
+  conventions) needs real editorial judgment, not a mechanical fix — tracked in `PLAN.md`, not
+  done here.
 - **Dependabot added** (`gradle` + `github-actions`, weekly) to keep dependency versions current
   across the monorepo.
 

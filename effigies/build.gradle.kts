@@ -5,6 +5,7 @@ plugins {
     id("com.diffplug.spotless") // version pinned at the root
     id("com.github.spotbugs") // version pinned at the root
     id("pmd")
+    id("jacoco")
 }
 
 group = "org.identigon"

@@ -12,7 +12,7 @@ provenance, licensing, data processing. All three are recorded below and in
 ## Source
 
 **Ofcom**, "Telephone numbers for use in TV and radio drama programmes."
-Data: https://www.ofcom.org.uk/phones-and-broadband/phone-numbers/numbers-for-drama
+Data: <https://www.ofcom.org.uk/phones-and-broadband/phone-numbers/numbers-for-drama>
 Published: 2019-03-01. Last updated: 2023-05-11. Retrieved: 2026-07-25.
 
 Ofcom's live page returns an anti-bot 403 to automated fetches, and this environment disallows

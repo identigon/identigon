@@ -6,6 +6,7 @@ plugins {
     id("com.diffplug.spotless") // version pinned at the root
     id("com.github.spotbugs") // version pinned at the root
     id("pmd")
+    id("jacoco")
 }
 
 group = "org.identigon"
@@ -30,17 +31,8 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
-tasks.withType<Javadoc>().configureEach {
-    options.encoding = "UTF-8"
-    (options as StandardJavadocDocletOptions).apply {
-        // A doclint warning fails the build instead of the backlog quietly accumulating (mirrors
-        // alterego). The full `all` group is enforced — including `missing` (a doc comment /
-        // @param / @return / @throws on every public element) — so the published javadoc jar is
-        // complete and warning-free.
-        addBooleanOption("Xdoclint:all", true)
-        addBooleanOption("Xwerror", true)
-    }
-}
+// Javadoc/doclint config (Xdoclint:all + Xwerror) is shared with every subproject that publishes
+// a javadoc jar, in the root build.gradle.kts's `subprojects { }` block.
 
 dependencies {
     // alterego is exposed through Incognito's public API (e.g. PipelineContext.alterEgo()), so it

@@ -29,3 +29,20 @@ jobs:
           java-version: 25
       - name: Build
         run: ./gradlew build
+      # Downloadable from the run's Summary page even when the build step above fails (the usual
+      # time someone actually wants them) -- !cancelled() runs on success/failure but skips a
+      # cancelled run, unlike always(). One glob per report kind covers all three subprojects
+      # without naming them, and stays correct if a fourth is ever added. SpotBugs XML is off
+      # (root build.gradle.kts), so only its HTML is picked up here.
+      - name: Upload build reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-reports-${{ matrix.os }}
+          path: |
+            */build/test-results/test/
+            */build/reports/tests/test/
+            */build/reports/jacoco/test/
+            */build/reports/pmd/
+            */build/reports/spotbugs/
+          if-no-files-found: warn

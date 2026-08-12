@@ -26,7 +26,7 @@ Rules with self-contained provenance, not repeated here:
 - **Source**: gov.uk, "Appendix C — Valid Postcode Format" (ILR specification), which gives the
   regex with the final-two-letter set `[ABD-HJLNP-UW-Z]`. Corroborated by Wikipedia, "Postcodes
   in the United Kingdom", and ideal-postcodes.co.uk's "UK Postcode Format" guide.
-- **URL**: https://assets.publishing.service.gov.uk/media/5a81ebbded915d74e6234d42/Appendix_C_ILR_2017_to_2018_v1_Published_28April17.pdf
+- **URL**: <https://assets.publishing.service.gov.uk/media/5a81ebbded915d74e6234d42/Appendix_C_ILR_2017_to_2018_v1_Published_28April17.pdf>
 
 ## nhsNumber() — `999` reserved test range
 
@@ -36,7 +36,7 @@ Rules with self-contained provenance, not repeated here:
   Service). Statement relied on: "Synthetic patient records ... always start 999 ... The NHS
   number is valid but is from a range of numbers from which real NHS numbers will never be
   issued." (Real synthetic records also use family names beginning `XXTESTPATIENT`.)
-- **URL**: https://digital.nhs.uk/services/e-referral-service/document-library/synthetic-data-in-live-environments
+- **URL**: <https://digital.nhs.uk/services/e-referral-service/document-library/synthetic-data-in-live-environments>
 - **Check digit**: standard mod-11, weights 10..2 over the first nine digits, `11 - (sum mod 11)`,
   with `11 -> 0` and `10` meaning an invalid number (redraw). Widely documented; corroborated by
   the `wardle.org` NHS-number write-up and multiple open-source validators.
@@ -50,7 +50,7 @@ Rules with self-contained provenance, not repeated here:
   `D, F, I, Q, U, V` are not used as the first or second letter of a prefix; `O` is not used as
   the second letter; example "QQ 12 34 56 A ... This is an example only and should not be used as
   an actual number." Suffix letter is always `A`, `B`, `C`, or `D`.
-- **URL**: https://www.gov.uk/hmrc-internal-manuals/national-insurance-manual/nim39110
+- **URL**: <https://www.gov.uk/hmrc-internal-manuals/national-insurance-manual/nim39110>
 
 ## creditCardNumber() — ISO/IEC 7812 major industry identifier `0`
 
@@ -59,7 +59,7 @@ Rules with self-contained provenance, not repeated here:
 - **Source**: ISO/IEC 7812-1 (Identification cards — Identification of issuers), corroborated by
   the Wikipedia ISO/IEC 7812 article. Statement relied on: MII `0` is designated for "ISO/TC 68
   and other future industry assignments."
-- **URL**: https://en.wikipedia.org/wiki/ISO/IEC_7812 (primary: ISO/IEC 7812-1:2006, paywalled)
+- **URL**: <https://en.wikipedia.org/wiki/ISO/IEC_7812> (primary: ISO/IEC 7812-1:2006, paywalled)
 - **Check digit**: standard Luhn over the first fifteen digits.
 
 ## passportNumber() — `ZZ` prefix impossible for a UK passport
@@ -71,7 +71,7 @@ Rules with self-contained provenance, not repeated here:
   numbers have been 9 numeric digits since 1988. Statement relied on: the passport number is the
   9-digit numeric code at the top of the photo page.
 - **URL**:
-  https://assets.publishing.service.gov.uk/media/5a7a3bc5ed915d1a6421c00a/basic-passport-checks.pdf
+  <https://assets.publishing.service.gov.uk/media/5a7a3bc5ed915d1a6421c00a/basic-passport-checks.pdf>
 
 ## drivingLicenceNumber() — `99999` surname block impossible
 
@@ -107,5 +107,5 @@ Revisit if a reserved/never-issued range comes to light. Format facts (for the r
 should it return): England & Wales are 8 digits with no distinguishing prefix; Scotland is `SC` +
 6 digits; Northern Ireland is `NI` + 6 digits; always 8 characters total.
 Source: gov.uk / Companies House; HMRC "Company Registration Number Formats"
-(https://www.hmrc.gov.uk/gds/com/attachments/coy_reg_no_formats.doc); current-allocation
+(<https://www.hmrc.gov.uk/gds/com/attachments/coy_reg_no_formats.doc>); current-allocation
 observations from live Companies House records (2026).

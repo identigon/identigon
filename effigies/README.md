@@ -93,7 +93,7 @@ The engine will execute the pipeline and surface the DPIA accountability report 
 `./gradlew build` (from the monorepo root) produces a single runnable jar; run it with a bare
 `java -jar`:
 
-```
+```sh
 java -jar build/libs/identigon.jar help
 ```
 

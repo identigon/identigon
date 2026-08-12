@@ -95,16 +95,16 @@ each nation's naming rather than token it, without creating a distortion in the 
 - **England and Wales**: "Baby names in England and Wales, 1996 to 2025" — Office for National
   Statistics. Top 20 boys' + top 20 girls' names for both 2025 (the most recent year published)
   and 1996 (the first year this ONS series covers) used.
-  Data: https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/livebirths/datasets/babynamesinenglandandwalesfrom1996
+  Data: <https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/livebirths/datasets/babynamesinenglandandwalesfrom1996>
   Licence: Open Government Licence v3.0 —
-  http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+  <http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/>
   Retrieved: 2026-07-14
 
 - **Scotland**: "Babies' First Names, 2025" — National Records of Scotland. Top 10 boys' + top
   10 girls' names, single current year only.
-  Data: https://www.nrscotland.gov.uk/publications/babies-first-names-2025/
+  Data: <https://www.nrscotland.gov.uk/publications/babies-first-names-2025/>
   Licence: Open Government Licence v3.0 —
-  http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+  <http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/>
   Retrieved: 2026-07-14
 
 - **Northern Ireland**: "Top 10 Baby Names, 1997 to 2025" — Northern Ireland Statistics and
@@ -112,9 +112,9 @@ each nation's naming rather than token it, without creating a distortion in the 
   per-district dashboard export) was used because it's a clean, already-computed national top 10
   — the raw dashboard file's per-district pivot didn't produce a sane national ranking when
   queried directly, and re-deriving one from it wasn't worth chasing for a "close enough" target.
-  Data: https://www.nisra.gov.uk/publications/baby-names-2025
+  Data: <https://www.nisra.gov.uk/publications/baby-names-2025>
   Licence: Open Government Licence v3.0, confirmed via NISRA's own Crown Copyright page
-  (https://www.nisra.gov.uk/crown-copyright).
+  (<https://www.nisra.gov.uk/crown-copyright>).
   Retrieved: 2026-07-14
 
 **Deduplication detail**: 2025+1996 England & Wales (80 raw) + Scotland top-10×2 (20 raw) +
@@ -167,7 +167,7 @@ Grove, Hill, Lane, Mews, Mount, Orchard, Place, Plaza, Road, Row, Square, Street
 View, Walk, Way.
 Source: Ideal Postcodes, "UK PAF Thoroughfare Descriptors" — a third-party compilation of Royal
 Mail's PAF descriptor list.
-Data: https://ideal-postcodes.co.uk/guides/thoroughfare-descriptors
+Data: <https://ideal-postcodes.co.uk/guides/thoroughfare-descriptors>
 Licence: not stated on the page — a third-party mirror, not Royal Mail's own page directly.
 Corroborated via Royal Mail's own official "Programmers Guide – Technical specifications for
 users of PAF" (poweredbypaf.com/resources/), which independently confirms PAF holds
@@ -194,10 +194,10 @@ names).
 
 - **UK IPO Trade Mark Data Release** — Intellectual Property Office. Domestic UK Applications
   dataset, "Name" field (real trade mark applicant/owner names, many of them companies).
-  Data: https://www.gov.uk/government/publications/ipo-trade-mark-data-release
+  Data: <https://www.gov.uk/government/publications/ipo-trade-mark-data-release>
   Licence: Open Government Licence v3.0, confirmed directly on the primary gov.uk page ("All
   content is available under the Open Government Licence v3.0") —
-  http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+  <http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/>
   Retrieved (licence confirmed): 2026-07-14
 
 **Method** (fully scripted, `tools/mine_org_components.py`): the dataset is a single 817 MB

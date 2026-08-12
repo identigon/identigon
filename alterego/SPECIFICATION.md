@@ -272,7 +272,7 @@ definition lives in Appendix A; this section states the properties.
 The randomness available to a strategy is **derived from the input value**, not shared across a
 stream. Conceptually:
 
-```
+```text
 key = HMAC-SHA256(salt, purpose || domain || canonical(input) || counter)   // Appendix A.1
 ```
 
@@ -1089,7 +1089,7 @@ Everything in this appendix is frozen within a major version and enforced by the
 
 ### A.1 Key derivation
 
-```
+```text
 message = utf8(purpose) || 0x00 || utf8(domain) || 0x00 || utf8(canonical) || 0x00 || uint32_be(counter)
 key     = HMAC-SHA256(salt, message)
 ```
@@ -1111,7 +1111,7 @@ key     = HMAC-SHA256(salt, message)
 
 The byte stream for a key is the concatenation of
 
-```
+```text
 block(i) = HMAC-SHA256(key, uint32_be(i))        i = 0, 1, 2, ...
 ```
 
@@ -1124,7 +1124,7 @@ All primitives consume from the stream in the order the strategy calls them.
 - `next8()` (internal): consume the next 8 bytes as a big-endian `long`.
 - `nextLong(bound)`: require `bound > 0`. Rejection sampling over 63-bit draws:
 
-  ```
+  ```text
   limit = (Long.MAX_VALUE / bound) * bound          // largest multiple of bound <= 2^63 - 1
   do { v = next8() & Long.MAX_VALUE } while (v >= limit)
   return v % bound
@@ -1149,7 +1149,7 @@ order written.
 
 ### A.5 NHS number generation
 
-```
+```text
 repeat:
     d[1..6] = digit() x 6                       // six fresh draws on every iteration
     digits  = 9, 9, 9, d1, d2, d3, d4, d5, d6   // the nine payload digits
@@ -1162,7 +1162,7 @@ output "999 " + d1 d2 d3 + " " + d4 d5 d6 + c    // "999 ddd dddc"
 
 ### A.6 National Insurance number generation
 
-```
+```text
 d[1..6] = digit() x 6
 s       = pick(["A", "B", "C", "D"])
 output "QQ " + d1 d2 + " " + d3 d4 + " " + d5 d6 + " " + s     // "QQ dd dd dd S"
@@ -1170,7 +1170,7 @@ output "QQ " + d1 d2 + " " + d3 d4 + " " + d5 d6 + " " + s     // "QQ dd dd dd S
 
 ### A.7 GB driving licence number generation
 
-```
+```text
 decade   = digit()                       // second digit of the birth year
 female   = nextBoolean()
 month    = nextInt(12) + 1               // 1..12; add 50 if female
@@ -1187,14 +1187,14 @@ output "99999"                           // surname block: impossible on a real 
 
 ### A.8 UK passport number generation
 
-```
+```text
 d[1..7] = digit() x 7
 output "ZZ" + d1 d2 d3 d4 d5 d6 d7       // "ZZddddddd", unspaced
 ```
 
 ### A.9 Credit card number generation
 
-```
+```text
 d[1..14] = digit() x 14
 payload  = 0, d1, ..., d14               // fifteen digits, leading 0 fixed
 sum = 0

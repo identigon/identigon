@@ -71,4 +71,40 @@ subprojects {
             ruleSetFiles = files(rootProject.file("config/pmd/ruleset.xml"))
         }
     }
+
+    // Javadoc/doclint: identical wherever a subproject publishes one (maven-publish is the signal --
+    // alterego and incognito both call withJavadocJar(); effigies deliberately doesn't, being a CLI
+    // rather than a published library, so this correctly skips it without a bespoke flag).
+    plugins.withId("maven-publish") {
+        tasks.withType<Javadoc>().configureEach {
+            options.encoding = "UTF-8"
+            (options as StandardJavadocDocletOptions).apply {
+                // The full `all` group (javadoc's own default doclint level -- stated explicitly
+                // rather than relied upon) including `missing`: a doc comment / @param / @return /
+                // @throws is required on every public element.
+                addBooleanOption("Xdoclint:all", true)
+                // A doclint warning fails the build instead of a backlog quietly accumulating.
+                addBooleanOption("Xwerror", true)
+            }
+        }
+    }
+
+    // JaCoCo: report shape and the check-task wiring are identical wherever the plugin is applied
+    // (only alterego, historically -- adding it to incognito/effigies too is a separate, per-
+    // subproject decision, not this block's job). toolVersion is left at the plugin's own default.
+    plugins.withId("jacoco") {
+        // jacocoTestReport isn't wired into `check` by default; every other quality plugin here
+        // (SpotBugs, PMD) already is.
+        tasks.named("check") {
+            dependsOn(tasks.withType<JacocoReport>())
+        }
+        tasks.withType<JacocoReport>().configureEach {
+            dependsOn(tasks.withType<Test>())
+            reports {
+                xml.required.set(true)
+                html.required.set(true)
+                csv.required.set(true)
+            }
+        }
+    }
 }

@@ -21,7 +21,7 @@ covers every release from 1.0.0 onward.
 
 All three subprojects are wired together as one Gradle multi-project build. From this directory:
 
-```
+```sh
 ./gradlew build
 ```
 

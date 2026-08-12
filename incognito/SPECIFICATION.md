@@ -242,7 +242,7 @@ Execution is a sequence of decoupled stages. `IncognitoPipeline` generates a fre
 salt for `AlterEgo` per run and destroys it on completion. Tables are processed sequentially in
 strict topological DAG order (parents before children).
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           IncognitoPipeline                             │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -778,7 +778,7 @@ any is a defect regardless of passing tests:
 
 ## 8. Exception Taxonomy & Failure Clean-Up
 
-```
+```text
 IncognitoException (unchecked)
  ├── IncognitoException.ConfigException
  ├── IncognitoException.SchemaException
@@ -968,7 +968,7 @@ window = the column's `jitterDays` (default ±14).
 
 **`execute()` orchestration (pseudocode):**
 
-```
+```text
 salt = generate/zero-managed (§5.1); ae = buildAlterEgo(salt)
 ctx  = new PipelineContext(source, target, policy, keyStore, cascadeStore, ae, dependencyGraph)
 try {
@@ -987,7 +987,7 @@ try {
 
 **Per-row transform dispatch (per column, by role):**
 
-```
+```text
 switch (columnRole):
   PRIMARY_KEY          -> newPk = surrogate(strategy); keyStore.put(table, sourcePk, newPk)
   FOREIGN_KEY          -> write keyStore.get(refTable, sourceFkValue)         // may be a placeholder if cyclic
@@ -1010,7 +1010,7 @@ exactly.
 
 **Cyclic-FK load (Tarjan SCC + placeholder / 2-pass):**
 
-```
+```text
 scc = tarjan(fkGraph)                       // strongly-connected components = FK cycles
 order = topologicalOrder(condense(scc))     // process acyclic condensation parents-first
 for each table (in order):
