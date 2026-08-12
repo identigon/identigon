@@ -75,6 +75,16 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
   the `EffigiesCli` class name are unchanged — this is the public artifact name only, not a module
   rename.
 
+### monorepo
+
+- **Markdown line-length lint added.** `.markdownlint-cli2.jsonc` runs `markdownlint-cli2` as a
+  pre-commit hook, `MD013` only (100-column line length; code blocks, tables, and headings
+  exempt) — deliberately narrow, matching what was actually asked for when the hook was added.
+  Existing violations across the repo were fixed in the same change. Widening the rule set is
+  tracked in `PLAN.md`, not done here.
+- **Dependabot added** (`gradle` + `github-actions`, weekly) to keep dependency versions current
+  across the monorepo.
+
 ## [1.0.0] — 2026-08-10
 
 ### alterego
