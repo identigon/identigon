@@ -67,9 +67,32 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
   catch-and-rethrow). No behavioural change.
 - **JaCoCo added to the build**, sharing the root `subprojects { }` block's report/`check`-task
   config with alterego/effigies (previously alterego-only; see the alterego entry above).
+- **`YamlPolicyParser` no longer crashes on a `scaffold`-shaped draft policy.** Every `role:`/
+  `surrogateStrategy:`/`directIdStrategy:`/`quasiIdStrategy:`/`redactionStrategy:` key
+  `scaffold` writes is present with a blank (YAML `null`) value, by design — `containsKey(...)`
+  is true for those, so each was resolved via `EnumType.valueOf(String.valueOf(null).toUpperCase())`,
+  i.e. `EnumType.valueOf("NULL")`, throwing an unhandled `IllegalArgumentException` instead of
+  leaving the field unset for the existing fail-closed validation to report clearly. Found running
+  the effigies quickstart's new `setup`/`run` workflow (below) against a real database for the
+  first time — previously masked because live testing had always used a fully-classified policy.
+  Now checks the value itself (`!= null`), not just key presence; the fail-closed error is once
+  again the clear, column-by-column message `scaffold`'s own output promises.
 
 ### effigies
 
+- **Fixed: `identigon.jar` could not connect to a real PostgreSQL database at all.** effigies never
+  declared a runtime dependency on the PostgreSQL JDBC driver — incognito is deliberately
+  driver-agnostic (works against any caller-supplied `DataSource`) and only pulls the driver in
+  `testRuntimeOnly` scope for its own Testcontainers tests, so nothing in the dependency graph ever
+  put `org.postgresql.Driver` on the CLI's own runtime classpath, despite the jar-merging task's
+  own comment claiming "JDBC drivers" were bundled. `SimpleDataSource`'s
+  `DriverManager.getConnection(...)` therefore always threw `SQLException: No suitable driver
+  found`, surfaced to the user as an opaque `Failed to inspect schema` with the real cause
+  swallowed. Every documented `java -jar build/libs/identigon.jar discover/scaffold/run` example —
+  in this repo's own READMEs and the public Getting Started guide — was unusable exactly as
+  written. Found running the effigies quickstart's `run-quickstart.sh`/`.ps1` (below) against a
+  real database for the first time; `runtimeOnly(libs.postgresql)` added to
+  `effigies/build.gradle.kts` fixes it.
 - **Added a `examples/quickstart/` worked example** — a small first-party PostgreSQL schema
   (`customers`/`orders`/`support_tickets`, no third-party data, no Docker/Testcontainers
   dependency) with a hand-authored `policy.yaml` and a step-by-step README, so evaluating the
@@ -79,6 +102,32 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
   including the new `ALTEREGO_NINO` (see the incognito entry above) and,
   deliberately, the `ALTEREGO_GENERIC` fallback for a bank-account column with no typed generator
   yet.
+- **Added `examples/quickstart/run-quickstart.sh` (POSIX `sh`) and `run-quickstart.ps1`
+  (PowerShell)** — twin, behaviourally-identical scripts; Docker + Java 25 only, nothing else to
+  install. `run-quickstart` (no args) is a one-shot demo: starts a throwaway Postgres container,
+  loads the schema and sample data, builds the CLI jar if needed, runs
+  `discover` → `scaffold` → `run` against the finished `policy.yaml`, and prints the fabricated
+  rows plus the DPIA report location. `setup` / `run` instead exercises the real authoring
+  workflow: `setup` stops after `scaffold`, leaving a draft for the `identigon-policy-author` Agent
+  Skill (or a human) to classify by hand, and `run` reuses the same container and anonymises
+  against whatever policy results — failing closed with a clear error if any column is still
+  unclassified (see the incognito `YamlPolicyParser` fix above — this is the workflow that found
+  it). `clean` tears down the throwaway container and any generated files either way. The manual
+  step-by-step walkthrough in the example's README is unchanged, for anyone who wants to run or
+  understand each step without a script. Both scripts were exercised end to end (all four
+  commands, both fresh-container and container-reuse paths, and the fail-closed path) against a
+  real Docker Desktop + PostgreSQL, which is how the two bugs above were actually found — not just
+  written and assumed correct. Two portability bugs fixed along the way, neither Bash/PowerShell
+  version-specific: the readiness check could pass against the official Postgres image's brief
+  *temporary* startup instance (for `initdb`) moments before it restarts for the real listener, a
+  narrow window where a query could hit the socket mid-restart — now requires two consecutive
+  successful `pg_isready` checks, not one. Windows-only wrinkles, one per script: the `sh` version
+  now avoids `docker inspect -f '{{...}}'` (MSYS2/Git-Bash mangles `{{ }}` template arguments to
+  native Windows executables) in favour of a template-free `docker ps -q -f name=...` check, and
+  uses `printf '%s\n'` instead of `echo` for any value that might contain backslashes — POSIX
+  `echo` is free to interpret them as escapes, and every Windows path has some; the `.ps1` version
+  avoids naming a parameter `$Args` (PowerShell's own reserved automatic-variable name), which
+  silently breaks splatting it onward to a wrapped command.
 - `PolicyInferrer` gains heuristics for postcodes (`QUASI_ID`), passport numbers, driving licence
   numbers, and credit card numbers (`DIRECT_ID`), and anchors the email/phone patterns to the end
   of the column name so a boolean like `email_verified` no longer gets suggested as DIRECT_ID.

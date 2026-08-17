@@ -6,9 +6,15 @@ Testcontainers dependency — just PostgreSQL. Point `effigies` at it and you'll
 names, e-mails, phone numbers, a National Insurance number (NINO), coherent date jitter, and a
 redacted free-text field, all in one pass.
 
-Three files: [`schema.sql`](schema.sql) (DDL only — load into both databases), [`seed-data.sql`](seed-data.sql)
-(sample rows — load into the source only), and [`policy.yaml`](policy.yaml) (the finished
-classification for every column).
+Five files: [`schema.sql`](schema.sql) (DDL only — load into both databases),
+[`seed-data.sql`](seed-data.sql) (sample rows — load into the source only), [`policy.yaml`](policy.yaml)
+(a finished classification for every column, to run directly or to compare your own against), and
+two behaviourally-identical driver scripts — [`run-quickstart.sh`](run-quickstart.sh) (POSIX `sh`;
+macOS/Linux/WSL/Git Bash) and [`run-quickstart.ps1`](run-quickstart.ps1) (native PowerShell; no
+POSIX shell needed on Windows) — either running a one-shot demo, or the real
+scaffold-then-author-then-run workflow; see below. Use whichever script matches your shell; the
+rest of this README shows the `sh` invocations, but `.\run-quickstart.ps1 <command>` takes the same
+commands.
 
 This is separate from the benchmark fixtures under
 [`incognito/src/test/resources/benchmarks/`](../../../incognito/src/test/resources/benchmarks/) —
@@ -19,6 +25,54 @@ itself.
 For the narrative walkthrough of *why* each step exists (fail-closed, salt modes, the DPIA report),
 see [Getting Started](https://identigon.org/getting-started) on the project site — this directory
 is the copy-pasteable version of the same steps.
+
+## Fastest way to try it
+
+Requires Docker and Java 25 — nothing else to install:
+
+```sh
+./run-quickstart.sh
+```
+
+(Windows without a POSIX shell: `.\run-quickstart.ps1` instead — same commands throughout.)
+
+One command: starts a throwaway Postgres container, loads the schema and sample data, builds the
+CLI jar if it isn't already built, runs `discover` → `scaffold` → `run` against the finished
+`policy.yaml` already in this directory, and prints the fabricated rows for you to look at, with a
+short explanation of what to check. Nothing to author, nothing to decide — just to see the tool
+work. Safe to re-run — it always starts from a clean slate. When you're done:
+`./run-quickstart.sh clean` removes the container and any generated files.
+
+## Evaluate the actual authoring workflow
+
+The one-shot demo above skips the part of Identigon that involves judgment — it uses the
+already-finished `policy.yaml`. To see the real workflow, including the interactive
+[Agent Skill](../../.agents/skills/identigon-policy-author/) that helps you classify a fresh
+scaffold, use two commands instead of one:
+
+```sh
+./run-quickstart.sh setup
+```
+
+Starts the container, loads the schema and data, and runs `discover` + `scaffold` for you, then
+stops — leaving a draft policy at `.quickstart-work/policy.draft.yaml` and printing a suggested
+prompt for your AI coding assistant. Ask it (Claude Code, Antigravity, Copilot, or any other
+Agent-Skill-compatible assistant) to use the `identigon-policy-author` skill on that draft; it
+interviews you, batching related columns so you're not answering one question per column, and
+never assigns anything without your confirmation. Once every column is classified:
+
+```sh
+./run-quickstart.sh run
+```
+
+Anonymises using whatever policy you ended up with and prints the same results/DPIA summary as the
+one-shot demo. If a column is still unclassified, this fails closed with a clear error instead of
+guessing — go back and finish the draft, then run it again.
+
+`./run-quickstart.sh clean` tears down the container and removes `.quickstart-work/` either way.
+
+The rest of this README walks through the same one-shot-demo steps by hand, if you'd rather run
+(or understand) each one yourself without the script.
 
 ## 1. Create the source and target databases
 
@@ -110,3 +164,6 @@ column's classification and a sample of illustrative (never real) fabricated val
 ```sh
 docker stop identigon-quickstart
 ```
+
+(If you used `./run-quickstart.sh` instead of the manual steps above, use
+`./run-quickstart.sh clean` — same effect, same container name.)

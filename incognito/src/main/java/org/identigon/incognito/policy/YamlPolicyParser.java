@@ -88,19 +88,26 @@ public class YamlPolicyParser {
 
                             ColumnPolicy.Builder colBuilder = ColumnPolicy.builder(colName);
                             if (colNode != null) {
-                                if (colNode.containsKey("role")) {
+                                // colNode.get("X") != null, not containsKey("X"): `scaffold` always emits every
+                                // key with a blank value (e.g. "role:" with nothing after the colon — a YAML
+                                // null, present but unset), specifically so a human/agent fills it in. containsKey
+                                // is true for that blank entry too, so ColumnRole.valueOf(String.valueOf(null))
+                                // used to evaluate ColumnRole.valueOf("NULL") and throw a cryptic
+                                // IllegalArgumentException instead of leaving the field null for the existing
+                                // fail-closed validation (SPEC §7.2) to report clearly.
+                                if (colNode.get("role") != null) {
                                     colBuilder.role(ColumnRole.valueOf(String.valueOf(colNode.get("role")).toUpperCase()));
                                 }
-                                if (colNode.containsKey("surrogateStrategy")) {
+                                if (colNode.get("surrogateStrategy") != null) {
                                     colBuilder.surrogateStrategy(SurrogateStrategy.valueOf(String.valueOf(colNode.get("surrogateStrategy")).toUpperCase()));
                                 }
-                                if (colNode.containsKey("directIdStrategy")) {
+                                if (colNode.get("directIdStrategy") != null) {
                                     colBuilder.directIdStrategy(DirectIdStrategy.valueOf(String.valueOf(colNode.get("directIdStrategy")).toUpperCase()));
                                 }
-                                if (colNode.containsKey("quasiIdStrategy")) {
+                                if (colNode.get("quasiIdStrategy") != null) {
                                     colBuilder.quasiIdStrategy(QuasiIdStrategy.valueOf(String.valueOf(colNode.get("quasiIdStrategy")).toUpperCase()));
                                 }
-                                if (colNode.containsKey("redactionStrategy")) {
+                                if (colNode.get("redactionStrategy") != null) {
                                     colBuilder.redactionStrategy(RedactionStrategy.valueOf(String.valueOf(colNode.get("redactionStrategy")).toUpperCase()));
                                 }
                                 if (colNode.containsKey("distinguishing")) {

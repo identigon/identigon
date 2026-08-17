@@ -43,6 +43,14 @@ dependencies {
     // Reads/writes the declarative policy YAML that incognito consumes.
     implementation(libs.snakeyaml)
 
+    // incognito is driver-agnostic (works against any caller-supplied javax.sql.DataSource; see its
+    // testRuntimeOnly-scoped use of this same artifact for its own Testcontainers tests) -- but
+    // effigies' SimpleDataSource concretely resolves a `jdbc:postgresql://...` URL via
+    // DriverManager, which needs the driver's own ServiceLoader registration on the runtime
+    // classpath to find a driver for that URL at all. runtimeOnly: nothing in effigies' own source
+    // references org.postgresql.* directly (SPEC §1: PostgreSQL is what's actually supported today).
+    runtimeOnly(libs.postgresql)
+
     // Testing dependencies
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)

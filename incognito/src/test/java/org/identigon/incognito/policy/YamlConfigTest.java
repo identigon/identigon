@@ -109,6 +109,29 @@ class YamlConfigTest {
     }
 
     @Test
+    void columnWithBlankRoleValueParsesWithNullRoleNotAnEnumException() {
+        // Distinct from the missing-key case above: `scaffold`'s own output always emits every
+        // key with a blank value ("role:              # TODO classify ..." — the key IS present,
+        // its YAML value is null), not an absent key. ColumnRole.valueOf(String.valueOf(null))
+        // used to evaluate ColumnRole.valueOf("NULL") and throw IllegalArgumentException instead
+        // of leaving the field null for fail-closed validation to report clearly.
+        String yamlString = """
+            tables:
+              customers:
+                columns:
+                  ssn:
+                    role:
+            """;
+
+        InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
+        AnonymisationPolicy policy = new YamlPolicyParser().parse(inputStream);
+
+        ColumnPolicy ssnCol = policy.table("customers").orElseThrow().column("ssn").orElseThrow();
+        assertNull(ssnCol.role(), "a column with a blank role: value must parse with a null role, "
+            + "never throw trying to resolve it as an enum constant");
+    }
+
+    @Test
     void testParseEmptyConfig() {
         String yamlString = "";
 
