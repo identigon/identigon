@@ -110,3 +110,12 @@ see Phase 3 and the ADR).
 - [ ] A non-interactive "authoring session" mode that runs discover → scaffold → (agent) → run in
   one invocation, with the DPIA report fed back for iteration.
 - [ ] Support for engines incognito adds beyond PostgreSQL, without change here.
+- [ ] **Revisit `examples/quickstart/` and the Agent Skill once incognito's policy-API backlog
+  lands.** `incognito/PLAN.md`'s Post-v1.0 section tracks several `alterego` capabilities incognito
+  doesn't expose yet (the remaining identifier generators, a bank-account generator, `RecordScope`
+  cross-field coherence, `Options`/clamp/time-of-day jitter knobs, a `pattern(String)` strategy).
+  None of that is effigies' code to change, but each item that lands is a candidate to (a) fold into
+  `examples/quickstart/policy.yaml` as a new demonstrated strategy — it already carries an explicit
+  caveat comment on `bank_account` for exactly this reason — and (b) teach the
+  `identigon-policy-author` Agent Skill to suggest, the same way it already knows the current
+  strategy vocabulary.

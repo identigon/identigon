@@ -36,6 +36,13 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
 
 ### incognito
 
+- **`DirectIdStrategy.ALTEREGO_NINO` added**, wiring the `alterego` GB National Insurance number
+  generator (already present, unwired — ADR 0012) through to
+  `TableTransformLoadStage` (fabrication), `AnonymisationReportBuilder` (illustrative DPIA samples),
+  and `VerificationStage` (a new fictionality check: every fabricated value must carry the
+  guaranteed-fictional `QQ` prefix, alongside the existing email/postcode/domain/URL checks).
+  `nhsNumber()`, `passportNumber()`, `drivingLicenceNumber()`, and `creditCardNumber()` remain
+  unwired — tracked in `incognito/PLAN.md`.
 - **Spotless/SpotBugs config consolidated to the monorepo root** alongside the PMD move below —
   `config/spotbugs/exclude-incognito.xml`; see the alterego entry above for the mechanics, including
   the find-sec-bugs and JUnit BOM alignment.
@@ -63,6 +70,15 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
 
 ### effigies
 
+- **Added a `examples/quickstart/` worked example** — a small first-party PostgreSQL schema
+  (`customers`/`orders`/`support_tickets`, no third-party data, no Docker/Testcontainers
+  dependency) with a hand-authored `policy.yaml` and a step-by-step README, so evaluating the
+  `discover` → `scaffold` → `run` workflow no longer requires a real production database or one of
+  incognito's Docker-gated benchmark fixtures. Linked from the main README's new "Try it in five
+  minutes" section. Demonstrates every `DirectIdStrategy`/`QuasiIdStrategy` family in one schema,
+  including the new `ALTEREGO_NINO` (see the incognito entry above) and,
+  deliberately, the `ALTEREGO_GENERIC` fallback for a bank-account column with no typed generator
+  yet.
 - `PolicyInferrer` gains heuristics for postcodes (`QUASI_ID`), passport numbers, driving licence
   numbers, and credit card numbers (`DIRECT_ID`), and anchors the email/phone patterns to the end
   of the column name so a boolean like `email_verified` no longer gets suggested as DIRECT_ID.

@@ -45,6 +45,13 @@ the reasoning, [`SPECIFICATION.md`](SPECIFICATION.md) for the behavioural contra
 
 **v1.0 Complete.** The core authoring workflow is fully implemented.
 
+## Try it in five minutes
+
+[`examples/quickstart/`](examples/quickstart/) is a small, self-contained PostgreSQL schema (no
+Docker, no third-party data) with a finished `policy.yaml` — the fastest way to see
+`discover` → `scaffold` → `run` and the DPIA report working end to end before pointing Identigon
+at a real database.
+
 ## Usage Workflow
 
 The typical workflow uses three CLI commands and an AI Agent Skill.

@@ -1,0 +1,115 @@
+# Identigon quickstart example policy — see README.md in this directory for the full walkthrough.
+#
+# This is hand-authored, not `scaffold` output: `effigies scaffold` would only get you as far as
+# assigning roles it can infer with confidence and would still fail closed on several columns here
+# (nino, bank_account, notes) pending your explicit strategy choice. This file shows the
+# *finished* policy so you can see the whole feature surface in one place; try running `discover`
+# and `scaffold` against your own copy of this schema first if you want to see the authoring step
+# for yourself before reading the answer below.
+#
+# autoInfer stays false (the default) — every column below is classified explicitly. Fail-closed:
+# an unclassified column aborts the run rather than being copied silently.
+autoInfer: false
+
+tables:
+  customers:
+    columns:
+      id:
+        role: PRIMARY_KEY
+        surrogateStrategy: SEQUENTIAL_LONG
+
+      # --- Direct identifiers: always fabricated, never generalised (SPEC §2.3, ADR 0001) -------
+      full_name:
+        role: DIRECT_ID
+        directIdStrategy: ALTEREGO_NAME
+      email:
+        role: DIRECT_ID
+        directIdStrategy: ALTEREGO_EMAIL       # RFC 2606 reserved domain — never a real mailbox
+      phone:
+        role: DIRECT_ID
+        directIdStrategy: ALTEREGO_PHONE
+      nino:
+        role: DIRECT_ID
+        directIdStrategy: ALTEREGO_NINO  # guaranteed-fictional "QQ" prefix
+      bank_account:
+        role: DIRECT_ID
+        # No typed bank-account generator exists in alterego yet (tracked in incognito/PLAN.md), so
+        # this falls back to the generic shape-preserving strategy: same length and digit/letter
+        # classes as the source value, but — unlike every strategy above — carries NO fictionality
+        # guarantee. Good enough to sever the link to the real account; don't rely on the *output*
+        # looking obviously fake the way the NI number above does.
+        directIdStrategy: ALTEREGO_GENERIC
+
+      # --- Quasi-identifiers: always fabricated, several strategies on show (SPEC §4.2) ----------
+      date_of_birth:
+        role: QUASI_ID
+        quasiIdStrategy: SYNTHESISE   # fresh fictional date — dob is strongly identifying, so no
+                                       # date-jitter mode is used for it (incognito hard invariant)
+      postcode:
+        role: QUASI_ID
+        quasiIdStrategy: SYNTHESISE
+        directIdStrategy: ALTEREGO_POSTCODE  # typed hint on a QUASI_ID: synthesise via the postcode
+                                              # generator instead of a shape-preserving scramble
+
+      # --- Sensitive: kept real or fabricated per the declared `distinguishing` flag (SPEC §4.1) -
+      marketing_opt_in:
+        role: SENSITIVE
+        distinguishing: false   # a shared boolean; once names/emails are gone it singles nobody out
+
+      # --- Payload: operational data, kept real so the clone stays useful for testing ------------
+      signed_up_on:
+        role: PAYLOAD
+
+  orders:
+    columns:
+      id:
+        role: PRIMARY_KEY
+        surrogateStrategy: SEQUENTIAL_LONG
+      customer_id:
+        role: FOREIGN_KEY
+        references: { table: customers, column: id }
+
+      # Coherent jitter: both dates share one salt-keyed delta per order, so `shipped_on` never
+      # moves ahead of `ordered_on` and the gap between them survives (SPEC §4.2, ADR 0005).
+      ordered_on:
+        role: QUASI_ID
+        quasiIdStrategy: JITTER_DAYS
+        jitterDays: 10
+        coherenceGroup: customer_order
+      shipped_on:
+        role: QUASI_ID
+        quasiIdStrategy: JITTER_DAYS
+        jitterDays: 10
+        coherenceGroup: customer_order
+
+      total_amount:
+        role: PAYLOAD
+      status:
+        role: PAYLOAD
+
+  support_tickets:
+    columns:
+      id:
+        role: PRIMARY_KEY
+        surrogateStrategy: SEQUENTIAL_LONG
+      customer_id:
+        role: FOREIGN_KEY
+        references: { table: customers, column: id }
+
+      # Standalone (uncoupled) monthly jitter: exact monthly ticket volumes survive, but this date
+      # isn't required to stay ordered relative to anything else, so no coherenceGroup is needed.
+      opened_at:
+        role: QUASI_ID
+        quasiIdStrategy: JITTER_WITHIN_MONTH
+
+      category:
+        role: SENSITIVE
+        distinguishing: false   # low-cardinality ('billing'/'technical'/'account') — kept real
+
+      # Free text an agent typed — could name the customer, quote a card number, anything. Kept
+      # real is not an option (distinguishing: true), and there's no safe typed fabrication for
+      # arbitrary prose, so it's cleared rather than masked or replaced with a fixed placeholder.
+      notes:
+        role: SENSITIVE
+        distinguishing: true
+        redactionStrategy: CLEAR

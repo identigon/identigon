@@ -364,6 +364,8 @@ sources so they cannot be mistaken for real data:
 - Postcodes/streets with fictionality guarantees.
 - Domains and URLs from the same RFC 2606 reserved set/TLDs (`example.com`, `*.test`,
   `*.invalid`, …) — never a live, resolvable, or registrable name.
+- National Insurance numbers (NINOs) with the structurally-unallocatable `QQ` prefix — never
+  issued by HMRC.
 
 `VerificationStage` asserts these on the target, skipping `NULL` cells during verification. It also
 runs a **source-value survival** net over every non-reserved `DIRECT_ID` column: any real source
@@ -524,7 +526,7 @@ public interface IncognitoPipeline {
     }
 }
 
-public enum DirectIdStrategy {ALTEREGO_NAME, ALTEREGO_FIRST_NAME, ALTEREGO_LAST_NAME, ALTEREGO_ORGANISATION, ALTEREGO_CITY, ALTEREGO_STREET_ADDRESS, ALTEREGO_POSTCODE, ALTEREGO_EMAIL, ALTEREGO_PHONE, ALTEREGO_DOMAIN, ALTEREGO_URL, ALTEREGO_GENERIC}
+public enum DirectIdStrategy {ALTEREGO_NAME, ALTEREGO_FIRST_NAME, ALTEREGO_LAST_NAME, ALTEREGO_ORGANISATION, ALTEREGO_CITY, ALTEREGO_STREET_ADDRESS, ALTEREGO_POSTCODE, ALTEREGO_EMAIL, ALTEREGO_PHONE, ALTEREGO_DOMAIN, ALTEREGO_URL, ALTEREGO_NINO, ALTEREGO_GENERIC}
 
 public enum QuasiIdStrategy {
     SYNTHESISE,            // fresh fictional value; distribution NOT preserved
@@ -887,7 +889,10 @@ GB-only reality every other typed generator already has (only GB dictionaries ar
 `ALTEREGO_EMAIL` | `ae.emailAddress()` — RFC 2606 reserved domain by default | | `ALTEREGO_PHONE` |
 `ae.phoneNumber()` | | `ALTEREGO_DOMAIN` | `ae.domainName()` — RFC 2606 reserved domains/TLDs | |
 `ALTEREGO_URL` | `ae.url()` — a scheme plus `ae.domainName()`, with an optional random path | |
-`ALTEREGO_GENERIC` | shape-preserving fabrication (length + `D`/`L`/`l`/`A` character classes) on
+`ALTEREGO_NINO` | `ae.nationalInsuranceNumber()` — GB only; every output carries the
+structurally-unallocatable `QQ` prefix (never issued by HMRC), so it can never coincide with a
+real NINO | | `ALTEREGO_GENERIC` | shape-preserving fabrication (length + `D`/`L`/`l`/`A` character
+classes) on
 AlterEgo's salt-keyed stream — **code-like fields only**; the preserved shape is identifying for
 names/addresses, and it carries no fictionality guarantee | | `UNIQUE_CANDIDATE_KEY` | any of the
 above **`.unique()`** — e.g. `ae.pattern(shape).unique()`. Needs the mapping store. See

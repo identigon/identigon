@@ -564,3 +564,51 @@ Out of the locked v1.0 scope; recorded so the intent isn't lost, not committed t
   destroyed on successful completion (SPEC §5.3), exactly as the salt is. (A `redis:7-alpine` dev
   `docker-compose.yml` was removed once v1.0 shipped without it; reinstate a local service
   definition alongside this work if picked up.)
+- [ ] **Remaining `alterego` identifier builtins not yet wired into `DirectIdStrategy`.**
+  `AlterEgo.nhsNumber()`, `.passportNumber()`, `.drivingLicenceNumber()` and `.creditCardNumber()`
+  (ADR 0012) exist in `alterego` but have no corresponding `DirectIdStrategy` enum value or
+  `TableTransformLoadStage`/`VerificationStage`/`AnonymisationReportBuilder` wiring yet — the same
+  gap `ALTEREGO_NINO` just closed. Each needs the same four-place wiring
+  (enum + transform + illustrative-example + fictionality verification) plus a SPECIFICATION.md
+  entry.
+- [ ] **No UK bank-account generator in `alterego` at all** (sort code + account number, or IBAN) —
+  unlike the identifiers above, there's no primitive to wire even if `DirectIdStrategy` grew a case
+  for it. Surfaced authoring a bank-account column for the effigies quickstart example, which falls
+  back to `ALTEREGO_GENERIC` (no fictionality guarantee) in the meantime.
+- [ ] **`alterego` `RecordScope` (`AlterEgo.record()`/`record(key)`) is never opened anywhere in
+  `incognito`.** Every column transformer in `TableTransformLoadStage` is built and applied
+  independently, so the cross-field coherence `alterego` explicitly supports — `city()`/
+  `postcode()`/`phoneNumber()` agreeing on the same UK region via the shared `UK_POSTCODE_AREA`/
+  `UK_NATION` attributes (alterego SPEC §6.3) — never actually engages. A fabricated `city` and a
+  fabricated `postcode` on the same row can land in unrelated parts of the UK today. Wiring this
+  would mean opening one `RecordScope` per source row in `TableTransformLoadStage` and routing every
+  column transform for that row through `scope.apply(...)` instead of calling the transformation
+  directly.
+- [ ] **`alterego` `Options` types are never passed through `DirectIdStrategy`/`RedactionStrategy`
+  — every generator runs with hard-coded defaults.** Concretely: `NameOptions.preserveInitial()`
+  (`ALTEREGO_FIRST_NAME`/`_LAST_NAME`); `mask(maskChar, keepLast)` (`RedactionStrategy.MASK` always
+  calls `alterEgo.mask('*', 0)` — full-mask only, no partial "keep the last N characters"). Would
+  need new optional fields on `ColumnPolicy`/the YAML schema, plumbed through to the relevant
+  `TableTransformLoadStage` branch.
+  `PostcodeOptions.realistic()`/`EmailOptions.preserveDomain()`/`.mapDomain()`/
+  `PhoneOptions.realistic()`/`.includeNonGeographic()` are the same shape of gap but deliberately
+  **not** recommended for wiring: each opts out of the fictionality guarantee `VerificationStage`
+  asserts for that column, so exposing them would need a policy-level way to also disable the
+  matching verification check — more design than "just wire it".
+- [ ] **`JitterOptions.min/max/minmax(...)` (inclusive post-jitter clamp bounds) has no
+  `ColumnPolicy`/YAML equivalent.** A jittered `QUASI_ID` date can land outside a caller-known-valid
+  range (e.g. before a company's founding date, or in the future) with no way to constrain it —
+  `alterego`'s `shiftDate`/`shiftDateTime` support a clamp today, `incognito` never passes one.
+- [ ] **Temporal `QUASI_ID` jitter never touches the time-of-day component.** Every temporal
+  strategy (`JITTER_WITHIN_MONTH`/`_YEAR`, standalone `JITTER_DAYS`, `SYNTHESISE`'s date-window
+  fallback) calls `shiftDateTime(field/days, 0)` — zero seconds — or does date-only arithmetic for
+  the coherent-group case; a `TIMESTAMP` column's clock time always survives exactly as-is.
+  `alterego` supports jittering it too (`TimeField.HOUR`, an explicit `LocalTime` start/end range, a
+  `seconds` half-range) plus a dedicated `shiftInstant()`, none of it reachable from a policy today.
+- [ ] **`AlterEgo.pattern(String)` (the `D`/`L`/`l`/`A` shape mini-language) has no
+  `DirectIdStrategy` equivalent.** `ALTEREGO_GENERIC` is the one fixed internal fallback
+  (`fabricateShapePreserving`, itself the tracked hand-roll violation above); there's no way for a
+  policy to hand a *custom* pattern for a code-like column that isn't a name/email/phone/etc. A
+  `DirectIdStrategy.ALTEREGO_PATTERN` with a `pattern` string field on `ColumnPolicy` would close
+  this and let a `UNIQUE_CANDIDATE_KEY` reach `ae.pattern(shape).unique()` (already the documented
+  example in SPEC §5.1) from policy YAML, not just from Java.

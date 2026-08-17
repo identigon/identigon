@@ -272,6 +272,7 @@ public final class AnonymisationReportBuilder {
             case ALTEREGO_PHONE -> ex.phoneNumber().apply(seed);
             case ALTEREGO_DOMAIN -> ex.domainName().apply(seed);
             case ALTEREGO_URL -> ex.url().apply(seed);
+            case ALTEREGO_NINO -> ex.nationalInsuranceNumber().apply(seed);
             case ALTEREGO_GENERIC -> "Example-" + seed;
         };
     }

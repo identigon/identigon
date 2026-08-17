@@ -32,6 +32,13 @@ public enum DirectIdStrategy {
     /** URL generator ({@code AlterEgo.url()}) — a scheme plus {@code AlterEgo.domainName()}, with an optional random path. */
     ALTEREGO_URL,
     /**
+     * National Insurance number (NINO) generator ({@code AlterEgo.nationalInsuranceNumber()}) — GB
+     * only. Every output carries the structurally-unallocatable {@code QQ} prefix (never issued by
+     * HMRC), so it can never coincide with a real NINO. Throws {@code AlterEgoConfigException} if
+     * the pipeline's locale does not resolve to country GB.
+     */
+    ALTEREGO_NINO,
+    /**
      * Generic shape-preserving generator ({@code fabricateShapePreserving} on AlterEgo's salt-keyed
      * stream), and the **default** when a {@code DIRECT_ID}/{@code UNIQUE_CANDIDATE_KEY} column names
      * no strategy. Best for <b>code-like</b> fields (reference numbers, codes, usernames): it preserves
