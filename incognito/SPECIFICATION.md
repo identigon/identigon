@@ -305,6 +305,12 @@ streams (`fetchSize = 5000`) in topological order.
 `OPERATIONAL` in a source-data classification maps to `PAYLOAD` (kept). `SENSITIVE` is **not** an
 l-diversity target — it is the declared `distinguishing: true | false` split above.
 
+**Region coherence within a row.** `DirectIdStrategy.ALTEREGO_CITY`/`ALTEREGO_POSTCODE`/
+`ALTEREGO_PHONE` columns on the same table agree on the same fictional UK region within each row —
+a fabricated city, postcode, and phone number never land in unrelated parts of the country, even
+though each is an independently-classified column. See Appendix A for the mechanism
+(`alterego`'s `RecordScope`, opened once per source row).
+
 **The gate is the declaration, not a probe.** Because keep-vs-fabricate is now **declared** by the
 policy author, the privacy decision no longer reads any source *value* — Incognito acts purely on
 the `distinguishing` flag and the presence of a strategy, both checked at config time before a row
@@ -366,6 +372,11 @@ sources so they cannot be mistaken for real data:
   `*.invalid`, …) — never a live, resolvable, or registrable name.
 - National Insurance numbers (NINOs) with the structurally-unallocatable `QQ` prefix — never
   issued by HMRC.
+- NHS numbers with the reserved `999` test-range prefix — never issued to a real patient.
+- UK passport numbers with the structurally-impossible `ZZ` prefix — a real passport must be 9
+  numeric digits.
+- GB driving licence numbers with the zero-letter-surname `99999` block — never occurs on a real
+  licence.
 
 `VerificationStage` asserts these on the target, skipping `NULL` cells during verification. It also
 runs a **source-value survival** net over every non-reserved `DIRECT_ID` column: any real source
@@ -434,7 +445,10 @@ The strategy is given by a **role-specific key** (not a single polymorphic `stra
 removes any ambiguity about which enum applies: `surrogateStrategy` (PK), `directIdStrategy`
 (DIRECT_ID / UNIQUE_CANDIDATE_KEY), `quasiIdStrategy` (QUASI_ID), `redactionStrategy` (SENSITIVE). A
 `SENSITIVE` column also requires a `distinguishing: true | false` flag (§4.1). `references`/
-`derivedFrom` are nested `{ table, column }` maps.
+`derivedFrom` are nested `{ table, column }` maps. `redactionStrategy: CONSTANT` may optionally
+carry a `redactionConstant` (a fixed text placeholder, e.g. `"0000 0000 0000 0000"` for a card
+number) — text-type columns only, checked at pipeline-build time; the default without one is the
+generic `"REDACTED"`.
 
 ```yaml
 # incognito-policy.yaml
@@ -456,6 +470,7 @@ tables:
       last_seen: { role: QUASI_ID, quasiIdStrategy: JITTER_DAYS, jitterDays: 14 }
       debt_recovery_flag: { role: SENSITIVE, distinguishing: false } # flag shared by many → kept real
       case_notes: { role: SENSITIVE, distinguishing: true, redactionStrategy: CLEAR }  # free text → redacted
+      card_number: { role: SENSITIVE, distinguishing: true, redactionStrategy: CONSTANT, redactionConstant: "0000 0000 0000 0000" }
       status: { role: PAYLOAD }                               # operational → kept real
 
   contracts:
@@ -526,7 +541,7 @@ public interface IncognitoPipeline {
     }
 }
 
-public enum DirectIdStrategy {ALTEREGO_NAME, ALTEREGO_FIRST_NAME, ALTEREGO_LAST_NAME, ALTEREGO_ORGANISATION, ALTEREGO_CITY, ALTEREGO_STREET_ADDRESS, ALTEREGO_POSTCODE, ALTEREGO_EMAIL, ALTEREGO_PHONE, ALTEREGO_DOMAIN, ALTEREGO_URL, ALTEREGO_NINO, ALTEREGO_GENERIC}
+public enum DirectIdStrategy {ALTEREGO_NAME, ALTEREGO_FIRST_NAME, ALTEREGO_LAST_NAME, ALTEREGO_ORGANISATION, ALTEREGO_CITY, ALTEREGO_STREET_ADDRESS, ALTEREGO_POSTCODE, ALTEREGO_EMAIL, ALTEREGO_PHONE, ALTEREGO_DOMAIN, ALTEREGO_URL, ALTEREGO_NINO, ALTEREGO_NHS_NUMBER, ALTEREGO_PASSPORT_NUMBER, ALTEREGO_DRIVING_LICENCE_NUMBER, ALTEREGO_GENERIC}
 
 public enum QuasiIdStrategy {
     SYNTHESISE,            // fresh fictional value; distribution NOT preserved
@@ -631,6 +646,8 @@ public record ColumnPolicy(...) {                              // fields elided
         Builder quasiIdStrategy(QuasiIdStrategy s);       // WHICH: QUASI_ID jitter/synthesise mode
 
         Builder redactionStrategy(RedactionStrategy s);   // WHICH: distinguishing:true SENSITIVE redaction
+
+        Builder redactionConstant(String value);          // CONSTANT's placeholder; text columns only (§7.2)
 
         Builder distinguishing(boolean flag);             // SENSITIVE: false=keep real, true=fabricate/redact (§4.1)
 
@@ -891,8 +908,14 @@ GB-only reality every other typed generator already has (only GB dictionaries ar
 `ALTEREGO_URL` | `ae.url()` — a scheme plus `ae.domainName()`, with an optional random path | |
 `ALTEREGO_NINO` | `ae.nationalInsuranceNumber()` — GB only; every output carries the
 structurally-unallocatable `QQ` prefix (never issued by HMRC), so it can never coincide with a
-real NINO | | `ALTEREGO_GENERIC` | shape-preserving fabrication (length + `D`/`L`/`l`/`A` character
-classes) on
+real NINO | | `ALTEREGO_NHS_NUMBER` | `ae.nhsNumber()` — GB only; every output carries the
+reserved `999` test-range prefix (never issued to a real patient), so it can never coincide with
+a real NHS number | | `ALTEREGO_PASSPORT_NUMBER` | `ae.passportNumber()` — GB only; every output
+carries the structurally-impossible `ZZ` prefix (a real UK passport must be 9 numeric digits), so
+it can never coincide with a real passport number | | `ALTEREGO_DRIVING_LICENCE_NUMBER` |
+`ae.drivingLicenceNumber()` — GB only; every output carries the zero-letter-surname `99999` block,
+which never occurs on a real licence | | `ALTEREGO_GENERIC` | shape-preserving fabrication
+(length + `D`/`L`/`l`/`A` character classes) on
 AlterEgo's salt-keyed stream — **code-like fields only**; the preserved shape is identifying for
 names/addresses, and it carries no fictionality guarantee | | `UNIQUE_CANDIDATE_KEY` | any of the
 above **`.unique()`** — e.g. `ae.pattern(shape).unique()`. Needs the mapping store. See
@@ -900,7 +923,10 @@ sequence-fallback (§5.1). | | `QuasiIdStrategy.SYNTHESISE` | per source type �
 `JITTER_WITHIN_MONTH` / `_YEAR` | `ae.shiftDate(AlterEgo.DateField.MONTH \| YEAR)` | | `JITTER_DAYS`
 (standalone) | `ae.shiftDate(jitterDays)` — uniform over `[-jitterDays, +jitterDays]` | |
 `RedactionStrategy.CLEAR` | `null` (nullable) or a type-empty value | | `RedactionStrategy.MASK` |
-`ae.mask(maskChar, keepLast)` | | `RedactionStrategy.CONSTANT` | `ae.constant(fixedValue)` |
+`ae.mask(maskChar, keepLast)` | | `RedactionStrategy.CONSTANT` | `ae.constant(fixedValue)` —
+`fixedValue` is `ColumnPolicy.redactionConstant` when the author set one (text columns only,
+checked at build time; e.g. `"0000 0000 0000 0000"` for a card number), else the type-appropriate
+default (`"REDACTED"` for text) | |
 
 **Custom generators** (e.g. a numeric QI):
 `ae.bind(domain, Integer.class, (input, ctx) -> derive(ctx.random()))` — `Strategy<T>` is a
@@ -916,6 +942,15 @@ its own `bind(domain, …)`** so uniqueness is namespaced per column, not shared
 **independent** delta from `context.random()` — two date fields in one record get *different*
 offsets. So for interval/parent-child coherence Incognito computes **one shared delta per entity
 itself** (Appendix D), not via AlterEgo per-field jitter.
+
+**Record scope IS used, for exactly the region-coherence case above.** `TableTransformLoadStage`
+opens one `RecordScope` per source row (keyed on the row's own source PK — deterministic,
+reproducible-mode-safe), and every `DIRECT_ID`/`UNIQUE_CANDIDATE_KEY` typed generator runs through
+it via `scope.apply(transformation, value)`, not a bare `transformation.apply(value)`. This is a
+no-op for every strategy except `ALTEREGO_CITY`/`ALTEREGO_POSTCODE`/`ALTEREGO_PHONE` — only those
+three ever consult record-scoped attributes — so when two or more of them classify columns on the
+same table, they cohere on the same UK region within each row; every other strategy's output is
+unaffected either way.
 
 **Nulls.** AlterEgo `NullPolicy` defaults to `PASS_THROUGH`; `null` inputs return `null`.
 

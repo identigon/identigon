@@ -36,13 +36,35 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
 
 ### incognito
 
-- **`DirectIdStrategy.ALTEREGO_NINO` added**, wiring the `alterego` GB National Insurance number
-  generator (already present, unwired — ADR 0012) through to
-  `TableTransformLoadStage` (fabrication), `AnonymisationReportBuilder` (illustrative DPIA samples),
-  and `VerificationStage` (a new fictionality check: every fabricated value must carry the
-  guaranteed-fictional `QQ` prefix, alongside the existing email/postcode/domain/URL checks).
-  `nhsNumber()`, `passportNumber()`, `drivingLicenceNumber()`, and `creditCardNumber()` remain
-  unwired — tracked in `incognito/PLAN.md`.
+- **`DirectIdStrategy.ALTEREGO_NINO`, `.ALTEREGO_NHS_NUMBER`, `.ALTEREGO_PASSPORT_NUMBER`, and
+  `.ALTEREGO_DRIVING_LICENCE_NUMBER` added**, wiring all four remaining `alterego` GB identifier
+  generators (already present, unwired — ADR 0012) through to `TableTransformLoadStage`
+  (fabrication), `AnonymisationReportBuilder` (illustrative DPIA samples), and `VerificationStage`
+  (new fictionality checks: every fabricated value must carry its guaranteed-fictional prefix —
+  `QQ` / `999` / `ZZ` / `99999` respectively — alongside the existing email/postcode/domain/URL
+  checks). Each covered by its own live E2E test against a real Postgres. `creditCardNumber()` is
+  the one identifier builtin still unwired — deliberately, since a card number is `SENSITIVE`
+  (confirmed, same treatment as a bank account), not a plain `DIRECT_ID` — see the
+  `redactionConstant` entry below for how that gap actually closed.
+- **`ColumnPolicy.redactionConstant` added** — an optional caller-chosen fixed placeholder for a
+  `RedactionStrategy.CONSTANT` column (e.g. `"0000 0000 0000 0000"` for a card number), instead of
+  the generic `"REDACTED"` every `CONSTANT`-redacted text column got before. Text-type columns
+  only; a non-text column with one set fails closed with a clear `ConfigException` at
+  pipeline-build time, not per row (SPEC §7.2). Wired through `YamlPolicyParser` and the DPIA
+  report's illustrative samples too. This is the closure for the credit-card-number gap above —
+  redact to one obviously-fake constant, rather than fabricating a typed per-row value — and is
+  general-purpose beyond credit cards (any `SENSITIVE distinguishing: true` text column wanting a
+  specific placeholder).
+- **`TableTransformLoadStage` now opens one `alterego` `RecordScope` per source row**, keyed on the
+  row's own source PK (deterministic, reproducible-mode-safe), and routes every
+  `DIRECT_ID`/`UNIQUE_CANDIDATE_KEY` typed generator through it instead of calling the
+  transformation bare. A no-op for every strategy except `ALTEREGO_CITY`/`ALTEREGO_POSTCODE`/
+  `ALTEREGO_PHONE` — the only three that ever consult record-scoped attributes — so a table
+  classifying two or more of those three now fabricates them coherently: same fictional UK region
+  within a row, never independently-picked unrelated parts of the country. Verified with a new
+  `RecordCoherenceE2ETest` against a real Postgres, reusing the same area-to-dialling-code mapping
+  `alterego`'s own `RecordCoherenceIntegrationTest` treats as ground truth. `SPECIFICATION.md`
+  §4.1/Appendix A updated.
 - **Spotless/SpotBugs config consolidated to the monorepo root** alongside the PMD move below —
   `config/spotbugs/exclude-incognito.xml`; see the alterego entry above for the mechanics, including
   the find-sec-bugs and JUnit BOM alignment.

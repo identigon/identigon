@@ -21,6 +21,9 @@ import org.identigon.incognito.api.SurrogateStrategy;
  * @param directIdStrategy how a {@code DIRECT_ID}/{@code UNIQUE_CANDIDATE_KEY} is fabricated
  * @param quasiIdStrategy how a {@code QUASI_ID} is jittered/synthesised
  * @param redactionStrategy how a distinguishing {@code SENSITIVE} column is redacted
+ * @param redactionConstant the fixed placeholder {@link RedactionStrategy#CONSTANT} writes, for a
+ *     text-type column only (e.g. {@code "0000 0000 0000 0000"} for a card number); {@code null}
+ *     falls back to the type-appropriate default ({@code "REDACTED"} for text)
  * @param distinguishing the {@code SENSITIVE} keep-vs-fabricate declaration (§4.1); {@code null} if not declared
  * @param jitterDays the ±window in days for {@link QuasiIdStrategy#JITTER_DAYS}
  * @param coherenceGroup the shared temporal-jitter group name (SPEC §4.2)
@@ -36,6 +39,7 @@ public record ColumnPolicy(
     DirectIdStrategy directIdStrategy,
     QuasiIdStrategy quasiIdStrategy,
     RedactionStrategy redactionStrategy,
+    String redactionConstant,
     Boolean distinguishing,
     int jitterDays,
     String coherenceGroup,
@@ -75,6 +79,7 @@ public record ColumnPolicy(
         private DirectIdStrategy directIdStrategy;
         private QuasiIdStrategy quasiIdStrategy;
         private RedactionStrategy redactionStrategy;
+        private String redactionConstant;
         private Boolean distinguishing;
         private int jitterDays;
         private String coherenceGroup;
@@ -148,6 +153,20 @@ public record ColumnPolicy(
         }
 
         /**
+         * Sets the fixed placeholder {@link RedactionStrategy#CONSTANT} writes for this column,
+         * e.g. {@code "0000 0000 0000 0000"} for a card number. Text-type columns only — checked
+         * at pipeline-build time, not per row (SPEC §7.2). Leave unset for the type-appropriate
+         * default ({@code "REDACTED"} for text).
+         *
+         * @param redactionConstant the fixed placeholder value
+         * @return this builder
+         */
+        public Builder redactionConstant(String redactionConstant) {
+            this.redactionConstant = redactionConstant;
+            return this;
+        }
+
+        /**
          * Declares the {@code SENSITIVE} keep-vs-fabricate flag (§4.1).
          *
          * @param distinguishing the {@code SENSITIVE} keep-vs-fabricate declaration (§4.1)
@@ -214,7 +233,7 @@ public record ColumnPolicy(
         public ColumnPolicy build() {
             return new ColumnPolicy(
                 columnName, role, surrogateStrategy, directIdStrategy, quasiIdStrategy, redactionStrategy,
-                distinguishing, jitterDays, coherenceGroup,
+                redactionConstant, distinguishing, jitterDays, coherenceGroup,
                 referencedTable, referencedColumn,
                 derivedFromTable, derivedFromColumn
             );

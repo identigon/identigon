@@ -29,7 +29,9 @@ import org.identigon.incognito.policy.TablePolicy;
  *   <li>Fictionality: DIRECT_ID email columns use RFC 2606 reserved domains; postcode columns use
  *       the guaranteed-fictional inward-code letter; domain/URL columns use RFC 2606 reserved
  *       domains/TLDs; National Insurance number (NINO) columns use the guaranteed-fictional QQ
- *       prefix.</li>
+ *       prefix; NHS number columns use the reserved 999 test-range prefix; passport number columns
+ *       use the structurally-impossible ZZ prefix; driving licence number columns use the
+ *       zero-letter-surname 99999 block.</li>
  *   <li>Misdeclaration lint (SPEC §4.1): cross-checks every {@code SENSITIVE distinguishing: false}
  *       column's real {@code COUNT(DISTINCT)} against {@code maxCategoricalCardinality}.</li>
  *   <li>Per-period volume tolerance (SPEC §4.2, Appendix D): for temporal QUASI_ID columns,
@@ -79,6 +81,27 @@ public final class VerificationStage implements PipelineStage {
      * with a real National Insurance number (NINO).
      */
     private static final String NINO_RESERVED_PREFIX = "QQ ";
+
+    /**
+     * {@code NhsNumberStrategy}'s guarantee (alterego): every output starts with the {@code 999}
+     * prefix, reserved for test/synthetic use and never issued to a real patient — so the output
+     * can never coincide with a real NHS number.
+     */
+    private static final String NHS_NUMBER_RESERVED_PREFIX = "999 ";
+
+    /**
+     * {@code PassportNumberStrategy}'s guarantee (alterego): every output starts with the
+     * {@code ZZ} prefix, structurally impossible on a real UK passport (which must be 9 numeric
+     * digits) — so the output can never coincide with a real passport number.
+     */
+    private static final String PASSPORT_NUMBER_RESERVED_PREFIX = "ZZ";
+
+    /**
+     * {@code DrivingLicenceNumberStrategy}'s guarantee (alterego): every output starts with the
+     * {@code 99999} surname block, which implies a zero-letter surname and can never occur on a
+     * real licence — so the output can never coincide with a real driving licence number.
+     */
+    private static final String DRIVING_LICENCE_NUMBER_RESERVED_PREFIX = "99999";
 
     /**
      * Margin above the threshold at which we skip the pg_stats pre-filter and run the exact count
@@ -183,6 +206,15 @@ public final class VerificationStage implements PipelineStage {
                         verifyUrlFictionality(targetConn, tableName, colPolicy.columnName(), failures, failedTables);
                     } else if (strategy == DirectIdStrategy.ALTEREGO_NINO) {
                         verifyNinoFictionality(
+                            targetConn, tableName, colPolicy.columnName(), failures, failedTables);
+                    } else if (strategy == DirectIdStrategy.ALTEREGO_NHS_NUMBER) {
+                        verifyNhsNumberFictionality(
+                            targetConn, tableName, colPolicy.columnName(), failures, failedTables);
+                    } else if (strategy == DirectIdStrategy.ALTEREGO_PASSPORT_NUMBER) {
+                        verifyPassportNumberFictionality(
+                            targetConn, tableName, colPolicy.columnName(), failures, failedTables);
+                    } else if (strategy == DirectIdStrategy.ALTEREGO_DRIVING_LICENCE_NUMBER) {
+                        verifyDrivingLicenceNumberFictionality(
                             targetConn, tableName, colPolicy.columnName(), failures, failedTables);
                     }
                 }
@@ -311,15 +343,18 @@ public final class VerificationStage implements PipelineStage {
                 for (Map.Entry<String, ColumnPolicy> entry : getColumnPolicies(tablePolicy)) {
                     ColumnPolicy colPolicy = entry.getValue();
                     if (colPolicy.role() != ColumnRole.DIRECT_ID) continue;
-                    // Email/postcode/domain/URL/NINO fictionality is already checked in section 2
-                    // against an absolute reserved-value guarantee; this survival net is for other
-                    // strategies.
+                    // Email/postcode/domain/URL/NINO/NHS-number/passport-number/driving-licence
+                    // fictionality is already checked in section 2 against an absolute
+                    // reserved-value guarantee; this survival net is for other strategies.
                     DirectIdStrategy strategy = colPolicy.directIdStrategy();
                     if (strategy == DirectIdStrategy.ALTEREGO_EMAIL
                             || strategy == DirectIdStrategy.ALTEREGO_POSTCODE
                             || strategy == DirectIdStrategy.ALTEREGO_DOMAIN
                             || strategy == DirectIdStrategy.ALTEREGO_URL
-                            || strategy == DirectIdStrategy.ALTEREGO_NINO) continue;
+                            || strategy == DirectIdStrategy.ALTEREGO_NINO
+                            || strategy == DirectIdStrategy.ALTEREGO_NHS_NUMBER
+                            || strategy == DirectIdStrategy.ALTEREGO_PASSPORT_NUMBER
+                            || strategy == DirectIdStrategy.ALTEREGO_DRIVING_LICENCE_NUMBER) continue;
 
                     String colName = colPolicy.columnName();
                     verifySurvival(sourceConn, targetConn3, tableName, colName,
@@ -535,6 +570,60 @@ public final class VerificationStage implements PipelineStage {
             if (rs.next() && rs.getLong(1) > 0) {
                 failures.add("Fictionality violation: " + tableName + "." + columnName
                     + " has " + rs.getLong(1) + " NINO(s) not using the guaranteed-fictional QQ prefix");
+                failedTables.add(tableName);
+            }
+        }
+    }
+
+    private void verifyNhsNumberFictionality(
+            Connection conn, String tableName, String columnName,
+            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
+
+        String sql = "SELECT COUNT(*) FROM " + tableName
+            + " WHERE " + columnName + " IS NOT NULL"
+            + " AND " + columnName + " NOT LIKE '" + NHS_NUMBER_RESERVED_PREFIX + "%'";
+
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next() && rs.getLong(1) > 0) {
+                failures.add("Fictionality violation: " + tableName + "." + columnName
+                    + " has " + rs.getLong(1) + " NHS number(s) not using the reserved 999 test-range prefix");
+                failedTables.add(tableName);
+            }
+        }
+    }
+
+    private void verifyPassportNumberFictionality(
+            Connection conn, String tableName, String columnName,
+            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
+
+        String sql = "SELECT COUNT(*) FROM " + tableName
+            + " WHERE " + columnName + " IS NOT NULL"
+            + " AND " + columnName + " NOT LIKE '" + PASSPORT_NUMBER_RESERVED_PREFIX + "%'";
+
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next() && rs.getLong(1) > 0) {
+                failures.add("Fictionality violation: " + tableName + "." + columnName
+                    + " has " + rs.getLong(1) + " passport number(s) not using the structurally-impossible ZZ prefix");
+                failedTables.add(tableName);
+            }
+        }
+    }
+
+    private void verifyDrivingLicenceNumberFictionality(
+            Connection conn, String tableName, String columnName,
+            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
+
+        String sql = "SELECT COUNT(*) FROM " + tableName
+            + " WHERE " + columnName + " IS NOT NULL"
+            + " AND " + columnName + " NOT LIKE '" + DRIVING_LICENCE_NUMBER_RESERVED_PREFIX + "%'";
+
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next() && rs.getLong(1) > 0) {
+                failures.add("Fictionality violation: " + tableName + "." + columnName
+                    + " has " + rs.getLong(1) + " driving licence number(s) not using the zero-letter-surname 99999 block");
                 failedTables.add(tableName);
             }
         }

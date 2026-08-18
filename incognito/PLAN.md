@@ -564,51 +564,45 @@ Out of the locked v1.0 scope; recorded so the intent isn't lost, not committed t
   destroyed on successful completion (SPEC §5.3), exactly as the salt is. (A `redis:7-alpine` dev
   `docker-compose.yml` was removed once v1.0 shipped without it; reinstate a local service
   definition alongside this work if picked up.)
-- [ ] **Remaining `alterego` identifier builtins not yet wired into `DirectIdStrategy`.**
-  `AlterEgo.nhsNumber()`, `.passportNumber()`, `.drivingLicenceNumber()` and `.creditCardNumber()`
-  (ADR 0012) exist in `alterego` but have no corresponding `DirectIdStrategy` enum value or
-  `TableTransformLoadStage`/`VerificationStage`/`AnonymisationReportBuilder` wiring yet — the same
-  gap `ALTEREGO_NINO` just closed. Each needs the same four-place wiring
-  (enum + transform + illustrative-example + fictionality verification) plus a SPECIFICATION.md
-  entry.
+- [ ] **`AlterEgo.creditCardNumber()` (ADR 0012) is still not wired to fabricate a typed,
+  per-row-unique value** — a card number is `SENSITIVE`, not a plain `DIRECT_ID` (confirmed, same
+  treatment as a bank account), so it was never going to be the same mechanical
+  `DirectIdStrategy` case as the other four GB identifiers. Resolved instead via
+  `ColumnPolicy.redactionConstant`: `RedactionStrategy.CONSTANT` now accepts a caller-chosen fixed
+  text placeholder (e.g. `"0000 0000 0000 0000"`), checked at pipeline-build time for text-type
+  columns only. Every `distinguishing: true` card-number column redacts to the same obviously-fake
+  value — arguably a better privacy story than per-row fabrication (zero entropy, maximally
+  obviously fake) — general-purpose beyond credit cards too (any `SENSITIVE` text column wanting a
+  specific placeholder, not just `"REDACTED"`). `AlterEgo.creditCardNumber()` itself remains
+  unused by incognito; still directly usable from `alterego` alone if a per-row-unique Luhn-valid
+  fictional number is ever wanted instead of a constant.
 - [ ] **No UK bank-account generator in `alterego` at all** (sort code + account number, or IBAN) —
   unlike the identifiers above, there's no primitive to wire even if `DirectIdStrategy` grew a case
   for it. Surfaced authoring a bank-account column for the effigies quickstart example, which falls
   back to `ALTEREGO_GENERIC` (no fictionality guarantee) in the meantime.
-- [ ] **`alterego` `RecordScope` (`AlterEgo.record()`/`record(key)`) is never opened anywhere in
-  `incognito`.** Every column transformer in `TableTransformLoadStage` is built and applied
-  independently, so the cross-field coherence `alterego` explicitly supports — `city()`/
-  `postcode()`/`phoneNumber()` agreeing on the same UK region via the shared `UK_POSTCODE_AREA`/
-  `UK_NATION` attributes (alterego SPEC §6.3) — never actually engages. A fabricated `city` and a
-  fabricated `postcode` on the same row can land in unrelated parts of the UK today. Wiring this
-  would mean opening one `RecordScope` per source row in `TableTransformLoadStage` and routing every
-  column transform for that row through `scope.apply(...)` instead of calling the transformation
-  directly.
-- [ ] **`alterego` `Options` types are never passed through `DirectIdStrategy`/`RedactionStrategy`
-  — every generator runs with hard-coded defaults.** Concretely: `NameOptions.preserveInitial()`
-  (`ALTEREGO_FIRST_NAME`/`_LAST_NAME`); `mask(maskChar, keepLast)` (`RedactionStrategy.MASK` always
-  calls `alterEgo.mask('*', 0)` — full-mask only, no partial "keep the last N characters"). Would
-  need new optional fields on `ColumnPolicy`/the YAML schema, plumbed through to the relevant
-  `TableTransformLoadStage` branch.
-  `PostcodeOptions.realistic()`/`EmailOptions.preserveDomain()`/`.mapDomain()`/
-  `PhoneOptions.realistic()`/`.includeNonGeographic()` are the same shape of gap but deliberately
-  **not** recommended for wiring: each opts out of the fictionality guarantee `VerificationStage`
-  asserts for that column, so exposing them would need a policy-level way to also disable the
-  matching verification check — more design than "just wire it".
-- [ ] **`JitterOptions.min/max/minmax(...)` (inclusive post-jitter clamp bounds) has no
-  `ColumnPolicy`/YAML equivalent.** A jittered `QUASI_ID` date can land outside a caller-known-valid
-  range (e.g. before a company's founding date, or in the future) with no way to constrain it —
-  `alterego`'s `shiftDate`/`shiftDateTime` support a clamp today, `incognito` never passes one.
 - [ ] **Temporal `QUASI_ID` jitter never touches the time-of-day component.** Every temporal
   strategy (`JITTER_WITHIN_MONTH`/`_YEAR`, standalone `JITTER_DAYS`, `SYNTHESISE`'s date-window
   fallback) calls `shiftDateTime(field/days, 0)` — zero seconds — or does date-only arithmetic for
   the coherent-group case; a `TIMESTAMP` column's clock time always survives exactly as-is.
   `alterego` supports jittering it too (`TimeField.HOUR`, an explicit `LocalTime` start/end range, a
   `seconds` half-range) plus a dedicated `shiftInstant()`, none of it reachable from a policy today.
+- [ ] **No way to clamp a jittered `QUASI_ID` date/time to "not in the future."** `alterego`'s
+  `JitterOptions.max(...)` already supports an inclusive upper bound (ADR 0007: a caller-supplied
+  bound, not `alterego` reading system time itself — the run's own "now", captured once by
+  `incognito` at pipeline start, is exactly the sanctioned shape of caller-supplied bound), but
+  `incognito` never passes one. Without it, a wide `JITTER_DAYS` shift on a date near "today" in the
+  source (e.g. a recent `created_at`) can jitter into the future, which is either invalid for the
+  column's real-world meaning or a visible tell that the value is synthetic. Narrower and more
+  directly useful than a fully general min/max clamp: cap at the run's captured "now", not an
+  arbitrary caller bound.
 - [ ] **`AlterEgo.pattern(String)` (the `D`/`L`/`l`/`A` shape mini-language) has no
   `DirectIdStrategy` equivalent.** `ALTEREGO_GENERIC` is the one fixed internal fallback
   (`fabricateShapePreserving`, itself the tracked hand-roll violation above); there's no way for a
   policy to hand a *custom* pattern for a code-like column that isn't a name/email/phone/etc. A
   `DirectIdStrategy.ALTEREGO_PATTERN` with a `pattern` string field on `ColumnPolicy` would close
   this and let a `UNIQUE_CANDIDATE_KEY` reach `ae.pattern(shape).unique()` (already the documented
-  example in SPEC §5.1) from policy YAML, not just from Java.
+  example in SPEC §5.1) from policy YAML, not just from Java. **Not blocked on anything:** today's
+  `D`/`L`/`l`/`A`-plus-literals language is already enough to wire — e.g. a NINO-shaped
+  `"QQDD DD DDL"` pattern is expressible right now. See `alterego/PLAN.md`'s pattern-extensions
+  item (`[ABC]` classes, `D{5}` repetition) for the richer syntax some callers may eventually want;
+  if that lands, this wiring should be revisited to expose it, but doesn't need to wait for it.

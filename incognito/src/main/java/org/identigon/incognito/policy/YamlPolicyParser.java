@@ -110,6 +110,9 @@ public class YamlPolicyParser {
                                 if (colNode.get("redactionStrategy") != null) {
                                     colBuilder.redactionStrategy(RedactionStrategy.valueOf(String.valueOf(colNode.get("redactionStrategy")).toUpperCase()));
                                 }
+                                if (colNode.get("redactionConstant") != null) {
+                                    colBuilder.redactionConstant(String.valueOf(colNode.get("redactionConstant")));
+                                }
                                 if (colNode.containsKey("distinguishing")) {
                                     colBuilder.distinguishing((Boolean) colNode.get("distinguishing"));
                                 }

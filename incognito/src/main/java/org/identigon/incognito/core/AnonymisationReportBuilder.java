@@ -218,7 +218,8 @@ public final class AnonymisationReportBuilder {
                     return switch (colPol.redactionStrategy()) {
                         case MASK -> ex.mask('*', 0).apply(seed);
                         case CLEAR -> "(cleared)";
-                        case CONSTANT -> "(fixed value)";
+                        case CONSTANT -> colPol.redactionConstant() != null
+                            ? colPol.redactionConstant() : "(fixed value)";
                     };
                 }
                 if (colPol.quasiIdStrategy() != null) return quasiIdExample(ex, colPol, sqlType, seed, i);
@@ -273,6 +274,9 @@ public final class AnonymisationReportBuilder {
             case ALTEREGO_DOMAIN -> ex.domainName().apply(seed);
             case ALTEREGO_URL -> ex.url().apply(seed);
             case ALTEREGO_NINO -> ex.nationalInsuranceNumber().apply(seed);
+            case ALTEREGO_NHS_NUMBER -> ex.nhsNumber().apply(seed);
+            case ALTEREGO_PASSPORT_NUMBER -> ex.passportNumber().apply(seed);
+            case ALTEREGO_DRIVING_LICENCE_NUMBER -> ex.drivingLicenceNumber().apply(seed);
             case ALTEREGO_GENERIC -> "Example-" + seed;
         };
     }

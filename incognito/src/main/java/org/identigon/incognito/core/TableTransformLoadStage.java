@@ -244,50 +244,60 @@ public final class TableTransformLoadStage implements PipelineStage {
                                 }
                             }
 
-                            for (int i = 0; i < columnsToProcess.size(); i++) {
-                                ColumnTransformer transformer = transformers.get(i);
-                                String colName = columnsToProcess.get(i);
-                                int sqlType = rsMeta.getColumnType(i + 1);
+                            // One RecordScope per source row, keyed on its own PK where there is one
+                            // (deterministic/reproducible-mode-safe, matching the coherent-jitter
+                            // delta derivation elsewhere in this class) — an anonymous scope for the
+                            // rare no-PK table. This is what lets CITY/POSTCODE/PHONE cohere on the
+                            // same UK region within a row (alterego SPEC §6.3); every other strategy
+                            // ignores it, so this changes nothing for columns outside that trio.
+                            org.identigon.alterego.RecordScope recordScope = sourcePk != null
+                                ? alterEgo.record(String.valueOf(sourcePk)) : alterEgo.record();
+                            try (recordScope) {
+                                for (int i = 0; i < columnsToProcess.size(); i++) {
+                                    ColumnTransformer transformer = transformers.get(i);
+                                    String colName = columnsToProcess.get(i);
+                                    int sqlType = rsMeta.getColumnType(i + 1);
 
-                                Object originalValue = rs.getObject(i + 1);
+                                    Object originalValue = rs.getObject(i + 1);
 
-                                Object transformedValue;
-                                try {
-                                    transformedValue = transformer.transform(
-                                        originalValue, rs, sourcePk, sqlType, surrogateCounter, context, tableMeta);
-                                } catch (CyclicFkException e) {
-                                    // Defer this update. We will create the DeferredUpdate after the row loop
-                                    // when the target PK is definitely known.
-                                    rowDeferred.add(new PendingUpdate(colName, e.referencedTable, e.sourceFkValue));
-                                    transformedValue = getPlaceholderForType(sqlType);
-                                }
-
-                                // Collect PK-column translations. A composite PK is recorded once
-                                // after the loop as a single CompositeKey mapping — never per column
-                                // (which would overwrite/pollute the store — SPEC §5.2).
-                                int pkIdx = pkCols.indexOf(colName);
-                                if (pkIdx >= 0 && originalValue != null) {
-                                    if (compositePk) {
-                                        newPkVals[pkIdx] = transformedValue;
-                                    } else {
-                                        keyStore.put(tableName, originalValue, transformedValue);
-                                        targetPk = transformedValue;
+                                    Object transformedValue;
+                                    try {
+                                        transformedValue = transformer.transform(
+                                            originalValue, rs, sourcePk, sqlType, surrogateCounter, context, tableMeta, recordScope);
+                                    } catch (CyclicFkException e) {
+                                        // Defer this update. We will create the DeferredUpdate after the row loop
+                                        // when the target PK is definitely known.
+                                        rowDeferred.add(new PendingUpdate(colName, e.referencedTable, e.sourceFkValue));
+                                        transformedValue = getPlaceholderForType(sqlType);
                                     }
-                                }
 
-                                // Publish the fabricated value for descendants to inherit (SPEC §6.1).
-                                // A null value is not published — the store (a ConcurrentHashMap)
-                                // rejects null values outright, and there is no way today to record
-                                // "published, and it's genuinely null" distinctly from "never
-                                // published". A descendant reading this attribute therefore sees the
-                                // same ConstraintException as a genuine ordering/config error, rather
-                                // than crashing the whole load with an uncaught NullPointerException.
-                                if (!columnsToPublish.isEmpty() && sourcePk != null && columnsToPublish.contains(colName)
-                                        && transformedValue != null) {
-                                    context.cascadeStore().put(tableName, sourcePk, colName, transformedValue);
-                                }
+                                    // Collect PK-column translations. A composite PK is recorded once
+                                    // after the loop as a single CompositeKey mapping — never per column
+                                    // (which would overwrite/pollute the store — SPEC §5.2).
+                                    int pkIdx = pkCols.indexOf(colName);
+                                    if (pkIdx >= 0 && originalValue != null) {
+                                        if (compositePk) {
+                                            newPkVals[pkIdx] = transformedValue;
+                                        } else {
+                                            keyStore.put(tableName, originalValue, transformedValue);
+                                            targetPk = transformedValue;
+                                        }
+                                    }
 
-                                rowBuf[i] = transformedValue;
+                                    // Publish the fabricated value for descendants to inherit (SPEC §6.1).
+                                    // A null value is not published — the store (a ConcurrentHashMap)
+                                    // rejects null values outright, and there is no way today to record
+                                    // "published, and it's genuinely null" distinctly from "never
+                                    // published". A descendant reading this attribute therefore sees the
+                                    // same ConstraintException as a genuine ordering/config error, rather
+                                    // than crashing the whole load with an uncaught NullPointerException.
+                                    if (!columnsToPublish.isEmpty() && sourcePk != null && columnsToPublish.contains(colName)
+                                            && transformedValue != null) {
+                                        context.cascadeStore().put(tableName, sourcePk, colName, transformedValue);
+                                    }
+
+                                    rowBuf[i] = transformedValue;
+                                }
                             }
 
                             // Composite PK: record the single CompositeKey -> CompositeKey translation.
@@ -358,7 +368,9 @@ public final class TableTransformLoadStage implements PipelineStage {
                     yield ColumnTransformer.PASSTHROUGH;
                 }
                 if (colPolicy.redactionStrategy() != null) {
-                    yield buildRedactionTransformer(colPolicy, alterEgo);
+                    Integer declaredSqlType = tableMeta.columnTypes().get(columnName);
+                    int sqlTypeForValidation = declaredSqlType != null ? declaredSqlType : Types.OTHER;
+                    yield buildRedactionTransformer(colPolicy, alterEgo, columnName, sqlTypeForValidation);
                 }
                 if (colPolicy.quasiIdStrategy() != null) {
                     yield buildQuasiIdTransformer(colPolicy, alterEgo, tableMeta.tableName());
@@ -373,7 +385,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                         "INHERITED_ATTRIBUTE column '" + columnName + "' in table '" + tableMeta.tableName()
                             + "' must declare derivedFrom(table, column) (SPEC §6.1).");
                 }
-                yield (value, rs, pk, sqlType, counter, ctx, meta) ->
+                yield (value, rs, pk, sqlType, counter, ctx, meta, recordScope) ->
                     resolveInheritedValue(ctx, metadataByName, meta.tableName(), pk,
                         derivedTable, derivedColumn, columnName);
             }
@@ -387,9 +399,9 @@ public final class TableTransformLoadStage implements PipelineStage {
         if (strategy == null) strategy = SurrogateStrategy.SEQUENTIAL_LONG;
 
         return switch (strategy) {
-            case SEQUENTIAL_LONG -> (value, rs, pk, sqlType, counter, ctx, meta) ->
+            case SEQUENTIAL_LONG -> (value, rs, pk, sqlType, counter, ctx, meta, recordScope) ->
                 counter.getAndIncrement();
-            case UUID_V4 -> (value, rs, pk, sqlType, counter, ctx, meta) ->
+            case UUID_V4 -> (value, rs, pk, sqlType, counter, ctx, meta, recordScope) ->
                 java.util.UUID.randomUUID();
             case PASSTHROUGH_SURROGATE -> ColumnTransformer.PASSTHROUGH;
         };
@@ -408,7 +420,7 @@ public final class TableTransformLoadStage implements PipelineStage {
         if (composite == null) {
             // Single-column FK: look up the parent's surrogate directly.
             String referencedTable = colPolicy.referencedTable();
-            return (value, rs, pk, sqlType, counter, ctx, meta) -> {
+            return (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
                 if (value == null) return null;
                 Optional<Object> mapped = ctx.keyStore().get(referencedTable, value);
                 if (mapped.isPresent()) return mapped.get();
@@ -442,7 +454,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                     + " — composite + partial FKs are not supported (SPEC §5.2).");
         }
 
-        return (value, rs, pk, sqlType, counter, ctx, meta) -> {
+        return (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
             if (value == null) return null;
             Object[] lookupVals = new Object[orderedChildCols.size()];
             for (int i = 0; i < orderedChildCols.size(); i++) {
@@ -491,34 +503,59 @@ public final class TableTransformLoadStage implements PipelineStage {
             case ALTEREGO_DOMAIN -> alterEgo.domainName();
             case ALTEREGO_URL -> alterEgo.url();
             case ALTEREGO_NINO -> alterEgo.nationalInsuranceNumber();
+            case ALTEREGO_NHS_NUMBER -> alterEgo.nhsNumber();
+            case ALTEREGO_PASSPORT_NUMBER -> alterEgo.passportNumber();
+            case ALTEREGO_DRIVING_LICENCE_NUMBER -> alterEgo.drivingLicenceNumber();
             case ALTEREGO_GENERIC -> alterEgo.bind(domain, (input, ctx) -> fabricateShapePreserving(input, ctx.random()));
         };
 
         Transformation<String> finalTransformation = isUnique ? transformation.unique() : transformation;
 
-        return (value, rs, pk, sqlType, counter, ctx, meta) -> {
+        return (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
             if (value == null) return null;
+            // Routed through the row's RecordScope, not called bare: it's a no-op for every
+            // strategy above except CITY/POSTCODE/PHONE, which is exactly the point — those three
+            // (and only those three) cohere on the same UK region within one row when more than
+            // one is present (alterego SPEC §6.3). Every other strategy's output is unaffected,
+            // since only those three ever consult record-scoped attributes at all.
             if (!isUnique) {
-                return finalTransformation.apply(value.toString());
+                return recordScope.apply(finalTransformation, value.toString());
             }
             try {
-                return finalTransformation.apply(value.toString());
+                return recordScope.apply(finalTransformation, value.toString());
             } catch (org.identigon.alterego.AlterEgoCollisionException e) {
                 long seq = counter.getAndIncrement();
                 if (sqlType == Types.INTEGER || sqlType == Types.BIGINT || sqlType == Types.NUMERIC || sqlType == Types.DECIMAL) {
                     return seq;
                 }
-                return uniquenessFallback(transformation.apply(value.toString()), seq);
+                return uniquenessFallback(recordScope.apply(transformation, value.toString()), seq);
             }
         };
     }
 
-    private ColumnTransformer buildRedactionTransformer(ColumnPolicy colPolicy, AlterEgo alterEgo) {
+    private ColumnTransformer buildRedactionTransformer(
+            ColumnPolicy colPolicy, AlterEgo alterEgo, String columnName, int sqlType) {
         org.identigon.incognito.api.RedactionStrategy strategy = colPolicy.redactionStrategy();
+        String customConstant = colPolicy.redactionConstant();
+        // Checked here, once, at pipeline-build time -- not inside the per-row lambda below (SPEC
+        // §7.2: configuration errors are checked immediately, not per element). A custom constant
+        // only makes sense for a text column: there's no safe, general way to interpret an
+        // arbitrary caller string as e.g. a NUMERIC or DATE without a parsing scheme this project
+        // doesn't have a use case for yet.
+        if (customConstant != null && strategy == org.identigon.incognito.api.RedactionStrategy.CONSTANT
+                && !isTextType(sqlType)) {
+            throw new IncognitoException.ConfigException(
+                "redactionConstant on column '" + columnName + "' requires a text-type column "
+                    + "(VARCHAR/CHAR/...) — its SQL type does not support a custom text placeholder.");
+        }
         return switch (strategy) {
-            case CLEAR -> (val, rs, pk, type, counter, ctx, meta) -> null;
-            case CONSTANT -> (val, rs, pk, type, counter, ctx, meta) -> val == null ? null : redactedConstant(alterEgo, type);
-            case MASK -> (val, rs, pk, type, counter, ctx, meta) -> {
+            case CLEAR -> (val, rs, pk, type, counter, ctx, meta, recordScope) -> null;
+            case CONSTANT -> (val, rs, pk, type, counter, ctx, meta, recordScope) -> {
+                if (val == null) return null;
+                if (customConstant != null) return alterEgo.constant(customConstant).apply("");
+                return redactedConstant(alterEgo, type);
+            };
+            case MASK -> (val, rs, pk, type, counter, ctx, meta, recordScope) -> {
                 if (val == null) return null;
                 // Masking is defined only over text; a numeric/temporal/opaque column instead gets a
                 // type-appropriate redacted constant so the redacted value still fits the column.
@@ -592,7 +629,7 @@ public final class TableTransformLoadStage implements PipelineStage {
             case JITTER_WITHIN_MONTH -> {
                 Transformation<LocalDate> dateTransform = alterEgo.shiftDate(AlterEgo.DateField.MONTH);
                 Transformation<java.time.LocalDateTime> dateTimeTransform = alterEgo.shiftDateTime(AlterEgo.DateField.MONTH, 0);
-                yield (value, rs, pk, sqlType, counter, ctx, meta) -> {
+                yield (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
                     if (value == null) return null;
                     Object shifted = shiftTemporalOrNull(value, dateTransform, dateTimeTransform);
                     return shifted != null ? shifted : value;
@@ -601,7 +638,7 @@ public final class TableTransformLoadStage implements PipelineStage {
             case JITTER_WITHIN_YEAR -> {
                 Transformation<LocalDate> dateTransform = alterEgo.shiftDate(AlterEgo.DateField.YEAR);
                 Transformation<java.time.LocalDateTime> dateTimeTransform = alterEgo.shiftDateTime(AlterEgo.DateField.YEAR, 0);
-                yield (value, rs, pk, sqlType, counter, ctx, meta) -> {
+                yield (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
                     if (value == null) return null;
                     Object shifted = shiftTemporalOrNull(value, dateTransform, dateTimeTransform);
                     return shifted != null ? shifted : value;
@@ -614,7 +651,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                 if (group == null) {
                     Transformation<LocalDate> dateTransform = alterEgo.shiftDate(days);
                     Transformation<java.time.LocalDateTime> dateTimeTransform = alterEgo.shiftDateTime(days, 0);
-                    yield (value, rs, pk, sqlType, counter, ctx, meta) -> {
+                    yield (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
                         if (value == null) return null;
                         Object shifted = shiftTemporalOrNull(value, dateTransform, dateTimeTransform);
                         return shifted != null ? shifted : value;
@@ -625,7 +662,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                         return Long.toString(d);
                     });
 
-                    yield (value, rs, pk, sqlType, counter, ctx, meta) -> {
+                    yield (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
                         if (value == null) return null;
 
                         // Inherit the delta from the direct FK parent that anchors THIS coherence group.
@@ -685,7 +722,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                 Transformation<java.time.LocalDateTime> dateTimeTransform = alterEgo.shiftDateTime(SYNTHESISE_DATE_WINDOW_DAYS, 0);
                 Transformation<String> strTransform = alterEgo.bind(domain,
                     (input, ctx) -> fabricateShapePreserving(input, ctx.random()));
-                yield (value, rs, pk, sqlType, counter, ctx, meta) -> {
+                yield (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
                     if (value == null) return null;
                     Object shifted = shiftTemporalOrNull(value, dateTransform, dateTimeTransform);
                     return shifted != null ? shifted : strTransform.apply(value.toString());
@@ -853,10 +890,12 @@ public final class TableTransformLoadStage implements PipelineStage {
     @FunctionalInterface
     interface ColumnTransformer {
         /** Passthrough: returns the value unchanged. */
-        ColumnTransformer PASSTHROUGH = (value, rs, pk, sqlType, counter, ctx, meta) -> value;
+        ColumnTransformer PASSTHROUGH = (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> value;
 
         Object transform(Object value, ResultSet rs, Object sourcePk, int sqlType, AtomicLong surrogateCounter,
-                          PipelineContext ctx, SchemaInspector.TableMetadata meta) throws SQLException, IncognitoException;
+                          PipelineContext ctx, SchemaInspector.TableMetadata meta,
+                          org.identigon.alterego.RecordScope recordScope)
+            throws SQLException, IncognitoException;
     }
 
     private static Object getPlaceholderForType(int sqlType) {

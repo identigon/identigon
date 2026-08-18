@@ -39,6 +39,27 @@ public enum DirectIdStrategy {
      */
     ALTEREGO_NINO,
     /**
+     * NHS number generator ({@code AlterEgo.nhsNumber()}) — GB only. Every output carries the
+     * {@code 999} prefix reserved for test/synthetic use (never issued to a real patient), so it
+     * can never coincide with a real NHS number. Throws {@code AlterEgoConfigException} if the
+     * pipeline's locale does not resolve to country GB.
+     */
+    ALTEREGO_NHS_NUMBER,
+    /**
+     * UK passport number generator ({@code AlterEgo.passportNumber()}) — GB only. Every output
+     * carries the {@code ZZ} prefix, structurally impossible for a real UK passport (which must be
+     * 9 numeric digits), so it can never coincide with a real passport number. Throws
+     * {@code AlterEgoConfigException} if the pipeline's locale does not resolve to country GB.
+     */
+    ALTEREGO_PASSPORT_NUMBER,
+    /**
+     * GB driving licence number generator ({@code AlterEgo.drivingLicenceNumber()}) — GB only.
+     * Every output carries the {@code 99999} surname block, which implies a zero-letter surname
+     * and can never occur on a real licence. Throws {@code AlterEgoConfigException} if the
+     * pipeline's locale does not resolve to country GB.
+     */
+    ALTEREGO_DRIVING_LICENCE_NUMBER,
+    /**
      * Generic shape-preserving generator ({@code fabricateShapePreserving} on AlterEgo's salt-keyed
      * stream), and the **default** when a {@code DIRECT_ID}/{@code UNIQUE_CANDIDATE_KEY} column names
      * no strategy. Best for <b>code-like</b> fields (reference numbers, codes, usernames): it preserves
