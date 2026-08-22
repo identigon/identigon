@@ -9,8 +9,8 @@ postcodes, obviously-fictional surnames and street names) so pseudonymised data 
 references something real.
 
 See [`docs/spec/alterego.md`](../docs/spec/alterego.md) for the full behavioural contract,
-[`CHANGELOG.md`](CHANGELOG.md) for the release history and what's changed between versions, and
-[`PLAN.md`](PLAN.md) for the deferred backlog.
+[`CHANGELOG.md`](CHANGELOG.md) for the release history and what's changed between versions, and the
+root [`PLAN.md`](../PLAN.md) (`**Project:** alterego` entries) for the deferred backlog.
 
 Every code sample below is compiled and run as part of the test suite
 (`src/test/java/org/identigon/alterego/ReadmeExamplesTest.java`), so they cannot silently rot out of

@@ -1,6 +1,6 @@
 # ADR 0002: Two libraries — value transformation vs relational coherence
 
-Status: accepted (2026-07-30, backfilled)
+Status: accepted (2026-07-30, backfilled) (refined by ADR 0009)
 
 ## Context
 

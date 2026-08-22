@@ -44,9 +44,8 @@ writing any code, for whichever subproject(s) you're touching:
   supersede with a new ADR if one genuinely changes. (Migrating to root `docs/adr/` — see
   `docs/tasks/consolidate-subproject-docs.md`.)
 
-Until the migration in `docs/tasks/consolidate-subproject-docs.md` completes, each subproject also
-still carries its own `PLAN.md` (phase order, done items, tracked follow-ups/deferrals) — check the
-relevant one(s) alongside the root list.
+Decision records are still mid-migration to root `docs/adr/` — see
+`docs/tasks/consolidate-subproject-docs.md` for the remaining phases.
 
 ## Build and test
 

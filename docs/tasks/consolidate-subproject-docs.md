@@ -51,14 +51,23 @@ Low priority; candidate for a bulk find-and-replace pass, own decision on when.
 
 ## 4. Phase 2 — `PLAN.md` consolidation (mechanical, low ambiguity)
 
-- [ ] Merge the three subprojects' `PLAN.md` entries into root `PLAN.md`, tagging each with
-      `**Project:**`.
-- [ ] Move any existing `<subproject>/docs/tasks/*.md` file to root `docs/tasks/`, prefixed with its
-      subproject (e.g. `incognito/docs/tasks/composite-pk-cyclic-fk.md` →
-      `docs/tasks/incognito-composite-pk-cyclic-fk.md`), and update the moved `PLAN.md` entry's
-      pointer to match. Repo-specific to this migration, not a naming convention doc-kit itself
-      needs. Only one such file exists today: `incognito/docs/tasks/composite-pk-cyclic-fk.md`.
-- [ ] Delete the three subproject `PLAN.md` files.
+- [x] **Mined the completed narrative for missing ADRs before deleting it, per explicit
+      instruction.** `incognito/PLAN.md`'s Phase 4 follow-up reversed ADR 0002's "tracked as debt"
+      characterisation of shape-preserving fabrication, but the reversal was only ever recorded as a
+      completed plan item — never its own record. Wrote `incognito/docs/adr/0009-...md` and pointed
+      ADR 0002's status at it (`refined by ADR 0009`) before deleting the source narrative. No other
+      completed item in any of the three files read as an undocumented decision.
+- [x] Merge the three subprojects' `PLAN.md` entries into root `PLAN.md`, tagging each with
+      `**Project:**`. Only genuinely open items migrated (~22, including one missed on the first
+      pass — a `[ ]` item nested inside an otherwise-`[x]`-complete `incognito` phase section); the
+      ~550 lines of completed (`[x]`) phase-by-phase build narrative were **not** carried over —
+      deleted, trusting git history, per explicit instruction. Root `PLAN.md`'s header updated to
+      describe it as the single whole-monorepo backlog, not cross-cutting-only.
+- [x] Moved `incognito/docs/tasks/composite-pk-cyclic-fk.md` → root
+      `docs/tasks/incognito-composite-pk-cyclic-fk.md` (the only such file), updating its own
+      internal `PLAN.md`/`SPECIFICATION.md` references and the migrated `PLAN.md` entry's pointer.
+- [x] Deleted the three subproject `PLAN.md` files; fixed the `README.md` links (all three
+      subprojects' own, plus root) and `AGENTS.md`/`DOC-MAP.md` mentions that pointed at them.
 
 ## 5. Phase 3 — `CHANGELOG.md` consolidation (mechanical, needs the prefix scheme)
 

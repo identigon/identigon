@@ -91,8 +91,8 @@ fails today (hits the line-468 guard) and passes once §3 is done.
 - The two fail-closed guards this replaces (the composite-FK-into-cyclic message at line ~468 and
   the composite-PK row guard) are removed only for the now-supported case; genuinely unresolvable
   cases (e.g. a missing key translation) still fail closed with a clear message.
-- `PLAN.md` Phase 3: tick the item and name the covering test. If `SPECIFICATION.md` §5.2 states the
-  combination is unsupported, update it.
+- Delete this task file and its root `PLAN.md` entry in the same commit, naming the covering test.
+  If `docs/spec/incognito.md` §5.2 states the combination is unsupported, update it.
 
 ## 6. Risk note
 

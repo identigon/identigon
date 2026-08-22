@@ -13,9 +13,9 @@ explicit non-goals — see [ADR 0001](docs/adr/0001-fabrication-not-k-anonymity.
 > PII — a cloned database where the PII has been anonymised, and obviously anonymised, using
 > clearly fictional data."*
 
-See [`docs/spec/incognito.md`](../docs/spec/incognito.md) for the full behavioural contract,
-[`PLAN.md`](PLAN.md) for the implementation phases, [`docs/adr/`](docs/adr/) for the key design
-decisions and why they
+See [`docs/spec/incognito.md`](../docs/spec/incognito.md) for the full behavioural contract, the
+root [`PLAN.md`](../PLAN.md) (`**Project:** incognito` entries) for the backlog,
+[`docs/adr/`](docs/adr/) for the key design decisions and why they
 were made, and [`CHANGELOG.md`](CHANGELOG.md) for what has changed between versions.
 
 ## Relationship to `alterego`
