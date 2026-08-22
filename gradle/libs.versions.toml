@@ -6,7 +6,7 @@
 
 [versions]
 spotless = "8.8.0"
-spotbugsPlugin = "6.5.9"
+spotbugsPlugin = "6.5.10"
 spotbugsTool = "4.9.8"
 findsecbugs = "1.13.0"
 pmdTool = "7.22.0"
