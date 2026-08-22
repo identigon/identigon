@@ -9,8 +9,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 dated, human-curated entries — adapted for a monorepo: each version groups changes by subproject
 rather than by change type.
 
-Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGELOG.md`,
-`effigies/CHANGELOG.md`) covers everything before this file took over at 1.0.0.
+Every release before 1.0.0 (when the three subprojects joined lockstep) is folded in below with a
+project-prefixed version tag (`alterego-0.1.0`, `incognito-1.0.0`, `effigies-1.0.0`, …) instead of a
+bare number, since each subproject's own pre-lockstep numbering restarted independently and would
+otherwise collide with this file's own `1.0.0` (the first *shared* release) — most visibly,
+`incognito` and `effigies` each had their own unrelated `1.0.0` before joining lockstep. Each
+subproject's standing output-stability guarantees / hard invariants, previously repeated at the top
+of its own now-retired `CHANGELOG.md`, live in its `docs/spec/` member instead — restating them here
+too would be the same fact in two places.
 
 ## [Unreleased]
 
@@ -199,6 +205,174 @@ Each subproject's own `CHANGELOG.md` (`alterego/CHANGELOG.md`, `incognito/CHANGE
   (verified: the published `incognito` POM still resolves `snakeyaml` to `2.2`, matching before).
   CI's downloadable per-run artifact (see above) makes this easy to spot-check going forward: the
   JaCoCo/PMD/SpotBugs reports inside it reflect whatever the catalog resolved.
+
+## [alterego-0.1.0] - 2026-07-26
+
+Initial implementation, milestones M0-M6 of `alterego/PLAN.md` (now deleted; see git history).
+
+### Added
+
+- Deterministic pseudonymisation core: per-input HMAC-SHA256 key derivation, counter-mode randomness
+  stream, sampling primitives (Appendix A), frozen conformance vectors.
+- Pattern-based (`pattern()`), constant (`constant()`), and masking (`mask()`) transformations.
+- Name and address built-ins: `firstName()`, `lastName()`, `fullName()`, `city()`,
+  `streetAddress()`, `postcode()`, `organisationName()`, backed by curated, provenance-tracked UK
+  dictionaries (`alterego/docs/dictionaries.md`). `lastName()` and `streetAddress()`'s theme words
+  go further: authored, deliberately fictional vocabulary rather than real data, so a pseudonymised
+  name or street address reads as unmistakably fictional, not merely a real one attached to the
+  wrong person (ADR 0010).
+- Temporal jitter: `shiftDate(...)`/`shiftDateTime(...)`, sixteen methods across eight jitter
+  strategies, with inclusive `JitterOptions` clamping.
+- Fictional-by-default contact details: `emailAddress()` (RFC 2606 reserved domains) and
+  `phoneNumber()` (Ofcom drama ranges, `alterego/docs/phone-ranges.md`), each with a `realistic()`
+  opt-out.
+- `MappingStore` SPI, `InMemoryMappingStore`, and the `stored()`/`unique()` decorators, with the
+  full section 2.5 decorator algebra and a reusable store contract test.
+- Record coherence: `RecordScope` (anonymous and keyed), `RecordAttributes`, and built-in coherence
+  between `city()`/`postcode()`/`phoneNumber()` via `UK_POSTCODE_AREA`/`UK_NATION` — whichever of
+  the three runs first in a scope establishes the record's place for the others to follow.
+- Extensibility: any `Strategy<T>` lambda bound via `AlterEgo.bind(...)` gets full built-in parity
+  (determinism, `unique()`, `stored()`, record coherence, `derived(...)` composition).
+- `maven-publish` configuration (group `org.identigon`, artifact `alterego`).
+
+## [alterego-0.2.0] - 2026-07-31
+
+### Added
+
+- `FileMappingStore` (spec §5.4): a persistent, file-backed `MappingStore` that provides cross-run
+  stability for `stored()` and `unique()` mappings.
+- Five identifier built-ins (`nhsNumber()`, `nationalInsuranceNumber()`, `drivingLicenceNumber()`,
+  `passportNumber()`, `creditCardNumber()`) with structurally guaranteed fictional outputs (ADR
+  0012).
+
+## [alterego-0.3.0] - 2026-08-02
+
+### Added
+
+- `domainName()` and `url()` built-ins using RFC 2606 reserved domains.
+- `shiftInstant()` family to `AlterEgo` for `Instant` jitter.
+- `PhoneOptions.includeNonGeographic()` to allow `phoneNumber()` to draw from Ofcom freephone,
+  premium rate, and UK-wide drama ranges.
+- Supported `LocalTime`, `YearMonth`, and `BigDecimal` in the canonical value codecs and `redact()`.
+
+## [incognito-1.0.0] - 2026-08-02
+
+Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; single-threaded.
+
+### Added
+
+- **Pipeline & policy engine** (Phases 1–3): `IncognitoPipeline` builder with auto-assembled default
+  stages; `AnonymisationPolicy` / `TablePolicy` / `ColumnPolicy` records and builders; a
+  programmatic and YAML (`YamlPolicyParser`) policy surface; `SchemaInspector` (tables, PKs, FKs,
+  unique candidate keys, identity vs generated columns); `TableDependencyGraph` topological
+  ordering; fail-closed classification with advisory `PolicyInferrer` suggestions.
+- **Fabrication engine** (Phase 4): streaming transform+load; `DIRECT_ID` / `UNIQUE_CANDIDATE_KEY`
+  via `alterego` with a length-preserving collision fallback; `QUASI_ID` temporal jitter,
+  including one salt-keyed delta per coherence group inherited by descendants (ADR 0005); declared
+  `distinguishing` handling for `SENSITIVE` columns (ADR 0003); root-ancestor `INHERITED_ATTRIBUTE`
+  resolution (ADR 0007); primary-key surrogates and foreign-key rewriting.
+- **Key & cascade stores** (Phase 5): `InMemoryKeyTranslationStore` and
+  `InMemoryAttributeCascadeStore` (published attributes, FK linkage, and group-scoped jitter
+  deltas). Single-column **and** composite (`CompositeKey`) keys.
+- **Loader, cyclic FKs, clean-up & verification** (Phase 6): `PostgresDialectHandler` (+ generic
+  ANSI fallback) with `session_replication_role` trigger isolation, `OVERRIDING SYSTEM VALUE`, and
+  sequence resync; cyclic / self-referential foreign keys via Tarjan SCC plus a placeholder and a
+  second-pass `UPDATE` (ADR 0006); `IncognitoCleanUpHandler` compensation on failure with salt
+  destruction; `VerificationStage` (referential integrity, e-mail fictionality, per-period volume
+  tolerances, the default-on misdeclaration lint, and a source-value survival net);
+  `AnonymisationReportBuilder` (with the §7.2 opaque-type passthrough audit) and a
+  `DpiaArtefactEmitter` that writes JSON, HTML, or Markdown.
+- **alterego 0.3.0 adoption:** **type-aware redaction** — `CONSTANT`/`MASK` now delegate to
+  `AlterEgo.redact(Class<T>)`/`constant`/`mask`, so numeric, temporal, boolean and opaque
+  `SENSITIVE`
+  columns get a type-appropriate constant instead of failing at insert; **salt destruction** — the
+  `AlterEgo` instance's internal salt clone is now zeroed on completion via `AlterEgo.close()`, not
+  just Incognito's own copy; and **`TIMESTAMP`/`LocalDateTime` quasi-identifier `SYNTHESISE`** (a
+  timestamp DOB is shifted within the salt-keyed ±5y window, preserving type and time-of-day).
+- **Observability** via the JDK `System.Logger` facade (zero-dependency): previously-swallowed
+  best-effort compensation failures now log a `WARNING`, and benign fallbacks (owner-mode trigger
+  handling, pg_stats-unavailable) log at `DEBUG`. Each record carries only the operation, table and
+  SQLState — never the salt, a field value, or the raw exception message (§7.3/§5.1).
+- **Owner-mode cyclic-FK load** (SPEC §9): a non-superuser target that *owns* its tables now clones
+  cyclic/self-referential FKs by dropping the cyclic FK constraints for the load and recreating them
+  verbatim (`pg_get_constraintdef`) after the pass-2 `UPDATE` — where a superuser uses
+  `session_replication_role`. The drop/recreate is atomic (transactional DDL) and is recreated on
+  failure too; a role that can do neither still fails fast.
+
+### Fixed
+
+- **Enum / user-type passthrough.** A kept (`PAYLOAD`) column of a PostgreSQL `enum` or other
+  user-defined type failed on re-insert — the read `String` was bound as `varchar`, so any table
+  with an enum column (e.g. Pagila's `film.rating`) could not be cloned. `String` values now bind as
+  `Types.OTHER` so PostgreSQL casts them to the column's actual type (enum, `tsvector`, `uuid`, …).
+- `JITTER_DAYS` no longer raises spurious per-period volume-drift *warnings*: because a ±N-day
+  jitter crosses month boundaries, the verification volume check now buckets it **yearly** (not
+  monthly), where a day-window barely leaks. Cosmetic — it never failed the run.
+
+### Known gaps
+
+- Composite PK **and** cyclic FK on the same table (each supported alone; the combination fails
+  closed — `FailClosedGuardE2ETest`). Tracked in root `PLAN.md`
+  (`docs/tasks/incognito-composite-pk-cyclic-fk.md`).
+- Generic shape-preserving fabrication (`ALTEREGO_GENERIC` / string-`SYNTHESISE`) carries no
+  fictionality guarantee — inherent for an arbitrary shape; use a typed strategy where the guarantee
+  matters. It runs on alterego's `bind` extension API (salt-keyed, deterministic) and lives in
+  Incognito by decision, not a delegation gap (see incognito ADR 0009).
+- Declarative table **partitioning** is not cloned (partition children are discovered but the
+  partitioned parent isn't specially handled); the Pagila benchmark excludes its partitioned
+  `payment` table. Non-partitioned tables are unaffected.
+
+**Note:** incognito's independently-versioned history as a standalone repository continued to
+`1.1.0` after this release, before rejoining this monorepo's lockstep numbering at `1.0.0` (see the
+lockstep-versioning ADR) — that `1.1.0` release's own changes were never recorded in a `CHANGELOG.md`
+entry before the repositories merged, and are not reconstructed here.
+
+## [alterego-0.4.0] - 2026-08-09
+
+### Added
+
+- Guarded Maven Central artifact signing in the `maven-publish` configuration: active only when a
+  `SIGNING_KEY` is supplied, so ordinary `build` runs are unaffected.
+
+### Fixed
+
+- `drivingLicenceNumber()` now formats its digits with `Locale.ROOT`, so output no longer depends on
+  the JVM's default formatting locale. Under a default locale with a non-Latin numbering system the
+  month/day digits could previously render as non-ASCII glyphs; reference-salt output (ASCII) is
+  unchanged.
+- `FileMappingStore` now re-establishes its header when recovery truncates the file to empty. A
+  crash while writing the initial header line previously left the store with no header, making it
+  permanently unopenable on the next `open()`.
+- `shiftInstant()` now validates `days`/`seconds >= 0` at configuration time, throwing
+  `AlterEgoConfigException` like `shiftDate()`/`shiftDateTime()`, instead of throwing a raw
+  `IllegalArgumentException` lazily on first application.
+
+## [effigies-1.0.0] - 2026-08-09
+
+### Added
+
+- Phase 5 Agent Skill: Added `identigon-policy-author` Agent Skill
+  (`.agents/skills/identigon-policy-author/SKILL.md`) to conduct interactive, fail-closed user
+  interviews for policy classification, featuring paginated topology parsing and aggressive
+  batching to mitigate fatigue.
+- Phase 4 Orchestration: Added `run` subcommand to execute `incognito` using a finished
+  `policy.yaml`, supporting ephemeral, persistent, and reproducible salt modes. Surfaces the
+  engine's DPIA accountability report via `DpiaArtefactEmitter` as `dpia-report.html`,
+  `dpia-report.json`, and `dpia-report.md`.
+- Phase 3 Inference: Added `PolicyInferrer` to auto-suggest column roles based on naming
+  heuristics during `scaffold`. Suggestions are emitted strictly as YAML comments to preserve
+  fail-closed execution.
+- `discover` subcommand: Inspects a source database using `incognito`'s `SchemaInspector`
+  and prints a metadata-only summary.
+- `scaffold` subcommand: Emits a fail-closed starter `policy.yaml` with schema metadata as comments.
+- Project skeleton: Gradle (Kotlin DSL) build with a Java 25 toolchain and a single runnable jar
+  (`java -jar`); Spotless + SpotBugs/find-sec-bugs; pre-commit hooks + gitleaks; CI mirroring the
+  sibling repos (a reusable `_build.yml` invoked by `main.yml` and `pull-request.yml`) that resolves
+  incognito and alterego from GitHub Packages.
+- `EffigiesCli` dispatch skeleton (`discover` / `scaffold` / `run` declared; `help` / `version`
+  live), covered by `EffigiesCliTest`.
+- Base docs: `README.md`, `SPECIFICATION.md`, `PLAN.md`, `docs/adr/` (ADR 0001 — authoring above the
+  engine), and an initial `docs/tasks/` handoff for schema discovery + scaffold.
 
 ## [1.0.0] — 2026-08-10
 

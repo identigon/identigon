@@ -17,8 +17,8 @@ each still has its own `docs/adr/` (design decisions) — see the subproject's o
 does and how to use it, and
 [`docs/tasks/consolidate-subproject-docs.md`](docs/tasks/consolidate-subproject-docs.md) for the
 ongoing migration to a fully repository-wide documentation set. Release history is split at the
-point the three merged: each subproject's own `CHANGELOG.md` covers everything before 1.0.0, and the
-root [`CHANGELOG.md`](CHANGELOG.md) covers every release from 1.0.0 onward.
+point the three merged: the root [`CHANGELOG.md`](CHANGELOG.md) covers pre-1.0.0 history too now
+(project-prefixed version tags), as well as every shared release from 1.0.0 onward.
 
 ## Building
 

@@ -55,10 +55,10 @@ independent release cadence is not a boundary the documentation needs to keep ei
 `docs/tasks/consolidate-subproject-docs.md` for the migration this consolidation is being carried
 out under, and its current phase.
 
-**Transitional note.** As of this map's most recent revision, `docs/spec/` and `PLAN.md` are
-consolidated, but `docs/adr/` and `CHANGELOG.md` are still mid-migration: `alterego/`, `incognito/`,
-and `effigies/` each still carry their own `docs/adr/` and `CHANGELOG.md` until the remaining phases
-in `docs/tasks/consolidate-subproject-docs.md` land. This map states the target shape; where it and
+**Transitional note.** As of this map's most recent revision, `docs/spec/`, `PLAN.md`, and
+`CHANGELOG.md` are consolidated, but `docs/adr/` is still mid-migration: `alterego/`, `incognito/`,
+and `effigies/` each still carry their own `docs/adr/` until the remaining phase in
+`docs/tasks/consolidate-subproject-docs.md` lands. This map states the target shape; where it and
 the working tree disagree, the task file's phase checklist is authoritative about what has actually
 moved.
 

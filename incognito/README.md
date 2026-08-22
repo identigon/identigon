@@ -15,8 +15,9 @@ explicit non-goals — see [ADR 0001](docs/adr/0001-fabrication-not-k-anonymity.
 
 See [`docs/spec/incognito.md`](../docs/spec/incognito.md) for the full behavioural contract, the
 root [`PLAN.md`](../PLAN.md) (`**Project:** incognito` entries) for the backlog,
-[`docs/adr/`](docs/adr/) for the key design decisions and why they
-were made, and [`CHANGELOG.md`](CHANGELOG.md) for what has changed between versions.
+[`docs/adr/`](docs/adr/) for the key design decisions and why they were made, and the root
+[`CHANGELOG.md`](../CHANGELOG.md) (`incognito-1.0.0` for pre-1.0.0 history, then every shared
+release) for what has changed between versions.
 
 ## Relationship to `alterego`
 

@@ -8,10 +8,10 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Consolidate subproject docs into root docs.** `SPECIFICATION.md` and `PLAN.md` are done;
-  `alterego`, `incognito`, and `effigies` still each have their own `docs/adr/` and `CHANGELOG.md`,
-  migrating to a single repo-wide documentation set (justified by lockstep versioning — one
-  version, one release, for all three). See `docs/tasks/consolidate-subproject-docs.md` for the
+- [ ] **Consolidate subproject docs into root docs.** `SPECIFICATION.md`, `PLAN.md`, and
+  `CHANGELOG.md` are done; `alterego`, `incognito`, and `effigies` still each have their own
+  `docs/adr/`, migrating to a single repo-wide documentation set (justified by lockstep versioning —
+  one version, one release, for all three). See `docs/tasks/consolidate-subproject-docs.md` for the
   phased plan.
 - [ ] **Consider turning on more of `markdownlint-cli2`'s rule set, not just line length.**
   `.markdownlint-cli2.jsonc` currently enables only `MD013` (`default: false`) — deliberately

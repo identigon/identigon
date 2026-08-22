@@ -71,10 +71,20 @@ Low priority; candidate for a bulk find-and-replace pass, own decision on when.
 
 ## 5. Phase 3 — `CHANGELOG.md` consolidation (mechanical, needs the prefix scheme)
 
-- [ ] Fold `alterego` `[0.1.0]`–`[0.4.0]`, `incognito` `[1.0.0]`, `effigies` `[1.0.0]` into the root
-      file as `alterego-0.1.0` … `alterego-0.4.0`, `incognito-1.0.0`, `effigies-1.0.0`, in original
-      chronological order, ahead of the existing lockstep `[1.0.0] — 2026-08-10`.
-- [ ] Delete the three subproject `CHANGELOG.md` files.
+- [x] Folded `alterego` `[0.1.0]`–`[0.4.0]`, `incognito` `[1.0.0]`, `effigies` `[1.0.0]` into the
+      root file as `alterego-0.1.0` … `alterego-0.4.0`, `incognito-1.0.0`, `effigies-1.0.0`, in
+      original chronological order (tie-break on same-day releases: alterego → incognito →
+      effigies), ahead of the existing lockstep `[1.0.0] — 2026-08-10`. Dropped each subproject's
+      "Output-stability guarantees"/"Invariants" preamble rather than carrying it over — verified
+      each is already stated in the corresponding `docs/spec/<subproject>.md` member; keeping both
+      would be the same fact in two places.
+- [x] **Found and flagged, not fixed**: incognito's own history references a `1.1.0` release
+      (`incognito/docs/adr/0008-lockstep-versioning.md`: "moves backward in number... `1.1.0` →
+      `1.0.0`") that has no corresponding `CHANGELOG.md` entry anywhere — a pre-existing gap in
+      their own historical record, not something this migration fabricated content for. Noted
+      inline in the merged `[incognito-1.0.0]` entry rather than silently passed over.
+- [x] Deleted the three subproject `CHANGELOG.md` files; fixed the `README.md` links (all three
+      subprojects' own, plus root) and `AGENTS.md`/`DOC-MAP.md` mentions that pointed at them.
 
 ## 6. Phase 4 — ADR renumbering (highest risk, largest blast radius — do last, separately)
 

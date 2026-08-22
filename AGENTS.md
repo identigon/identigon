@@ -16,8 +16,10 @@ the others (`effigies` → `incognito` → `alterego`, via `project(...)` depend
   databases.
 
 The root `PLAN.md` tracks the whole monorepo's backlog (optionally tagged `**Project:**`); root
-`CHANGELOG.md` covers every release from 1.0.0 onward, grouped by subproject per release. Each
-subproject's specification now lives under root `docs/spec/` — read the relevant one(s) before
+`CHANGELOG.md` covers every release, pre-1.0.0 history included (project-prefixed version tags for
+each subproject's own past releases, then every shared release from `1.0.0` onward, grouped by
+subproject per release). Each subproject's specification now lives under root `docs/spec/` — read
+the relevant one(s) before
 writing any code, for whichever subproject(s) you're touching:
 
 **alterego/**
