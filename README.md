@@ -11,11 +11,13 @@ and documented independently:
 | [`incognito/`](incognito) | A library that clones a database and orchestrates the anonymisation: schema discovery, load ordering, key translation, coherent cross-entity relationships. Delegates all field-value fabrication to `alterego`. | `alterego` |
 | [`effigies/`](effigies) | A CLI that discovers a schema, authors (and helps infer) the declarative policy `incognito` runs from, and drives the engine to produce the clone. | `incognito` |
 
-Each subproject has its own `SPECIFICATION.md` (behavioural contract), `PLAN.md` (implementation
-plan and backlog), and `docs/adr/` (design decisions) — see the subproject's own README for what it
-does and how to use it. Release history is split at the point the three merged: each subproject's
-own `CHANGELOG.md` covers everything before 1.0.0, and the root [`CHANGELOG.md`](CHANGELOG.md)
-covers every release from 1.0.0 onward.
+Each subproject's behavioural contract lives under root [`docs/spec/`](docs/spec/); each still has
+its own `PLAN.md` (implementation plan and backlog) and `docs/adr/` (design decisions) — see the
+subproject's own README for what it does and how to use it, and
+[`docs/tasks/consolidate-subproject-docs.md`](docs/tasks/consolidate-subproject-docs.md) for the
+ongoing migration to a fully repository-wide documentation set. Release history is split at the
+point the three merged: each subproject's own `CHANGELOG.md` covers everything before 1.0.0, and the
+root [`CHANGELOG.md`](CHANGELOG.md) covers every release from 1.0.0 onward.
 
 ## Building
 

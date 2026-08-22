@@ -6,6 +6,10 @@ place for. See the root `CHANGELOG.md` for what's already shipped in this catego
 
 ## Outstanding
 
+- [ ] **Consolidate subproject docs into root docs.** `alterego`, `incognito`, and `effigies` each
+  have their own `SPECIFICATION.md`, `PLAN.md`, `docs/adr/`, and `CHANGELOG.md`; migrating to a
+  single repo-wide documentation set (justified by lockstep versioning — one version, one release,
+  for all three). See `docs/tasks/consolidate-subproject-docs.md` for the phased plan.
 - [ ] **Consider turning on more of `markdownlint-cli2`'s rule set, not just line length.**
   `.markdownlint-cli2.jsonc` currently enables only `MD013` (`default: false`) — deliberately
   narrow, matching what was actually asked for when the hook was added. Checked read-only with

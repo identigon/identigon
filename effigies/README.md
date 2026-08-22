@@ -38,7 +38,7 @@ Two boundaries are deliberate and load-bearing:
   from the schema, not the data.
 
 See [`docs/adr/0001-authoring-above-the-engine.md`](docs/adr/0001-authoring-above-the-engine.md) for
-the reasoning, [`SPECIFICATION.md`](SPECIFICATION.md) for the behavioural contract, and
+the reasoning, [`docs/spec/effigies.md`](../docs/spec/effigies.md) for the behavioural contract, and
 [`PLAN.md`](PLAN.md) for the phased plan.
 
 ## Status

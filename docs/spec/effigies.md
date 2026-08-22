@@ -1,7 +1,7 @@
 # Effigies — Specification
 
 Effigies is a command-line application that **authors and orchestrates** an
-[incognito](../incognito) anonymisation run. It discovers a source
+[incognito](../../incognito) anonymisation run. It discovers a source
 schema, helps produce the declarative policy that incognito consumes, and drives the engine to
 create the anonymised clone. Effigies performs **no** value substitution and **no** relational
 orchestration itself — those belong to incognito (and, beneath it, alterego).
@@ -21,7 +21,9 @@ incognito produced from it."
 The engine below Effigies stays **deterministic and model-free**. All judgment — inferring what a
 column is, scaffolding a starting policy, packaging a schema for an agent to reason about — lives in
 Effigies. The reasoning for this split is in
-[`docs/adr/0001-authoring-above-the-engine.md`](docs/adr/0001-authoring-above-the-engine.md).
+[`docs/adr/0001-authoring-above-the-engine.md`](../../effigies/docs/adr/0001-authoring-above-the-engine.md)
+(will move to the root `docs/adr/` and renumber in a later phase of this migration — see
+`docs/tasks/consolidate-subproject-docs.md`).
 
 ## 2. Hard invariants — never violate
 

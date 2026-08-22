@@ -18,7 +18,6 @@
 .vscode/
 .yamlrc.yml
 ._*
-CLAUDE.md
 bin/
 build/
 effigies/examples/quickstart/.quickstart-work/

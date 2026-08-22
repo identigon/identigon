@@ -8,7 +8,7 @@ fictional-by-default output (reserved email domains, Ofcom drama phone numbers, 
 postcodes, obviously-fictional surnames and street names) so pseudonymised data never accidentally
 references something real.
 
-See [`SPECIFICATION.md`](SPECIFICATION.md) for the full behavioural contract,
+See [`docs/spec/alterego.md`](../docs/spec/alterego.md) for the full behavioural contract,
 [`CHANGELOG.md`](CHANGELOG.md) for the release history and what's changed between versions, and
 [`PLAN.md`](PLAN.md) for the deferred backlog.
 
