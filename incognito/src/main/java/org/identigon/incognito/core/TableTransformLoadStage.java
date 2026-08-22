@@ -707,7 +707,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                 // Author-declared typed routing (SPEC Appendix B): a QUASI_ID SYNTHESISE column may
                 // name a DirectIdStrategy to synthesise a guaranteed-fictional typed value (postcode,
                 // city, street, …) instead of a shape-preserving scramble. The routing is explicit,
-                // never auto-detected (ADR 0004). Delegating to the DIRECT_ID transformer reuses the
+                // never auto-detected (ADR 17). Delegating to the DIRECT_ID transformer reuses the
                 // single strategy→primitive switch, so the two can never diverge.
                 if (colPolicy.directIdStrategy() != null) {
                     yield buildDirectIdTransformer(colPolicy, alterEgo, tableName);

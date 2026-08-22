@@ -18,7 +18,7 @@ tables:
         role: PRIMARY_KEY
         surrogateStrategy: SEQUENTIAL_LONG
 
-      # --- Direct identifiers: always fabricated, never generalised (SPEC §2.3, ADR 0001) -------
+      # --- Direct identifiers: always fabricated, never generalised (SPEC §2.3, ADR 14) ---------
       full_name:
         role: DIRECT_ID
         directIdStrategy: ALTEREGO_NAME
@@ -70,7 +70,7 @@ tables:
         references: { table: customers, column: id }
 
       # Coherent jitter: both dates share one salt-keyed delta per order, so `shipped_on` never
-      # moves ahead of `ordered_on` and the gap between them survives (SPEC §4.2, ADR 0005).
+      # moves ahead of `ordered_on` and the gap between them survives (SPEC §4.2, ADR 18).
       ordered_on:
         role: QUASI_ID
         quasiIdStrategy: JITTER_DAYS

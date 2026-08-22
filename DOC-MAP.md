@@ -26,25 +26,25 @@ DOC-MAP.md                 this file — the map
 AGENTS.md                  behavioural rules for agents; carries the pointer into this map
 CLAUDE.md                  a pointer to AGENTS.md, for tools that look for this name specifically
 README.md                  repository orientation, one screen, links outward
-SPECIFICATION.md           index into the docs/spec/ tree below
-CHANGELOG.md               what shipped, across the whole monorepo (lockstep releases from 1.0.0;
-                            project-prefixed entries for each subproject's pre-lockstep history)
-PLAN.md                    single ranked backlog, entries optionally tagged with a Project
-docs/
-  adr/*.md                  decisions about any subproject's design, numbered across the whole
-                             monorepo — a decision belongs to whichever subproject it constrains,
-                             not to a per-subproject sequence
-  tasks/*.md                optional: per-item working notes, disposable; prefixed with the
-                             subproject name where the work is subproject-specific
-docs/spec/
-  alterego.md                the pseudonymisation library's contract
-  incognito.md                the database-cloning/anonymisation engine's contract
-  effigies.md                 the authoring/orchestration CLI's contract
 alterego/README.md         module orientation, links outward to the root docs/ above
 incognito/README.md        module orientation, links outward to the root docs/ above
 effigies/README.md         module orientation, links outward to the root docs/ above
-effigies/.agents/skills/identigon-policy-author/SKILL.md  one agent tool skill, not project
-                                                            documentation
+SPECIFICATION.md           index into the docs/spec/ tree below
+docs/spec/
+  alterego.md                 the pseudonymisation library's contract
+  incognito.md                 the database-cloning/anonymisation engine's contract
+  effigies.md                  the authoring/orchestration CLI's contract
+CHANGELOG.md                what shipped, across the whole monorepo
+PLAN.md                     single ranked backlog, entries optionally tagged with a Project
+docs/adr/*.md                decisions about any subproject's design, numbered monorepo-wide
+docs/tasks/*.md               optional: per-item working notes, disposable
+alterego/docs/dictionaries.md          provenance/curation notes for the bundled dictionaries
+alterego/docs/fictional-ranges.md      candidate fictional-value ranges not yet supported
+alterego/docs/phone-ranges.md          Ofcom reserved/drama UK phone-range reference data
+alterego/tools/data-cache/SOURCES.md   provenance of cached upstream dictionary source data
+effigies/examples/quickstart/README.md  walkthrough for the quickstart worked example
+incognito/src/test/resources/benchmarks/SOURCES.md  provenance/licensing of vendored benchmarks
+effigies/.agents/skills/identigon-policy-author/SKILL.md  one agent tool skill, not project docs
 ```
 
 This repository has three Gradle modules, each independently usable and documented, but they
@@ -52,33 +52,39 @@ This repository has three Gradle modules, each independently usable and document
 release history is why documentation is consolidated at the repository level rather than split per
 module (doc-kit's usual monorepo default): a module boundary that does not correspond to an
 independent release cadence is not a boundary the documentation needs to keep either. See
-`docs/tasks/consolidate-subproject-docs.md` for the migration this consolidation is being carried
-out under, and its current phase.
+`docs/tasks/consolidate-subproject-docs.md` for the migration this consolidation was carried out
+under.
 
-**Transitional note.** As of this map's most recent revision, `docs/spec/`, `PLAN.md`, and
-`CHANGELOG.md` are consolidated, but `docs/adr/` is still mid-migration: `alterego/`, `incognito/`,
-and `effigies/` each still carry their own `docs/adr/` until the remaining phase in
-`docs/tasks/consolidate-subproject-docs.md` lands. This map states the target shape; where it and
-the working tree disagree, the task file's phase checklist is authoritative about what has actually
-moved.
+**The specification is a set, not a file.** `SPECIFICATION.md` is an index over `docs/spec/` — the
+one place in `docs/` you can glob (`docs/spec/*.md`) to find every specification member without
+reading any other file — one member per subproject, since each is a separately usable artifact with
+its own contract, even though the three release together.
 
 ## Artifacts
 
 | Artifact | Purpose | Tense | Durability | Audience |
 | --- | --- | --- | --- | --- |
 | `DOC-MAP.md` | This map: what each document is for, and where a fact belongs | present | rewritten in place | anyone adding documentation |
+| `AGENTS.md` | Behavioural rules for coding agents, including the pointer into this map | present | rewritten in place | coding agents |
+| `CLAUDE.md` | **Alias** of `AGENTS.md` — some tools look for this filename specifically; the file itself is just a pointer | present | rewritten in place | coding agents |
 | `README.md` | Orient a newcomer fast at the repository root | present | rewritten in place | anyone |
-| `<subproject>/README.md` | **Alias** of `README.md` — same purpose, scoped to that subproject | present | rewritten in place | anyone |
-| `SPECIFICATION.md` | Index over the `docs/spec/` tree beside it. **No standard for the file** | present | rewritten in place | anyone adding a behaviour fact |
+| `alterego/README.md` | **Alias** of `README.md` — same purpose, scoped to this subproject | present | rewritten in place | anyone |
+| `incognito/README.md` | **Alias** of `README.md` — same purpose, scoped to this subproject | present | rewritten in place | anyone |
+| `effigies/README.md` | **Alias** of `README.md` — same purpose, scoped to this subproject | present | rewritten in place | anyone |
+| `SPECIFICATION.md` | Index over the `docs/spec/` tree beside it. No standard for the file | present | rewritten in place | anyone adding a behaviour fact |
 | `docs/spec/alterego.md` | `alterego`'s full behavioural contract | present | rewritten in place | consumers of `alterego`; `incognito` implementers |
 | `docs/spec/incognito.md` | `incognito`'s full behavioural contract | present | rewritten in place | consumers of `incognito`; `effigies` implementers |
 | `docs/spec/effigies.md` | `effigies`'s full behavioural contract | present | rewritten in place | CLI users |
-| `docs/adr/*.md` | Why a decision was made, for any subproject. **Real convention:** [MADR](https://adr.github.io/madr/) minimal template | past | immutable once accepted | future maintainers |
-| `CHANGELOG.md` | What shipped, user-visible, across the whole monorepo. **Real standard:** [Keep a Changelog](https://keepachangelog.com), adapted: grouped by subproject per release, not by change-type category | past | append-only | users |
-| `PLAN.md` | Single ranked backlog. **No standard**; entries may carry a `Project` tag | future | volatile | the team |
-| `docs/tasks/*.md` | Working notes for one backlog item, prefixed with the subproject name when subproject-specific. **No standard** | future | disposable | whoever picks it up |
-| `AGENTS.md` | Behavioural rules for coding agents, including the pointer into this map. **Real convention:** [agents.md](https://agents.md) | present | rewritten in place | coding agents |
-| `CLAUDE.md` | **Alias** of `AGENTS.md` — some tools look for this filename specifically; the file itself is just a pointer | present | rewritten in place | coding agents |
+| `CHANGELOG.md` | What shipped, user-visible, across the whole monorepo. **Real standard:** Keep a Changelog, adapted: grouped by subproject per release, not by change-type category | past | append-only | users |
+| `PLAN.md` | Single ranked backlog. No standard; entries may carry a `Project` tag | future | volatile | the team |
+| `docs/adr/*.md` | Why a decision was made, for any subproject. **Real convention:** MADR minimal template | past | immutable | future maintainers |
+| `docs/tasks/*.md` | Working notes for one backlog item, prefixed with the subproject name when subproject-specific. No standard | future | disposable | whoever picks it up |
+| `alterego/docs/dictionaries.md` | Provenance and curation notes for the bundled name/place dictionaries | present | rewritten in place | `alterego` contributors curating dictionaries |
+| `alterego/docs/fictional-ranges.md` | Analysis of candidate fictional-value ranges for identifiers not yet supported (e.g. Companies House numbers) | present | rewritten in place | `alterego` contributors investigating new identifiers |
+| `alterego/docs/phone-ranges.md` | Ofcom reserved/drama UK phone-range reference data backing `phoneNumber()` | present | rewritten in place | `alterego` contributors curating phone ranges |
+| `alterego/tools/data-cache/SOURCES.md` | Provenance of cached upstream data used by the dictionary-curation tooling | past | append-only | `alterego` contributors |
+| `effigies/examples/quickstart/README.md` | **Alias** of `README.md` — step-by-step walkthrough for the quickstart worked example | present | rewritten in place | anyone trying Effigies |
+| `incognito/src/test/resources/benchmarks/SOURCES.md` | Provenance and licensing of the vendored benchmark-fixture schemas/datasets | past | append-only | `incognito` contributors |
 | `effigies/.agents/skills/identigon-policy-author/SKILL.md` | Step-by-step procedure for one agent tool skill | imperative | rewritten in place | coding agents |
 
 ## Lifecycle
@@ -86,16 +92,27 @@ moved.
 | Artifact | Created when | Removed / closed when |
 | --- | --- | --- |
 | `DOC-MAP.md` | the structure is first agreed | never — revised when an artifact is added, removed or repurposed |
-| `README.md` | project starts | never |
-| `<subproject>/README.md` | the module is created | never |
-| `SPECIFICATION.md` | behaviour is decided | never — edited forever |
-| `docs/spec/*.md` | behaviour is decided | never — edited forever |
-| `docs/adr/*.md` | a choice a newcomer would question | never — status flips to `superseded by ADR-NNNN` |
-| `CHANGELOG.md` entry | at release, if user-visible | never |
-| `PLAN.md` entry | idea occurs — one paragraph, no design | **deleted** when done, not struck through |
-| `docs/tasks/*.md` | work begins on an item | work completes |
 | `AGENTS.md` | agents first work in this repository | never |
 | `CLAUDE.md` | agents first work in this repository | never |
+| `README.md` | project starts | never |
+| `alterego/README.md` | the module is created | never |
+| `incognito/README.md` | the module is created | never |
+| `effigies/README.md` | the module is created | never |
+| `SPECIFICATION.md` | behaviour is decided | never — edited forever |
+| `docs/spec/alterego.md` | behaviour is decided | never — edited forever |
+| `docs/spec/incognito.md` | behaviour is decided | never — edited forever |
+| `docs/spec/effigies.md` | behaviour is decided | never — edited forever |
+| `CHANGELOG.md` entry | at release, if user-visible | never |
+| `PLAN.md` entry | idea occurs — one paragraph, no design | **deleted** when done, not struck through |
+| `docs/adr/*.md` | a choice a newcomer would question | never — status flips to `superseded by ADR-NNNN` |
+| `docs/tasks/*.md` | work begins on an item | work completes |
+| `alterego/docs/dictionaries.md` | the dictionaries are curated | never |
+| `alterego/docs/fictional-ranges.md` | an identifier's fictional range is investigated | the identifier ships or the investigation is abandoned |
+| `alterego/docs/phone-ranges.md` | the phone built-ins are curated | never |
+| `alterego/tools/data-cache/SOURCES.md` | the data cache is populated | never |
+| `effigies/examples/quickstart/README.md` | the example is created | never |
+| `incognito/src/test/resources/benchmarks/SOURCES.md` | a benchmark fixture is vendored | never |
+| `effigies/.agents/skills/identigon-policy-author/SKILL.md` | the skill is written | the skill is retired |
 
 ## Flow
 
@@ -113,7 +130,7 @@ Most changes skip the ADR. Nothing skips the deletion.
 continuing past the current highest number regardless of which subproject the next decision
 concerns), following the [MADR](https://adr.github.io/madr/) minimal template — YAML front matter
 (`status`, `date`, `decision-makers`), `Considered Options` as its own section. Copy
-`docs/adr/0000-template.md` for the shape once it exists (see the migration task file).
+`docs/adr/0000-template.md` for the shape.
 
 - Status is one of `proposed`, `rejected`, `accepted`, `deprecated`, `superseded by ADR-NNNN`.
 - **Only `accepted` binds.**
@@ -137,9 +154,13 @@ tag. No design; anything longer needs an ADR. Entries are deleted when done, nev
 - **Per-subproject `DOC-MAP.md`, `SPECIFICATION.md`, `PLAN.md`, `docs/adr/`, or `CHANGELOG.md`.**
   Consolidated to the repository root because the subprojects release in lockstep — see "Layout"
   above and the lockstep-versioning ADR.
+- **`docs/adr/README.md`.** An index-by-title table was tried during the consolidation migration
+  and dropped: `docs/adr/*.md` is swept as ADR content, so an index file there fails the MADR-shape
+  check rather than being recognised as an exception. `docs/adr/` is small enough to browse
+  directly; revisit if it grows past roughly 30 records.
 - **`docs/quirks.md`, `docs/glossary.md`, `docs/testing.md`.** Not yet adopted; each subproject's
-  own `SPECIFICATION.md` member currently states known limitations and non-goals inline. Revisit if
-  that stops being enough.
+  own `docs/spec/` member currently states known limitations and non-goals inline. Revisit if that
+  stops being enough.
 - **`docs/archive/`.** Nothing has yet had its currency called into question strongly enough to
   archive rather than fix or delete.
 

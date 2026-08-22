@@ -19,7 +19,7 @@ java {
 
 application {
     // The CLI entry point. Effigies is a thin authoring/orchestration front-end above incognito;
-    // see ADR 0001 and SPECIFICATION.md for the boundary.
+    // see ADR 23 and docs/spec/effigies.md for the boundary.
     mainClass = "org.identigon.effigies.EffigiesCli"
 }
 
@@ -37,7 +37,7 @@ tasks.withType<JavaCompile>().configureEach {
 dependencies {
     // The orchestration engine. Effigies depends ONLY on incognito (alterego arrives transitively
     // and is not called directly). It moves to a 2.0.x incognito once that lands (which removes the
-    // inference that migrates here — ADR 0001).
+    // inference that migrates here — ADR 23).
     implementation(project(":incognito"))
 
     // Reads/writes the declarative policy YAML that incognito consumes.
@@ -80,7 +80,7 @@ tasks.test {
 // Named "identigon.jar", not "effigies.jar": consumers run this one artifact and never touch
 // incognito/alterego directly, so the jar (and the CLI's own --version/--help banner, see
 // EffigiesCli) present the project's public name. "effigies" stays as the internal module/package
-// name only -- see the module's own Javadoc and ADR 0001 for why the three-subproject split exists.
+// name only -- see the module's own Javadoc and ADR 23 for why the three-subproject split exists.
 tasks.jar {
     // A stable, unversioned filename so `java -jar build/libs/identigon.jar` always works; the
     // version travels in the manifest (Implementation-Version) instead.

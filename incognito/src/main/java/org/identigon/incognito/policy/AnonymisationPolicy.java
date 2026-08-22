@@ -80,7 +80,7 @@ public record AnonymisationPolicy(
          * @return this builder
          * @deprecated inference is authoring, not execution; {@code effigies} owns it now and this
          *     fail-closed engine's own copy is scheduled for removal at incognito's next major
-         *     version — see {@code effigies/docs/adr/0001-authoring-above-the-engine.md}.
+         *     version — see {@code docs/adr/0023-authoring-above-the-engine.md}.
          */
         @Deprecated(forRemoval = true)
         public Builder autoInfer(boolean autoInfer) {

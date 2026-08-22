@@ -34,10 +34,8 @@ task to a single subproject with `:name:`, e.g. `./gradlew :incognito:test`.
 ## Versioning
 
 The three subprojects version together, not independently — a version bump anywhere in the monorepo
-bumps the shared number for all three. See any subproject's "lockstep versioning" ADR
-([`alterego`](alterego/docs/adr/0015-lockstep-versioning.md),
-[`incognito`](incognito/docs/adr/0008-lockstep-versioning.md),
-[`effigies`](effigies/docs/adr/0002-lockstep-versioning.md)) for why.
+bumps the shared number for all three. See the
+["lockstep versioning" ADR](docs/adr/0024-lockstep-versioning.md) for why.
 
 ## Licence
 

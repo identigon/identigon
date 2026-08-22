@@ -8,11 +8,6 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Consolidate subproject docs into root docs.** `SPECIFICATION.md`, `PLAN.md`, and
-  `CHANGELOG.md` are done; `alterego`, `incognito`, and `effigies` still each have their own
-  `docs/adr/`, migrating to a single repo-wide documentation set (justified by lockstep versioning —
-  one version, one release, for all three). See `docs/tasks/consolidate-subproject-docs.md` for the
-  phased plan.
 - [ ] **Consider turning on more of `markdownlint-cli2`'s rule set, not just line length.**
   `.markdownlint-cli2.jsonc` currently enables only `MD013` (`default: false`) — deliberately
   narrow, matching what was actually asked for when the hook was added. Checked read-only with
@@ -71,8 +66,8 @@ shipped.
   `@Deprecated(forRemoval = true)`. Inference is authoring, not execution — fail-closed means it
   never affected engine output — and the maintained version now lives in `effigies`' own
   `PolicyInferrer`; this copy only survives for the fail-closed error message's diagnostic hint.
-  See `effigies/docs/adr/0001-authoring-above-the-engine.md` for the reasoning and
-  `effigies/docs/adr/0002-lockstep-versioning.md` for the version-bump mechanics.
+  See `docs/adr/0023-authoring-above-the-engine.md` for the reasoning and
+  `docs/adr/0024-lockstep-versioning.md` for the version-bump mechanics.
 - [ ] **Project:** incognito — **Multi-edge structural fingerprints.** The shipped
   structural-uniqueness report scores one FK edge at a time; combining several edges into one joint
   fingerprint per subject is more faithful to real singling-out but harder to threshold defensibly.

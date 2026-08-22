@@ -12,7 +12,7 @@ import org.identigon.incognito.api.ColumnRole;
  *     retained only for {@code SchemaDiscoveryStage}'s fail-closed error-message hint and is
  *     scheduled for removal, together with {@code AnonymisationPolicy.Builder.autoInfer(boolean)},
  *     at incognito's next major version — see
- *     {@code effigies/docs/adr/0001-authoring-above-the-engine.md}.
+ *     {@code docs/adr/0023-authoring-above-the-engine.md}.
  */
 @Deprecated(forRemoval = true)
 public class PolicyInferrer {

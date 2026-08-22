@@ -77,8 +77,8 @@ too would be the same fact in two places.
 - **`PolicyInferrer` and `AnonymisationPolicy.Builder.autoInfer(boolean)` are now
   `@Deprecated(forRemoval = true)`.** Inference is authoring, not execution — the maintained version
   has lived in `effigies`' own `PolicyInferrer` since the 1.0.0 split — and this copy is scheduled
-  for removal at incognito's next major version (see
-  `effigies/docs/adr/0001-authoring-above-the-engine.md`). No behavioural change yet; this is the
+  for removal at incognito's next major version (see `docs/adr/0023-authoring-above-the-engine.md`).
+  No behavioural change yet; this is the
   deprecation notice ahead of that removal.
 - **Identifier quoting fixed in both dialect handlers.** `PostgresDialectHandler` (`buildInsertSql`,
   `preLoadTable`'s owner-mode fallback, `postLoadTable`, `resyncSequence`) and
@@ -268,16 +268,16 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
   ordering; fail-closed classification with advisory `PolicyInferrer` suggestions.
 - **Fabrication engine** (Phase 4): streaming transform+load; `DIRECT_ID` / `UNIQUE_CANDIDATE_KEY`
   via `alterego` with a length-preserving collision fallback; `QUASI_ID` temporal jitter,
-  including one salt-keyed delta per coherence group inherited by descendants (ADR 0005); declared
-  `distinguishing` handling for `SENSITIVE` columns (ADR 0003); root-ancestor `INHERITED_ATTRIBUTE`
-  resolution (ADR 0007); primary-key surrogates and foreign-key rewriting.
+  including one salt-keyed delta per coherence group inherited by descendants (ADR 18); declared
+  `distinguishing` handling for `SENSITIVE` columns (ADR 16); root-ancestor `INHERITED_ATTRIBUTE`
+  resolution (ADR 20); primary-key surrogates and foreign-key rewriting.
 - **Key & cascade stores** (Phase 5): `InMemoryKeyTranslationStore` and
   `InMemoryAttributeCascadeStore` (published attributes, FK linkage, and group-scoped jitter
   deltas). Single-column **and** composite (`CompositeKey`) keys.
 - **Loader, cyclic FKs, clean-up & verification** (Phase 6): `PostgresDialectHandler` (+ generic
   ANSI fallback) with `session_replication_role` trigger isolation, `OVERRIDING SYSTEM VALUE`, and
   sequence resync; cyclic / self-referential foreign keys via Tarjan SCC plus a placeholder and a
-  second-pass `UPDATE` (ADR 0006); `IncognitoCleanUpHandler` compensation on failure with salt
+  second-pass `UPDATE` (ADR 19); `IncognitoCleanUpHandler` compensation on failure with salt
   destruction; `VerificationStage` (referential integrity, e-mail fictionality, per-period volume
   tolerances, the default-on misdeclaration lint, and a source-value survival net);
   `AnonymisationReportBuilder` (with the §7.2 opaque-type passthrough audit) and a
@@ -317,7 +317,7 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
 - Generic shape-preserving fabrication (`ALTEREGO_GENERIC` / string-`SYNTHESISE`) carries no
   fictionality guarantee — inherent for an arbitrary shape; use a typed strategy where the guarantee
   matters. It runs on alterego's `bind` extension API (salt-keyed, deterministic) and lives in
-  Incognito by decision, not a delegation gap (see incognito ADR 0009).
+  Incognito by decision, not a delegation gap (see ADR 21).
 - Declarative table **partitioning** is not cloned (partition children are discovered but the
   partitioned parent isn't specially handled); the Pagila benchmark excludes its partitioned
   `payment` table. Non-partitioned tables are unaffected.
@@ -371,7 +371,7 @@ entry before the repositories merged, and are not reconstructed here.
   incognito and alterego from GitHub Packages.
 - `EffigiesCli` dispatch skeleton (`discover` / `scaffold` / `run` declared; `help` / `version`
   live), covered by `EffigiesCliTest`.
-- Base docs: `README.md`, `SPECIFICATION.md`, `PLAN.md`, `docs/adr/` (ADR 0001 — authoring above the
+- Base docs: `README.md`, `SPECIFICATION.md`, `PLAN.md`, `docs/adr/` (ADR 23 — authoring above the
   engine), and an initial `docs/tasks/` handoff for schema discovery + scaffold.
 
 ## [1.0.0] — 2026-08-10
@@ -380,17 +380,17 @@ entry before the repositories merged, and are not reconstructed here.
 
 - Merged into the `identigon` monorepo alongside `incognito` and `effigies`, each a Gradle
   subproject with full history preserved. Versioning is now lockstep across all three, sourced from
-  the monorepo root (see `alterego/docs/adr/0015-lockstep-versioning.md`). A deliberate re-baseline
-  to 1.0.0, not a claim that four minor versions' worth of API changes happened at once — alterego's
-  own history before this point is in `alterego/CHANGELOG.md`.
+  the monorepo root (see `docs/adr/0024-lockstep-versioning.md`). A deliberate re-baseline to
+  1.0.0, not a claim that four minor versions' worth of API changes happened at once — alterego's
+  own history before this point is the `alterego-0.1.0`–`0.4.0` entries above.
 
 ### incognito
 
 - Merged into the `identigon` monorepo alongside `alterego` and `effigies`, each a Gradle
   subproject with full history preserved. Versioning is now lockstep across all three, sourced from
-  the monorepo root (see `incognito/docs/adr/0008-lockstep-versioning.md`). Moves backward in number
-  from incognito's last independent release, `1.1.0` → `1.0.0` — deliberate, not a downgrade; see
-  the ADR.
+  the monorepo root (see `docs/adr/0024-lockstep-versioning.md`). Moves backward in number from
+  incognito's last independent release, `1.1.0` → `1.0.0` — deliberate, not a downgrade; see the
+  ADR.
 - **`DirectIdStrategy`: `ALTEREGO_POSTCODE`, `ALTEREGO_DOMAIN`, `ALTEREGO_URL`.** Three previously
   unexposed `alterego` typed generators (`postcode()`, `domainName()`, `url()`) are now reachable
   from policy. `VerificationStage` positively asserts each strategy's fictionality guarantee on the
@@ -401,6 +401,6 @@ entry before the repositories merged, and are not reconstructed here.
 
 - Merged into the `identigon` monorepo alongside `alterego` and `incognito`, each a Gradle
   subproject with full history preserved. Versioning is now lockstep across all three, sourced from
-  the monorepo root (see `effigies/docs/adr/0002-lockstep-versioning.md`). The version number itself
+  the monorepo root (see `docs/adr/0024-lockstep-versioning.md`). The version number itself
   is unchanged from effigies' prior standalone release — both are 1.0.0 — this entry exists so that
   change in what "1.0.0" means isn't silently missing from the record.

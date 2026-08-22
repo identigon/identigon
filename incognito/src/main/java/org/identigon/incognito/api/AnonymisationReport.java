@@ -100,7 +100,7 @@ public record AnonymisationReport(
      * A {@code SENSITIVE distinguishing: false} column whose real distinct-value count exceeds the
      * categorical-cardinality threshold (SPEC §4.1) — a candidate misdeclaration: the column was
      * kept opaque as low-cardinality categorical data but looks high-cardinality enough to be
-     * quasi-identifying. This is a safety net, never the privacy gate (ADR 0003) — the
+     * quasi-identifying. This is a safety net, never the privacy gate (ADR 16) — the
      * {@code distinguishing} declaration alone decides keep-vs-fabricate.
      *
      * @param table the table name

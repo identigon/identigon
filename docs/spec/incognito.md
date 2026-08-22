@@ -758,9 +758,9 @@ identifier leaking through as `PAYLOAD`.
 execution — fail-closed classification means it never affected engine output — and it now lives in
 `effigies`' own `PolicyInferrer`, which is what actually interviews users during authoring. This
 copy is retained only for the fail-closed error message's diagnostic hint and is scheduled for
-removal at incognito's next major version; see
-`effigies/docs/adr/0001-authoring-above-the-engine.md` for the reasoning and
-`effigies/docs/adr/0002-lockstep-versioning.md` for how that major lands across the monorepo.
+removal at incognito's next major version; see `docs/adr/0023-authoring-above-the-engine.md` for
+the reasoning and `docs/adr/0024-lockstep-versioning.md` for how that major lands across the
+monorepo.
 
 A `PAYLOAD` (or kept `SENSITIVE`) column whose JDBC type is complex/opaque and untransformable in
 v1.0 (geometry, `JSONB`, array, `INET`, BLOB) is flagged in the report as *"untransformed
@@ -961,7 +961,7 @@ unaffected either way.
 `SYNTHESISE` has no single generator — it depends on the column's type. **A `QUASI_ID` whose
 type has no built-in mapping below and no typed hint fails fail-closed with `ConfigException`
 at discovery — never a silent passthrough or shape-fabrication.** The type-specific `VARCHAR`
-rows (postcode/city/street/organisation) are **author-declared**, not auto-detected (ADR 0004):
+rows (postcode/city/street/organisation) are **author-declared**, not auto-detected (ADR 17):
 the author adds a `directIdStrategy` hint to the `QUASI_ID` column (e.g. `ALTEREGO_POSTCODE`),
 and Incognito routes the value through that typed, guaranteed-fictional generator. Absent a
 hint, a temporal type shifts and a character type shape-preserves ("other `VARCHAR`"); anything

@@ -25,8 +25,6 @@ writing any code, for whichever subproject(s) you're touching:
 **alterego/**
 - `docs/spec/alterego.md` — the behavioural contract, including the normative Appendix A. Every
   observable behaviour is defined there; if you find a gap, flag it — do not invent behaviour.
-- `alterego/docs/adr/` — decisions already made, with reasons. Do not revisit or "improve" them.
-  (Migrating to root `docs/adr/` — see `docs/tasks/consolidate-subproject-docs.md`.)
 - `alterego/docs/tasks/M<n>.md` — if present, the ordered checklist for the current milestone. Work
   top to bottom, ticking items off as you complete them, and delete the file once the milestone
   ships — its history lives in git, not as a lingering doc.
@@ -35,16 +33,14 @@ writing any code, for whichever subproject(s) you're touching:
 - `docs/spec/incognito.md` — the behavioural contract (privacy model, roles, strategies, the §7.3
   must-not-regress invariants). Every observable behaviour is defined there; if you find a gap, flag
   it — do not invent behaviour.
-- `incognito/docs/adr/` — decisions already made, with reasons. Do not revisit or "improve" them;
-  supersede with a new ADR if one genuinely changes. (Migrating to root `docs/adr/` — see
-  `docs/tasks/consolidate-subproject-docs.md`.)
 
 **effigies/**
 - `docs/spec/effigies.md` — the behavioural contract. Every observable behaviour is defined there;
   if you find a gap, flag it — do not invent behaviour.
-- `effigies/docs/adr/` — decisions already made, with reasons. Do not revisit or "improve" them;
-  supersede with a new ADR if one genuinely changes. (Migrating to root `docs/adr/` — see
-  `docs/tasks/consolidate-subproject-docs.md`.)
+
+Decisions for all three subprojects now live together in root `docs/adr/` (numbered across the
+whole monorepo, not per subproject) — decisions already made, with reasons. Do not revisit or
+"improve" one; supersede with a new ADR if one genuinely changes.
 
 Decision records are still mid-migration to root `docs/adr/` — see
 `docs/tasks/consolidate-subproject-docs.md` for the remaining phases.

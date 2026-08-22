@@ -21,9 +21,7 @@ incognito produced from it."
 The engine below Effigies stays **deterministic and model-free**. All judgment — inferring what a
 column is, scaffolding a starting policy, packaging a schema for an agent to reason about — lives in
 Effigies. The reasoning for this split is in
-[`docs/adr/0001-authoring-above-the-engine.md`](../../effigies/docs/adr/0001-authoring-above-the-engine.md)
-(will move to the root `docs/adr/` and renumber in a later phase of this migration — see
-`docs/tasks/consolidate-subproject-docs.md`).
+[ADR 23](../adr/0023-authoring-above-the-engine.md).
 
 ## 2. Hard invariants — never violate
 

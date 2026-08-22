@@ -6,7 +6,7 @@ clone useful for testing — data volumes (including per-period volumes), refere
 foreign-key topology, and cardinalities — while severing the link to any real person. Direct
 identifiers and quasi-identifiers are *fabricated*, not generalised or suppressed: Incognito is a
 fabrication engine, **not** a k-anonymity / l-diversity / t-closeness implementation (those are
-explicit non-goals — see [ADR 0001](docs/adr/0001-fabrication-not-k-anonymity.md)).
+explicit non-goals — see [ADR 14](../docs/adr/0014-fabrication-not-k-anonymity.md)).
 
 > **In one sentence:** *"I have a great production database and I want a test environment with
 > similar data volumes and similar relationships between entities, but with no danger of leaking
@@ -15,7 +15,7 @@ explicit non-goals — see [ADR 0001](docs/adr/0001-fabrication-not-k-anonymity.
 
 See [`docs/spec/incognito.md`](../docs/spec/incognito.md) for the full behavioural contract, the
 root [`PLAN.md`](../PLAN.md) (`**Project:** incognito` entries) for the backlog,
-[`docs/adr/`](docs/adr/) for the key design decisions and why they were made, and the root
+[`docs/adr/`](../docs/adr/) for the key design decisions and why they were made, and the root
 [`CHANGELOG.md`](../CHANGELOG.md) (`incognito-1.0.0` for pre-1.0.0 history, then every shared
 release) for what has changed between versions.
 
@@ -31,7 +31,9 @@ Incognito delegates all **field-value** transformation to its sibling library
 | **Knows about** | values and formats                                                                                    | tables, primary/foreign keys, load order, triggers, sequences, DPIA reporting           |
 
 The boundary is simply: **AlterEgo fabricates fields; Incognito preserves relationships**
-([ADR 0002](docs/adr/0002-two-libraries-two-responsibilities.md)). Incognito never implements its
+([ADR 15](../docs/adr/0015-two-libraries-two-responsibilities.md), refined by
+[ADR 21](../docs/adr/0021-shape-preserving-fabrication-stays-in-incognito.md)). Incognito never
+implements its
 own value substitution — where it needs a transformation AlterEgo does not yet expose, the fix is to
 add it to AlterEgo, not to hand-roll it.
 
@@ -113,19 +115,19 @@ denormalised attributes are resolved from their root ancestor's fabricated value
 ([inherited attributes][adr7]); and cyclic / self-referential foreign keys load via a placeholder
 plus a second-pass update ([cyclic FKs][adr6]).
 
-[adr5]: docs/adr/0005-coherent-temporal-jitter.md
-[adr6]: docs/adr/0006-cyclic-fk-two-pass-load.md
-[adr7]: docs/adr/0007-inherited-attribute-root-ancestor.md
+[adr5]: ../docs/adr/0018-coherent-temporal-jitter.md
+[adr6]: ../docs/adr/0019-cyclic-fk-two-pass-load.md
+[adr7]: ../docs/adr/0020-inherited-attribute-root-ancestor.md
 [key translation]: ../docs/spec/incognito.md
 
 ## Fail-closed by design
 
 An unclassified column **aborts the run** — Incognito never copies a column it was not told how to
 handle, because an unspotted identifier is the one mistake that leaks real data
-([ADR 0004](docs/adr/0004-fail-closed-classification.md)). Auto-inference only *suggests* roles; it
+([ADR 17](../docs/adr/0017-fail-closed-classification.md)). Auto-inference only *suggests* roles; it
 never silently assigns one. Whether a `SENSITIVE` column is kept real or fabricated is a one-word
 **declaration** (`distinguishing: true | false`), checked before any row is read, not guessed from
-the data ([ADR 0003](docs/adr/0003-declared-distinguishing-flag.md)).
+the data ([ADR 16](../docs/adr/0016-declared-distinguishing-flag.md)).
 
 ## This is pseudonymisation-grade severing, and the salt is a secret
 
