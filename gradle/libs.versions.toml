@@ -14,7 +14,7 @@ junit = "6.1.3"
 snakeyaml = "2.2"
 h2 = "2.2.224"
 testcontainers = "2.0.5"
-postgresql = "42.7.3"
+postgresql = "42.7.13"
 
 [libraries]
 findsecbugs-plugin = { module = "com.h3xstream.findsecbugs:findsecbugs-plugin", version.ref = "findsecbugs" }
