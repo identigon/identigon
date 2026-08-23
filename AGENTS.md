@@ -42,6 +42,25 @@ Decisions for all three subprojects live together in root `docs/adr/` (numbered 
 monorepo, not per subproject) — decisions already made, with reasons. Do not revisit or "improve"
 one; supersede with a new ADR if one genuinely changes.
 
+## Documentation
+
+When documents disagree, tense settles it:
+
+- `docs/spec/<subproject>.md` — present tense, authoritative about what that subproject does now
+  (indexed from root `SPECIFICATION.md`).
+- `CHANGELOG.md` — past tense. What changed, never what is true today.
+- `PLAN.md` — intent. Nothing described in it exists yet.
+- `docs/adr/` — why. Only `accepted` records bind; check the status before relying on one.
+
+Before you edit:
+
+- A specification member follows the work. Change it because behaviour changed, not because it
+  would read better. Its purpose and scope are not yours to revise.
+- Never change an ADR's `status`, and never edit one that says `accepted`. Drafting a record is
+  yours; deciding one is not — leave `decision-makers` as the template's placeholder too.
+- Delete completed `PLAN.md` entries rather than marking them done.
+- Adding a document means updating `DOC-MAP.md` in the same commit.
+
 ## Build and test
 
 ```sh
