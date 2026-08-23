@@ -18,12 +18,6 @@ These are the raw files as published — `tools/curate_dictionaries.py` extracts
 ranks/years from them by hand-copied values (see the script's own source comments for exactly
 which rows). They are not read programmatically by the script itself.
 
-Known limitation, already investigated and not worth re-chasing (see
-`docs/research/0001-alterego-dictionaries.md`, "First names"): NRS's own historical-rank column in
-the 2025 summary file only tracks names
-still in *today's* top 100, so it can't be used to build an accurate "Scotland top-10 for an
-older decade" — a name popular in the 1990s that has since fallen out of the current top 100
-would be silently missing. NISRA's dashboard file doesn't have this problem (its historical
-tables are genuine independent per-decade rankings), but for consistency Scotland and Northern
-Ireland are both single-cohort (current year only) in the curated dictionaries; only England &
-Wales gets the two-cohort blend.
+Known limitation, already investigated and not worth re-chasing: see
+`docs/research/0001-alterego-dictionaries.md`, "First names", for why Scotland and Northern
+Ireland are single-cohort while England & Wales gets two.

@@ -127,6 +127,16 @@ Northern Ireland top-10×2 (20 raw) = 120 raw entries, reducing to **89 unique f
 in their own source; kept distinct rather than merged, since each is a genuinely separate ranked
 entry in its source.
 
+**Dead end: a second Scotland/NI cohort year was investigated and dropped.** England & Wales
+gets two cohort years (2025 and 1996); Scotland and Northern Ireland are single-cohort (2025
+only) — not for lack of trying. NRS's own historical-rank column in the 2025 summary file only
+tracks names still in *today's* top 100, so it can't be used to build an accurate "Scotland
+top-10 for an older decade": a name popular in the 1990s that has since fallen out of the
+current top 100 would be silently missing. NISRA's dashboard file doesn't have this problem (its
+historical tables are genuine independent per-decade rankings), but for consistency both nations
+were kept single-cohort rather than giving Northern Ireland a two-cohort blend Scotland couldn't
+match.
+
 The final lists, and the script that produces them deterministically from these sources, are
 tracked against `alterego/tools/curate_dictionaries.py` (`docs/spec/alterego.md` section 9's
 "repeatable,
