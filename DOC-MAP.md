@@ -39,6 +39,7 @@ PLAN.md                     single ranked backlog, entries optionally tagged wit
 .agents/skills/identigon-policy-author/SKILL.md  one agent tool skill, not project docs
 docs/adr/*.md                decisions about any subproject's design, numbered monorepo-wide
 docs/research/*.md            sourced findings with confidence levels, numbered monorepo-wide
+docs/testing.md               test strategy for all three subprojects, and what isn't covered
 docs/tasks/*.md               optional: per-item working notes, disposable
 alterego/tools/data-cache/SOURCES.md   provenance of cached upstream dictionary source data
 quickstart/README.md         walkthrough for the quickstart worked example
@@ -75,6 +76,7 @@ its own contract, even though the three release together.
 | `PLAN.md` | Single ranked backlog. No standard; entries may carry a `Project` tag | future | volatile | the team |
 | `docs/adr/*.md` | Why a decision was made, for any subproject. **Real convention:** MADR minimal template | past | immutable | future maintainers |
 | `docs/research/*.md` | Sourced findings behind a spec guarantee, with an explicit confidence level. **No standard** | past | append-only | implementers |
+| `docs/testing.md` | Test strategy for all three subprojects, and what is deliberately not covered | present | rewritten in place | contributors |
 | `docs/tasks/*.md` | Working notes for one backlog item, prefixed with the subproject name when subproject-specific. No standard | future | disposable | whoever picks it up |
 | `alterego/tools/data-cache/SOURCES.md` | Provenance of cached upstream data used by the dictionary-curation tooling | past | append-only | `alterego` contributors |
 | `quickstart/README.md` | **Alias** of `README.md` — step-by-step walkthrough for the quickstart worked example | present | rewritten in place | anyone trying Identigon |
@@ -100,6 +102,7 @@ its own contract, even though the three release together.
 | `PLAN.md` entry | idea occurs — one paragraph, no design | **deleted** when done, not struck through |
 | `docs/adr/*.md` | a choice a newcomer would question | never — status flips to `superseded by ADR-NNNN` |
 | `docs/research/*.md` | a question is investigated | never — confidence is revised in place as evidence changes |
+| `docs/testing.md` | the second test approach appears (already true) | never |
 | `docs/tasks/*.md` | work begins on an item | work completes |
 | `alterego/tools/data-cache/SOURCES.md` | the data cache is populated | never |
 | `quickstart/README.md` | the example is created | never |
@@ -159,9 +162,9 @@ the ADR only needs to point at.
   and dropped: `docs/adr/*.md` is swept as ADR content, so an index file there fails the MADR-shape
   check rather than being recognised as an exception. `docs/adr/` is small enough to browse
   directly; revisit if it grows past roughly 30 records.
-- **`docs/quirks.md`, `docs/glossary.md`, `docs/testing.md`.** Not yet adopted; each subproject's
-  own `docs/spec/` member currently states known limitations and non-goals inline. Revisit if that
-  stops being enough.
+- **`docs/quirks.md`, `docs/glossary.md`.** Not yet adopted; each subproject's own `docs/spec/`
+  member currently states known limitations and non-goals inline. Revisit if that stops being
+  enough. (`docs/testing.md` *is* adopted — see the Artifacts table.)
 - **`docs/archive/`.** Nothing has yet had its currency called into question strongly enough to
   archive rather than fix or delete.
 

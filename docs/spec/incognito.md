@@ -851,24 +851,8 @@ v1.0 targets **PostgreSQL** only; `GenericDialectHandler` is an uncertified ANSI
 
 ## 11. Testing Strategy
 
-- **Testcontainers PostgreSQL** backs every integration/E2E test; tests **skip gracefully** where
-  Docker is unavailable. On Docker Engine 29.x set `TESTCONTAINERS_RYUK_DISABLED=true`.
-- **Walking skeleton (Gate A):** one end-to-end vertical slice (discover → transform → load →
-  verify) against a real container, proving the whole pipeline before feature work.
-- **Fail-closed** is tested directly: an unclassified column, or a `SENSITIVE` column with no
-  `distinguishing` declaration, aborts the run with `ConfigException`.
-- **De-risk pattern:** each hard-to-reason feature gets a focused Testcontainers test *before* it is
-  relied on — composite PK/FK, cyclic/self-referential FKs, the inheritance diamond (convergent +
-  forked), coherent group jitter, `SERIAL` vs `IDENTITY` PKs, VIEW / materialised-view exclusion,
-  per-period volume preservation, and the opaque-type passthrough audit. Several real defects (a
-  fail-open cyclic deferral; a NUL-corrupted inherited-attribute path) were caught this way.
-- **Benchmark suites (Phase 7):** real schemas from `src/test/resources/benchmarks/` — Spring
-  PetClinic (done); Pagila and Northwind (licence-cleared, provenance recorded).
-- Assertions favour **surrogate-independent invariants** — referential integrity, preserved
-  row/interval multisets, mutual-relationship preservation — over exact fabricated values, since
-  fabrication is salt-keyed and the per-run salt is ephemeral.
-- Pure helpers (the length-preserving unique-key fallback, the in-memory stores, the DPIA emitters)
-  have **no-Docker unit tests**.
+See `docs/testing.md` — consolidated there alongside `alterego`'s once both subprojects had grown
+one.
 
 ---
 
