@@ -47,7 +47,7 @@ work. Safe to re-run — it always starts from a clean slate. When you're done:
 
 The one-shot demo above skips the part of Identigon that involves judgment — it uses the
 already-finished `policy.yaml`. To see the real workflow, including the interactive
-[Agent Skill](../../.agents/skills/identigon-policy-author/) that helps you classify a fresh
+[Agent Skill](../../../.agents/skills/identigon-policy-author/) that helps you classify a fresh
 scaffold, use two commands instead of one:
 
 ```sh
@@ -120,7 +120,7 @@ to prevent (an unclassified column aborts `run` rather than being copied silentl
 do is suggest one from name-based heuristics where it recognises the column name (`email`, `phone`,
 `date_of_birth`, `nino`, …); columns it doesn't recognise (`bank_account`, `notes`, …) get a bare
 prompt to classify manually. Either way, you fill in every `role:` yourself. Normally this is
-where you'd hand the draft to the [Agent Skill](../../.agents/skills/identigon-policy-author/) to
+where you'd hand the draft to the [Agent Skill](../../../.agents/skills/identigon-policy-author/) to
 finish interactively; this example skips straight to the finished result in `policy.yaml`.
 
 ## 3. Run the anonymisation pipeline

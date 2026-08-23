@@ -36,13 +36,13 @@ docs/spec/
   effigies.md                  the authoring/orchestration CLI's contract
 CHANGELOG.md                what shipped, across the whole monorepo
 PLAN.md                     single ranked backlog, entries optionally tagged with a Project
+.agents/skills/identigon-policy-author/SKILL.md  one agent tool skill, not project docs
 docs/adr/*.md                decisions about any subproject's design, numbered monorepo-wide
 docs/research/*.md            sourced findings with confidence levels, numbered monorepo-wide
 docs/tasks/*.md               optional: per-item working notes, disposable
 alterego/tools/data-cache/SOURCES.md   provenance of cached upstream dictionary source data
 effigies/examples/quickstart/README.md  walkthrough for the quickstart worked example
 incognito/src/test/resources/benchmarks/SOURCES.md  provenance/licensing of vendored benchmarks
-effigies/.agents/skills/identigon-policy-author/SKILL.md  one agent tool skill, not project docs
 ```
 
 This repository has three Gradle modules, each independently usable and documented, but they
@@ -79,7 +79,7 @@ its own contract, even though the three release together.
 | `alterego/tools/data-cache/SOURCES.md` | Provenance of cached upstream data used by the dictionary-curation tooling | past | append-only | `alterego` contributors |
 | `effigies/examples/quickstart/README.md` | **Alias** of `README.md` — step-by-step walkthrough for the quickstart worked example | present | rewritten in place | anyone trying Effigies |
 | `incognito/src/test/resources/benchmarks/SOURCES.md` | Provenance and licensing of the vendored benchmark-fixture schemas/datasets | past | append-only | `incognito` contributors |
-| `effigies/.agents/skills/identigon-policy-author/SKILL.md` | Step-by-step procedure for one agent tool skill | imperative | rewritten in place | coding agents |
+| `.agents/skills/identigon-policy-author/SKILL.md` | Step-by-step procedure for one agent tool skill | imperative | rewritten in place | coding agents |
 
 ## Lifecycle
 
@@ -104,7 +104,7 @@ its own contract, even though the three release together.
 | `alterego/tools/data-cache/SOURCES.md` | the data cache is populated | never |
 | `effigies/examples/quickstart/README.md` | the example is created | never |
 | `incognito/src/test/resources/benchmarks/SOURCES.md` | a benchmark fixture is vendored | never |
-| `effigies/.agents/skills/identigon-policy-author/SKILL.md` | the skill is written | the skill is retired |
+| `.agents/skills/identigon-policy-author/SKILL.md` | the skill is written | the skill is retired |
 
 ## Flow
 
