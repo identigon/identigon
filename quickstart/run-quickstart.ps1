@@ -44,7 +44,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $ScriptDir = $PSScriptRoot
-$RepoRoot = (Resolve-Path (Join-Path $ScriptDir '..\..\..')).Path
+$RepoRoot = (Resolve-Path (Join-Path $ScriptDir '..')).Path
 $WorkDir = Join-Path $ScriptDir '.quickstart-work'
 
 $ContainerName = 'identigon-quickstart'
@@ -258,7 +258,7 @@ function Invoke-Setup {
         Write-Host "for example:"
         Write-Host ""
         Write-Host "  Use the identigon-policy-author skill to help me classify"
-        Write-Host "  effigies/examples/quickstart/.quickstart-work/policy.draft.yaml"
+        Write-Host "  quickstart/.quickstart-work/policy.draft.yaml"
         Write-Host ""
         Write-Host "The skill assigns roles (DIRECT_ID, QUASI_ID, SENSITIVE, ...) through interview; it doesn't pick"
         Write-Host "strategies (directIdStrategy, quasiIdStrategy, distinguishing, redactionStrategy) for you, so ask"

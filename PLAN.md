@@ -114,7 +114,7 @@ shipped.
   scaffold → (agent) → run in one invocation, with the DPIA report fed back for iteration.
 - [ ] **Project:** effigies — **Support for engines `incognito` adds beyond PostgreSQL.** No change
   needed here when it lands.
-- [ ] **Project:** effigies — **Revisit `examples/quickstart/` and the Agent Skill once
+- [ ] **Project:** effigies — **Revisit `quickstart/` and the Agent Skill once
   `incognito`'s policy-API backlog lands.** Several `alterego` capabilities `incognito` doesn't
   expose yet (remaining identifier generators, a bank-account generator, `RecordScope` cross-field
   coherence, jitter/clamp knobs, a `pattern(String)` strategy — see the matching

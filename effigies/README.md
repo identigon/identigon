@@ -47,10 +47,10 @@ the root [`PLAN.md`](../PLAN.md) (`**Project:** effigies` entries) for the backl
 
 ## Try it in five minutes
 
-[`examples/quickstart/`](examples/quickstart/) is a small, self-contained PostgreSQL schema (no
-Docker, no third-party data) with a finished `policy.yaml` — the fastest way to see
-`discover` → `scaffold` → `run` and the DPIA report working end to end before pointing Identigon
-at a real database.
+[`quickstart/`](../quickstart/) (at the repository root — it exercises the whole pipeline, not
+just Effigies) is a small, self-contained PostgreSQL schema (no Docker, no third-party data) with
+a finished `policy.yaml` — the fastest way to see `discover` → `scaffold` → `run` and the DPIA
+report working end to end before pointing Identigon at a real database.
 
 ## Usage Workflow
 

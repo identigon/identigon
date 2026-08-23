@@ -29,7 +29,7 @@ set -eu
 CDPATH=''   # avoid `cd` printing an unexpected match to stdout if the caller's CDPATH is set
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "$0")" && pwd)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 WORK_DIR="$SCRIPT_DIR/.quickstart-work"
 
 CONTAINER_NAME=identigon-quickstart
@@ -207,7 +207,7 @@ Antigravity, GitHub Copilot, ...) and ask it to use the identigon-policy-author 
 for example:
 
   Use the identigon-policy-author skill to help me classify
-  effigies/examples/quickstart/.quickstart-work/policy.draft.yaml
+  quickstart/.quickstart-work/policy.draft.yaml
 
 The skill assigns roles (DIRECT_ID, QUASI_ID, SENSITIVE, ...) through interview; it doesn't pick
 strategies (directIdStrategy, quasiIdStrategy, distinguishing, redactionStrategy) for you, so ask

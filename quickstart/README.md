@@ -17,7 +17,7 @@ rest of this README shows the `sh` invocations, but `.\run-quickstart.ps1 <comma
 commands.
 
 This is separate from the benchmark fixtures under
-[`incognito/src/test/resources/benchmarks/`](../../../incognito/src/test/resources/benchmarks/) —
+[`incognito/src/test/resources/benchmarks/`](../incognito/src/test/resources/benchmarks/) —
 those are third-party sample databases used as integration-test fixtures and require Docker. This
 one is authored for this repository specifically so there's nothing to install beyond Postgres
 itself.
@@ -47,7 +47,7 @@ work. Safe to re-run — it always starts from a clean slate. When you're done:
 
 The one-shot demo above skips the part of Identigon that involves judgment — it uses the
 already-finished `policy.yaml`. To see the real workflow, including the interactive
-[Agent Skill](../../../.agents/skills/identigon-policy-author/) that helps you classify a fresh
+[Agent Skill](../.agents/skills/identigon-policy-author/) that helps you classify a fresh
 scaffold, use two commands instead of one:
 
 ```sh
@@ -106,10 +106,10 @@ looking at the finished `policy.yaml` in this directory.
 ```sh
 export IDENTIGON_SOURCE_PASSWORD=postgres
 
-java -jar ../../build/libs/identigon.jar discover \
+java -jar ../effigies/build/libs/identigon.jar discover \
   --source-url "jdbc:postgresql://localhost:5432/quickstart_source" --source-user postgres
 
-java -jar ../../build/libs/identigon.jar scaffold \
+java -jar ../effigies/build/libs/identigon.jar scaffold \
   --source-url "jdbc:postgresql://localhost:5432/quickstart_source" --source-user postgres \
   --out ./policy.draft.yaml
 ```
@@ -120,7 +120,7 @@ to prevent (an unclassified column aborts `run` rather than being copied silentl
 do is suggest one from name-based heuristics where it recognises the column name (`email`, `phone`,
 `date_of_birth`, `nino`, …); columns it doesn't recognise (`bank_account`, `notes`, …) get a bare
 prompt to classify manually. Either way, you fill in every `role:` yourself. Normally this is
-where you'd hand the draft to the [Agent Skill](../../../.agents/skills/identigon-policy-author/) to
+where you'd hand the draft to the [Agent Skill](../.agents/skills/identigon-policy-author/) to
 finish interactively; this example skips straight to the finished result in `policy.yaml`.
 
 ## 3. Run the anonymisation pipeline
@@ -129,7 +129,7 @@ finish interactively; this example skips straight to the finished result in `pol
 export IDENTIGON_SOURCE_PASSWORD=postgres
 export IDENTIGON_TARGET_PASSWORD=postgres
 
-java -jar ../../build/libs/identigon.jar run \
+java -jar ../effigies/build/libs/identigon.jar run \
   --policy ./policy.yaml \
   --source-url "jdbc:postgresql://localhost:5432/quickstart_source" --source-user postgres \
   --target-url "jdbc:postgresql://localhost:5432/quickstart_target" --target-user postgres

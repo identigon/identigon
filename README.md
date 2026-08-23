@@ -20,6 +20,22 @@ ongoing migration to a fully repository-wide documentation set. Release history 
 point the three merged: the root [`CHANGELOG.md`](CHANGELOG.md) covers pre-1.0.0 history too now
 (project-prefixed version tags), as well as every shared release from 1.0.0 onward.
 
+## Try it in five minutes
+
+[`quickstart/`](quickstart/) is a small, self-contained PostgreSQL schema (no third-party data)
+with a finished `policy.yaml` — the fastest way to see `discover` → `scaffold` → `run` and the
+DPIA report working end to end, without Docker for the schema itself or a real production
+database. Requires Docker (for a throwaway Postgres container) and Java 25:
+
+```sh
+cd quickstart && ./run-quickstart.sh
+```
+
+(Windows without a POSIX shell: `.\run-quickstart.ps1` instead.) See
+[`quickstart/README.md`](quickstart/README.md) for the real authoring workflow — scaffolding a
+draft and classifying it with the `identigon-policy-author` Agent Skill, rather than using the
+finished policy this one-shot demo skips straight to.
+
 ## Building
 
 All three subprojects are wired together as one Gradle multi-project build. From this directory:

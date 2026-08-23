@@ -121,7 +121,8 @@ too would be the same fact in two places.
   written. Found running the effigies quickstart's `run-quickstart.sh`/`.ps1` (below) against a
   real database for the first time; `runtimeOnly(libs.postgresql)` added to
   `effigies/build.gradle.kts` fixes it.
-- **Added a `examples/quickstart/` worked example** — a small first-party PostgreSQL schema
+- **Added a `quickstart/` worked example** (originally `effigies/examples/quickstart/`; moved to
+  the repository root in a later restructuring) — a small first-party PostgreSQL schema
   (`customers`/`orders`/`support_tickets`, no third-party data, no Docker/Testcontainers
   dependency) with a hand-authored `policy.yaml` and a step-by-step README, so evaluating the
   `discover` → `scaffold` → `run` workflow no longer requires a real production database or one of
@@ -130,7 +131,7 @@ too would be the same fact in two places.
   including the new `ALTEREGO_NINO` (see the incognito entry above) and,
   deliberately, the `ALTEREGO_GENERIC` fallback for a bank-account column with no typed generator
   yet.
-- **Added `examples/quickstart/run-quickstart.sh` (POSIX `sh`) and `run-quickstart.ps1`
+- **Added `quickstart/run-quickstart.sh` (POSIX `sh`) and `run-quickstart.ps1`
   (PowerShell)** — twin, behaviourally-identical scripts; Docker + Java 25 only, nothing else to
   install. `run-quickstart` (no args) is a one-shot demo: starts a throwaway Postgres container,
   loads the schema and sample data, builds the CLI jar if needed, runs

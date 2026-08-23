@@ -41,7 +41,7 @@ docs/adr/*.md                decisions about any subproject's design, numbered m
 docs/research/*.md            sourced findings with confidence levels, numbered monorepo-wide
 docs/tasks/*.md               optional: per-item working notes, disposable
 alterego/tools/data-cache/SOURCES.md   provenance of cached upstream dictionary source data
-effigies/examples/quickstart/README.md  walkthrough for the quickstart worked example
+quickstart/README.md         walkthrough for the quickstart worked example
 incognito/src/test/resources/benchmarks/SOURCES.md  provenance/licensing of vendored benchmarks
 ```
 
@@ -77,7 +77,7 @@ its own contract, even though the three release together.
 | `docs/research/*.md` | Sourced findings behind a spec guarantee, with an explicit confidence level. **No standard** | past | append-only | implementers |
 | `docs/tasks/*.md` | Working notes for one backlog item, prefixed with the subproject name when subproject-specific. No standard | future | disposable | whoever picks it up |
 | `alterego/tools/data-cache/SOURCES.md` | Provenance of cached upstream data used by the dictionary-curation tooling | past | append-only | `alterego` contributors |
-| `effigies/examples/quickstart/README.md` | **Alias** of `README.md` — step-by-step walkthrough for the quickstart worked example | present | rewritten in place | anyone trying Effigies |
+| `quickstart/README.md` | **Alias** of `README.md` — step-by-step walkthrough for the quickstart worked example | present | rewritten in place | anyone trying Identigon |
 | `incognito/src/test/resources/benchmarks/SOURCES.md` | Provenance and licensing of the vendored benchmark-fixture schemas/datasets | past | append-only | `incognito` contributors |
 | `.agents/skills/identigon-policy-author/SKILL.md` | Step-by-step procedure for one agent tool skill | imperative | rewritten in place | coding agents |
 
@@ -102,7 +102,7 @@ its own contract, even though the three release together.
 | `docs/research/*.md` | a question is investigated | never — confidence is revised in place as evidence changes |
 | `docs/tasks/*.md` | work begins on an item | work completes |
 | `alterego/tools/data-cache/SOURCES.md` | the data cache is populated | never |
-| `effigies/examples/quickstart/README.md` | the example is created | never |
+| `quickstart/README.md` | the example is created | never |
 | `incognito/src/test/resources/benchmarks/SOURCES.md` | a benchmark fixture is vendored | never |
 | `.agents/skills/identigon-policy-author/SKILL.md` | the skill is written | the skill is retired |
 
