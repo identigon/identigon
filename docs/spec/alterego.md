@@ -320,7 +320,7 @@ algorithms — all of which are owned by this library, none by the JDK. Therefor
 - Dictionaries are versioned; a dictionary change is a breaking change and is called out in release
   notes.
 - The Appendix A algorithms and canonical encodings are frozen within a major version, enforced by
-  committed test vectors (section 10).
+  committed test vectors (`docs/testing.md`).
 - Tests pin exact expected outputs for a reference salt to detect accidental drift.
 - **The library never reads the clock.** Constraints like "never a future date" are expressed as
   explicit, caller-supplied bounds (section 4.5); if a bound should mean "today", the caller
@@ -343,7 +343,7 @@ pools that naturally include Welsh, Scottish, and Northern Irish names and place
 currently town and street entries use their English-language forms (Swansea, not Abertawe).
 
 Consequences: `cy-GB` and `en-GB` are configuration synonyms for the v1 built-ins (an equivalence
-test enforces this, section 10); a locale without a country (e.g. `Locale.of("en")`)
+test enforces this, `docs/testing.md`); a locale without a country (e.g. `Locale.of("en")`)
 fails fast for country-scoped transformations; the locale's language component steers nothing in v1
 and is reserved for future language-sensitive generation. v1 ships country `GB`; others, starting
 with `US`, are post-v1.
@@ -730,7 +730,7 @@ public interface MappingStore {
   number of distinct inputs — documented; large or long-lived datasets belong in a persistent store.
   The library also ships `FileMappingStore` (section 5.4), a single-process persistent store backed
   by one local file. JDBC- or Redis-backed stores are left to clients or future modules; the SPI
-  plus the contract test (section 10) are the contract.
+  plus the contract test (`docs/testing.md`) are the contract.
 - **Privacy**: by default the *key* written to the store is the purpose-separated
   `HMAC(salt, input)` from Appendix A.4, encoded as 64 lowercase hex characters — the store never
   contains raw input data, and store contents cannot be used to reconstruct randomness keys. Storing
@@ -1014,7 +1014,7 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
   `src/main/resources/dictionaries/LICENCES/<licence-name>.txt`, referenced by name from each file's
   header — so redistribution terms are traceable without relying on an external link staying live. A
   dictionary file with no header, or one citing a licence with no matching committed text, fails the
-  build-time well-formedness check (section 10).
+  build-time well-formedness check (`docs/testing.md`).
 - **Dictionary sourcing policy**: OGL, MIT, and CC0 are the acceptable licences; UK-government-
   associated sources (ONS, Ordnance Survey, National Records of Scotland, NISRA, Companies House)
   are preferred over others even where a non-government source offers broader coverage. The full
@@ -1043,7 +1043,7 @@ one.
 ## Appendix A — Normative algorithms
 
 Everything in this appendix is frozen within a major version and enforced by the conformance vectors
-(section 10). An implementation is correct iff it reproduces the vectors byte-for-byte.
+(`docs/testing.md`). An implementation is correct iff it reproduces the vectors byte-for-byte.
 
 ### A.1 Key derivation
 
@@ -1102,8 +1102,8 @@ The stored key for an input is the A.1 derivation with purpose `"alterego/1/mapk
 format and never changes within a major version.
 
 The identifier algorithms below (A.5-A.9) compose the A.3 primitives; they are pinned by the
-golden-output tests (section 10) rather than by new vector files. Draws always occur in exactly the
-order written.
+golden-output tests (`docs/testing.md`) rather than by new vector files. Draws always occur in
+exactly the order written.
 
 ### A.5 NHS number generation
 
