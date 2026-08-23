@@ -1,9 +1,12 @@
 # Dictionary source provenance
 
+**Confidence:** high
+
 Master index of external data sources used to build AlterEgo's dictionaries. Record a
 decision here as soon as it is made, not just once M2 begins. The same information is repeated
-as a header comment in the dictionary file(s) that draw on each source (`SPECIFICATION.md`
-section 9), and each licence's full text is committed once under `dictionaries/LICENCES/` when
+as a header comment in the dictionary file(s) that draw on each source (`docs/spec/alterego.md`
+section 9), and each licence's full text is committed once under
+`alterego/src/main/resources/dictionaries/LICENCES/` when
 the first dictionary file citing it is added.
 
 **Every dictionary file needs all three of the following — no exceptions, and not satisfied by
@@ -16,7 +19,8 @@ having each piece present somewhere else in the project:**
    a word typed from memory can be subtly wrong (spelling, meaning, usage) with no way to catch
    it, so it still needs a real citable source.
 3. **Data processing** — the exact reduction/curation rule stated and scripted
-   (`tools/curate_dictionaries.py`, matching `tools/verify_vectors.py`'s standing), not manual
+   (`alterego/tools/curate_dictionaries.py`, matching `alterego/tools/verify_vectors.py`'s
+   standing), not manual
    transcription from a report into a file.
 
 ## Sourcing policy
@@ -40,7 +44,8 @@ having each piece present somewhere else in the project:**
   commercial sources, given their consistent OGL licensing and official standing — even when a
   non-government source would offer broader coverage.
 - Every entry below must record: organisation and dataset name, the exact original data URL, the
-  licence name and its exact original URL, and the retrieval date (spec section 9).
+  licence name and its exact original URL, and the retrieval date (`docs/spec/alterego.md`
+  section 9).
 
 ## Attribution placement
 
@@ -67,19 +72,18 @@ if a sourcing decision below changes.
 
 ## Surnames
 
-**Status: decided for v1 — authored, not sourced (ADR 0010).**
+**Status: decided for v1 — authored, not sourced (ADR 10).**
 
 `lastName()` draws from a deliberately obviously-fictional, authored word list rather than real
 population data, so a pseudonymised full name is unmistakably not a real person's regardless of
-the (real) first name it's paired with (`firstName()` is unaffected — see ADR 0010 for why only
+the (real) first name it's paired with (`firstName()` is unaffected — see ADR 10 for why only
 the surname needs this). The three-part sourcing gate (provenance/licensing/data-processing) that
 applies to sourced dictionaries doesn't apply the same way here, since there is no third-party
 source to cite; instead, the bar is: every entry reviewed to confirm it does not coincide with a
 known real UK surname, and that it reads as unmistakably fictional at a glance rather than merely
 plausible-shaped (e.g. "Testperson", "Sampleford" — not a joke name, just unmistakably synthetic).
-Licensed
-under this project's own MIT licence as original content (`dictionaries/LICENCES/MIT.txt`), not
-a third-party data licence.
+Licensed under this project's own MIT licence as original content
+(`alterego/src/main/resources/dictionaries/LICENCES/MIT.txt`), not a third-party data licence.
 
 ## First names
 
@@ -124,8 +128,9 @@ in their own source; kept distinct rather than merged, since each is a genuinely
 entry in its source.
 
 The final lists, and the script that produces them deterministically from these sources, are
-tracked against `tools/curate_dictionaries.py` (spec section 9's "repeatable, documented
-process" requirement).
+tracked against `alterego/tools/curate_dictionaries.py` (`docs/spec/alterego.md` section 9's
+"repeatable,
+documented process" requirement).
 
 ## Towns/cities + postcode area + nation tags
 
@@ -145,18 +150,18 @@ The resulting ranking is a strict UK-wide population order, not a per-nation quo
 is England 16 / Scotland 2 / Wales 1 / Northern Ireland 1 (Swansea, Newport, Aberdeen, Dundee,
 Derry, and Lisburn all fall just below the cutoff).
 
-**Judgement call, decided**: London spans 8 postcode areas (E, EC, N, NW, SE, SW, W, WC), not
-one, so it doesn't fit the dictionary's one-area-per-entry model as a single row. Decision:
-**list London once per major postcode area** (8 rows, all tagged `ENGLAND`), rather than picking
-one inaccurate representative area or excluding the UK's largest city entirely.
+London spans 8 postcode areas, so it is listed once per major postcode area (8 rows) rather than
+picking one inaccurate representative area or excluding the UK's largest city entirely — see
+[ADR 25](../adr/0025-london-listed-once-per-postcode-area.md) for the decision and its
+consequences.
 
 The 20-town, 27-row (with London's 8 areas) list, and the script that produces it, are tracked
-against `tools/curate_dictionaries.py` alongside the first-names curation (see above).
+against `alterego/tools/curate_dictionaries.py` alongside the first-names curation (see above).
 
 ## Street names
 
 **Status: decided for v1 — Compositional (theme word + type word); theme words authored per
-ADR 0010, type words still real.**
+ADR 10, type words still real.**
 
 **Decision**: two small composed word lists — `street-themes.txt` (descriptive words) and
 `street-types.txt` (road-type words: "Road", "Avenue", "Close"...), combined at generation time
@@ -179,10 +184,11 @@ Street theme words (24): Artificial, Bluff, Bogus, Counterfeit, Demo, Dummy, Exa
 Fake, Fictional, Hypothetical, Imaginary, Invented, Madeup, Nonexistent, Notreal, Phony,
 Placeholder, Pretend, Sample, Somewhere, Specimen, Synthetic, Unreal.
 
-Authored, not sourced (ADR 0010): deliberately obvious placeholder-style words, reviewed to
+Authored, not sourced (ADR 10): deliberately obvious placeholder-style words, reviewed to
 confirm none coincides with a real UK street-name theme word and that every theme+type
 combination (e.g. "Example Road") reads as unmistakably fictional. Licensed under this project's
-own MIT licence as original content (`dictionaries/LICENCES/MIT.txt`), not a third-party data
+own MIT licence as original content
+(`alterego/src/main/resources/dictionaries/LICENCES/MIT.txt`), not a third-party data
 licence — the three-part sourcing gate for real data doesn't apply the same way here, since there
 is no third-party source to cite.
 
@@ -200,7 +206,8 @@ names).
   <http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/>
   Retrieved (licence confirmed): 2026-07-14
 
-**Method** (fully scripted, `tools/mine_org_components.py`): the dataset is a single 817 MB
+**Method** (fully scripted, `alterego/tools/mine_org_components.py`): the dataset is a single
+817 MB
 pipe-delimited UTF-16 file inside a 60 MB ZIP.
 Rows are filtered to `Country == "United Kingdom"`, then deduplicated by owner name (a single
 owner can file many trade marks under the same name — counting every row would let one prolific
@@ -209,7 +216,8 @@ into words; legal-form words (Limited, Ltd, Plc, LLP, Cyf, Ccc...), ordinary Eng
 and honorific/domain noise (Mr, Mrs, Com...) are dropped. The raw ZIP itself isn't kept in this
 repository — it's a stable, versioned direct download (last modified 2018), so re-running the
 script against a fresh copy reproduces the same output; only the small derived candidate list is
-kept, at `tools/data-cache/org-components-candidates.tsv` (133,424 tokens after filtering).
+kept, at `alterego/tools/data-cache/org-components-candidates.tsv` (133,424 tokens after
+filtering).
 
 **Personal-name filtering, a real finding not a guess**: many UK trade mark owners are sole
 traders filing under their own name, so the raw frequency table was dominated by personal names
@@ -220,23 +228,9 @@ dictionaries: every first name appearing anywhere in the ONS 1996–2025 baby na
 NRS's "Surnames TimeSeries 1975 to 2025" (3,672 surnames) — both real, sourced, already-cited
 data, not invented. This removed 14,119 tokens from the candidate list.
 
-**Generation algorithm, decided**: a flat single pool risks nonsensical composition.
-Resolved by tagging every entry `MODIFIER` or `NOUN`
-(`organisation-components.txt` is a tagged dictionary, same file-format mechanism as towns'
-postcode-area/nation tags — see `DictionaryWellFormedness.validateOrgComponentTags`) and
-generating a name as three distinct words: `[MODIFIER-or-NOUN] + NOUN + NOUN`. Position 1 may be
-either category; positions 2 and 3 must be `NOUN` and distinct from every word already chosen.
-This permits both real patterns ("Northern Trading Solutions", MODIFIER+NOUN+NOUN; "Trading
-Solutions Partners", NOUN+NOUN+NOUN) while making same-word repeats and MODIFIER+MODIFIER
-pairings structurally impossible, not just unlikely.
-
-Three words rather than two specifically to keep the combination count high: unlike
-`streetAddress()` (house number + street name gives extra differentiation) or personal names
-(real-world collisions are normal — many people share a name), two different real organisations
-landing on the same pseudonymised name would be a much more visible artefact, and organisation
-names are rarely duplicated in reality. With **31 `MODIFIER` + 44 `NOUN`** entries (75 total),
-the combination count is `44 × 43 × 73 = 138,116` — comfortably past a 50,000-combination floor
-without needing to bloat the dictionary the way a two-word design would have.
+Names are generated as three tagged words (`MODIFIER-or-NOUN` + `NOUN` + `NOUN`), not a flat pool
+— see [ADR 26](../adr/0026-organisation-name-three-word-tagged-composition.md) for the decision,
+the rejected alternatives, and the combination-count reasoning.
 
 **NOUN (44 entries)**: the original top-50-by-frequency cut from the candidate list, minus "Sons"
 (dropped: it grammatically wants a personal surname before it, e.g. "Smith & Sons", which this

@@ -6,11 +6,12 @@ import org.identigon.alterego.TransformationContext;
 
 /**
  * Composes an organisation name from the country's tagged component dictionary
- * (SPECIFICATION.md section 4.2): three distinct words, {@code [MODIFIER-or-NOUN] + NOUN + NOUN}
- * — position 1 may be either category, positions 2 and 3 must be {@code NOUN} and distinct from
- * every word already chosen, so the same word can never repeat and two place-like
- * {@code MODIFIER} words can never land next to each other (docs/dictionaries.md,
- * "Organisation-name components", has the full reasoning). A recognised legal suffix detected at
+ * (docs/spec/alterego.md section 4.2): three distinct words, {@code [MODIFIER-or-NOUN] + NOUN +
+ * NOUN} — position 1 may be either category, positions 2 and 3 must be {@code NOUN} and distinct
+ * from every word already chosen, so the same word can never repeat and two place-like
+ * {@code MODIFIER} words can never land next to each other (ADR 26 has the reasoning;
+ * docs/research/0001-alterego-dictionaries.md has the curation detail). A recognised legal
+ * suffix detected at
  * the end of the input (case-insensitive) is preserved on the output in its canonical form;
  * {@link LegalSuffixes} holds the fixed per-country list.
  */

@@ -59,7 +59,8 @@ tasks.test {
 
 // LICENCE and NOTICE must travel inside the built artifact: most consumers receive only the
 // jar, never the repository, so packaging them at the repo root alone is not enough (see
-// docs/dictionaries.md, "Attribution placement"). These are alterego's own copies (its LICENCE
+// docs/research/0001-alterego-dictionaries.md, "Attribution placement"). These are alterego's own
+// copies (its LICENCE
 // carries an extra Open Government Licence clause for the dictionaries/ data, and NOTICE is the
 // attribution it points to) -- not the monorepo root's, which is deliberately the plainer, common text.
 tasks.named<Jar>("jar") {

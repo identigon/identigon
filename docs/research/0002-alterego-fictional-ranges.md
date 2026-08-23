@@ -1,20 +1,26 @@
 # Fictional-range provenance
 
-Every "fictional by default" guarantee in SPECIFICATION.md section 4.1 rests on an external fact:
-an officially reserved range, a documented allocation rule, or a structural impossibility. This
-file records the provenance of each such rule — the source, retrieval date, and the exact
-statement relied on — the same discipline as `docs/phone-ranges.md`. Where only a secondary
-source was to hand, that is stated and the primary source is named for confirmation.
+**Confidence:** high
 
-Retrieved: 2026-07-26 (except `phone-ranges.md`, dated there).
+Every "fictional by default" guarantee in `docs/spec/alterego.md` section 4.1 rests on an external
+fact: an officially reserved range, a documented allocation rule, or a structural impossibility.
+This file records the provenance of each such rule — the source, retrieval date, and the exact
+statement relied on — the same discipline as `docs/research/0003-alterego-phone-ranges.md`. Where
+only a secondary source was to hand, that is stated and the primary source is named for
+confirmation.
+
+Retrieved: 2026-07-26 (except `phoneNumber()`, dated in `docs/research/0003-alterego-phone-ranges.md`).
 
 Rules with self-contained provenance, not repeated here:
 
 - **`emailAddress()`** — RFC 2606 reserves `example.com` / `.net` / `.org` (and the `.test`,
   `.invalid` TLDs) for documentation and testing. The RFC is the citation.
-- **`phoneNumber()`** — Ofcom drama ranges; full provenance in `docs/phone-ranges.md`.
+- **`phoneNumber()`** — Ofcom drama ranges; full provenance in
+  `docs/research/0003-alterego-phone-ranges.md`.
 - **Deferred** — TEST-NET IP ranges (RFC 5737) and `.test`/`.invalid` domains (RFC 6761) are
   likewise self-citing when implemented.
+
+## Finding
 
 ## postcode() — inward-code letters `C I K M O V`
 
@@ -84,12 +90,21 @@ Rules with self-contained provenance, not repeated here:
   DOB block (chars 6-11): decade digit, month (+50 for female), day, year-unit digit — e.g. a
   male born 23 March 1986 gives `803236`, a female `853236`. Chars 12-13 are initials
   (`9` if a single forename); chars 14-16 are randomised check characters.
+
+## Evidence
+
 - **Primary source to confirm**: DVLA is the authority; the exact composition of the chars 14-16
   check block is not published, but is immaterial here — the guarantee rests solely on `99999`.
 - **Note**: Northern Ireland's separate DVA format (8 digits) is not generated; output is always
   the Great Britain layout.
 
-## companyNumber() — DEFERRED (unsolved fictional space)
+## Dead ends
+
+None recorded — every guarantee above traces to a primary source without a dead-end path.
+
+## Open questions
+
+### companyNumber() — unsolved fictional space
 
 **Not implemented. Open issue: no acceptable fictional space has been found.** Companies House
 registration numbers have no officially reserved test range (unlike NHS numbers) and no checksum;
@@ -103,9 +118,10 @@ they are allocated sequentially from 1.
   project's no-time-dependence invariant regardless.
 - There is no reserved or invalid range in between.
 
-Revisit if a reserved/never-issued range comes to light. Format facts (for the regional element,
-should it return): England & Wales are 8 digits with no distinguishing prefix; Scotland is `SC` +
-6 digits; Northern Ireland is `NI` + 6 digits; always 8 characters total.
+Revisit if a reserved/never-issued range comes to light — tracked in root `PLAN.md`
+(`**Project:** alterego — companyNumber()`). Format facts (for the regional element, should it
+return): England & Wales are 8 digits with no distinguishing prefix; Scotland is `SC` + 6 digits;
+Northern Ireland is `NI` + 6 digits; always 8 characters total.
 Source: gov.uk / Companies House; HMRC "Company Registration Number Formats"
 (<https://www.hmrc.gov.uk/gds/com/attachments/coy_reg_no_formats.doc>); current-allocation
 observations from live Companies House records (2026).

@@ -37,10 +37,8 @@ docs/spec/
 CHANGELOG.md                what shipped, across the whole monorepo
 PLAN.md                     single ranked backlog, entries optionally tagged with a Project
 docs/adr/*.md                decisions about any subproject's design, numbered monorepo-wide
+docs/research/*.md            sourced findings with confidence levels, numbered monorepo-wide
 docs/tasks/*.md               optional: per-item working notes, disposable
-alterego/docs/dictionaries.md          provenance/curation notes for the bundled dictionaries
-alterego/docs/fictional-ranges.md      candidate fictional-value ranges not yet supported
-alterego/docs/phone-ranges.md          Ofcom reserved/drama UK phone-range reference data
 alterego/tools/data-cache/SOURCES.md   provenance of cached upstream dictionary source data
 effigies/examples/quickstart/README.md  walkthrough for the quickstart worked example
 incognito/src/test/resources/benchmarks/SOURCES.md  provenance/licensing of vendored benchmarks
@@ -51,9 +49,7 @@ This repository has three Gradle modules, each independently usable and document
 **version and release together** (lockstep — see the lockstep-versioning ADR). That single shared
 release history is why documentation is consolidated at the repository level rather than split per
 module (doc-kit's usual monorepo default): a module boundary that does not correspond to an
-independent release cadence is not a boundary the documentation needs to keep either. See
-`docs/tasks/consolidate-subproject-docs.md` for the migration this consolidation was carried out
-under.
+independent release cadence is not a boundary the documentation needs to keep either.
 
 **The specification is a set, not a file.** `SPECIFICATION.md` is an index over `docs/spec/` — the
 one place in `docs/` you can glob (`docs/spec/*.md`) to find every specification member without
@@ -78,10 +74,8 @@ its own contract, even though the three release together.
 | `CHANGELOG.md` | What shipped, user-visible, across the whole monorepo. **Real standard:** Keep a Changelog, adapted: grouped by subproject per release, not by change-type category | past | append-only | users |
 | `PLAN.md` | Single ranked backlog. No standard; entries may carry a `Project` tag | future | volatile | the team |
 | `docs/adr/*.md` | Why a decision was made, for any subproject. **Real convention:** MADR minimal template | past | immutable | future maintainers |
+| `docs/research/*.md` | Sourced findings behind a spec guarantee, with an explicit confidence level. **No standard** | past | append-only | implementers |
 | `docs/tasks/*.md` | Working notes for one backlog item, prefixed with the subproject name when subproject-specific. No standard | future | disposable | whoever picks it up |
-| `alterego/docs/dictionaries.md` | Provenance and curation notes for the bundled name/place dictionaries | present | rewritten in place | `alterego` contributors curating dictionaries |
-| `alterego/docs/fictional-ranges.md` | Analysis of candidate fictional-value ranges for identifiers not yet supported (e.g. Companies House numbers) | present | rewritten in place | `alterego` contributors investigating new identifiers |
-| `alterego/docs/phone-ranges.md` | Ofcom reserved/drama UK phone-range reference data backing `phoneNumber()` | present | rewritten in place | `alterego` contributors curating phone ranges |
 | `alterego/tools/data-cache/SOURCES.md` | Provenance of cached upstream data used by the dictionary-curation tooling | past | append-only | `alterego` contributors |
 | `effigies/examples/quickstart/README.md` | **Alias** of `README.md` — step-by-step walkthrough for the quickstart worked example | present | rewritten in place | anyone trying Effigies |
 | `incognito/src/test/resources/benchmarks/SOURCES.md` | Provenance and licensing of the vendored benchmark-fixture schemas/datasets | past | append-only | `incognito` contributors |
@@ -105,10 +99,8 @@ its own contract, even though the three release together.
 | `CHANGELOG.md` entry | at release, if user-visible | never |
 | `PLAN.md` entry | idea occurs — one paragraph, no design | **deleted** when done, not struck through |
 | `docs/adr/*.md` | a choice a newcomer would question | never — status flips to `superseded by ADR-NNNN` |
+| `docs/research/*.md` | a question is investigated | never — confidence is revised in place as evidence changes |
 | `docs/tasks/*.md` | work begins on an item | work completes |
-| `alterego/docs/dictionaries.md` | the dictionaries are curated | never |
-| `alterego/docs/fictional-ranges.md` | an identifier's fictional range is investigated | the identifier ships or the investigation is abandoned |
-| `alterego/docs/phone-ranges.md` | the phone built-ins are curated | never |
 | `alterego/tools/data-cache/SOURCES.md` | the data cache is populated | never |
 | `effigies/examples/quickstart/README.md` | the example is created | never |
 | `incognito/src/test/resources/benchmarks/SOURCES.md` | a benchmark fixture is vendored | never |
@@ -148,6 +140,15 @@ lockstep version numbers, which start fresh at `1.0.0`.
 **Plan entry** — a checkbox, a bold title, then one paragraph. Optionally prefixed with a
 `**Project:** alterego|incognito|effigies` tag; cross-cutting or unknown-project entries carry no
 tag. No design; anything longer needs an ADR. Entries are deleted when done, never annotated.
+
+**Research note** — one file per topic, numbered across the whole monorepo the same way as
+`docs/adr/`. A confidence level of `high` (verified directly against a primary source), `medium`
+(sources agree, not verified directly), or `low` (inferred, or a single unverified source), stated
+right under the title. Copy `docs/research/0000-template.md` for the shape. Where sources
+disagree, say which won and why — that reconciliation is the part nobody can reconstruct later. A
+genuine decision found while researching (a real alternative considered and rejected) belongs in
+its own ADR, not buried in the research note — the note may still carry the full sourcing detail
+the ADR only needs to point at.
 
 ## Deliberately not here
 

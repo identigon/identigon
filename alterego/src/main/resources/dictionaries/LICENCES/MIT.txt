@@ -26,5 +26,6 @@ SOFTWARE.
 
 Used here for dictionary files that are original, authored content (not derived from any
 third-party source) — e.g. `dictionaries/GB/surnames.txt` and `dictionaries/GB/street-themes.txt`
-(see docs/dictionaries.md and ADR 0010) — which fall under this project's own source-code
+(see docs/research/0001-alterego-dictionaries.md and ADR 10) — which fall under this project's own
+source-code
 licence rather than a third-party data licence like the Open Government Licence.

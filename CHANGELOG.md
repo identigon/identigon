@@ -217,14 +217,16 @@ Initial implementation, milestones M0-M6 of `alterego/PLAN.md` (now deleted; see
 - Pattern-based (`pattern()`), constant (`constant()`), and masking (`mask()`) transformations.
 - Name and address built-ins: `firstName()`, `lastName()`, `fullName()`, `city()`,
   `streetAddress()`, `postcode()`, `organisationName()`, backed by curated, provenance-tracked UK
-  dictionaries (`alterego/docs/dictionaries.md`). `lastName()` and `streetAddress()`'s theme words
+  dictionaries (`docs/research/0001-alterego-dictionaries.md`). `lastName()` and
+  `streetAddress()`'s theme words
   go further: authored, deliberately fictional vocabulary rather than real data, so a pseudonymised
   name or street address reads as unmistakably fictional, not merely a real one attached to the
   wrong person (ADR 0010).
 - Temporal jitter: `shiftDate(...)`/`shiftDateTime(...)`, sixteen methods across eight jitter
   strategies, with inclusive `JitterOptions` clamping.
 - Fictional-by-default contact details: `emailAddress()` (RFC 2606 reserved domains) and
-  `phoneNumber()` (Ofcom drama ranges, `alterego/docs/phone-ranges.md`), each with a `realistic()`
+  `phoneNumber()` (Ofcom drama ranges, `docs/research/0003-alterego-phone-ranges.md`), each with a
+  `realistic()`
   opt-out.
 - `MappingStore` SPI, `InMemoryMappingStore`, and the `stored()`/`unique()` decorators, with the
   full section 2.5 decorator algebra and a reusable store contract test.

@@ -8,10 +8,11 @@ import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
 /**
- * Generates a fictional phone number (SPECIFICATION.md section 4.1, section 4.4, section 6.3):
- * digits replaced in place, punctuation and grouping preserved. By default, if the country has a
- * published fictional-range table ({@code dictionaries/<country>/phone-ranges.txt} —
- * {@code docs/phone-ranges.md} for GB's sourcing), the output is built from one of those ranges'
+ * Generates a fictional phone number (docs/spec/alterego.md section 4.1, section 4.4, section
+ * 6.3): digits replaced in place, punctuation and grouping preserved. By default, if the country
+ * has a published fictional-range table ({@code dictionaries/<country>/phone-ranges.txt} —
+ * {@code docs/research/0003-alterego-phone-ranges.md} for GB's sourcing), the output is built
+ * from one of those ranges'
  * display templates (its fixed digits copied verbatim, its trailing {@code XXX} replaced with 3
  * random digits), guaranteeing an unconnectable number.
  *

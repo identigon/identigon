@@ -59,7 +59,8 @@ shipped.
   structurally-impossible value is zero, and mapping every company to zero is redaction, not
   pseudonymisation. A high range is time-dependent (Scotland is already at `SC770005`). Deferred
   until a reserved or never-issued range is found — full analysis in
-  `alterego/docs/fictional-ranges.md`. Has a regional element (`SC`/`NI`/plain) that would feed
+  `docs/research/0002-alterego-fictional-ranges.md`. Has a regional element (`SC`/`NI`/plain) that
+  would feed
   `UK_NATION` record coherence if it returns.
 - [ ] **Project:** incognito — **Remove `PolicyInferrer` and
   `AnonymisationPolicy.Builder.autoInfer(boolean)` (committed, next major).** Both are

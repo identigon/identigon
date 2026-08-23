@@ -386,7 +386,8 @@ public final class AlterEgo implements AutoCloseable {
   /**
    * Generates a fictional phone number (section 4.1, section 4.4): digits replaced in place,
    * punctuation and grouping preserved. By default lands in the locale's country's reserved
-   * fictional range where one is published ({@code docs/phone-ranges.md}); a country with no
+   * fictional range where one is published ({@code docs/research/0003-alterego-phone-ranges.md});
+   * a country with no
    * range table falls back to plain digit replacement, with no fictionality guarantee.
    *
    * @return a {@link Transformation} over phone numbers

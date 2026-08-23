@@ -177,9 +177,10 @@ The source code is MIT-licensed — see [`LICENCE`](LICENCE).
 
 The bundled UK dictionary data (names, towns, streets, organisation-name components) is derived from
 UK government sources published under the Open Government Licence v3.0, with one documented
-exception (Ofcom's drama phone-number ranges — see [`docs/phone-ranges.md`](docs/phone-ranges.md)
-for why). Full provenance for every source is tracked in
-[`docs/dictionaries.md`](docs/dictionaries.md); the exact required attribution string for every
+exception (Ofcom's drama phone-number ranges — see
+[research note 0003](../docs/research/0003-alterego-phone-ranges.md) for why). Full provenance for
+every source is tracked in [research note 0001](../docs/research/0001-alterego-dictionaries.md);
+the exact required attribution string for every
 source in use is consolidated in [`NOTICE`](NOTICE), which — along with `LICENCE` — is packaged into
 the built JAR's `META-INF/` directory. **This attribution obligation passes through transitively to
 any application that depends on AlterEgo**, since the JAR bundles this data into every application

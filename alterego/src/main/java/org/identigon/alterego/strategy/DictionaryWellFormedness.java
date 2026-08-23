@@ -67,7 +67,8 @@ final class DictionaryWellFormedness {
 
   /**
    * Validates the two-tag (display template, place) convention for the phone-ranges resource
-   * (SPECIFICATION.md section 4.1, section 4.4, section 6.3; {@code docs/phone-ranges.md}): each
+   * (docs/spec/alterego.md section 4.1, section 4.4, section 6.3;
+   * {@code docs/research/0003-alterego-phone-ranges.md}): each
    * entry's value is an 8-digit fixed prefix, its first tag is that same prefix in Ofcom's own
    * digit-grouping with the 3 freely-varying trailing digits marked {@code XXX} (stripping the
    * template's spaces and {@code XXX} must reconstruct the value exactly), and its second tag is

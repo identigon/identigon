@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Mines common word tokens from real trade mark owner names, for AlterEgo's UK
-organisation-name-components dictionary (docs/dictionaries.md, "Organisation-name components").
+organisation-name-components dictionary (docs/research/0001-alterego-dictionaries.md,
+"Organisation-name components").
 
 Source: UK IPO Trade Mark Data Release, Domestic UK Applications dataset (OGL v3.0).
 https://www.gov.uk/government/publications/ipo-trade-mark-data-release

@@ -11,7 +11,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Exercises {@code phoneNumber()}: the section 4.1 fictionality guarantee against the GB Ofcom
- * drama ranges ({@code docs/phone-ranges.md}), in-place digit replacement with punctuation
+ * drama ranges ({@code docs/research/0003-alterego-phone-ranges.md}), in-place digit replacement
+ * with punctuation
  * preserved (the {@code PhoneOptions.realistic()} and no-range-country paths, where the output
  * takes the input's own shape rather than a reserved template's), and the {@code realistic()}
  * opt-out.

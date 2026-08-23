@@ -1019,7 +1019,7 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
   associated sources (ONS, Ordnance Survey, National Records of Scotland, NISRA, Companies House)
   are preferred over others even where a non-government source offers broader coverage. The full
   policy and every dictionary's actual sourcing decision are tracked in
-  `docs/dictionaries.md`.
+  `docs/research/0001-alterego-dictionaries.md`.
 - **Licence: MIT**, in a root file named `LICENCE` (UK spelling for the filename; the licence's own
   canonical text and title — "MIT License" — are left as written, since that is its official name).
   MIT covers the source code only; it does not relicense the bundled OGL data.
