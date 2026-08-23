@@ -38,12 +38,9 @@ writing any code, for whichever subproject(s) you're touching:
 - `docs/spec/effigies.md` — the behavioural contract. Every observable behaviour is defined there;
   if you find a gap, flag it — do not invent behaviour.
 
-Decisions for all three subprojects now live together in root `docs/adr/` (numbered across the
-whole monorepo, not per subproject) — decisions already made, with reasons. Do not revisit or
-"improve" one; supersede with a new ADR if one genuinely changes.
-
-Decision records are still mid-migration to root `docs/adr/` — see
-`docs/tasks/consolidate-subproject-docs.md` for the remaining phases.
+Decisions for all three subprojects live together in root `docs/adr/` (numbered across the whole
+monorepo, not per subproject) — decisions already made, with reasons. Do not revisit or "improve"
+one; supersede with a new ADR if one genuinely changes.
 
 ## Build and test
 
