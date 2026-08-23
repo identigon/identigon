@@ -8,7 +8,7 @@ import org.identigon.alterego.store.InMemoryMappingStore;
 import org.junit.jupiter.api.Test;
 
 /**
- * The {@code AutoCloseable} salt lifecycle (SPECIFICATION.md section 2, "Lifecycle"): {@code
+ * The {@code AutoCloseable} salt lifecycle (docs/spec/alterego.md section 2, "Lifecycle"): {@code
  * close()}/{@code destroy()} zero the salt, later factory calls throw, and — because every
  * transformation shares the instance's one salt array — applying a transformation built before
  * {@code close()} throws rather than silently deriving from the zeroed salt.

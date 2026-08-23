@@ -5,7 +5,8 @@ import org.identigon.alterego.Randomness;
 import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
-/** Implements the normative GB driving licence number generation algorithm (SPECIFICATION.md A.7). */
+/** Implements the normative GB driving licence number generation algorithm
+ * (docs/spec/alterego.md A.7). */
 public final class DrivingLicenceNumberStrategy implements Strategy<String> {
   /** Singleton instance. */
   public static final DrivingLicenceNumberStrategy INSTANCE = new DrivingLicenceNumberStrategy();

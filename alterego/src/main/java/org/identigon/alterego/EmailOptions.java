@@ -2,7 +2,7 @@ package org.identigon.alterego;
 
 import java.util.Objects;
 
-/** Options for {@code emailAddress()} (SPECIFICATION.md section 4.1, section 4.4). */
+/** Options for {@code emailAddress()} (docs/spec/alterego.md section 4.1, section 4.4). */
 public final class EmailOptions {
 
   private static final EmailOptions DEFAULTS = new EmailOptions(false, null);

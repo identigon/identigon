@@ -5,7 +5,7 @@ import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
 /**
- * Picks an entry from a flat, country-scoped dictionary (SPECIFICATION.md section 4.2:
+ * Picks an entry from a flat, country-scoped dictionary (docs/spec/alterego.md section 4.2:
  * {@code firstName()}, {@code lastName()}; also reused for {@code city()}, which needs the same
  * unconstrained-pick behaviour and ignores the town dictionary's tag columns — those are read
  * directly by record-coherence code in M5, not through this strategy). {@code preserveInitial}

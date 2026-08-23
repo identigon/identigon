@@ -8,7 +8,7 @@ import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
 /**
- * Compiles and applies the pattern language of SPECIFICATION.md section 4.6: {@code D} (digit),
+ * Compiles and applies the pattern language of docs/spec/alterego.md section 4.6: {@code D} (digit),
  * {@code L}/{@code l} (upper/lower letter), {@code A} (letter, either case), {@code \x} (literal
  * {@code x}), and any other character (copied as a literal). Compilation happens once, at
  * {@link #compile(String)} time, not per element.

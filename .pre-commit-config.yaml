@@ -30,7 +30,7 @@ repos:
     rev: v5.0.0
     hooks:
       # Frozen test vectors and vendored third-party fixtures must stay byte-identical to what was
-      # generated/fetched -- CLAUDE.md's hard invariant for the vectors, and SOURCES.md's recorded
+      # generated/fetched -- AGENTS.md's hard invariant for the vectors, and SOURCES.md's recorded
       # SHA-256 provenance for the fixtures both depend on it. Auto-fixing whitespace/EOF in either
       # would silently violate that (found the hard way: a first `--all-files` run trimmed trailing
       # spaces and normalized EOF newlines across both before this exclude existed).

@@ -438,7 +438,7 @@ public final class AlterEgo implements AutoCloseable {
   // --- Identifiers (section 4.8) ------------------------------------------------------------
 
   /**
-   * Generates a fictional NHS number (SPECIFICATION.md section 4.1, 4.8).
+   * Generates a fictional NHS number (docs/spec/alterego.md section 4.1, 4.8).
    * <p>
    * Output format: 10 digits with 3-3-4 spacing, e.g. "999 ddd dddc", where c is a valid mod-11 check digit.
    * Guarantee: The number falls within the '999' test/synthetic range and is never issued to a real person.
@@ -452,7 +452,7 @@ public final class AlterEgo implements AutoCloseable {
   }
 
   /**
-   * Generates a fictional National Insurance number (SPECIFICATION.md section 4.1, 4.8).
+   * Generates a fictional National Insurance number (docs/spec/alterego.md section 4.1, 4.8).
    * <p>
    * Output format: "QQ dd dd dd S".
    * Guarantee: The 'QQ' prefix is structurally unallocatable by HMRC (used only for examples).
@@ -466,7 +466,7 @@ public final class AlterEgo implements AutoCloseable {
   }
 
   /**
-   * Generates a fictional GB driving licence number (SPECIFICATION.md section 4.1, 4.8).
+   * Generates a fictional GB driving licence number (docs/spec/alterego.md section 4.1, 4.8).
    * <p>
    * Output format: 16 characters DVLA layout, unspaced.
    * Guarantee: Uses the surname block "99999", which implies a zero-letter surname and can never occur on a real licence.
@@ -480,7 +480,7 @@ public final class AlterEgo implements AutoCloseable {
   }
 
   /**
-   * Generates a fictional UK passport number (SPECIFICATION.md section 4.1, 4.8).
+   * Generates a fictional UK passport number (docs/spec/alterego.md section 4.1, 4.8).
    * <p>
    * Output format: "ZZddddddd", unspaced.
    * Guarantee: The "ZZ" prefix makes it structurally impossible for a UK passport, which must be 9 numeric digits.
@@ -494,7 +494,7 @@ public final class AlterEgo implements AutoCloseable {
   }
 
   /**
-   * Generates a fictional credit card number (SPECIFICATION.md section 4.1, 4.8).
+   * Generates a fictional credit card number (docs/spec/alterego.md section 4.1, 4.8).
    * <p>
    * Output format: 16 digits grouped as "0ddd dddd dddd dddc" with a valid Luhn check digit.
    * Guarantee: The '0' major industry identifier is reserved for ISO/TC 68 and future assignment; no scheme issues PANs beginning with 0.

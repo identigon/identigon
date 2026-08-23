@@ -14,7 +14,7 @@ import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Test;
 
 /**
- * Exercises the eight jitter strategies of SPECIFICATION.md section 4.5: uniform-in-range,
+ * Exercises the eight jitter strategies of docs/spec/alterego.md section 4.5: uniform-in-range,
  * determinism, leap-year coverage, nanosecond-zeroing, the {@code start > end} rejection, and
  * {@link JitterOptions} clamp piling at both boundaries, for both {@code LocalDate} and
  * {@code LocalDateTime}.

@@ -4,7 +4,7 @@ import org.identigon.alterego.Randomness;
 import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
-/** Implements the normative NHS number generation algorithm (SPECIFICATION.md A.5). */
+/** Implements the normative NHS number generation algorithm (docs/spec/alterego.md A.5). */
 public final class NhsNumberStrategy implements Strategy<String> {
   /** Singleton instance. */
   public static final NhsNumberStrategy INSTANCE = new NhsNumberStrategy();

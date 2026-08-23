@@ -9,7 +9,7 @@ import org.identigon.alterego.TransformationContext;
 import org.identigon.alterego.UkNation;
 
 /**
- * Replacement drawn from the country's town/city dictionary (SPECIFICATION.md section 4.3,
+ * Replacement drawn from the country's town/city dictionary (docs/spec/alterego.md section 4.3,
  * section 6.3): inside a record scope with an already-fixed {@code UK_POSTCODE_AREA}, restricts
  * the pick to towns tagged with that exact area; otherwise picks freely and fixes both {@code
  * UK_POSTCODE_AREA} and {@code UK_NATION} from the chosen town's tags, so a later {@code

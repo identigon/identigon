@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Independently verifies the frozen conformance vectors under src/test/resources/vectors/.
 
-This is a from-scratch reimplementation of Appendix A (SPECIFICATION.md) using Python's stdlib
+This is a from-scratch reimplementation of Appendix A (docs/spec/alterego.md) using Python's stdlib
 hmac/hashlib, deliberately not sharing any code with the Java implementation. It is what backed
 the M1 independent review gate (docs/tasks/M1.md) before the vectors were frozen: every case in all
 four vector files was checked against this script and matched exactly.

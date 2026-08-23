@@ -1,6 +1,6 @@
 package org.identigon.alterego;
 
-/** Options for {@code phoneNumber()} (SPECIFICATION.md section 4.1, section 4.4). */
+/** Options for {@code phoneNumber()} (docs/spec/alterego.md section 4.1, section 4.4). */
 public final class PhoneOptions {
 
   private static final PhoneOptions DEFAULTS = new PhoneOptions(false, false);

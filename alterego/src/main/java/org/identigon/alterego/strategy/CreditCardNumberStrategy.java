@@ -4,7 +4,7 @@ import org.identigon.alterego.Randomness;
 import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
-/** Implements the normative credit card number generation algorithm (SPECIFICATION.md A.9). */
+/** Implements the normative credit card number generation algorithm (docs/spec/alterego.md A.9). */
 public final class CreditCardNumberStrategy implements Strategy<String> {
   /** Singleton instance. */
   public static final CreditCardNumberStrategy INSTANCE = new CreditCardNumberStrategy();

@@ -5,7 +5,8 @@ import org.identigon.alterego.Randomness;
 import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
-/** Implements the normative National Insurance number generation algorithm (SPECIFICATION.md A.6). */
+/** Implements the normative National Insurance number generation algorithm (docs/spec/alterego.md
+ * A.6). */
 public final class NationalInsuranceNumberStrategy implements Strategy<String> {
   /** Singleton instance. */
   public static final NationalInsuranceNumberStrategy INSTANCE = new NationalInsuranceNumberStrategy();

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
-/** {@code city()}'s record-coherence behaviour (SPECIFICATION.md section 6.3). */
+/** {@code city()}'s record-coherence behaviour (docs/spec/alterego.md section 6.3). */
 class CityCoherenceTest {
 
   private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);

@@ -1,6 +1,6 @@
 package org.identigon.alterego.pattern;
 
-/** One compiled token of a pattern (SPECIFICATION.md section 4.6). */
+/** One compiled token of a pattern (docs/spec/alterego.md section 4.6). */
 sealed interface PatternToken {
   record RandomDigit() implements PatternToken {}
   record RandomUpper() implements PatternToken {}

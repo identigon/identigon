@@ -8,7 +8,7 @@ import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
 /**
- * Generates a UK-format postcode (SPECIFICATION.md section 4.1, section 4.3): a plausible
+ * Generates a UK-format postcode (docs/spec/alterego.md section 4.1, section 4.3): a plausible
  * outward code (one of the common shapes {@code A9}, {@code A99}, {@code AA9}, {@code AA99}) and
  * an inward code (one digit, two letters). By default the inward code's last letter is drawn
  * only from {@code C I K M O V} — letters Royal Mail never uses there — so the output is

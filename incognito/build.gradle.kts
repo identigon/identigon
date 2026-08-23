@@ -40,7 +40,8 @@ dependencies {
     api(project(":alterego"))
 
     // Declarative YAML policy parser — an internal detail. TODO: move to a separate incognito-yaml
-    // module so the core stays dependency-lean (SPECIFICATION.md §1); currently bundled in core.
+    // module so the core stays dependency-lean (docs/spec/incognito.md §1); currently bundled in
+    // core.
     implementation(libs.snakeyaml)
 
     // Testing dependencies

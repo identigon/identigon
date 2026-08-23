@@ -1,5 +1,5 @@
 {
-  // Line-length gate only (MD013). This repo's convention (CLAUDE.md's Code style section) is a
+  // Line-length gate only (MD013). This repo's convention (AGENTS.md's Code style section) is a
   // 100-column wrap for Markdown prose, with tables and code blocks exempt because there's no
   // sensible way to "wrap" either without corrupting them, and headings exempt because a heading
   // is one line by construction -- there's no wrap to apply, only a rename, which isn't this

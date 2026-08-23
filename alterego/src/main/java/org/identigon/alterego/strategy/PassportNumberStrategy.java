@@ -4,7 +4,7 @@ import org.identigon.alterego.Randomness;
 import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
-/** Implements the normative UK passport number generation algorithm (SPECIFICATION.md A.8). */
+/** Implements the normative UK passport number generation algorithm (docs/spec/alterego.md A.8). */
 public final class PassportNumberStrategy implements Strategy<String> {
   /** Singleton instance. */
   public static final PassportNumberStrategy INSTANCE = new PassportNumberStrategy();

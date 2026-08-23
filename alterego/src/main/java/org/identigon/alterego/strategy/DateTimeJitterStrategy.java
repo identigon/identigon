@@ -11,7 +11,7 @@ import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
 /**
- * Date-and-time jitter (SPECIFICATION.md section 4.5): pairs one of the two date strategies
+ * Date-and-time jitter (docs/spec/alterego.md section 4.5): pairs one of the two date strategies
  * (shared with {@link DateJitterStrategy}) with one of three time strategies, the date part
  * always drawn before the time part. Nanoseconds are zeroed in every output, unconditionally,
  * regardless of which time strategy ran.

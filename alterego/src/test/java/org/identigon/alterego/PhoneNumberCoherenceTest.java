@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
-/** {@code phoneNumber()}'s record-coherence behaviour (SPECIFICATION.md section 6.3). */
+/** {@code phoneNumber()}'s record-coherence behaviour (docs/spec/alterego.md section 6.3). */
 class PhoneNumberCoherenceTest {
 
   private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);

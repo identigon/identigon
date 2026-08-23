@@ -1,6 +1,6 @@
 package org.identigon.alterego;
 
-/** Options for {@code postcode()} (SPECIFICATION.md section 4.1, section 4.3). */
+/** Options for {@code postcode()} (docs/spec/alterego.md section 4.1, section 4.3). */
 public final class PostcodeOptions {
 
   private static final PostcodeOptions DEFAULTS = new PostcodeOptions(false);

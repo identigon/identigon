@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
-/** {@code postcode()}'s record-coherence behaviour (SPECIFICATION.md section 6.3). */
+/** {@code postcode()}'s record-coherence behaviour (docs/spec/alterego.md section 6.3). */
 class PostcodeCoherenceTest {
 
   private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);

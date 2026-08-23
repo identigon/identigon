@@ -1,6 +1,6 @@
 package org.identigon.alterego;
 
-/** Options for {@code firstName()} and {@code lastName()} (SPECIFICATION.md section 4.2). */
+/** Options for {@code firstName()} and {@code lastName()} (docs/spec/alterego.md section 4.2). */
 public final class NameOptions {
 
   private static final NameOptions DEFAULTS = new NameOptions(false);

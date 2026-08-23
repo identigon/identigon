@@ -843,9 +843,9 @@ v1.0 targets **PostgreSQL** only; `GenericDialectHandler` is an uncertified ANSI
 - **Licence: MIT**, in a root file named `LICENCE` (UK spelling for the filename). Incognito bundles
   **no third-party data** in the JAR; the benchmark fixtures under `src/test/resources/benchmarks/`
   are test-only, with their own provenance and licences (`SOURCES.md`, `NOTICE`, `LICENCES/`).
-- **Documents:** this `SPECIFICATION.md` (the authoritative contract), `PLAN.md` (phases,
+- **Documents:** this `docs/spec/incognito.md` (the authoritative contract), `PLAN.md` (phases,
   follow-ups, deferrals), `docs/adr/` (decisions with their reasons — do not revisit, supersede),
-  `CHANGELOG.md`, and `CLAUDE.md` (agent instructions and the §7.3 must-not-regress invariants).
+  `CHANGELOG.md`, and `AGENTS.md` (agent instructions and the §7.3 must-not-regress invariants).
 
 ---
 

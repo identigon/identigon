@@ -94,7 +94,7 @@ class IdentifierTest {
   void drivingLicenceNumberDigitsAreAsciiRegardlessOfDefaultFormatLocale() {
     // A default FORMAT locale with an explicit non-Latin numbering system makes
     // String.format("%d", ...) render native digit glyphs unless the format call pins
-    // Locale.ROOT explicitly (CLAUDE.md hard invariant: no Locale.getDefault() dependence).
+    // Locale.ROOT explicitly (AGENTS.md hard invariant: no Locale.getDefault() dependence).
     Locale original = Locale.getDefault(Locale.Category.FORMAT);
     try {
       Locale.setDefault(Locale.Category.FORMAT, Locale.forLanguageTag("ar-SA-u-nu-arab"));

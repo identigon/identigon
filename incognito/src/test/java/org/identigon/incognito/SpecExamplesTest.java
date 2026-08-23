@@ -16,12 +16,12 @@ import org.identigon.incognito.api.SurrogateStrategy;
 import org.identigon.incognito.policy.AnonymisationPolicy;
 import org.junit.jupiter.api.Test;
 
-/** Verifies the SPECIFICATION.md examples compile and behave as documented (fabrication model). */
+/** Verifies the docs/spec/incognito.md examples compile and behave as documented (fabrication model). */
 class SpecExamplesTest {
 
     @Test
     // autoInfer(boolean) is deprecated (scheduled for removal at incognito's next major version)
-    // but still exercised here deliberately, matching the SPECIFICATION.md example verbatim.
+    // but still exercised here deliberately, matching the docs/spec/incognito.md example verbatim.
     @SuppressWarnings("removal")
     void policyExampleBuilds() {
         AnonymisationPolicy policy = AnonymisationPolicy.builder()

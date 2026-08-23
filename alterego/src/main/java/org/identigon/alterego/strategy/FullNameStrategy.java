@@ -6,7 +6,7 @@ import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
 /**
- * Tokenises and delegates to the first-name/surname strategies (SPECIFICATION.md section 4.2,
+ * Tokenises and delegates to the first-name/surname strategies (docs/spec/alterego.md section 4.2,
  * the pinned rules): trim and split on whitespace; a single token is transformed as a surname;
  * with two or more tokens, the first and any middle tokens use the first-name domain and the
  * last token uses the surname domain; hyphenated tokens are split and rejoined; blank input is

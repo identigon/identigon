@@ -5,7 +5,8 @@ import org.identigon.alterego.TransformationContext;
 import org.identigon.alterego.UkNation;
 
 /**
- * Shared "establish the record's place" mechanism (SPECIFICATION.md section 6.2, section 6.3):
+ * Shared "establish the record's place" mechanism (docs/spec/alterego.md section 6.2, section
+ * 6.3):
  * when {@code postcode()}/{@code phoneNumber()} is the first field to touch a record's place
  * (nothing fixed yet, but a real scope is active — {@link
  * org.identigon.alterego.RecordAttributes#isActive()}), it fixes {@code
