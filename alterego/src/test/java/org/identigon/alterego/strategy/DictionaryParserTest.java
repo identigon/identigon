@@ -73,7 +73,7 @@ class DictionaryParserTest {
   @Test
   void emptyEntriesListIsAllowedByParserItself() {
     // Well-formedness (non-empty) is a separate check (DictionaryWellFormedness), not the
-    // parser's job — the parser only enforces structural validity of what's present.
+    // parser's job - the parser only enforces structural validity of what's present.
     Dictionary dict = DictionaryParser.parse(VALID_HEADER, "test");
     assertTrue(dict.entries().isEmpty());
   }

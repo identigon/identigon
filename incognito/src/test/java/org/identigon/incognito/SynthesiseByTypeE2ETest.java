@@ -50,7 +50,7 @@ class SynthesiseByTypeE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
         pg = new PostgreSQLContainer(TestPostgres.IMAGE)
             .withDatabaseName("synth").withUsername("test").withPassword("test");
         pg.start();
@@ -92,7 +92,7 @@ class SynthesiseByTypeE2ETest {
             String city = rs.getString(1);
             assertNotEquals("Q", city, "the real value must not survive");
             // A shape-preserving scramble of a 1-char input stays 1 char; the typed city generator
-            // produces a real (multi-character) fictional city name — proving the hint was routed.
+            // produces a real (multi-character) fictional city name - proving the hint was routed.
             assertTrue(city.length() > 1, "typed city hint should yield a real city name, got: " + city);
         }
     }
@@ -108,7 +108,7 @@ class SynthesiseByTypeE2ETest {
             """;
         DataSource[] ds = freshDatabases("numeric", ddl, "INSERT INTO readings (score) VALUES (42)");
 
-        // A numeric QUASI_ID SYNTHESISE with no directIdStrategy hint has no built-in mapping — abort.
+        // A numeric QUASI_ID SYNTHESISE with no directIdStrategy hint has no built-in mapping - abort.
         AnonymisationPolicy policy = AnonymisationPolicy.builder()
             .table("readings", t -> t
                 .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)

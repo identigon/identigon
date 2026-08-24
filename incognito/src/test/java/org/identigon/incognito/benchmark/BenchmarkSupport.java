@@ -22,7 +22,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * Shared plumbing for the Phase-7 benchmark E2E tests, so each benchmark's own test class reads as
- * just its schema, its fixture-loading quirk (if any), and its assertions — not repeated JDBC/JUnit
+ * just its schema, its fixture-loading quirk (if any), and its assertions - not repeated JDBC/JUnit
  * boilerplate.
  */
 final class BenchmarkSupport {
@@ -41,7 +41,7 @@ final class BenchmarkSupport {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping " + benchmarkName + " benchmark");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping " + benchmarkName + " benchmark");
     }
 
     /**
@@ -86,7 +86,7 @@ final class BenchmarkSupport {
 
     /**
      * Opens a connection to {@code ds} and executes {@code sql} as a single statement (autocommit
-     * on) — for DDL/bulk-load scripts, not parameterised queries.
+     * on) - for DDL/bulk-load scripts, not parameterised queries.
      *
      * @param ds the data source to execute against
      * @param sql the SQL to execute
@@ -115,7 +115,7 @@ final class BenchmarkSupport {
     }
 
     /**
-     * Runs {@code sql} and returns the first column of its first row as a {@code long} — for
+     * Runs {@code sql} and returns the first column of its first row as a {@code long} - for
      * {@code COUNT(*)}-shaped assertions.
      *
      * @param conn the connection to query on
@@ -131,7 +131,7 @@ final class BenchmarkSupport {
 
     /**
      * Demonstrates the DPIA artefact-emission path (opt-in per the library's design; see PLAN.md)
-     * against a real, full-scale report from an actual pipeline run — not just the synthetic
+     * against a real, full-scale report from an actual pipeline run - not just the synthetic
      * single-table sample in {@code DpiaArtefactEmitterTest}. Writes JSON, HTML and Markdown under
      * {@code build/dpia-reports/<benchmarkName>/} and asserts each file was actually written.
      *
@@ -150,7 +150,7 @@ final class BenchmarkSupport {
         assertTrue(Files.size(jsonReport) > 0, "DPIA JSON report must be written");
         assertTrue(Files.size(htmlReport) > 0, "DPIA HTML report must be written");
         assertTrue(Files.size(mdReport) > 0, "DPIA Markdown report must be written");
-        // A run through the builder must disclose how it was keyed (SPEC §5.1) — proves the
+        // A run through the builder must disclose how it was keyed (SPEC §5.1) - proves the
         // salt-mode attribute is wired from the builder through to the report end-to-end.
         assertNotNull(report.saltMode(), "DPIA report must disclose the salt mode");
     }

@@ -7,7 +7,7 @@ import org.identigon.incognito.api.IncognitoException;
 import org.identigon.incognito.api.KeyTranslationStore;
 
 /**
- * In-memory {@link KeyTranslationStore} — the single-JVM, non-persistent v1.0 default.
+ * In-memory {@link KeyTranslationStore} - the single-JVM, non-persistent v1.0 default.
  */
 public final class InMemoryKeyTranslationStore implements KeyTranslationStore {
     private final Map<String, Map<Object, Object>> store = new ConcurrentHashMap<>();

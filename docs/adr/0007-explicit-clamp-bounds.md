@@ -11,7 +11,7 @@ decision-makers: David Conneely
 Constraints like "a jittered date of birth must never be in the future" need a notion of *now*. An
 interim design put a `java.time.Clock` on the builder, read once at transformation-creation time
 (per-element reads would break order independence across a midnight rollover). But if the clock is
-read once and captured as an absolute value, the caller may as well pass that value directly — and
+read once and captured as an absolute value, the caller may as well pass that value directly - and
 doing so dissolves a real ambiguity: "past" for a `LocalDate` excludes today, while "past" for an
 instant means strictly before now. Only the caller knows which they mean.
 
@@ -38,7 +38,7 @@ themselves:
 
 ### Consequences
 
-* Good, because the library never reads system time at all — a stronger invariant than requiring
+* Good, because the library never reads system time at all - a stronger invariant than requiring
   the use of `java.time.Clock`, and simpler to enforce (no `now()` of any kind in library code).
 * Good, because fixed-bound callers get byte-reproducible runs with no special test configuration.
 * Neutral: run-dependence of now-relative bounds is visible in the caller's code, where it belongs.

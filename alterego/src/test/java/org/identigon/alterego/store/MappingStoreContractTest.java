@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Reusable {@link MappingStore} SPI contract (docs/spec/alterego.md section 5.1, section 10): any
- * implementation — the in-memory one shipped in M4, or a future external one (JDBC, file-backed)
- * — can subclass this and inherit the same tests. Covers {@code get}/{@code putIfAbsent}
+ * implementation - the in-memory one shipped in M4, or a future external one (JDBC, file-backed)
+ * - can subclass this and inherit the same tests. Covers {@code get}/{@code putIfAbsent}
  * semantics, {@code putIfAbsentUnique}'s three outcomes, namespace isolation, and the atomicity
  * of {@code putIfAbsentUnique} under concurrent callers.
  */

@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Every country-scoped built-in resolves purely by the locale's country (spec section 4, ADR
- * 0006 "language never implies location"), so {@code en-GB} and {@code cy-GB} — same country,
- * different language — must produce byte-identical output for the same input and salt. Covers
+ * 0006 "language never implies location"), so {@code en-GB} and {@code cy-GB} - same country,
+ * different language - must produce byte-identical output for the same input and salt. Covers
  * every such built-in, not just {@code fullName()}.
  */
 class LocaleEquivalenceTest {

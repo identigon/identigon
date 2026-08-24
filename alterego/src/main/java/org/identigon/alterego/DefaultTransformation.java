@@ -141,7 +141,7 @@ final class DefaultTransformation<T> implements Transformation<T> {
             + uniqueMaxAttempts
             + " attempts for domain '"
             + domain
-            + "' — the output space is likely too small for the input volume");
+            + "' - the output space is likely too small for the input volume");
   }
 
   private TransformationContext topLevelContext(String canonical) {

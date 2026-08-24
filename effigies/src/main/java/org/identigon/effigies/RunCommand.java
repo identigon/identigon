@@ -129,7 +129,7 @@ class RunCommand {
             out.println("Tables transformed: " + result.tablesProcessed());
             out.println("Rows processed: " + result.totalRowsLoaded());
 
-            // The engine's own emitter produces the accountability artefact — salt-mode disclosure,
+            // The engine's own emitter produces the accountability artefact - salt-mode disclosure,
             // survival/lint/structural findings, illustrative sample rows. Dumping the raw
             // AnonymisationReport record graph would throw all of that away, so delegate.
             Path dpiaHtml = Paths.get("./dpia-report.html");

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Locks the observability behaviour of the swallowed compensation failures: a best-effort
  * clean-up step that fails is surfaced as a {@code System.Logger} WARNING (so it is not invisible),
- * yet is logged <b>coarsely</b> — operation, table and SQLState only, never the exception message,
+ * yet is logged <b>coarsely</b> - operation, table and SQLState only, never the exception message,
  * which must never carry a field value (SPEC §7.3 / hard invariant 3). No Docker required.
  */
 class ObservabilityTest {
@@ -84,7 +84,7 @@ class ObservabilityTest {
 
     @Test
     void compensationNeverThrowsOnAMalformedContextAttribute() {
-        // A malformed attribute — the wrong type entirely, simulating a hypothetical future bug
+        // A malformed attribute - the wrong type entirely, simulating a hypothetical future bug
         // elsewhere in the pipeline that stores something unexpected under this key. This must not
         // crash compensate() with an uncaught ClassCastException, which would replace/mask the
         // ORIGINAL pipeline failure that triggered this compensation call in the first place.

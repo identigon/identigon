@@ -29,11 +29,11 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * Multi-path diamond (SPEC §6.1, Phase 7): {@code schedule} reaches {@code firm} by two FK paths —
- * {@code schedule → office → firm} and {@code schedule → contract → firm}. An
+ * Multi-path diamond (SPEC §6.1, Phase 7): {@code schedule} reaches {@code firm} by two FK paths -
+ * {@code schedule -> office -> firm} and {@code schedule -> contract -> firm}. An
  * {@code INHERITED_ATTRIBUTE} on {@code schedule} derived from {@code firm.name} must:
  * <ul>
- *   <li><b>converge</b> when both paths reach the <em>same</em> firm — the two branches are not a
+ *   <li><b>converge</b> when both paths reach the <em>same</em> firm - the two branches are not a
  *       conflict, so it resolves to that firm's fabricated name; and</li>
  *   <li><b>fail closed</b> when the paths reach <em>different</em> firms (a genuine fork).</li>
  * </ul>
@@ -74,7 +74,7 @@ class DiamondE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
         pg = new PostgreSQLContainer(TestPostgres.IMAGE)
             .withDatabaseName("diamond").withUsername("test").withPassword("test");
         pg.start();
@@ -144,12 +144,12 @@ class DiamondE2ETest {
                 stmt.execute("INSERT INTO firm (name) VALUES ('Alpha'), ('Beta')");   // 1,2
                 stmt.execute("INSERT INTO office (firm_id) VALUES (1)");              // o1 -> firm1
                 stmt.execute("INSERT INTO contract (firm_id) VALUES (2)");            // c1 -> firm2
-                // schedule's office (firm1) and contract (firm2) disagree — a genuine fork.
+                // schedule's office (firm1) and contract (firm2) disagree - a genuine fork.
                 stmt.execute("INSERT INTO schedule (office_id, contract_id, firm_name) VALUES (1,1,'Alpha')");
             }
         });
 
-        // Two distinct ancestor firms for one INHERITED_ATTRIBUTE — must fail closed, not guess.
+        // Two distinct ancestor firms for one INHERITED_ATTRIBUTE - must fail closed, not guess.
         assertThrows(IncognitoException.class, () -> run(ds),
             "a forked diamond (two distinct ancestor rows) must fail closed");
     }

@@ -1,8 +1,8 @@
 -- Sample data for the Identigon quickstart example. Load into the "source" database only, after
--- schema.sql — the "target" database stays empty (schema-identical) until `run` loads it. See
+-- schema.sql - the "target" database stays empty (schema-identical) until `run` loads it. See
 -- README.md in this directory for the full walkthrough.
 --
--- Every value below is already fictional/placeholder data — Identigon anonymising it further just
+-- Every value below is already fictional/placeholder data - Identigon anonymising it further just
 -- demonstrates the mechanics, it isn't standing in for anything real.
 
 INSERT INTO customers

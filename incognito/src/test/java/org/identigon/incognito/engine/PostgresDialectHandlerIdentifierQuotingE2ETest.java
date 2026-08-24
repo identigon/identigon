@@ -20,7 +20,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * Regression test: {@link PostgresDialectHandler#preLoadTable} (owner-mode fallback),
  * {@link PostgresDialectHandler#postLoadTable}, and {@link PostgresDialectHandler#resyncSequence}
  * must quote identifiers, not just {@link PostgresDialectHandler#buildInsertSql} and the FK-drop/
- * recreate pair ({@link PostgresDialectHandlerFkQuotingE2ETest}) — a mixed-case table/column name
+ * recreate pair ({@link PostgresDialectHandlerFkQuotingE2ETest}) - a mixed-case table/column name
  * exercises exactly the gap those two didn't cover.
  *
  * <p>Requires Docker; skips gracefully otherwise.
@@ -40,7 +40,7 @@ class PostgresDialectHandlerIdentifierQuotingE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping dialect-handler E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping dialect-handler E2E");
 
         pg = new PostgreSQLContainer(TestPostgres.IMAGE)
             .withDatabaseName("identifier_quoting").withUsername("test").withPassword("test");

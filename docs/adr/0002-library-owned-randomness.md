@@ -34,12 +34,12 @@ security argument.
 The context exposes `Randomness` (`nextInt`, `nextLong`, `nextBoolean`, `pick`, `digit`,
 `letterUpper`, `letterLower`). Its implementation is an HMAC-SHA256 counter-mode byte stream over
 the full derived key, with rejection sampling, all specified byte-exactly in the specification's
-Appendix A.2–A.3 and enforced by conformance vectors.
+Appendix A.2-A.3 and enforced by conformance vectors.
 
 ### Consequences
 
 * Good, because the frozen compatibility surface is seven methods this library controls and
-  vector-tests — no JDK or third-party algorithm is part of the output-stability contract.
+  vector-tests - no JDK or third-party algorithm is part of the output-stability contract.
 * Good, because the security argument stays a one-liner: everything observable is HMAC-SHA256
   (PRF) output.
 * Bad, because strategy authors cannot reach un-freezable conveniences like `nextGaussian()`.

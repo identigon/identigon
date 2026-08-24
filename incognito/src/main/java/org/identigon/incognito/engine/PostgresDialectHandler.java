@@ -20,7 +20,7 @@ public final class PostgresDialectHandler implements DialectHandler {
     /** Creates a PostgreSQL dialect handler. */
     public PostgresDialectHandler() {}
 
-    /** PostgreSQL SQLSTATE for "insufficient privilege" — the specific, expected non-superuser failure. */
+    /** PostgreSQL SQLSTATE for "insufficient privilege" - the specific, expected non-superuser failure. */
     private static final String SQLSTATE_INSUFFICIENT_PRIVILEGE = "42501";
 
     @Override
@@ -30,14 +30,14 @@ public final class PostgresDialectHandler implements DialectHandler {
             stmt.execute("SET session_replication_role = 'replica'");
         } catch (SQLException e) {
             // Non-superuser: the failed SET aborts the current transaction, so roll it back before the
-            // owner-mode fallback (safe — preLoadTable runs before any inserts). FK enforcement is then
+            // owner-mode fallback (safe - preLoadTable runs before any inserts). FK enforcement is then
             // handled separately by dropping the cyclic FK constraints (§9); this only disables triggers.
             if (!targetConn.getAutoCommit()) {
                 targetConn.rollback();
             }
             // Only fall back for the specific "insufficient privilege" failure a non-superuser gets.
             // Any other SQLState (a dead connection, an unrelated error) is a genuinely different
-            // problem that owner-mode DISABLE TRIGGER cannot fix — reinterpreting it as "must be
+            // problem that owner-mode DISABLE TRIGGER cannot fix - reinterpreting it as "must be
             // non-superuser" would hide the real cause, so rethrow it unchanged instead.
             if (!SQLSTATE_INSUFFICIENT_PRIVILEGE.equals(e.getSQLState())) {
                 throw e;
@@ -49,7 +49,7 @@ public final class PostgresDialectHandler implements DialectHandler {
                 stmt.execute("ALTER TABLE " + quoteIdent(tableName) + " DISABLE TRIGGER USER");
             } catch (SQLException fallbackFailure) {
                 // Keep the original cause visible rather than letting the fallback's own failure
-                // silently replace it — whoever debugs this needs both.
+                // silently replace it - whoever debugs this needs both.
                 fallbackFailure.addSuppressed(e);
                 throw fallbackFailure;
             }

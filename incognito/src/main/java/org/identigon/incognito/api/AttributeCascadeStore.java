@@ -33,7 +33,7 @@ public interface AttributeCascadeStore extends AutoCloseable {
      * (a diamond) by reading the value from their **shared (root) ancestor** entity, rather than
      * comparing the two branch copies. This makes convergent paths incapable of conflicting:
      * inheritance is always taken from the declared {@code derived_from} ancestor (SPEC §6.1). A
-     * value set on an intermediate branch is not an "override" — inheritance is by definition from
+     * value set on an intermediate branch is not an "override" - inheritance is by definition from
      * the ancestor.
      *
      * @param tableA the first branch's table

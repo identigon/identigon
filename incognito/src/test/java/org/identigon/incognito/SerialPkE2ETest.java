@@ -27,7 +27,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * De-risks {@code SERIAL} (sequence-default) primary keys — as used by Pagila — versus
+ * De-risks {@code SERIAL} (sequence-default) primary keys - as used by Pagila - versus
  * {@code GENERATED ALWAYS AS IDENTITY} (used by every other test). The PostgreSQL driver reports
  * both as {@code IS_AUTOINCREMENT=YES}, but {@code OVERRIDING SYSTEM VALUE} is valid <em>only</em>
  * for true identity columns; emitting it on a {@code SERIAL} column errors. This guards the Phase-7
@@ -60,7 +60,7 @@ class SerialPkE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
@@ -139,7 +139,7 @@ class SerialPkE2ETest {
                 stmt.execute("INSERT INTO account (holder) VALUES ('new')");
             }
             assertEquals(3, scalar(conn, "SELECT COUNT(*) FROM account"),
-                "SERIAL sequence resynced — new default-PK insert succeeds");
+                "SERIAL sequence resynced - new default-PK insert succeeds");
         }
     }
 

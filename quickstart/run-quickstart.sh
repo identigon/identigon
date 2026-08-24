@@ -53,28 +53,28 @@ die() { printf '\n\033[1;31mFAILED: %s\033[0m\n' "$1" >&2; exit 1; }
 on_exit() {
     code=$?
     if [ "$code" -ne 0 ]; then
-        printf '\nSomething went wrong (exit %s). The throwaway container (%s) was left running for inspection — remove it with: ./run-quickstart.sh clean\n' \
+        printf '\nSomething went wrong (exit %s). The throwaway container (%s) was left running for inspection - remove it with: ./run-quickstart.sh clean\n' \
             "$code" "$CONTAINER_NAME" >&2
     fi
 }
 
 require_tools() {
-    command -v docker >/dev/null 2>&1 || die "Docker is required — install it and make sure the daemon is running."
+    command -v docker >/dev/null 2>&1 || die "Docker is required - install it and make sure the daemon is running."
     command -v java >/dev/null 2>&1 || die "Java 25 is required."
-    docker info >/dev/null 2>&1 || die "Docker doesn't seem to be running — start Docker and try again."
+    docker info >/dev/null 2>&1 || die "Docker doesn't seem to be running - start Docker and try again."
 }
 
 container_running() {
     # Not `docker inspect -f '{{.State.Running}}'`: MSYS2/Git-Bash's argv translation for native
     # Windows executables mangles `{{ }}` Go-template arguments (a well-known Windows-only quirk,
-    # nothing to do with POSIX compliance) — this check needs no template at all.
+    # nothing to do with POSIX compliance) - this check needs no template at all.
     [ -n "$(docker ps -q -f "name=^${CONTAINER_NAME}\$" 2>/dev/null)" ]
 }
 
 psql_in_container() { docker exec -i "$CONTAINER_NAME" psql -v ON_ERROR_STOP=1 -U postgres "$@"; }
 
 # Starts a fresh container and loads schema + seed data. Always wipes any previous container first
-# — this is only called when there's no existing state worth preserving (see call sites).
+# - this is only called when there's no existing state worth preserving (see call sites).
 start_fresh_container() {
     log "Starting a throwaway PostgreSQL container ($CONTAINER_NAME, port $PG_PORT)"
     docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
@@ -112,9 +112,9 @@ start_fresh_container() {
 
 ensure_jar() {
     if [ ! -f "$JAR" ]; then
-        log "Building the Identigon CLI jar (first run only — this can take a minute)"
+        log "Building the Identigon CLI jar (first run only - this can take a minute)"
         ( cd "$REPO_ROOT" && ./gradlew :effigies:assemble -q )
-        [ -f "$JAR" ] || die "Build finished but $JAR wasn't produced — see the Gradle output above."
+        [ -f "$JAR" ] || die "Build finished but $JAR wasn't produced - see the Gradle output above."
     fi
 }
 
@@ -141,7 +141,7 @@ EOF
 
 cmd_demo() {
     require_tools
-    [ -e "$WORK_DIR" ] && die "$WORK_DIR exists from a previous 'setup' — run './run-quickstart.sh run' to finish that, or './run-quickstart.sh clean' first if you want the one-shot demo instead."
+    [ -e "$WORK_DIR" ] && die "$WORK_DIR exists from a previous 'setup' - run './run-quickstart.sh run' to finish that, or './run-quickstart.sh clean' first if you want the one-shot demo instead."
     demo_dir="$(mktemp -d)"
     trap on_exit EXIT
 
@@ -151,19 +151,19 @@ cmd_demo() {
     export IDENTIGON_SOURCE_PASSWORD="$PG_PASSWORD"
     export IDENTIGON_TARGET_PASSWORD="$PG_PASSWORD"
 
-    log "Step 1/3 — discover: reading the source schema (metadata only, no row values)"
+    log "Step 1/3 - discover: reading the source schema (metadata only, no row values)"
     java -jar "$JAR" discover --source-url "$SOURCE_URL" --source-user postgres
 
-    log "Step 2/3 — scaffold: what Identigon can classify on its own"
+    log "Step 2/3 - scaffold: what Identigon can classify on its own"
     java -jar "$JAR" scaffold --source-url "$SOURCE_URL" --source-user postgres \
         --out "$demo_dir/policy.draft.yaml"
     # printf %s, not echo: POSIX `echo` is free to interpret backslashes as escapes (dash's does,
     # by default) -- unsafe for a path that may contain them, as every Windows temp path does.
-    printf '%s\n' "(Written to $demo_dir/policy.draft.yaml — open it to see the suggestions and TODOs."
+    printf '%s\n' "(Written to $demo_dir/policy.draft.yaml - open it to see the suggestions and TODOs."
     printf '%s\n' " This one-shot demo uses the finished policy.yaml in this directory instead of the draft;"
     printf '%s\n' " run './run-quickstart.sh setup' if you want to author the draft yourself.)"
 
-    log "Step 3/3 — run: anonymising the clone"
+    log "Step 3/3 - run: anonymising the clone"
     ( cd "$demo_dir" && java -jar "$JAR" run \
         --policy "$SCRIPT_DIR/policy.yaml" \
         --source-url "$SOURCE_URL" --source-user postgres \
@@ -180,7 +180,7 @@ EOF
 
 cmd_setup() {
     require_tools
-    [ -e "$WORK_DIR" ] && die "$WORK_DIR already exists — run './run-quickstart.sh clean' first if you want to start over, or './run-quickstart.sh run' if a draft is already there and you're ready to anonymise."
+    [ -e "$WORK_DIR" ] && die "$WORK_DIR already exists - run './run-quickstart.sh clean' first if you want to start over, or './run-quickstart.sh run' if a draft is already there and you're ready to anonymise."
     trap on_exit EXIT
 
     start_fresh_container
@@ -203,7 +203,7 @@ Draft policy written to:
 
 Next: open this repo in an AI coding assistant that supports Agent Skills (Claude Code,
 Antigravity, GitHub Copilot, ...) and ask it to use the identigon-policy-author skill
-(.agents/skills/identigon-policy-author/SKILL.md) to interview you and classify every column —
+(.agents/skills/identigon-policy-author/SKILL.md) to interview you and classify every column -
 for example:
 
   Use the identigon-policy-author skill to help me classify
@@ -211,7 +211,7 @@ for example:
 
 The skill assigns roles (DIRECT_ID, QUASI_ID, SENSITIVE, ...) through interview; it doesn't pick
 strategies (directIdStrategy, quasiIdStrategy, distinguishing, redactionStrategy) for you, so ask
-it to fill those in too, or hand-edit them yourself — the checked-in policy.yaml in this directory
+it to fill those in too, or hand-edit them yourself - the checked-in policy.yaml in this directory
 is a finished worked example of the full strategy vocabulary if you want something to compare
 against.
 
@@ -220,7 +220,7 @@ Once every column has a role (and a strategy, where one's needed), run:
   ./run-quickstart.sh run
 
 to anonymise using your own policy and see the DPIA report. (Rerunning 'run' fails closed with a
-clear error if any column is still unclassified — that's the tool working as intended, not a bug;
+clear error if any column is still unclassified - that's the tool working as intended, not a bug;
 go back and finish the draft.)
 EOF
 }

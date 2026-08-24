@@ -46,7 +46,7 @@ class WalkingSkeletonTest {
 
     @BeforeAll
     void setUp() {
-        // Check Docker availability — skip gracefully if absent.
+        // Check Docker availability - skip gracefully if absent.
         boolean dockerAvailable;
         try {
             dockerAvailable = org.testcontainers.DockerClientFactory.instance().isDockerAvailable();
@@ -54,7 +54,7 @@ class WalkingSkeletonTest {
             dockerAvailable = false;
         }
         Assumptions.assumeTrue(dockerAvailable,
-            "Docker is not available — skipping Testcontainers integration tests");
+            "Docker is not available - skipping Testcontainers integration tests");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
@@ -101,7 +101,7 @@ class WalkingSkeletonTest {
                 }
             }
 
-            // Create the target database. Build URLs from host/port — getJdbcUrl() carries query
+            // Create the target database. Build URLs from host/port - getJdbcUrl() carries query
             // params (e.g. ?loggerLevel=OFF), so appending a db name to it produces a bad URL.
             String jdbcBase = "jdbc:postgresql://" + pg.getHost() + ":" + pg.getFirstMappedPort() + "/";
             try (Connection adminConn = DriverManager.getConnection(
@@ -258,7 +258,7 @@ class WalkingSkeletonTest {
                 .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
                 .column("email", ColumnRole.DIRECT_ID, DirectIdStrategy.ALTEREGO_EMAIL)
                 .column("dob", ColumnRole.QUASI_ID, QuasiIdStrategy.SYNTHESISE))
-                // 'status' deliberately missing → fail-closed
+                // 'status' deliberately missing -> fail-closed
             .build();
 
         assertThrows(IncognitoException.ConfigException.class, () ->
@@ -279,9 +279,9 @@ class WalkingSkeletonTest {
         Assumptions.assumeTrue(sourceDs != null, "Docker/PostgreSQL not available");
 
         // 'status' is present in the policy (unlike the sibling test above, where it's entirely
-        // absent) but its ColumnPolicy carries no role — e.g. a policy author who declared a
+        // absent) but its ColumnPolicy carries no role - e.g. a policy author who declared a
         // strategy but forgot the `role:` key. This must fail exactly like the entirely-absent
-        // case, not silently default to PAYLOAD (kept real) — see ColumnPolicy.Builder.
+        // case, not silently default to PAYLOAD (kept real) - see ColumnPolicy.Builder.
         AnonymisationPolicy incompletePolicy = AnonymisationPolicy.builder()
             .table("users", t -> t
                 .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
@@ -319,7 +319,7 @@ class WalkingSkeletonTest {
     }
 
     /**
-     * Minimal DataSource implementation for testing — wraps DriverManager.
+     * Minimal DataSource implementation for testing - wraps DriverManager.
      */
     private record SimpleDataSource(String url, String user, String password) implements DataSource {
         @Override

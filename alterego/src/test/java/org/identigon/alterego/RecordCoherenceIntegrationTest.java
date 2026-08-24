@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The full spec section 10 record-coherence suite: town/postcode/phone agree whichever field
- * runs first, in every ordering — not just the city-first case each built-in's own coherence test
+ * runs first, in every ordering - not just the city-first case each built-in's own coherence test
  * already covers individually.
  */
 class RecordCoherenceIntegrationTest {

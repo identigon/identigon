@@ -23,7 +23,7 @@ class EmailAddressTest {
 
   @Test
   void splitsAtTheLastAtSign() {
-    // A quoted local part containing an internal '@' — the split must use the last '@', not the first.
+    // A quoted local part containing an internal '@' - the split must use the last '@', not the first.
     Transformation<String> t = alterego().emailAddress();
     String result = t.apply("\"a@b\"@example.org");
     int lastAt = result.lastIndexOf('@');

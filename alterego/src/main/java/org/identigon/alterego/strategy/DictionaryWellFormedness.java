@@ -14,7 +14,7 @@ import org.identigon.alterego.UkNation;
  *
  * <p>"No duplicate entries" means no duplicate (value, tags) pair, not no duplicate value: a
  * tagged dictionary may legitimately repeat a value under different tags (e.g. London spans
- * several postcode areas, so it appears once per area with the area as part of the tag) —
+ * several postcode areas, so it appears once per area with the area as part of the tag) -
  * only an exact repeated row is rejected.
  */
 final class DictionaryWellFormedness {
@@ -72,7 +72,7 @@ final class DictionaryWellFormedness {
    * entry's value is an 8-digit fixed prefix, its first tag is that same prefix in Ofcom's own
    * digit-grouping with the 3 freely-varying trailing digits marked {@code XXX} (stripping the
    * template's spaces and {@code XXX} must reconstruct the value exactly), and its second tag is
-   * either a 1–2 uppercase-letter postcode area (for record-coherence matching against {@code
+   * either a 1-2 uppercase-letter postcode area (for record-coherence matching against {@code
    * UK_POSTCODE_AREA}), {@code NONE} (the designated geography-neutral fallback range), or
    * {@code MOBILE} (never a coherence match target or the neutral fallback).
    */

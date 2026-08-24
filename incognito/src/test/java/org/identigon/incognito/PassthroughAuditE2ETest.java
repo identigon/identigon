@@ -53,7 +53,7 @@ class PassthroughAuditE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
@@ -104,8 +104,8 @@ class PassthroughAuditE2ETest {
             .table("docs", t -> t
                 .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
                 .column("owner", ColumnRole.DIRECT_ID, DirectIdStrategy.ALTEREGO_GENERIC)
-                .column("meta", ColumnRole.PAYLOAD)   // jsonb — kept real, opaque → flagged
-                .column("ip", ColumnRole.PAYLOAD))     // inet — kept real, opaque → flagged
+                .column("meta", ColumnRole.PAYLOAD)   // jsonb - kept real, opaque -> flagged
+                .column("ip", ColumnRole.PAYLOAD))     // inet - kept real, opaque -> flagged
             .build();
 
         PipelineResult result = IncognitoPipeline.builder()

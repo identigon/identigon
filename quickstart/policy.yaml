@@ -1,4 +1,4 @@
-# Identigon quickstart example policy — see README.md in this directory for the full walkthrough.
+# Identigon quickstart example policy - see README.md in this directory for the full walkthrough.
 #
 # This is hand-authored, not `scaffold` output: `effigies scaffold` would only get you as far as
 # assigning roles it can infer with confidence and would still fail closed on several columns here
@@ -7,7 +7,7 @@
 # and `scaffold` against your own copy of this schema first if you want to see the authoring step
 # for yourself before reading the answer below.
 #
-# autoInfer stays false (the default) — every column below is classified explicitly. Fail-closed:
+# autoInfer stays false (the default) - every column below is classified explicitly. Fail-closed:
 # an unclassified column aborts the run rather than being copied silently.
 autoInfer: false
 
@@ -24,7 +24,7 @@ tables:
         directIdStrategy: ALTEREGO_NAME
       email:
         role: DIRECT_ID
-        directIdStrategy: ALTEREGO_EMAIL       # RFC 2606 reserved domain — never a real mailbox
+        directIdStrategy: ALTEREGO_EMAIL       # RFC 2606 reserved domain - never a real mailbox
       phone:
         role: DIRECT_ID
         directIdStrategy: ALTEREGO_PHONE
@@ -35,7 +35,7 @@ tables:
         role: DIRECT_ID
         # No typed bank-account generator exists in alterego yet (tracked in incognito/PLAN.md), so
         # this falls back to the generic shape-preserving strategy: same length and digit/letter
-        # classes as the source value, but — unlike every strategy above — carries NO fictionality
+        # classes as the source value, but - unlike every strategy above - carries NO fictionality
         # guarantee. Good enough to sever the link to the real account; don't rely on the *output*
         # looking obviously fake the way the NI number above does.
         directIdStrategy: ALTEREGO_GENERIC
@@ -43,7 +43,7 @@ tables:
       # --- Quasi-identifiers: always fabricated, several strategies on show (SPEC §4.2) ----------
       date_of_birth:
         role: QUASI_ID
-        quasiIdStrategy: SYNTHESISE   # fresh fictional date — dob is strongly identifying, so no
+        quasiIdStrategy: SYNTHESISE   # fresh fictional date - dob is strongly identifying, so no
                                        # date-jitter mode is used for it (incognito hard invariant)
       postcode:
         role: QUASI_ID
@@ -104,9 +104,9 @@ tables:
 
       category:
         role: SENSITIVE
-        distinguishing: false   # low-cardinality ('billing'/'technical'/'account') — kept real
+        distinguishing: false   # low-cardinality ('billing'/'technical'/'account') - kept real
 
-      # Free text an agent typed — could name the customer, quote a card number, anything. Kept
+      # Free text an agent typed - could name the customer, quote a card number, anything. Kept
       # real is not an option (distinguishing: true), and there's no safe typed fabrication for
       # arbitrary prose, so it's cleared rather than masked or replaced with a fixed placeholder.
       notes:

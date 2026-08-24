@@ -89,7 +89,7 @@ public class YamlPolicyParser {
                             ColumnPolicy.Builder colBuilder = ColumnPolicy.builder(colName);
                             if (colNode != null) {
                                 // colNode.get("X") != null, not containsKey("X"): `scaffold` always emits every
-                                // key with a blank value (e.g. "role:" with nothing after the colon — a YAML
+                                // key with a blank value (e.g. "role:" with nothing after the colon - a YAML
                                 // null, present but unset), specifically so a human/agent fills it in. containsKey
                                 // is true for that blank entry too, so ColumnRole.valueOf(String.valueOf(null))
                                 // used to evaluate ColumnRole.valueOf("NULL") and throw a cryptic

@@ -37,7 +37,7 @@ tasks.withType<JavaCompile>().configureEach {
 dependencies {
     // The orchestration engine. Effigies depends ONLY on incognito (alterego arrives transitively
     // and is not called directly). It moves to a 2.0.x incognito once that lands (which removes the
-    // inference that migrates here — ADR 23).
+    // inference that migrates here - ADR 23).
     implementation(project(":incognito"))
 
     // Reads/writes the declarative policy YAML that incognito consumes.
@@ -73,7 +73,7 @@ tasks.test {
 }
 
 // A single runnable ("fat") jar so the tool runs with a bare `java -jar build/libs/identigon.jar`
-// — the runtime classpath (incognito, alterego, snakeyaml, JDBC drivers) is bundled in. No
+// - the runtime classpath (incognito, alterego, snakeyaml, JDBC drivers) is bundled in. No
 // shadow plugin needed; plain Gradle assembles it. Signature files from signed dependency jars are
 // dropped, as they would otherwise invalidate the merged jar.
 //

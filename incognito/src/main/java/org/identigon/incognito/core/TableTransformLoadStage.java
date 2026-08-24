@@ -70,7 +70,7 @@ public final class TableTransformLoadStage implements PipelineStage {
 
         // Which (table, column) values are the SOURCE of some INHERITED_ATTRIBUTE elsewhere? Parents
         // must publish exactly these to the cascade store so descendants can inherit the fabricated
-        // value (SPEC §6.1). Empty when no policy uses INHERITED_ATTRIBUTE — the common, zero-overhead path.
+        // value (SPEC §6.1). Empty when no policy uses INHERITED_ATTRIBUTE - the common, zero-overhead path.
         java.util.Set<String> publishTargets = computePublishTargets(policy);
         boolean anyInheritance = !publishTargets.isEmpty();
 
@@ -92,13 +92,13 @@ public final class TableTransformLoadStage implements PipelineStage {
                             "Target has cyclic/self-referential foreign keys " + plan.cyclicTablesToUpdatePass2()
                             + " and the target role can neither suppress FK enforcement (needs SUPERUSER for"
                             + " session_replication_role='replica') nor drop the FK constraints (needs table"
-                            + " ownership) — SPEC §9.", e);
+                            + " ownership) - SPEC §9.", e);
                     }
                     if (droppedForeignKeys.isEmpty()) {
                         throw new IncognitoException.ConfigException(
                             "Target has cyclic/self-referential foreign keys " + plan.cyclicTablesToUpdatePass2()
                             + " that require suppressing FK enforcement during load, but the target role is not a"
-                            + " superuser and this dialect cannot drop FK constraints in owner mode — SPEC §9.");
+                            + " superuser and this dialect cannot drop FK constraints in owner mode - SPEC §9.");
                     }
                     // Persist for compensation: a failed load must recreate the dropped constraints.
                     context.attributes().put("incognito.droppedForeignKeys", droppedForeignKeys);
@@ -178,7 +178,7 @@ public final class TableTransformLoadStage implements PipelineStage {
             .map(col -> buildTransformer(col, tablePolicy, tableMeta, alterEgo, metadataByName, cyclicTables))
             .toList();
 
-        // Columns of THIS table whose fabricated value a descendant will inherit (SPEC §6.1) — publish these.
+        // Columns of THIS table whose fabricated value a descendant will inherit (SPEC §6.1) - publish these.
         java.util.Set<String> columnsToPublish = new java.util.LinkedHashSet<>();
         if (anyInheritance) {
             for (String c : columnsToProcess) {
@@ -225,7 +225,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                             List<PendingUpdate> rowDeferred = new java.util.ArrayList<>();
                             Object targetPk = null;
 
-                            // The row's own source PK — a single value, or a CompositeKey for a
+                            // The row's own source PK - a single value, or a CompositeKey for a
                             // composite PK. Everything keys on this: PK translation, published
                             // attributes, FK linkage, cyclic deferred UPDATE.
                             Object sourcePk = buildSourceKey(rs, pkCols, columnsToProcess);
@@ -246,7 +246,7 @@ public final class TableTransformLoadStage implements PipelineStage {
 
                             // One RecordScope per source row, keyed on its own PK where there is one
                             // (deterministic/reproducible-mode-safe, matching the coherent-jitter
-                            // delta derivation elsewhere in this class) — an anonymous scope for the
+                            // delta derivation elsewhere in this class) - an anonymous scope for the
                             // rare no-PK table. This is what lets CITY/POSTCODE/PHONE cohere on the
                             // same UK region within a row (alterego SPEC §6.3); every other strategy
                             // ignores it, so this changes nothing for columns outside that trio.
@@ -272,8 +272,8 @@ public final class TableTransformLoadStage implements PipelineStage {
                                     }
 
                                     // Collect PK-column translations. A composite PK is recorded once
-                                    // after the loop as a single CompositeKey mapping — never per column
-                                    // (which would overwrite/pollute the store — SPEC §5.2).
+                                    // after the loop as a single CompositeKey mapping - never per column
+                                    // (which would overwrite/pollute the store - SPEC §5.2).
                                     int pkIdx = pkCols.indexOf(colName);
                                     if (pkIdx >= 0 && originalValue != null) {
                                         if (compositePk) {
@@ -285,7 +285,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                                     }
 
                                     // Publish the fabricated value for descendants to inherit (SPEC §6.1).
-                                    // A null value is not published — the store (a ConcurrentHashMap)
+                                    // A null value is not published - the store (a ConcurrentHashMap)
                                     // rejects null values outright, and there is no way today to record
                                     // "published, and it's genuinely null" distinctly from "never
                                     // published". A descendant reading this attribute therefore sees the
@@ -310,7 +310,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                             if (!rowDeferred.isEmpty()) {
                                 // Fail-closed: a cyclic FK is resolved in pass 2 via an UPDATE keyed on
                                 // this row's target PK. Without a resolved single-column PK the placeholder
-                                // would persist as a dangling FK — never drop it silently. Composite PK +
+                                // would persist as a dangling FK - never drop it silently. Composite PK +
                                 // cyclic FK is not yet supported (the deferred UPDATE keys on one column).
                                 if (targetPk == null || compositePk) {
                                     throw new IncognitoException.ConstraintException(
@@ -444,14 +444,14 @@ public final class TableTransformLoadStage implements PipelineStage {
         int thisIdx = orderedChildCols.indexOf(columnName);
 
         // A composite FK that doesn't cover every column of the parent's actual PK is a schema/config
-        // problem, not a per-row data condition — `orderedChildCols` would carry a permanent `null`
+        // problem, not a per-row data condition - `orderedChildCols` would carry a permanent `null`
         // at the uncovered position for every row of this table. Fail loud here, once, rather than
         // silently returning each row's real, untranslated FK value forever (SPEC §7.2 fail-closed).
         if (orderedChildCols.contains(null)) {
             throw new IncognitoException.ConstraintException(
                 "Composite FK on '" + tableMeta.tableName() + "' referencing table '" + parentTable
                     + "' does not cover every column of the parent's primary key " + parentPk
-                    + " — composite + partial FKs are not supported (SPEC §5.2).");
+                    + " - composite + partial FKs are not supported (SPEC §5.2).");
         }
 
         return (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
@@ -461,7 +461,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                 String c = orderedChildCols.get(i);
                 lookupVals[i] = rs.getObject(c);
                 // A sibling FK column is null on THIS row even though the whole composite FK is
-                // schema-complete (checked above) — a partial-null composite FK value (valid under
+                // schema-complete (checked above) - a partial-null composite FK value (valid under
                 // SQL's default MATCH SIMPLE semantics). Leave this column's own value as-is; it is
                 // not a surrogate-translatable reference if its siblings aren't all present either.
                 if (lookupVals[i] == null) return value;
@@ -475,7 +475,7 @@ public final class TableTransformLoadStage implements PipelineStage {
             if (cyclicTables.contains(parentTable)) {
                 throw new IncognitoException.ConstraintException(
                     "Composite FK on '" + meta.tableName() + "' references cyclic table '" + parentTable
-                        + "' — composite + cyclic FKs are not yet supported (SPEC §5.2).");
+                        + "' - composite + cyclic FKs are not yet supported (SPEC §5.2).");
             }
             throw new IncognitoException.ConstraintException(
                 "No key translation for composite FK " + lookup + " referencing table '" + parentTable + "'");
@@ -514,7 +514,7 @@ public final class TableTransformLoadStage implements PipelineStage {
         return (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
             if (value == null) return null;
             // Routed through the row's RecordScope, not called bare: it's a no-op for every
-            // strategy above except CITY/POSTCODE/PHONE, which is exactly the point — those three
+            // strategy above except CITY/POSTCODE/PHONE, which is exactly the point - those three
             // (and only those three) cohere on the same UK region within one row when more than
             // one is present (alterego SPEC §6.3). Every other strategy's output is unaffected,
             // since only those three ever consult record-scoped attributes at all.
@@ -546,7 +546,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                 && !isTextType(sqlType)) {
             throw new IncognitoException.ConfigException(
                 "redactionConstant on column '" + columnName + "' requires a text-type column "
-                    + "(VARCHAR/CHAR/...) — its SQL type does not support a custom text placeholder.");
+                    + "(VARCHAR/CHAR/...) - its SQL type does not support a custom text placeholder.");
         }
         return switch (strategy) {
             case CLEAR -> (val, rs, pk, type, counter, ctx, meta, recordScope) -> null;
@@ -575,7 +575,7 @@ public final class TableTransformLoadStage implements PipelineStage {
     /**
      * A type-appropriate redacted constant, produced by alterego ({@code AlterEgo.redact}/
      * {@code constant}) so a {@code CONSTANT}/{@code MASK} redaction fits a numeric, temporal,
-     * boolean or opaque column rather than only text (SPEC §1.4 — value production is AlterEgo's).
+     * boolean or opaque column rather than only text (SPEC §1.4 - value production is AlterEgo's).
      */
     private static Object redactedConstant(AlterEgo alterEgo, int sqlType) {
         return switch (sqlType) {
@@ -598,14 +598,14 @@ public final class TableTransformLoadStage implements PipelineStage {
      * {@code LocalDate}/{@code java.sql.Date} via {@code dateT}; {@code java.sql.Timestamp}/{@code
      * LocalDateTime} via {@code dateTimeT}; and {@code Instant} via {@code dateTimeT} at UTC. Returns
      * {@code null} for a non-temporal value so the caller can choose a fallback. Routing date-time
-     * and timestamp columns through {@code shiftDateTime} — not {@code shiftDate} alone — is what
+     * and timestamp columns through {@code shiftDateTime} - not {@code shiftDate} alone - is what
      * keeps them from passing through unshifted (a real quasi-identifier surviving, SPEC §7.3).
      * ({@code Instant} reuses {@code shiftDateTime} at UTC rather than {@code shiftInstant} so a single
-     * path covers every jitter mode — {@code shiftInstant} has no {@code DateField} overload, so it
+     * path covers every jitter mode - {@code shiftInstant} has no {@code DateField} overload, so it
      * could not serve the within-month / within-year modes.)
      */
     // Package-private for direct unit testing of the Instant/LocalDateTime branches, which the JDBC
-    // read path (rs.getObject → java.sql.Date/Timestamp) does not reach.
+    // read path (rs.getObject -> java.sql.Date/Timestamp) does not reach.
     static Object shiftTemporalOrNull(Object value,
             Transformation<LocalDate> dateT,
             Transformation<java.time.LocalDateTime> dateTimeT) {
@@ -680,7 +680,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                             }
                         }
 
-                        // No anchor above: this entity originates the group — derive its own
+                        // No anchor above: this entity originates the group - derive its own
                         // salt-keyed delta (never pk.hashCode(); the source PK is known).
                         if (delta == null) {
                             String key = pk != null ? pk.toString() : String.valueOf(value);
@@ -706,9 +706,9 @@ public final class TableTransformLoadStage implements PipelineStage {
             case SYNTHESISE -> {
                 // Author-declared typed routing (SPEC Appendix B): a QUASI_ID SYNTHESISE column may
                 // name a DirectIdStrategy to synthesise a guaranteed-fictional typed value (postcode,
-                // city, street, …) instead of a shape-preserving scramble. The routing is explicit,
+                // city, street, ...) instead of a shape-preserving scramble. The routing is explicit,
                 // never auto-detected (ADR 17). Delegating to the DIRECT_ID transformer reuses the
-                // single strategy→primitive switch, so the two can never diverge.
+                // single strategy->primitive switch, so the two can never diverge.
                 if (colPolicy.directIdStrategy() != null) {
                     yield buildDirectIdTransformer(colPolicy, alterEgo, tableName);
                 }
@@ -733,7 +733,7 @@ public final class TableTransformLoadStage implements PipelineStage {
 
     /**
      * The set of {@code "table column"} keys naming every column that is the SOURCE of some
-     * {@code INHERITED_ATTRIBUTE} elsewhere in the policy — the columns whose fabricated value a
+     * {@code INHERITED_ATTRIBUTE} elsewhere in the policy - the columns whose fabricated value a
      * descendant will inherit, so a parent must publish them (SPEC §6.1).
      */
     private static java.util.Set<String> computePublishTargets(AnonymisationPolicy policy) {
@@ -754,9 +754,9 @@ public final class TableTransformLoadStage implements PipelineStage {
      * linkage) up to the declared root-ancestor table, then reading the ancestor's already-fabricated
      * value from the cascade store (SPEC §6.1). Fail-closed:
      * <ul>
-     *   <li>no reachable ancestor row (e.g. a nullable FK is null) → {@code null} — nothing to leak;</li>
-     *   <li>two <em>distinct</em> ancestor rows reached (a genuine fork) → {@link IncognitoException.ConstraintException};</li>
-     *   <li>ancestor reached but its value was never published (ordering/config error) → {@code ConstraintException}.</li>
+     *   <li>no reachable ancestor row (e.g. a nullable FK is null) -> {@code null} - nothing to leak;</li>
+     *   <li>two <em>distinct</em> ancestor rows reached (a genuine fork) -> {@link IncognitoException.ConstraintException};</li>
+     *   <li>ancestor reached but its value was never published (ordering/config error) -> {@code ConstraintException}.</li>
      * </ul>
      * It never silently passes the child's own real value through.
      */
@@ -767,7 +767,7 @@ public final class TableTransformLoadStage implements PipelineStage {
             String targetTable, String targetColumn,
             String columnName) throws IncognitoException {
 
-        if (startId == null) return null; // no PK to anchor the walk → no ancestor
+        if (startId == null) return null; // no PK to anchor the walk -> no ancestor
 
         java.util.Deque<Object[]> frontier = new java.util.ArrayDeque<>();
         frontier.add(new Object[]{startTable, startId});
@@ -781,7 +781,7 @@ public final class TableTransformLoadStage implements PipelineStage {
             if (!visited.add(java.util.List.of(table, id))) continue; // cycle / diamond convergence guard
 
             if (table.equals(targetTable)) {
-                ancestorIds.add(id); // reached the declared ancestor — do not climb higher
+                ancestorIds.add(id); // reached the declared ancestor - do not climb higher
                 continue;
             }
             SchemaInspector.TableMetadata m = metadataByName.get(table);
@@ -798,13 +798,13 @@ public final class TableTransformLoadStage implements PipelineStage {
         if (ancestorIds.size() > 1) {
             throw new IncognitoException.ConstraintException(
                 "INHERITED_ATTRIBUTE '" + columnName + "' resolves to " + ancestorIds.size()
-                    + " distinct '" + targetTable + "' ancestor rows (a genuine fork) — cannot inherit coherently (SPEC §6.1).");
+                    + " distinct '" + targetTable + "' ancestor rows (a genuine fork) - cannot inherit coherently (SPEC §6.1).");
         }
         Object ancestorId = ancestorIds.iterator().next();
         return ctx.cascadeStore().get(targetTable, ancestorId, targetColumn).orElseThrow(() ->
             new IncognitoException.ConstraintException(
                 "INHERITED_ATTRIBUTE '" + columnName + "': ancestor value '" + targetTable + '.' + targetColumn
-                    + "' for id '" + ancestorId + "' was not published — is '" + targetTable
+                    + "' for id '" + ancestorId + "' was not published - is '" + targetTable
                     + "' loaded before its descendants and its column classified? (SPEC §6.1)."));
     }
 
@@ -812,7 +812,7 @@ public final class TableTransformLoadStage implements PipelineStage {
      * Length-preserving uniqueness fallback for a string {@code UNIQUE_CANDIDATE_KEY} once AlterEgo's
      * {@code unique()} retry budget is exhausted: overlays a zero-padded sequence onto the TAIL of the
      * fabricated value, keeping the exact original length so a fixed-width / CHECK constraint still
-     * holds (Goal 1). Interim — full format-preserving generation is the deferred alterego
+     * holds (Goal 1). Interim - full format-preserving generation is the deferred alterego
      * delegation (see PLAN).
      */
     static String uniquenessFallback(String base, long seq) {
@@ -859,14 +859,14 @@ public final class TableTransformLoadStage implements PipelineStage {
     /**
      * Salt-keyed, shape/length-preserving fabrication: each character is replaced by a random one of
      * the same class (digit/upper/lower) drawn from AlterEgo's HMAC-SHA256 stream; other characters
-     * are kept so length and format survive (helps satisfy CHECK/length constraints — Goal 1).
+     * are kept so length and format survive (helps satisfy CHECK/length constraints - Goal 1).
      *
      * <p>This is a caller-supplied strategy bound via {@code alterEgo.bind(domain, ...)}: the random
      * characters come from AlterEgo's salt-keyed stream ({@code ctx.random()}) and it inherits
      * determinism / {@code unique()} / record-coherence parity from the bind, so only the character-class
      * walk is local. Running on AlterEgo's extension API, this is not a SPEC §1.4 violation, and by
      * decision it stays here (no migration to a core built-in is planned). It carries <em>no</em>
-     * fictionality guarantee — unattainable for an arbitrary shape (a guarantee needs a reserved space,
+     * fictionality guarantee - unattainable for an arbitrary shape (a guarantee needs a reserved space,
      * hence a known format); that guarantee is delivered only by the typed generators
      * ({@code emailAddress()}, {@code phoneNumber()}, the identifier built-ins).
      */

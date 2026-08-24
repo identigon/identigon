@@ -1,13 +1,13 @@
 # Task: support composite PK + cyclic FK together
 
-Status: not started; **larger than first scoped** — see §2. A build-time handoff; delete once
+Status: not started; **larger than first scoped** - see §2. A build-time handoff; delete once
 implemented and green.
 
 ## 1. What's missing
 
 A table whose primary key is composite (multi-column) cannot participate in a cyclic /
-self-referential foreign-key group. Today this **fails closed** (SPEC §5.2) — it never corrupts
-data, and no benchmark hits it — but the feature is absent.
+self-referential foreign-key group. Today this **fails closed** (SPEC §5.2) - it never corrupts
+data, and no benchmark hits it - but the feature is absent.
 
 ## 2. Why this is bigger than "widen the deferred UPDATE" (correction)
 
@@ -16,15 +16,15 @@ all PK columns instead of one (the guard in `TableTransformLoadStage` that rejec
 || compositePk`). **That is necessary but not sufficient, and on its own is unreachable.** The
 reason is structural:
 
-- A single-column FK is only *deferred* when its target row is **not yet mapped** at apply time — a
+- A single-column FK is only *deferred* when its target row is **not yet mapped** at apply time - a
   genuine forward reference, which only happens **inside a cycle** (`buildFkTransformer`,
-  single-column branch: `keyStore.get(...)` misses, then `cyclicTables.contains(...)` →
+  single-column branch: `keyStore.get(...)` misses, then `cyclicTables.contains(...)` ->
   `CyclicFkException`).
-- For a **composite-PK** table's FK to defer, that table must therefore be *in* the cycle — which
+- For a **composite-PK** table's FK to defer, that table must therefore be *in* the cycle - which
   means something references it. Because its PK is composite, that back-reference is a **composite
   FK**.
 - When that composite FK's parent isn't yet mapped (exactly the forward-reference that defines a
-  cycle), it hits a **different, earlier guard** — `buildFkTransformer`'s composite branch:
+  cycle), it hits a **different, earlier guard** - `buildFkTransformer`'s composite branch:
   `"composite + cyclic FKs are not yet supported"`. That fires before the composite-PK row guard is
   ever reached.
 
@@ -44,24 +44,24 @@ the deferral bookkeeping must dedupe to **one** resolution per composite FK per 
 to set every child column in pass 2.
 
 **(b) Resolve it in pass 2, keyed on the (possibly composite) PK of the row being updated.** The
-pending record needs: the child table, that row's **full** target PK (columns + values — a composite
+pending record needs: the child table, that row's **full** target PK (columns + values - a composite
 PK yields `WHERE col1 = ? AND col2 = ?`), the composite FK's child columns, and the source composite
-lookup key. Resolution: `keyStore.get(parentTable, sourceCompositeKey)` → the parent's new
-`CompositeKey` → set each child FK column to the matching `components()[i]`, in one `UPDATE`.
+lookup key. Resolution: `keyStore.get(parentTable, sourceCompositeKey)` -> the parent's new
+`CompositeKey` -> set each child FK column to the matching `components()[i]`, in one `UPDATE`.
 
 This means `BulkDatabaseLoadStage.DeferredUpdate` (or a new sibling record) must carry:
-`List<String> pkColumns`, `List<Object> pkValues` (the row to update — a one-element list for a
-single PK), and a set of `(fkColumn → parent-PK component index)` for the composite FK, plus
+`List<String> pkColumns`, `List<Object> pkValues` (the row to update - a one-element list for a
+single PK), and a set of `(fkColumn -> parent-PK component index)` for the composite FK, plus
 `referencedTable` and the source composite key. `resolveDeferredCyclicFKs` builds `UPDATE child SET
 fk1 = ?, fk2 = ? WHERE <full PK>`.
 
-The existing single-column cyclic path must keep working unchanged — ideally the composite path is
+The existing single-column cyclic path must keep working unchanged - ideally the composite path is
 an additive branch, not a rewrite of the single-column one.
 
 ## 4. Test
 
 Add `CompositePkCyclicFkE2ETest` (Testcontainers). The schema must put a composite-PK table **in** a
-cycle via a composite FK — e.g. two tables whose composite FKs reference each other, or a
+cycle via a composite FK - e.g. two tables whose composite FKs reference each other, or a
 self-referential composite FK:
 
 ```sql
@@ -86,7 +86,7 @@ fails today (hits the line-468 guard) and passes once §3 is done.
 
 - `./gradlew build` green (compile, all tests, the strict `Xdoclint:all` javadoc gate).
 - New E2E passes; `CyclicFkE2ETest` (single-column self-ref) and `CompositeKeyE2ETest` (composite
-  PK/FK, non-cyclic) still pass — the single-column cyclic path and the non-cyclic composite path
+  PK/FK, non-cyclic) still pass - the single-column cyclic path and the non-cyclic composite path
   must not regress.
 - The two fail-closed guards this replaces (the composite-FK-into-cyclic message at line ~468 and
   the composite-PK row guard) are removed only for the now-supported case; genuinely unresolvable

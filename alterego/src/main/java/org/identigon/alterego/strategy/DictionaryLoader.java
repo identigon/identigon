@@ -11,7 +11,7 @@ import org.identigon.alterego.AlterEgoConfigException;
 
 /**
  * Loads and caches dictionaries from {@code dictionaries/<country>/<name>.txt} classpath
- * resources (docs/spec/alterego.md section 9). Resolution is by country only — no language
+ * resources (docs/spec/alterego.md section 9). Resolution is by country only - no language
  * fallback,
  * no borrowing from another country (section 4): {@code en-GB} and {@code cy-GB} resolve to the
  * exact same resource, and an unshipped country fails fast.
@@ -56,7 +56,7 @@ public final class DictionaryLoader {
 
   /**
    * Whether {@code dictionaries/<country>/<name>.txt} exists on the classpath, without throwing
-   * if it doesn't — for built-ins like {@code phoneNumber()} where a missing resource is a
+   * if it doesn't - for built-ins like {@code phoneNumber()} where a missing resource is a
    * documented lesser category (no fictionality guarantee), not a configuration failure.
    */
   static boolean exists(String country, String name) {

@@ -15,12 +15,12 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Unit coverage for {@link BulkDatabaseLoadStage#close()}'s exception handling: if the batch flush
- * fails AND closing the (now broken) statement also fails, both must be visible — the first
+ * fails AND closing the (now broken) statement also fails, both must be visible - the first
  * (typically the more actionable, e.g. a constraint violation) as the primary thrown exception, the
  * second attached via {@link Throwable#addSuppressed}, rather than the second silently replacing
  * the first via plain try/finally semantics.
  *
- * <p>Uses hand-rolled JDBC proxies to deterministically force both failures — no database needed.
+ * <p>Uses hand-rolled JDBC proxies to deterministically force both failures - no database needed.
  */
 class BulkDatabaseLoadStageTest {
 

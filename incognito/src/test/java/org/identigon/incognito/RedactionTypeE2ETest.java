@@ -27,7 +27,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * Type-aware redaction (SPEC §4.1, delegated to {@code AlterEgo.redact}/{@code constant}). Redaction
- * used to assume text — {@code CONSTANT}/{@code MASK} stringified the value, so a numeric, temporal
+ * used to assume text - {@code CONSTANT}/{@code MASK} stringified the value, so a numeric, temporal
  * or boolean {@code SENSITIVE} column failed at insert (varchar vs the column type). This locks the
  * fix: each redacted column receives a <em>type-appropriate</em> constant that fits the column.
  * Requires Docker; skips gracefully otherwise.
@@ -58,7 +58,7 @@ class RedactionTypeE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
@@ -105,11 +105,11 @@ class RedactionTypeE2ETest {
         AnonymisationPolicy policy = AnonymisationPolicy.builder()
             .table("record", t -> t
                 .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
-                .column("amount", ColumnRole.SENSITIVE, RedactionStrategy.CONSTANT)      // INTEGER → 0
-                .column("balance", ColumnRole.SENSITIVE, RedactionStrategy.CONSTANT)     // NUMERIC → 0
-                .column("event_date", ColumnRole.SENSITIVE, RedactionStrategy.CONSTANT)  // DATE → 1970-01-01
-                .column("active", ColumnRole.SENSITIVE, RedactionStrategy.CONSTANT)      // BOOLEAN → false
-                .column("note", ColumnRole.SENSITIVE, RedactionStrategy.MASK))           // TEXT → '*' × len
+                .column("amount", ColumnRole.SENSITIVE, RedactionStrategy.CONSTANT)      // INTEGER -> 0
+                .column("balance", ColumnRole.SENSITIVE, RedactionStrategy.CONSTANT)     // NUMERIC -> 0
+                .column("event_date", ColumnRole.SENSITIVE, RedactionStrategy.CONSTANT)  // DATE -> 1970-01-01
+                .column("active", ColumnRole.SENSITIVE, RedactionStrategy.CONSTANT)      // BOOLEAN -> false
+                .column("note", ColumnRole.SENSITIVE, RedactionStrategy.MASK))           // TEXT -> '*' * len
             .build();
 
         PipelineResult result = IncognitoPipeline.builder()
@@ -122,7 +122,7 @@ class RedactionTypeE2ETest {
 
         try (Connection conn = targetDs.getConnection()) {
             assertEquals(2, scalar(conn, "SELECT COUNT(*) FROM record"));
-            // Each redacted column holds a type-appropriate constant — no real value survives.
+            // Each redacted column holds a type-appropriate constant - no real value survives.
             assertEquals(2, scalar(conn, "SELECT COUNT(*) FROM record WHERE amount = 0"), "INTEGER redacted to 0");
             assertEquals(2, scalar(conn, "SELECT COUNT(*) FROM record WHERE balance = 0"), "NUMERIC redacted to 0");
             assertEquals(2, scalar(conn, "SELECT COUNT(*) FROM record WHERE event_date = DATE '1970-01-01'"), "DATE redacted to epoch");

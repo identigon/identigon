@@ -12,7 +12,7 @@ import org.identigon.incognito.api.PipelineStage;
 
 /**
  * The default {@link IncognitoPipeline}: runs the configured stages in order, then destroys the salt
- * — Incognito's own copy and the AlterEgo clone — on completion, on both success and failure.
+ * - Incognito's own copy and the AlterEgo clone - on completion, on both success and failure.
  */
 public final class DefaultIncognitoPipeline implements IncognitoPipeline {
 

@@ -2,7 +2,7 @@
 
 Raw downloads backing `tools/curate_dictionaries.py`'s `SURNAMES`/`FIRST_NAMES` sections, cached
 here so re-running the curation script (or picking the data apart differently later) doesn't
-depend on these pages staying up or unchanged. All OGL v3.0 (Open Government Licence) — see
+depend on these pages staying up or unchanged. All OGL v3.0 (Open Government Licence) - see
 `docs/research/0001-alterego-dictionaries.md` for the full per-category provenance and
 `dictionaries/LICENCES/OGL-v3.txt` for the licence text.
 
@@ -14,7 +14,7 @@ depend on these pages staying up or unchanged. All OGL v3.0 (Open Government Lic
 | `nrs-babies-first-names-2025-summary.xlsx` | National Records of Scotland: Babies' First Names, 2025 (summary tables) | <https://www.nrscotland.gov.uk/publications/babies-first-names-2025/> | 2026-07-14 |
 | `nisra-baby-names-dashboard-data-2025.xlsx` | NISRA: Data for Baby Names Dashboard 2025 | <https://www.nisra.gov.uk/publications/data-baby-names-dashboard> | 2026-07-14 |
 
-These are the raw files as published — `tools/curate_dictionaries.py` extracts specific
+These are the raw files as published - `tools/curate_dictionaries.py` extracts specific
 ranks/years from them by hand-copied values (see the script's own source comments for exactly
 which rows). They are not read programmatically by the script itself.
 

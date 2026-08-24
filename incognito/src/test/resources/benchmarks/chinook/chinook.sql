@@ -1,4 +1,4 @@
---  Incognito benchmark fixture — Chinook (PostgreSQL), assembled from the upstream
+--  Incognito benchmark fixture - Chinook (PostgreSQL), assembled from the upstream
 --  single-file script with the database-creation preamble removed (DROP DATABASE /
 --  CREATE DATABASE / \c chinook) so it loads into an existing database through a plain
 --  JDBC statement stream. No table or data row was altered. The upstream header comment

@@ -1,5 +1,5 @@
 # Pagila (Sakila) anonymisation policy (was the Java builder in PagilaBenchmarkE2ETest), loaded via
-# YamlPolicyParser. The partitioned `payment` table (and its partitions) is simply omitted — undeclared
+# YamlPolicyParser. The partitioned `payment` table (and its partitions) is simply omitted - undeclared
 # tables are skipped. staff PK is passthrough so store.manager_staff_id (no FK constraint) stays coherent.
 autoInfer: false
 structuralUniqueness: REPORT   # demonstrate the SPEC 2.4 relational-fingerprint DPIA evidence
@@ -19,7 +19,7 @@ tables:
     columns:
       address_id:  { role: PRIMARY_KEY, surrogateStrategy: SEQUENTIAL_LONG }
       address:     { role: DIRECT_ID,   directIdStrategy: ALTEREGO_STREET_ADDRESS }
-      address2:    { role: PAYLOAD }   # a single constant (empty) value in Sakila — nothing to fabricate
+      address2:    { role: PAYLOAD }   # a single constant (empty) value in Sakila - nothing to fabricate
       district:    { role: DIRECT_ID,   directIdStrategy: ALTEREGO_GENERIC }
       city_id:     { role: FOREIGN_KEY, references: { table: city, column: city_id } }
       postal_code: { role: DIRECT_ID,   directIdStrategy: ALTEREGO_POSTCODE }
@@ -55,8 +55,8 @@ tables:
       replacement_cost:     { role: PAYLOAD }
       rating:               { role: PAYLOAD }   # enum (mpaa_rating)
       last_update:          { role: PAYLOAD }
-      special_features:     { role: PAYLOAD }   # text[] → passthrough
-      fulltext:             { role: PAYLOAD }   # tsvector → passthrough
+      special_features:     { role: PAYLOAD }   # text[] -> passthrough
+      fulltext:             { role: PAYLOAD }   # tsvector -> passthrough
   film_actor:   # composite PK (actor_id, film_id)
     columns:
       actor_id:    { role: FOREIGN_KEY, references: { table: actor, column: actor_id } }
@@ -85,7 +85,7 @@ tables:
       username:    { role: DIRECT_ID,   directIdStrategy: ALTEREGO_GENERIC }
       password:    { role: DIRECT_ID,   directIdStrategy: ALTEREGO_GENERIC }
       last_update: { role: PAYLOAD }
-      picture:     { role: SENSITIVE,   distinguishing: true, redactionStrategy: CLEAR }   # staff face image = biometric PII → drop
+      picture:     { role: SENSITIVE,   distinguishing: true, redactionStrategy: CLEAR }   # staff face image = biometric PII -> drop
   customer:
     columns:
       customer_id: { role: PRIMARY_KEY, surrogateStrategy: SEQUENTIAL_LONG }

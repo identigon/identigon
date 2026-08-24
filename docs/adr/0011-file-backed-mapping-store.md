@@ -11,7 +11,7 @@ decision-makers: David Conneely
 `stored()` and `unique()` promise cross-run stability: mappings, and in particular `unique()`
 collision resolutions, are recorded in the mapping store, so it stays stable on every later run
 (spec 5.3, README). The only store shipped in v0.1.0 is `InMemoryMappingStore`, which does not
-survive the process — so the promise was only achievable by users writing their own `MappingStore`.
+survive the process - so the promise was only achievable by users writing their own `MappingStore`.
 The zero-runtime-dependency invariant rules out shipping a JDBC/SQLite/Redis store in the core
 artifact.
 
@@ -32,7 +32,7 @@ single local file, implemented with the JDK only.
 
 * **Append-only log, replayed into memory on open.** Mappings are permanent by contract
   (put-if-absent semantics, never updated or deleted), so a log needs no compaction and the file
-  grows by exactly one line per distinct stored mapping — the same asymptotic footprint as the
+  grows by exactly one line per distinct stored mapping - the same asymptotic footprint as the
   in-memory store. Replay rebuilds the same forward-map-plus-inverse-index structure the in-memory
   store uses, so read and uniqueness-check performance are identical after open.
 * **Single-process, enforced by an exclusive `FileChannel` lock** held from `open` to `close`.
@@ -50,7 +50,7 @@ single local file, implemented with the JDK only.
   to the OS, so a process crash cannot lose an acknowledged mapping. An OS/power crash can lose a
   tail record; the torn-tail rule (ignore and overwrite an unterminated final line) makes reopening
   safe, and an unacknowledged write never had callers relying on it. Interior corruption or
-  duplicate keys fail `open` loudly — the store never silently repairs data.
+  duplicate keys fail `open` loudly - the store never silently repairs data.
 
 ### Consequences
 
@@ -61,6 +61,6 @@ single local file, implemented with the JDK only.
 * Neutral: the file format joins the frozen persistent contract (spec 3.4 discipline applies: a
   change to it is a breaking change to users' stored data).
 * Bad, because `open` throwing on a held lock means two `AlterEgo` instances in one process cannot
-  share one store file via separate `open` calls — they share the single `FileMappingStore`
+  share one store file via separate `open` calls - they share the single `FileMappingStore`
   instance instead (it is thread-safe). Documented in Javadoc.
 * Neutral: JDBC- and Redis-backed stores remain deferred as separate artifacts.

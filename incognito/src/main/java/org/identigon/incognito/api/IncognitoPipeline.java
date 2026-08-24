@@ -33,7 +33,7 @@ public interface IncognitoPipeline {
     /**
      * Fluent builder for an {@link IncognitoPipeline}. Incognito owns the salt and builds the backing
      * {@code AlterEgo} internally (in-memory mapping store), so there is deliberately no way to inject
-     * one — that guarantees the salt lifecycle (SPEC §5.1).
+     * one - that guarantees the salt lifecycle (SPEC §5.1).
      */
     interface Builder {
         /**
@@ -76,7 +76,7 @@ public interface IncognitoPipeline {
         Builder ephemeralSalt();
 
         /**
-         * Uses a caller-supplied fixed salt — opt-in linkable mode that forfeits irreversibility.
+         * Uses a caller-supplied fixed salt - opt-in linkable mode that forfeits irreversibility.
          *
          * @param salt the persistent salt bytes
          * @return this builder

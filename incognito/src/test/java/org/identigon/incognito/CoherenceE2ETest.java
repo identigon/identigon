@@ -34,15 +34,15 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 /**
  * De-risking E2E for the two advanced Phase-4 relational paths that unit tests can't exercise:
  * <ul>
- *   <li><b>Root-ancestor {@code INHERITED_ATTRIBUTE}</b> — a 3-level chain
- *       {@code firm → contract → schedule}. {@code firm.name} is a fabricated {@code DIRECT_ID};
+ *   <li><b>Root-ancestor {@code INHERITED_ATTRIBUTE}</b> - a 3-level chain
+ *       {@code firm -> contract -> schedule}. {@code firm.name} is a fabricated {@code DIRECT_ID};
  *       both {@code contract.firm_name} (direct parent) and {@code schedule.firm_name}
  *       (<em>grandparent</em>, reached by walking the FK chain) are declared
  *       {@code INHERITED_ATTRIBUTE derivedFrom(firm, name)} and must show the firm's <em>fabricated</em>
  *       value, never the row's own real value (SPEC §6.1).</li>
- *   <li><b>Coherent group jitter</b> — {@code contract.start_date} and {@code schedule.due_date}
+ *   <li><b>Coherent group jitter</b> - {@code contract.start_date} and {@code schedule.due_date}
  *       share coherence group {@code engagement}; the schedule inherits its contract's day-delta,
- *       so every {@code due_date − start_date} interval is preserved exactly (SPEC §4.2).</li>
+ *       so every {@code due_date - start_date} interval is preserved exactly (SPEC §4.2).</li>
  * </ul>
  * Also locks the working text-redaction path ({@code contract.notes}, {@code MASK}).
  *
@@ -83,7 +83,7 @@ class CoherenceE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
@@ -103,10 +103,10 @@ class CoherenceE2ETest {
                         + "(2, 'Beta Partners',  DATE '2024-02-15', 'CONFIDENTIAL-3')");
                     // schedules: intervals (due - start) are 10, 31, 14, 10 days
                     stmt.execute("INSERT INTO schedule (contract_id, firm_name, due_date) VALUES "
-                        + "(1, 'Alpha Holdings', DATE '2024-01-20'),"   // contract1 start 01-10 → +10
-                        + "(1, 'Alpha Holdings', DATE '2024-02-10'),"   // contract1 start 01-10 → +31
-                        + "(2, 'Alpha Holdings', DATE '2024-03-15'),"   // contract2 start 03-01 → +14
-                        + "(3, 'Beta Partners',  DATE '2024-02-25')");  // contract3 start 02-15 → +10
+                        + "(1, 'Alpha Holdings', DATE '2024-01-20'),"   // contract1 start 01-10 -> +10
+                        + "(1, 'Alpha Holdings', DATE '2024-02-10'),"   // contract1 start 01-10 -> +31
+                        + "(2, 'Alpha Holdings', DATE '2024-03-15'),"   // contract2 start 03-01 -> +14
+                        + "(3, 'Beta Partners',  DATE '2024-02-25')");  // contract3 start 02-15 -> +10
                 }
             }
 
@@ -152,8 +152,8 @@ class CoherenceE2ETest {
             .table("schedule", t -> t
                 .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
                 .column(ColumnPolicy.builder("contract_id").role(ColumnRole.FOREIGN_KEY).references("contract", "id").build())
-                // Grandparent inheritance: schedule has no direct FK to firm — resolution must walk
-                // schedule → contract → firm to read firm.name.
+                // Grandparent inheritance: schedule has no direct FK to firm - resolution must walk
+                // schedule -> contract -> firm to read firm.name.
                 .column(ColumnPolicy.builder("firm_name").role(ColumnRole.INHERITED_ATTRIBUTE).derivedFrom("firm", "name").build())
                 .column(ColumnPolicy.builder("due_date").role(ColumnRole.QUASI_ID)
                     .quasiIdStrategy(QuasiIdStrategy.JITTER_DAYS).jitterDays(30).coherenceGroup("engagement").build()))
@@ -181,7 +181,7 @@ class CoherenceE2ETest {
             assertEquals(3, count(conn, "contract"));
             assertEquals(4, count(conn, "schedule"));
 
-            // firm.name fabricated → no real firm name survives.
+            // firm.name fabricated -> no real firm name survives.
             assertEquals(0, scalar(conn,
                 "SELECT COUNT(*) FROM firm WHERE name IN ('Alpha Holdings','Beta Partners')"),
                 "DIRECT_ID firm.name must be fabricated");
@@ -203,7 +203,7 @@ class CoherenceE2ETest {
                 "SELECT COUNT(*) FROM schedule WHERE firm_name IN ('Alpha Holdings','Beta Partners')"),
                 "no real firm name may survive on schedule (grandparent fail-open guard)");
 
-            // Coherent jitter: the multiset of (due_date − start_date) intervals is unchanged.
+            // Coherent jitter: the multiset of (due_date - start_date) intervals is unchanged.
             // If the schedule drew an independent delta from its contract, intervals would shift.
             assertEquals(sourceIntervals, intervals(targetDs),
                 "coherent group jitter must preserve every parent-child date interval");
@@ -217,7 +217,7 @@ class CoherenceE2ETest {
         }
     }
 
-    /** Sorted list of (due_date − start_date) day intervals across the schedule⋈contract join. */
+    /** Sorted list of (due_date - start_date) day intervals across the schedule JOIN contract. */
     private List<Integer> intervals(DataSource ds) throws SQLException {
         List<Integer> out = new ArrayList<>();
         try (Connection conn = ds.getConnection();

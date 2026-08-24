@@ -29,7 +29,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * Phase-7 benchmark: Northwind. A real 14-table schema that stresses, together, features no other
- * test combined: a <b>self-referential FK</b> ({@code employees.reports_to → employees}, exercising
+ * test combined: a <b>self-referential FK</b> ({@code employees.reports_to -> employees}, exercising
  * the cyclic-FK deferral + Pass-2 UPDATE on real data), three <b>composite-PK</b> join tables
  * ({@code order_details}, {@code employee_territories}, {@code customer_customer_demo}), an <b>opaque
  * {@code bytea}</b> column kept and audited ({@code categories.picture}) alongside a biometric one
@@ -98,7 +98,7 @@ class NorthwindBenchmarkE2ETest {
                     "row count preserved for " + table);
             }
 
-            // Self-referential FK: resolved by the cyclic Pass-2 UPDATE — no placeholder, no dangling.
+            // Self-referential FK: resolved by the cyclic Pass-2 UPDATE - no placeholder, no dangling.
             assertEquals(0, scalar(tgt, "SELECT COUNT(*) FROM employees WHERE reports_to = -1"),
                 "reports_to placeholder must be resolved");
             assertEquals(0, scalar(tgt, "SELECT COUNT(*) FROM employees e WHERE e.reports_to IS NOT NULL "
@@ -122,7 +122,7 @@ class NorthwindBenchmarkE2ETest {
             assertEquals(0, scalar(tgt, "SELECT COUNT(*) FROM customers WHERE company_name = 'Alfreds Futterkiste'"),
                 "customer company names must be fabricated");
 
-            // SENSITIVE free-text bios (employees.notes, distinguishing) redacted to a constant — no bio survives.
+            // SENSITIVE free-text bios (employees.notes, distinguishing) redacted to a constant - no bio survives.
             assertEquals(0, scalar(tgt, "SELECT COUNT(*) FROM employees WHERE notes IS NOT NULL AND notes <> 'REDACTED'"),
                 "employee notes must be redacted, not kept");
             assertTrue(scalar(tgt, "SELECT COUNT(*) FROM employees WHERE notes = 'REDACTED'") > 0,

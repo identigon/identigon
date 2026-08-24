@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Proves {@link MappingStoreContractTest#runConcurrencyCheck} actually detects a broken,
- * non-atomic {@code putIfAbsentUnique} rather than passing vacuously against any store — a real
+ * non-atomic {@code putIfAbsentUnique} rather than passing vacuously against any store - a real
  * requirement, not just an inherited test that happens to be green (spec section 10: "a
  * deliberately broken fake store... fails at least one contract test").
  */
@@ -27,7 +27,7 @@ class MappingStoreContractCheckHasTeethTest {
   /**
    * Deliberately non-atomic: {@code putIfAbsentUnique} checks both maps, then sleeps (widening
    * the race window so the violation reproduces reliably rather than depending on unlucky
-   * timing), and only then writes — the textbook check-then-act race the real atomicity
+   * timing), and only then writes - the textbook check-then-act race the real atomicity
    * requirement exists to rule out.
    */
   private static final class NonAtomicFakeMappingStore implements MappingStore {

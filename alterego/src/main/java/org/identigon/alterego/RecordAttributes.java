@@ -49,7 +49,7 @@ public interface RecordAttributes {
   /**
    * Whether this view is backed by a real, active {@code RecordScope} ({@code true}) or the
    * outside-any-scope no-op view ({@code false}). Costs no randomness and touches no attribute,
-   * unlike {@code get}/{@code computeIfAbsent}/{@code set} — for a strategy that needs to know
+   * unlike {@code get}/{@code computeIfAbsent}/{@code set} - for a strategy that needs to know
    * whether attempting to *establish* a shared attribute (not just read one) is worthwhile at
    * all, since outside a scope nothing set or resolved is ever retained.
    *

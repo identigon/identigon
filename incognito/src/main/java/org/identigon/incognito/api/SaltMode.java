@@ -9,14 +9,14 @@ package org.identigon.incognito.api;
  */
 public enum SaltMode {
     /**
-     * A fresh random salt, generated per run and destroyed on completion — the default. Output is
+     * A fresh random salt, generated per run and destroyed on completion - the default. Output is
      * unlinkable across runs and the mapping is irreversible: the strongest anonymity claim.
      */
     EPHEMERAL,
     /**
      * A caller-supplied fixed salt reused across runs. Deliberately makes output <em>linkable</em>
      * between runs (the same source value fabricates to the same surrogate every time), which
-     * forfeits irreversibility (SPEC §5.2) — a reviewer must account for the retained salt as a
+     * forfeits irreversibility (SPEC §5.2) - a reviewer must account for the retained salt as a
      * re-identification vector.
      */
     PERSISTENT,

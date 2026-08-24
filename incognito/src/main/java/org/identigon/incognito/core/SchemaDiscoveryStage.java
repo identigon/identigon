@@ -33,7 +33,7 @@ public final class SchemaDiscoveryStage implements PipelineStage {
     /**
      * Key used to store the auto-inference role suggestions in the pipeline context attributes.
      * <b>Note:</b> since an unclassified column always aborts the run ({@code ConfigException},
-     * SPEC §7.2), this map is only ever stored on a fully-successful validation pass — where, by
+     * SPEC §7.2), this map is only ever stored on a fully-successful validation pass - where, by
      * definition, every column was already classified and there was nothing to suggest. Genuinely
      * populated suggestions currently only ever reach the thrown exception's message, listing
      * every unclassified column in a table at once, not a returned {@code AnonymisationReport}.
@@ -104,28 +104,28 @@ public final class SchemaDiscoveryStage implements PipelineStage {
         java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion> tableSuggestions = new java.util.ArrayList<>();
         // Collected across the WHOLE table rather than thrown on the first hit, so one run reports
         // every unclassified column at once instead of the user fixing them one at a time across
-        // repeated runs. (This still always aborts the run — auto-infer only suggests, never
+        // repeated runs. (This still always aborts the run - auto-infer only suggests, never
         // assigns, SPEC §7.2; it does not make suggestions reach a *returned* report, since a
-        // fail-closed run never returns one — see ATTR_INFER_SUGGESTIONS's Javadoc.)
+        // fail-closed run never returns one - see ATTR_INFER_SUGGESTIONS's Javadoc.)
         java.util.List<String> unclassifiedMessages = new java.util.ArrayList<>();
 
         for (String column : table.columns()) {
-            // Skip generated columns — they are excluded from INSERT and need no classification.
+            // Skip generated columns - they are excluded from INSERT and need no classification.
             if (table.generatedColumns().contains(column)) {
                 continue;
             }
 
             Optional<ColumnPolicy> declared = tablePolicy.column(column);
             // A column entirely absent from the policy, AND a column present but with no `role`
-            // key (ColumnPolicy.role() == null — never defaulted, see ColumnPolicy.Builder) are
+            // key (ColumnPolicy.role() == null - never defaulted, see ColumnPolicy.Builder) are
             // both "unclassified": both must fail closed identically. Checking Optional.isEmpty()
             // alone would silently miss the latter, since a ColumnPolicy still exists for it.
             if (declared.isEmpty() || declared.get().role() == null) {
                 // Auto-inference only SUGGESTS a role; it never silently assigns one, so an
                 // unclassified column ALWAYS fails-closed (SPEC §7.2) regardless of the policy's
-                // autoInfer setting — it must never pass through as real data. SPEC §7.2's "opt-in"
+                // autoInfer setting - it must never pass through as real data. SPEC §7.2's "opt-in"
                 // language governs whether a suggestion reaches the REPORT (ATTR_INFER_SUGGESTIONS,
-                // which — see its Javadoc — is moot here anyway: a fail-closed run never returns
+                // which - see its Javadoc - is moot here anyway: a fail-closed run never returns
                 // one); it says nothing about this MESSAGE. The hint below is deliberately shown
                 // unconditionally: it never assigns anything, so autoInfer gates nothing it needs
                 // to gate, and suppressing it when autoInfer is off (the default) would make the
@@ -162,13 +162,13 @@ public final class SchemaDiscoveryStage implements PipelineStage {
                 "Fail-closed: table '" + table.tableName() + "' has " + unclassifiedMessages.size()
                     + " unclassified column(s) with no declared ColumnRole in the policy: "
                     + String.join(", ", unclassifiedMessages)
-                    + ". Classify each explicitly — auto-infer only suggests, never assigns.");
+                    + ". Classify each explicitly - auto-infer only suggests, never assigns.");
         }
     }
 
     /**
      * Fail-closed guard for {@code SYNTHESISE}-by-type (SPEC Appendix B): a {@code QUASI_ID} that is
-     * synthesised (its strategy is {@code SYNTHESISE}, or absent — the default) from a source type
+     * synthesised (its strategy is {@code SYNTHESISE}, or absent - the default) from a source type
      * with no built-in generator, and with no typed {@code directIdStrategy} hint, would silently
      * shape-fabricate. That is forbidden; abort with a clear message directing the author to the fix.
      * Temporal and character types have a mapping ({@link #isSynthesisableType}) and pass.
@@ -186,7 +186,7 @@ public final class SchemaDiscoveryStage implements PipelineStage {
                 "Fail-closed: QUASI_ID column '" + column + "' in table '" + table.tableName()
                     + "' uses SYNTHESISE but its type (" + jdbcTypeName(sqlType) + ") has no built-in"
                     + " generator. Declare a directIdStrategy hint (e.g. ALTEREGO_POSTCODE) or a custom"
-                    + " strategy — SYNTHESISE never shape-fabricates an unmapped type (SPEC Appendix B).");
+                    + " strategy - SYNTHESISE never shape-fabricates an unmapped type (SPEC Appendix B).");
         }
     }
 

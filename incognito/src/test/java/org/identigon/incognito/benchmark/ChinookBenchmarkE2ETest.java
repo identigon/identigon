@@ -30,7 +30,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * Phase-7 benchmark: Chinook — a music-store schema (artists, albums, tracks, invoices, customers,
+ * Phase-7 benchmark: Chinook - a music-store schema (artists, albums, tracks, invoices, customers,
  * employees). It adds coverage the other benchmarks lack: <b>{@code email} columns</b> transformed
  * by {@link DirectIdStrategy#ALTEREGO_EMAIL} and checked by the verification stage's e-mail
  * fictionality net; a <b>self-referential FK</b> ({@code employee.reports_to}) resolved by the
@@ -39,7 +39,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * ({@code playlist_track}); and a rich FK graph rewritten across the surrogate remap. Volumes are
  * compared source-vs-target (no magic numbers).
  *
- * <p>Fixture: {@code resources/benchmarks/chinook/chinook.sql} (lerocha/chinook-database, MIT — see
+ * <p>Fixture: {@code resources/benchmarks/chinook/chinook.sql} (lerocha/chinook-database, MIT - see
  * {@code benchmarks/SOURCES.md}). Requires Docker; skips gracefully otherwise.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -99,7 +99,7 @@ class ChinookBenchmarkE2ETest {
                     "row count preserved for " + table);
             }
 
-            // Composite PK (playlist_id, track_id) intact — no collapse after the surrogate remap.
+            // Composite PK (playlist_id, track_id) intact - no collapse after the surrogate remap.
             assertEquals(scalar(src, "SELECT COUNT(DISTINCT (playlist_id, track_id)) FROM playlist_track"),
                 scalar(tgt, "SELECT COUNT(DISTINCT (playlist_id, track_id)) FROM playlist_track"),
                 "playlist_track composite PK preserved");
@@ -122,7 +122,7 @@ class ChinookBenchmarkE2ETest {
                 "playlist_track FKs must resolve");
             assertEquals(0, scalar(tgt, "SELECT COUNT(*) FROM invoice i "
                 + "WHERE NOT EXISTS (SELECT 1 FROM customer c WHERE c.customer_id = i.customer_id)"),
-                "invoice → customer FK must resolve");
+                "invoice -> customer FK must resolve");
 
             // PII fabricated: no real employee name or corporate e-mail survives.
             assertEquals(0, scalar(tgt, "SELECT COUNT(*) FROM employee WHERE last_name IN "

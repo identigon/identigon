@@ -7,10 +7,10 @@ import org.identigon.alterego.TransformationContext;
 /**
  * Picks an entry from a flat, country-scoped dictionary (docs/spec/alterego.md section 4.2:
  * {@code firstName()}, {@code lastName()}; also reused for {@code city()}, which needs the same
- * unconstrained-pick behaviour and ignores the town dictionary's tag columns — those are read
+ * unconstrained-pick behaviour and ignores the town dictionary's tag columns - those are read
  * directly by record-coherence code in M5, not through this strategy). {@code preserveInitial}
  * restricts the pick to entries sharing the input's first letter, falling back to an
- * unconstrained pick when no entry matches — still deterministic, since the fallback pick
+ * unconstrained pick when no entry matches - still deterministic, since the fallback pick
  * consumes the same context randomness either way.
  */
 public final class NameDictionaryStrategy implements Strategy<String> {

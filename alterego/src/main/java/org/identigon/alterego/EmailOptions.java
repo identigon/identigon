@@ -25,7 +25,7 @@ public final class EmailOptions {
   }
 
   /**
-   * Keeps the input's own domain unchanged instead of drawing a reserved one — opts out of the
+   * Keeps the input's own domain unchanged instead of drawing a reserved one - opts out of the
    * fictionality guarantee. If the input has no {@code @}, there is no domain to preserve, and
    * this falls back to a reserved-set draw (documented, still deterministic).
    *

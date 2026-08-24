@@ -53,7 +53,7 @@ class PassportNumberE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)

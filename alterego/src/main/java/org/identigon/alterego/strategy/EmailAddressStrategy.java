@@ -9,8 +9,8 @@ import org.identigon.alterego.TransformationContext;
  * Generates a fictional email address (docs/spec/alterego.md section 4.1, section 4.4): splits the
  * input at the <strong>last</strong> {@code @} (input with no {@code @} is treated as a bare
  * local part); replaces the local part class-wise in place (each ASCII letter by a letter of the
- * same case, each ASCII digit by a digit, every other character — dots, hyphens, plus tags,
- * non-ASCII — left untouched); and by default draws the domain from RFC 2606's reserved set.
+ * same case, each ASCII digit by a digit, every other character - dots, hyphens, plus tags,
+ * non-ASCII - left untouched); and by default draws the domain from RFC 2606's reserved set.
  *
  * <p>RFC 2606 reserves seven names in total: four whole TLDs ({@code test}, {@code example},
  * {@code invalid}, {@code localhost}) and three second-level domains ({@code example.com},

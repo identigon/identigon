@@ -3,20 +3,20 @@ package org.identigon.incognito.api;
 import java.util.List;
 
 /**
- * Typed accountability record produced by a pipeline run — the evidence a controller needs for a
+ * Typed accountability record produced by a pipeline run - the evidence a controller needs for a
  * DPIA / GDPR Art. 30 record. Structured, not free text, because the residual-risk evidence is the
  * product's differentiator.
  *
- * @param saltMode how the run was keyed (SPEC §5.1/§5.2) — a top-level fact because it governs the
+ * @param saltMode how the run was keyed (SPEC §5.1/§5.2) - a top-level fact because it governs the
  *     strength of the whole run's anonymity claim (Recital 26), independent of any single column
  * @param tables per-table outcomes, in processing order
  * @param survivalFindings DIRECT_ID columns where real source values reappeared in the target
- *     (SPEC §4.3) — the quantified singling-out evidence (Art. 29 WP 05/2014) a reviewer needs
+ *     (SPEC §4.3) - the quantified singling-out evidence (Art. 29 WP 05/2014) a reviewer needs
  * @param lintFindings {@code SENSITIVE distinguishing: false} columns whose real cardinality exceeds
- *     the categorical threshold (SPEC §4.1) — candidate misdeclarations kept opaque; populated only
+ *     the categorical threshold (SPEC §4.1) - candidate misdeclarations kept opaque; populated only
  *     when the lint runs in {@link DistinguishingLint#WARN} mode (in {@code ERROR} mode the run
  *     aborts before any report is built)
- * @param structuralFindings per-FK-edge relational fingerprints (SPEC §2.4) — subjects singled out
+ * @param structuralFindings per-FK-edge relational fingerprints (SPEC §2.4) - subjects singled out
  *     by their FK fan-out rather than by any field value; populated only when
  *     {@link StructuralUniquenessMode#REPORT} is enabled (off by default)
  * @param stageResults the result of each pipeline stage, in execution order
@@ -55,7 +55,7 @@ public record AnonymisationReport(
      * @param role the classified {@link ColumnRole}
      * @param transformation the transformation applied, e.g. {@code "ALTEREGO_EMAIL"} or {@code "KEEP"}
      * @param examples illustrative sample values (one per report sample row) showing what this
-     *     column's transformation produces — synthetic, generated from a fixed non-secret salt, so
+     *     column's transformation produces - synthetic, generated from a fixed non-secret salt, so
      *     they correspond to no real subject and are not this run's actual data
      */
     public record ColumnAction(String column, ColumnRole role, String transformation, List<String> examples) {}
@@ -70,7 +70,7 @@ public record AnonymisationReport(
     public record PassthroughFlag(String column, String jdbcType, String reason) {}
 
     /**
-     * An auto-inference suggestion — surfaced only, never auto-applied (fail-closed, SPEC §7.2).
+     * An auto-inference suggestion - surfaced only, never auto-applied (fail-closed, SPEC §7.2).
      *
      * @param column the column name
      * @param suggestedRole the role the inferrer suggests
@@ -79,7 +79,7 @@ public record AnonymisationReport(
     public record InferSuggestion(String column, ColumnRole suggestedRole, String matchedHeuristic) {}
 
     /**
-     * A DIRECT_ID column where real source values reappeared in the target (SPEC §4.3) — the
+     * A DIRECT_ID column where real source values reappeared in the target (SPEC §4.3) - the
      * quantified evidence for the Article 29 WP 05/2014 "singling-out" test. Fabrication of a
      * low-entropy value can collide with a real value purely by chance, so a small overlap is a
      * coincidence rather than a leak: {@code hardFailure} distinguishes a genuine passthrough (which
@@ -98,9 +98,9 @@ public record AnonymisationReport(
 
     /**
      * A {@code SENSITIVE distinguishing: false} column whose real distinct-value count exceeds the
-     * categorical-cardinality threshold (SPEC §4.1) — a candidate misdeclaration: the column was
+     * categorical-cardinality threshold (SPEC §4.1) - a candidate misdeclaration: the column was
      * kept opaque as low-cardinality categorical data but looks high-cardinality enough to be
-     * quasi-identifying. This is a safety net, never the privacy gate (ADR 16) — the
+     * quasi-identifying. This is a safety net, never the privacy gate (ADR 16) - the
      * {@code distinguishing} declaration alone decides keep-vs-fabricate.
      *
      * @param table the table name
@@ -114,16 +114,16 @@ public record AnonymisationReport(
      * A relational fingerprint on a single FK edge (SPEC §2.4): row counts and the FK graph are
      * preserved 1:1, so a parent row with a rare or unique count of referencing child rows (e.g.
      * "the one customer with 300 orders") can be singled out from <em>structure</em> alone, even
-     * though every field on it was fabricated. This is advisory evidence, never a privacy gate — it
+     * though every field on it was fabricated. This is advisory evidence, never a privacy gate - it
      * changes no data and never fails the run (there is no {@code ERROR} mode).
      *
      * @param parentTable the singled-out subject's table
      * @param childTable the table whose FK to {@code parentTable} produced this fingerprint
-     * @param childColumns the child's FK column(s), in key order — identifies <em>which</em> edge this
+     * @param childColumns the child's FK column(s), in key order - identifies <em>which</em> edge this
      *     is when a child references the same parent through more than one foreign key
      * @param distinctParents how many parent rows have at least one referencing child row
      * @param maxChildCount the largest number of referencing child rows observed for any parent
-     * @param uniqueFingerprintCount how many parent rows are the sole holder of their child count —
+     * @param uniqueFingerprintCount how many parent rows are the sole holder of their child count -
      *     singled out by fan-out alone
      * @param rareFingerprintCount how many parent rows have a child count shared by fewer than
      *     {@code k} parents in total (so a unique fingerprint, group size 1, is also rare when k &gt; 1)

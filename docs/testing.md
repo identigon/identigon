@@ -1,6 +1,6 @@
 # Testing
 
-The test strategy for all three subprojects, and — the part that only lives here — what each
+The test strategy for all three subprojects, and - the part that only lives here - what each
 deliberately does not cover. Previously split across each subproject's own `docs/spec/` member as a
 "Testing strategy" section; consolidated here once `alterego` and `incognito` had each independently
 grown one.
@@ -24,7 +24,7 @@ grown one.
 - **Fictionality**: property tests assert every generated email uses a reserved domain, every UK
   phone number falls inside a published Ofcom drama range, every UK postcode violates the
   inward-code letter rules, and every surname/street-theme word is drawn from the authored fictional
-  wordlist — over large generated samples. For the identifier built-ins, the same style of test
+  wordlist - over large generated samples. For the identifier built-ins, the same style of test
   asserts, per output: `nhsNumber()` matches `999 \d{3} \d{4}` **and** its mod-11 check digit
   verifies; `nationalInsuranceNumber()` matches `QQ \d{2} \d{2} \d{2} [A-D]`;
   `drivingLicenceNumber()` matches the A.7 shape with surname block `99999` and a valid
@@ -42,7 +42,7 @@ grown one.
 - **Store contract test**: a reusable test class exercising the `MappingStore` SPI (atomicity of
   `putIfAbsentUnique`, race behaviour), run against the in-memory store **and the file store**, and
   available to authors of external stores.
-- **File store**: beyond the contract test — mappings and `unique()` collision resolutions survive
+- **File store**: beyond the contract test - mappings and `unique()` collision resolutions survive
   `close()`/`open()`; a torn final line is ignored and safely overwritten; a malformed interior
   line, duplicate key, or wrong header fails `open` with `AlterEgoStoreException`; a second
   concurrent `open` of the same file fails; operations after `close()` fail; the file gains exactly
@@ -51,7 +51,7 @@ grown one.
   and its provenance header present with a licence name matching a committed file under
   `dictionaries/LICENCES/`. Deduplicated means no duplicate (value, tags) row, not no duplicate
   value: a tagged dictionary may legitimately repeat a value under different tags (e.g. London spans
-  several UK postcode areas — ADR 25) — only an exact repeated row is rejected.
+  several UK postcode areas - ADR 25) - only an exact repeated row is rejected.
 - **Null/edge cases**: null, empty string, single-character, and non-ASCII inputs for every
   built-in.
 
@@ -59,20 +59,20 @@ grown one.
 
 - **Testcontainers PostgreSQL** backs every integration/E2E test; tests **skip gracefully** where
   Docker is unavailable. On Docker Engine 29.x set `TESTCONTAINERS_RYUK_DISABLED=true`.
-- **Walking skeleton (Gate A):** one end-to-end vertical slice (discover → transform → load →
+- **Walking skeleton (Gate A):** one end-to-end vertical slice (discover -> transform -> load ->
   verify) against a real container, proving the whole pipeline before feature work.
 - **Fail-closed** is tested directly: an unclassified column, or a `SENSITIVE` column with no
   `distinguishing` declaration, aborts the run with `ConfigException`.
 - **De-risk pattern:** each hard-to-reason feature gets a focused Testcontainers test *before* it is
-  relied on — composite PK/FK, cyclic/self-referential FKs, the inheritance diamond (convergent +
+  relied on - composite PK/FK, cyclic/self-referential FKs, the inheritance diamond (convergent +
   forked), coherent group jitter, `SERIAL` vs `IDENTITY` PKs, VIEW/materialised-view exclusion,
   per-period volume preservation, and the opaque-type passthrough audit. Several real defects (a
   fail-open cyclic deferral; a NUL-corrupted inherited-attribute path) were caught this way.
-- **Benchmark suites:** real schemas from `src/test/resources/benchmarks/` — PetClinic, Pagila,
-  Northwind, Employees, and Chinook — each exercising a distinct shape (composite PKs, self-ref
+- **Benchmark suites:** real schemas from `src/test/resources/benchmarks/` - PetClinic, Pagila,
+  Northwind, Employees, and Chinook - each exercising a distinct shape (composite PKs, self-ref
   cycles, opaque types, temporal HR data) not covered by the standalone Testcontainers tests alone.
-- Assertions favour **surrogate-independent invariants** — referential integrity, preserved
-  row/interval multisets, mutual-relationship preservation — over exact fabricated values, since
+- Assertions favour **surrogate-independent invariants** - referential integrity, preserved
+  row/interval multisets, mutual-relationship preservation - over exact fabricated values, since
   fabrication is salt-keyed and the per-run salt is ephemeral.
 - Pure helpers (the length-preserving unique-key fallback, the in-memory stores, the DPIA emitters)
   have **no-Docker unit tests**.
@@ -83,18 +83,18 @@ grown one.
   can be exercised without faking environment variables; each has its own unit test
   (`DiscoverCommandTest`, `ScaffoldCommandTest`, `RunCommandTest`).
 - `PolicyInferrer`'s naming-heuristic suggestions and `SimpleDataSource`'s connection handling each
-  have their own unit test. No Testcontainers here — effigies delegates all engine behaviour to
+  have their own unit test. No Testcontainers here - effigies delegates all engine behaviour to
   `incognito`, which is where that coverage lives.
 
 ## What is verified only approximately
 
 - **Pagila's vendored `pagila-insert-data.sql`** is checked by a SHA-256 recorded at vendor time
-  (`incognito/src/test/resources/benchmarks/SOURCES.md`), not re-checked at test time — a
+  (`incognito/src/test/resources/benchmarks/SOURCES.md`), not re-checked at test time - a
   provenance record, not a runtime guarantee. git/GitHub already guarantee the committed bytes, the
   same as every other vendored fixture.
 - **`incognito`'s benchmark suites** assert surrogate-independent invariants (referential integrity,
   preserved multisets) rather than exact fabricated values, since fabrication is salt-keyed and the
-  per-run salt is ephemeral by default — an intentional approximation, not a gap.
+  per-run salt is ephemeral by default - an intentional approximation, not a gap.
 
 ## What is deliberately not covered
 
@@ -102,13 +102,13 @@ grown one.
   fidelity, formal re-identification bounds (ε-guarantees), exact row counts, structural outlier
   dropping, complex column types (JSON/JSONB, spatial, biometric/media BLOBs, arrays, INET), other
   database engines, parallel execution, free-text redaction, real-time proxying, and any UI. None of
-  these are tested because none of them are implemented — see the spec member for the full
+  these are tested because none of them are implemented - see the spec member for the full
   reasoning per item.
-- **Composite PK + cyclic FK on the same table** (each supported alone) — fails closed with a clear
+- **Composite PK + cyclic FK on the same table** (each supported alone) - fails closed with a clear
   message rather than corrupting data, but the combination itself has no passing test, because it
   has no implementation yet. Tracked in root `PLAN.md`
   (`docs/tasks/incognito-composite-pk-cyclic-fk.md`).
-- **`alterego`'s post-v1 deferred items** (root `PLAN.md`, `**Project:** alterego` entries) —
+- **`alterego`'s post-v1 deferred items** (root `PLAN.md`, `**Project:** alterego` entries) -
   `ServiceLoader` strategy packs, language-sensitive generation, pattern-language extensions,
   external `MappingStore` modules, a public codec SPI, and further fictional-value ranges are all
   untested because unimplemented, not because coverage was skipped.

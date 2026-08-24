@@ -8,7 +8,7 @@ import org.identigon.alterego.AlterEgoConfigException;
 
 /**
  * Parses the dictionary file format (docs/spec/alterego.md section 9): a provenance header of
- * {@code # key: value} comment lines, followed by one entry per line — a value optionally
+ * {@code # key: value} comment lines, followed by one entry per line - a value optionally
  * followed by tab-separated tag fields. Blank lines are skipped. Pure text in, {@link Dictionary}
  * out; classpath loading is {@link DictionaryLoader}'s job, so this is independently testable.
  */

@@ -4,12 +4,12 @@ date: 2026-07-30
 decision-makers: David Conneely
 ---
 
-# 15. Two libraries — value transformation vs relational coherence
+# 15. Two libraries - value transformation vs relational coherence
 
 ## Context and Problem Statement
 
 Incognito is a distinct library from `alterego`. The original justification ("Alterego works on
-records, Incognito works on datasets") was a k-anonymity-era assumption — that Incognito needed a
+records, Incognito works on datasets") was a k-anonymity-era assumption - that Incognito needed a
 global statistical view. With fabrication (ADR 14) there is no such pass, so that framing no longer
 holds and the real reason for the split had to be restated.
 
@@ -30,17 +30,17 @@ value transformer.
 
 Split by **responsibility**, not batch size:
 
-* **`alterego`** transforms a single value or the fields of one record — deterministic in
+* **`alterego`** transforms a single value or the fields of one record - deterministic in
   `(salt, domain, value)`, stateless with respect to the dataset, and DB-agnostic (reusable on a
   CSV, an API payload, or a message).
 * **Incognito** owns everything relational: schema discovery and role classification, topological
-  load order, key translation (PK → surrogate, FK rewritten to the same mapping), coherent
+  load order, key translation (PK -> surrogate, FK rewritten to the same mapping), coherent
   cross-entity temporal deltas, root-ancestor attribute cascade, bulk loading with trigger
   isolation, and DPIA reporting.
 
 Incognito **consumes** Alterego and delegates **all** field-value substitution to it. Where
 Incognito needs a value transformation Alterego does not expose, the fix is to add the primitive to
-Alterego — never to hand-roll it in Incognito.
+Alterego - never to hand-roll it in Incognito.
 
 ### Consequences
 
@@ -49,5 +49,5 @@ Alterego — never to hand-roll it in Incognito.
 * Neutral: the boundary is a one-line test: *Alterego fabricates fields; Incognito preserves
   relationships.*
 * Bad, because any value logic that leaks into Incognito must be tracked as debt, not sanctioned by
-  default — see ADR 21 for the one case where that characterisation was later revisited and
+  default - see ADR 21 for the one case where that characterisation was later revisited and
   reversed.

@@ -5,8 +5,8 @@ import java.util.function.Function;
 
 /**
  * The {@link RecordAttributes} seen inside an active {@link RecordScope} (section 6.2): reads
- * and writes go to the scope's shared map, so every context created while the scope is active —
- * including {@code derived(...)} children — sees the same fixed attributes. Carries the *asking*
+ * and writes go to the scope's shared map, so every context created while the scope is active -
+ * including {@code derived(...)} children - sees the same fixed attributes. Carries the *asking*
  * context's own {@link Randomness}, used only as the anonymous-scope {@code computeIfAbsent}
  * fallback (a keyed scope ignores it, resolving from the record key instead).
  */

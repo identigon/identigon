@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * {@code context.mappings()} ({@link DefaultMappings}) honours {@code rawMappingKeys} exactly
- * like {@code stored()}/{@code unique()} (spec section 2.6, section 5.1) — a dedicated test since
+ * like {@code stored()}/{@code unique()} (spec section 2.6, section 5.1) - a dedicated test since
  * this path isn't exercised by either decorator.
  */
 class MappingsRawKeyTest {

@@ -11,14 +11,14 @@ import org.identigon.alterego.TransformationContext;
  * Generates a UK-format postcode (docs/spec/alterego.md section 4.1, section 4.3): a plausible
  * outward code (one of the common shapes {@code A9}, {@code A99}, {@code AA9}, {@code AA99}) and
  * an inward code (one digit, two letters). By default the inward code's last letter is drawn
- * only from {@code C I K M O V} — letters Royal Mail never uses there — so the output is
+ * only from {@code C I K M O V} - letters Royal Mail never uses there - so the output is
  * guaranteed to never be a real, deliverable postcode (ADR 0005). {@code realistic} opts out,
  * drawing that letter from the full alphabet instead.
  *
  * <p>v1 does not generate the rarer outward shapes with a trailing district letter (e.g.
  * {@code W1A}, {@code EC1A}). Inside an active record scope, the outward code's letters come
  * from the fixed (or, if this is the first field to touch the record's place, freshly
- * established from a real town — {@link PlaceCoherence}) {@code UK_POSTCODE_AREA} (section 6.3);
+ * established from a real town - {@link PlaceCoherence}) {@code UK_POSTCODE_AREA} (section 6.3);
  * outside any scope, this is exactly the unconstrained shape/letter generation of M2, unchanged.
  */
 public final class PostcodeStrategy implements Strategy<String> {
@@ -64,7 +64,7 @@ public final class PostcodeStrategy implements Strategy<String> {
   /**
    * Builds the outward code from an already-fixed record area (section 6.3): the area's own
    * letters, verbatim, plus a freshly-drawn 1 or 2 trailing digits (uniform choice between the
-   * two valid shapes) — an additional path alongside {@link #outwardCode}, which stays
+   * two valid shapes) - an additional path alongside {@link #outwardCode}, which stays
    * byte-for-byte unchanged for the no-fixed-area case.
    */
   private static String outwardCodeForArea(String area, Randomness random) {

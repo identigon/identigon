@@ -30,7 +30,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * {@code JITTER_DAYS} deliberately shifts a date by up to ±N days, so it routinely crosses month
- * boundaries and does <b>not</b> preserve monthly buckets — verifying monthly counts against a ±2%
+ * boundaries and does <b>not</b> preserve monthly buckets - verifying monthly counts against a ±2%
  * tolerance therefore raised spurious "volume drift" warnings. The VerificationStage now checks
  * <b>yearly</b> buckets for {@code JITTER_DAYS}. This test concentrates every row on the last day of
  * a mid-year month: the jitter spills many rows into the next month (monthly buckets would flag) but
@@ -61,7 +61,7 @@ class JitterDaysVolumeE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         pg = new PostgreSQLContainer(TestPostgres.IMAGE)
             .withDatabaseName("jd_source").withUsername("test").withPassword("test");
@@ -71,7 +71,7 @@ class JitterDaysVolumeE2ETest {
              Statement stmt = conn.createStatement()) {
             stmt.execute(DDL);
             // 20 distinct late-June dates (5 rows each), mid-year and far from any year boundary. The
-            // dates are distinct because JITTER_DAYS is value-keyed — identical dates shift identically.
+            // dates are distinct because JITTER_DAYS is value-keyed - identical dates shift identically.
             stmt.execute("INSERT INTO spikes (ts) SELECT DATE '2024-06-11' + (n % 20) FROM generate_series(1, 100) n");
         }
 
@@ -115,7 +115,7 @@ class JitterDaysVolumeE2ETest {
         assertTrue(result.success(), "pipeline should succeed");
 
         try (Connection conn = targetDs.getConnection()) {
-            // The jitter genuinely crossed the month boundary — so a monthly check WOULD have drifted...
+            // The jitter genuinely crossed the month boundary - so a monthly check WOULD have drifted...
             assertTrue(scalar(conn, "SELECT COUNT(*) FROM spikes WHERE ts >= DATE '2024-07-01'") > 0,
                 "some rows must have spilled into July");
             // ...yet the year is fully preserved.

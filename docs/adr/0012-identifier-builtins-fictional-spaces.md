@@ -8,7 +8,7 @@ decision-makers: David Conneely
 
 ## Context and Problem Statement
 
-Real datasets carry checksummed or format-constrained identifiers — NHS numbers, National
+Real datasets carry checksummed or format-constrained identifiers - NHS numbers, National
 Insurance numbers, driving licence numbers, passport numbers, payment card numbers. v0.1.0 offers
 only `pattern(...)` for these, which can reproduce the shape but neither the checksum nor any
 fictionality guarantee; the deferred-list sketch was "checksum-aware (Luhn) generation" as a
@@ -23,12 +23,12 @@ pattern-language extension.
 
 Chosen option: "five dedicated, identifier-specific built-ins", because a fictionality guarantee
 is identifier-specific knowledge (which prefix is never issued, which field value is impossible)
-that a generic pattern token cannot express — a Luhn token would produce checksum-valid numbers
+that a generic pattern token cannot express - a Luhn token would produce checksum-valid numbers
 indistinguishable from real cards.
 
 Ship five dedicated built-ins (spec 4.8, algorithms A.5-A.9) rather than generic checksum tokens in
 the pattern language. Each identifier needs its own frozen domain (`alterego:nhs-number`, ...) so
-outputs never correlate across identifier types — the same reason every other built-in has one.
+outputs never correlate across identifier types - the same reason every other built-in has one.
 
 Fictionality mechanism per identifier (full statements in spec 4.8):
 
@@ -46,7 +46,7 @@ Scoping: the four UK-document built-ins require locale country `GB` (fail-fast o
 
 **No `realistic()` opt-outs**, unlike phone/postcode. A realistic output here is a credential-shaped
 identifier that can collide with a real person's NHS record, NI account, licence, passport, or
-card — the risk-to-value ratio is categorically worse than a phone number that might ring. Card
+card - the risk-to-value ratio is categorically worse than a phone number that might ring. Card
 testing against payment networks is served by the networks' published test PANs, not by this
 library. This is a deliberate exclusion, revisitable per-identifier if a concrete need appears.
 Generic pattern-language extensions (`[ABC]`, `D{5}`) stay deferred; a generic checksum token is

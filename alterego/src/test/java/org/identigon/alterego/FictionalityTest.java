@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
  * {@code emailAddress()} uses an RFC 2606 reserved domain, every default {@code phoneNumber()}
  * falls inside a published Ofcom drama range, and every default {@code lastName()}/{@code
  * streetAddress()} theme word is drawn from the authored, deliberately fictional word list
- * (ADR 0010) rather than real population/vocabulary data — each over a large sample.
+ * (ADR 0010) rather than real population/vocabulary data - each over a large sample.
  */
 class FictionalityTest {
 

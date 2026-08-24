@@ -10,7 +10,7 @@ The name: an *effigy* is a deliberately fake likeness. Effigies makes the likene
 carries out the substitution.
 
 > **In one sentence:** *"Point me at a production database and help me produce a reviewable
-> configuration that incognito can run to make an anonymised copy — without me
+> configuration that incognito can run to make an anonymised copy - without me
 > hand-writing Java, and without ever showing a real data value to anything that doesn't need it."*
 
 ## Where it sits (and what stays out)
@@ -21,20 +21,20 @@ Three layers, each with one job:
 |:------|:---------------|:---------------|:----------------|
 | [alterego](../alterego) | fabricate one field value | yes | no |
 | [incognito](../incognito) | clone the schema + orchestrate the load from a policy | yes | no |
-| **Effigies (this directory)** | discover schema, author/infer the policy, drive a run | authoring is advisory; the produced config + runs are deterministic | **yes — here only** |
+| **Effigies (this directory)** | discover schema, author/infer the policy, drive a run | authoring is advisory; the produced config + runs are deterministic | **yes - here only** |
 
 Two boundaries are deliberate and load-bearing:
 
-- **No model in the engine path.** Any inference — heuristic or agent-driven — is *authoring*. The
+- **No model in the engine path.** Any inference - heuristic or agent-driven - is *authoring*. The
   anonymisation itself stays a deterministic, reproducible, model-free incognito run. The policy
   YAML is the durable, checked-in, reviewable artifact; Effigies helps you write it, then gets out
   of the way.
 - **Fail-closed survives.** Effigies never assigns a column role behind your back. It *suggests*; an
   unclassified column still aborts the run (incognito's fail-closed contract, ADR 17).
-  The DPIA report incognito emits — source-value survival, misdeclaration lint, structural
-  findings, and the illustrative sample rows — is the safety net that catches a bad classification.
+  The DPIA report incognito emits - source-value survival, misdeclaration lint, structural
+  findings, and the illustrative sample rows - is the safety net that catches a bad classification.
 - **Metadata only.** Schema discovery and any artifact Effigies produces for a human or an agent
-  carry schema *metadata* (names, types, the FK graph) — never sampled real values. Authoring works
+  carry schema *metadata* (names, types, the FK graph) - never sampled real values. Authoring works
   from the schema, not the data.
 
 See [ADR 23](../docs/adr/0023-authoring-above-the-engine.md) for
@@ -47,9 +47,9 @@ the root [`PLAN.md`](../PLAN.md) (`**Project:** effigies` entries) for the backl
 
 ## Try it in five minutes
 
-[`quickstart/`](../quickstart/) (at the repository root — it exercises the whole pipeline, not
+[`quickstart/`](../quickstart/) (at the repository root - it exercises the whole pipeline, not
 just Effigies) is a small, self-contained PostgreSQL schema (no Docker, no third-party data) with
-a finished `policy.yaml` — the fastest way to see `discover` → `scaffold` → `run` and the DPIA
+a finished `policy.yaml` - the fastest way to see `discover` -> `scaffold` -> `run` and the DPIA
 report working end to end before pointing Identigon at a real database.
 
 ## Usage Workflow
@@ -108,4 +108,4 @@ java -jar build/libs/identigon.jar help
 
 ## Licence
 
-MIT — see the [root LICENCE](../LICENCE).
+MIT - see the [root LICENCE](../LICENCE).

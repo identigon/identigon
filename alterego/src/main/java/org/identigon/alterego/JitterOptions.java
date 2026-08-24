@@ -6,7 +6,7 @@ import java.util.Objects;
  * Inclusive clamp bounds for a {@code shiftDate}/{@code shiftDateTime} jitter strategy
  * (docs/spec/alterego.md section 4.5), applied last, after the strategy has run. {@code T} is
  * {@link java.time.LocalDate} or {@link java.time.LocalDateTime}, matching the method it is
- * passed to. Values that would fall outside a bound are clamped to it, not rejected — values
+ * passed to. Values that would fall outside a bound are clamped to it, not rejected - values
  * near a bound pile up on it, documented rather than hidden. There is no "unbounded" instance:
  * an unclamped call simply omits the trailing {@code JitterOptions} argument.
  *

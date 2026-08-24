@@ -91,7 +91,7 @@ class YamlConfigTest {
     void columnMissingRoleKeyParsesWithNullRoleNotPayloadDefault() {
         // A column entry present under `columns:` but missing the `role:` key (e.g. a policy
         // author who declared a strategy but forgot the role) must NOT silently resolve to
-        // ColumnRole.PAYLOAD — SchemaDiscoveryStage relies on role() staying null to fail closed.
+        // ColumnRole.PAYLOAD - SchemaDiscoveryStage relies on role() staying null to fail closed.
         String yamlString = """
             tables:
               customers:
@@ -111,7 +111,7 @@ class YamlConfigTest {
     @Test
     void columnWithBlankRoleValueParsesWithNullRoleNotAnEnumException() {
         // Distinct from the missing-key case above: `scaffold`'s own output always emits every
-        // key with a blank value ("role:              # TODO classify ..." — the key IS present,
+        // key with a blank value ("role:              # TODO classify ..." - the key IS present,
         // its YAML value is null), not an absent key. ColumnRole.valueOf(String.valueOf(null))
         // used to evaluate ColumnRole.valueOf("NULL") and throw IllegalArgumentException instead
         // of leaving the field null for fail-closed validation to report clearly.

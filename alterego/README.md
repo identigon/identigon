@@ -42,13 +42,13 @@ every stream and thread you like.
 ## How determinism works
 
 Every output is a function of the salt, a domain (the transformation's own namespace, e.g.
-`alterego:first-name`), and the input value — nothing else. Concretely, an HMAC-SHA256 key is
+`alterego:first-name`), and the input value - nothing else. Concretely, an HMAC-SHA256 key is
 derived from `(salt, domain, input)`, and that key drives a counter-mode byte stream the strategy
 draws from. Two consequences fall out of that directly: the same input always produces the same
 output, regardless of what order a stream processes elements in or whether it runs in parallel; and
 two different transformations (different domains) of the same input never correlate, so knowing one
 pseudonym reveals nothing about another. The library never reads the system clock,
-`Locale.getDefault()`, or any other ambient state — the only inputs to any output are the ones you
+`Locale.getDefault()`, or any other ambient state - the only inputs to any output are the ones you
 configured explicitly.
 
 ## This is pseudonymisation, not anonymisation
@@ -64,7 +64,7 @@ could avoid:
   data is still the most common pseudonym in the output, and a jittered date stays close to the true
   one by construction (`shiftDate(30)` never moves a date by more than 30 days). An attacker with
   population statistics can make informed guesses about frequent values without ever seeing the
-  salt. Where this matters, the mitigation is aggregation or suppression — outside this library's
+  salt. Where this matters, the mitigation is aggregation or suppression - outside this library's
   scope.
 - **Low-cardinality values gain almost nothing.** Deterministically relabelling a `Boolean` or a
   small enum is just that: a relabelling of a handful of values. These types are supported so
@@ -90,7 +90,7 @@ real mailbox, phone number, or deliverable address:
 | `lastName()`                | reads as obviously fictional, not a real person's surname | authored (not sourced) surname vocabulary (e.g. `"Testperson"`)                                  |
 | `streetAddress()`           | reads as obviously fictional, not a real street           | authored (not sourced) theme word (e.g. `"Example"`) plus a real structural type word (`"Road"`) |
 
-Each of the first eight is format-valid — that's exactly why it was reserved — so it passes ordinary
+Each of the first eight is format-valid - that's exactly why it was reserved - so it passes ordinary
 validation but fails a live lookup against real reference data (an MX record, a number allocation, a
 delivery address, a PDS trace). Where full realism matters more than the guarantee,
 `PhoneOptions.realistic()` and `PostcodeOptions.realistic()` opt out explicitly; their Javadoc
@@ -104,7 +104,7 @@ Transformation<String> cc = alterego.creditCardNumber();
 
 `lastName()` and `streetAddress()` use a different mechanism: there's no officially reserved
 "fictional surname" or "fictional street" space to draw from, so their vocabulary is authored rather
-than sourced from real UK data, and reviewed to avoid coinciding with a known real name (ADR 0010) —
+than sourced from real UK data, and reviewed to avoid coinciding with a known real name (ADR 0010) -
 a curation-time guarantee, not a structural one. `firstName()` and `city()` are unaffected and keep
 drawing from real data; the surname alone is enough to make a full name unmistakably not a real
 person's.
@@ -118,10 +118,10 @@ Transformation<String> uniqueCustomerId =
 
 `unique()` guarantees distinct inputs never map to the same output, backed by a `MappingStore`
 (configure one via `AlterEgo.builder().mappingStore(...)`). Every undecorated transformation is
-fully order-independent — reordering, filtering, or deduplicating a stream never changes an
+fully order-independent - reordering, filtering, or deduplicating a stream never changes an
 individual mapping. `unique()` is the one deliberate exception: when two inputs' natural candidates
 would collide, whichever one is processed *first* keeps that natural candidate, and the other is
-re-derived. Absent an actual collision — the overwhelming majority of real data —
+re-derived. Absent an actual collision - the overwhelming majority of real data -
 `unique()` output is identical regardless of processing order; when a collision does happen, only
 those specific inputs are affected, and the resolution is recorded in the mapping store, so it stays
 stable on every later run.
@@ -138,7 +138,7 @@ try (FileMappingStore store = FileMappingStore.open(Path.of("mappings.alterego")
 
 ## Record coherence
 
-Transforming a record's fields independently can produce incoherent combinations — a town in the
+Transforming a record's fields independently can produce incoherent combinations - a town in the
 north paired with a postcode and phone number that only exist in London. A `RecordScope` lets
 related fields agree:
 
@@ -151,12 +151,12 @@ try (RecordScope rec = alterego.record()) {
 ```
 
 Whichever of those three fields runs first fixes the record's place; the others follow it. This is
-best-effort coherence, not a fictionality guarantee — the guarantees in the table above hold
+best-effort coherence, not a fictionality guarantee - the guarantees in the table above hold
 regardless of whether a `RecordScope` is in use.
 
 ## Extending with custom strategies
 
-A custom strategy is a plain lambda; binding it gives it every feature a built-in has — determinism,
+A custom strategy is a plain lambda; binding it gives it every feature a built-in has - determinism,
 `unique()`, `stored()`, and record coherence:
 
 ```java
@@ -171,17 +171,17 @@ Prefix your own domains (`"myapp:..."`) to avoid clashing with AlterEgo's own bu
 
 ## Licence
 
-The source code is MIT-licensed — see [`LICENCE`](LICENCE).
+The source code is MIT-licensed - see [`LICENCE`](LICENCE).
 
 ## Data attribution
 
 The bundled UK dictionary data (names, towns, streets, organisation-name components) is derived from
 UK government sources published under the Open Government Licence v3.0, with one documented
-exception (Ofcom's drama phone-number ranges — see
+exception (Ofcom's drama phone-number ranges - see
 [research note 0003](../docs/research/0003-alterego-phone-ranges.md) for why). Full provenance for
 every source is tracked in [research note 0001](../docs/research/0001-alterego-dictionaries.md);
 the exact required attribution string for every
-source in use is consolidated in [`NOTICE`](NOTICE), which — along with `LICENCE` — is packaged into
+source in use is consolidated in [`NOTICE`](NOTICE), which - along with `LICENCE` - is packaged into
 the built JAR's `META-INF/` directory. **This attribution obligation passes through transitively to
 any application that depends on AlterEgo**, since the JAR bundles this data into every application
 built on it, not just this repository.

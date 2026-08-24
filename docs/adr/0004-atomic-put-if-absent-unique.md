@@ -29,7 +29,7 @@ PutUniqueResult putIfAbsentUnique(String namespace, String key, String value);
 // sealed: Stored | ExistingMapping(value) | ValueTaken
 ```
 
-It stores `key → value` only if the key has no mapping AND the value is unused as an output in the
+It stores `key -> value` only if the key has no mapping AND the value is unused as an output in the
 namespace, atomically as a whole (specification section 5.1).
 
 ### Consequences
@@ -37,7 +37,7 @@ namespace, atomically as a whole (specification section 5.1).
 * Good, because no reservation state exists outside the mapping itself, so nothing can leak.
 * Good, because a JDBC implementation is one transaction; the in-memory implementation is one lock
   or compute.
-* Neutral: the `unique()` retry loop is simple: `ValueTaken` → bump the derivation counter and try
+* Neutral: the `unique()` retry loop is simple: `ValueTaken` -> bump the derivation counter and try
   again.
 * Neutral: a reusable store contract test enforces the atomicity requirement on all
   implementations.

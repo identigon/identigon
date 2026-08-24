@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.identigon.incognito.api.AttributeCascadeStore;
 
 /**
- * In-memory {@link AttributeCascadeStore} — the v1.0 default: published attributes, FK linkage, and
+ * In-memory {@link AttributeCascadeStore} - the v1.0 default: published attributes, FK linkage, and
  * coherence-group jitter deltas held in memory for the duration of one run.
  */
 public final class InMemoryAttributeCascadeStore implements AttributeCascadeStore {

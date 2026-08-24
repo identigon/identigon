@@ -81,7 +81,7 @@
         <exclude name="AvoidThrowingRawExceptionTypes"/>
         <!-- Declaring an unchecked domain exception (IncognitoException & friends, all
              RuntimeException) in `throws` is deliberate self-documentation, paired with the
-             Xdoclint:all-enforced @throws Javadoc — not an oversight. -->
+             Xdoclint:all-enforced @throws Javadoc - not an oversight. -->
         <exclude name="AvoidUncheckedExceptionsInSignatures"/>
         <!-- Matches the existing CognitiveComplexity/CyclomaticComplexity/NPathComplexity/GodClass
              exclusions above: a streaming per-table pipeline method is kept together deliberately

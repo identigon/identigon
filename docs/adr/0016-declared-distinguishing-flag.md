@@ -8,11 +8,11 @@ decision-makers: David Conneely
 
 ## Context and Problem Statement
 
-After fabrication, some `SENSITIVE` columns can safely be kept real — a boolean or a small code set
-singles out no one — while others cannot: a rare code, an unusual amount, or free-text narrative
+After fabrication, some `SENSITIVE` columns can safely be kept real - a boolean or a small code set
+singles out no one - while others cannot: a rare code, an unusual amount, or free-text narrative
 can itself identify a person, making it effectively a quasi-identifier. An earlier design decided
 this automatically with a `COUNT(DISTINCT)` cardinality gate. That gate was a k-anonymity-era
-residue and, critically, the **last place the privacy path read source values** — a dataset-level
+residue and, critically, the **last place the privacy path read source values** - a dataset-level
 probe intended to be removed entirely.
 
 Backfilled 2026-07-30, documenting a decision made earlier in the project's development.
@@ -31,9 +31,9 @@ author choice instead of an emergent property of the data.
 
 The policy author **declares** per `SENSITIVE` column a boolean `distinguishing`:
 
-* `distinguishing: false` → keep the real value.
-* `distinguishing: true` → fabricate it (a `QuasiIdStrategy`) or redact it (a `RedactionStrategy`).
-* absent → the run fails.
+* `distinguishing: false` -> keep the real value.
+* `distinguishing: true` -> fabricate it (a `QuasiIdStrategy`) or redact it (a `RedactionStrategy`).
+* absent -> the run fails.
 
 The declaration is validated at **config time**, before any row is read. The distinct-count
 survives only as a **default-on, advisory misdeclaration lint** (`distinguishingLint`: `WARN` |
@@ -43,7 +43,7 @@ a pre-filter for the lint).
 
 ### Consequences
 
-* Good, because the privacy decision no longer reads any source value — it acts purely on the flag
+* Good, because the privacy decision no longer reads any source value - it acts purely on the flag
   and the presence of a strategy, checked before load.
 * Good, because keep-vs-fabricate is an explicit, reviewable, one-word author decision rather than
   an emergent property of the data.

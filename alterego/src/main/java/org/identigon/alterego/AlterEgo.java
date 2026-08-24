@@ -104,7 +104,7 @@ public final class AlterEgo implements AutoCloseable {
    * escapes, literals) into a transformation whose output always matches the pattern's shape.
    * Compiled once, here, not per element; malformed patterns throw
    * {@link AlterEgoPatternException} immediately. Carries no fictionality guarantee (section
-   * 4.1) — use a specific built-in such as {@code postcode()} when that guarantee matters.
+   * 4.1) - use a specific built-in such as {@code postcode()} when that guarantee matters.
    *
    * @param pattern the pattern text (section 4.6)
    * @return a {@link Transformation} whose output always matches {@code pattern}'s shape
@@ -246,7 +246,7 @@ public final class AlterEgo implements AutoCloseable {
 
   /**
    * Replacement drawn from the locale's country's surname dictionary (section 4.2). The surname
-   * vocabulary is authored to read as obviously fictional (section 4.1) — never a real person's
+   * vocabulary is authored to read as obviously fictional (section 4.1) - never a real person's
    * surname.
    *
    * @return a {@link Transformation} over surnames
@@ -296,7 +296,7 @@ public final class AlterEgo implements AutoCloseable {
   /**
    * A house number (1-299) plus a complete street name composed from the locale's country's
    * street dictionaries (section 4.3). Theme words are authored to read as obviously fictional
-   * (section 4.1) — never a real street name; type words ("Road", "Avenue") are real structural
+   * (section 4.1) - never a real street name; type words ("Road", "Avenue") are real structural
    * vocabulary.
    *
    * @return a {@link Transformation} over street addresses

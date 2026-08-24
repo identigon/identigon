@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The section 2.5 decorator algebra: {@code unique()} subsumes {@code stored()}; both are
- * idempotent; {@code t.unique().stored()} ≡ {@code t.unique()}; {@code t.stored().unique()}
- * ≡ {@code t.unique()}. Proven by observing behaviour (an ever-incrementing strategy reveals
+ * idempotent; {@code t.unique().stored()} === {@code t.unique()}; {@code t.stored().unique()}
+ * === {@code t.unique()}. Proven by observing behaviour (an ever-incrementing strategy reveals
  * whether a given call actually reused a stored/unique value or re-ran the strategy), not by
  * inspecting internals.
  */

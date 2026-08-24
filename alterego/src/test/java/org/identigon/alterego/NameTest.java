@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
  * Exercises firstName()/lastName()/fullName() against the ZZ synthetic test fixtures (for
  * exact, controlled assertions) and the default-configured GB dictionaries (for end-to-end
  * coverage of the default-configured path). firstName() draws from a real curated dictionary;
- * lastName() draws from an authored, deliberately fictional dictionary (ADR 0010) — see
+ * lastName() draws from an authored, deliberately fictional dictionary (ADR 0010) - see
  * {@link FictionalityTest} for the property test confirming every lastName() output is drawn
  * from that fictional set.
  */

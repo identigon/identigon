@@ -29,7 +29,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * row's real, untranslated FK value forever (SPEC §7.2).
  *
  * <p>{@code authorship}'s real PK is {@code (author_id, book_id, edition)} (3 columns); {@code
- * chapter}'s composite FK references only {@code UNIQUE (author_id, book_id)} (2 columns) — the FK
+ * chapter}'s composite FK references only {@code UNIQUE (author_id, book_id)} (2 columns) - the FK
  * cannot resolve via the key store, which only tracks PK-based surrogate mappings.
  *
  * <p>Requires Docker; skips gracefully otherwise.
@@ -66,7 +66,7 @@ class PartialCompositeFkFailClosedE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)

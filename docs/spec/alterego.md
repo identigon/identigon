@@ -1,4 +1,4 @@
-# AlterEgo — Specification
+# AlterEgo - Specification
 
 AlterEgo is a Java 25 library for deterministic pseudonymisation. It replaces personal or sensitive
 values (names, addresses, dates, reference numbers) with realistic-looking substitutes, such that
@@ -22,7 +22,7 @@ left to the implementer's choice of algorithm or the JDK's.
 
 ### Goals
 
-- **Deterministic**: the same input, salt, and configuration always produce the same output — across
+- **Deterministic**: the same input, salt, and configuration always produce the same output - across
   runs, across JVMs and JDK versions, and independent of the order in which inputs are processed.
   Determinism depends on nothing outside this library; the library never reads the system clock or
   any other ambient state.
@@ -37,10 +37,10 @@ left to the implementer's choice of algorithm or the JDK's.
 - **Fictional by default**: where a recognised reserved-for-fiction or guaranteed-invalid value
   space exists (reserved email domains, Ofcom drama numbers, impossible postcodes), built-ins
   generate inside it; surnames and street names go further, drawing from authored, deliberately
-  obvious vocabulary rather than real data at all — so pseudonymised data cannot accidentally
+  obvious vocabulary rather than real data at all - so pseudonymised data cannot accidentally
   reference something real (section 4.1).
-- **Record-coherent**: fields of one record can be transformed consistently — town, postcode, and
-  phone number agree — via an explicit record scope (section 6).
+- **Record-coherent**: fields of one record can be transformed consistently - town, postcode, and
+  phone number agree - via an explicit record scope (section 6).
 - **Zero runtime dependencies**: the library depends only on the JDK.
 
 ### Non-goals
@@ -164,19 +164,19 @@ public interface Transformation<T> extends Function<T, T> {
     /** Guarantee distinct inputs map to distinct outputs (requires a MappingStore). */
     Transformation<T> unique();
 
-    /** Persist input→output pairs in the MappingStore, and reuse them on later calls. */
+    /** Persist input->output pairs in the MappingStore, and reuse them on later calls. */
     Transformation<T> stored();
 }
 ```
 
 Decorator algebra, so composition is never ambiguous: `unique()` subsumes `stored()`; both are
-idempotent (`t.unique().unique()` ≡ `t.unique()`); `t.unique().stored()` ≡ `t.unique()`; and
-`t.stored().unique()` ≡ `t.unique()`. Calling either without a configured `MappingStore` throws
+idempotent (`t.unique().unique()` === `t.unique()`); `t.unique().stored()` === `t.unique()`; and
+`t.stored().unique()` === `t.unique()`. Calling either without a configured `MappingStore` throws
 `AlterEgoStoreException` immediately (not per element).
 
 Transformations are immutable and thread-safe; one instance can be shared across threads and reused
 across streams. Null handling is governed by the builder's `NullPolicy`:
-`PASS_THROUGH` (default — `apply(null)` returns `null`) or `FAIL` (throws `AlterEgoException`).
+`PASS_THROUGH` (default - `apply(null)` returns `null`) or `FAIL` (throws `AlterEgoException`).
 
 ### 2.6 AlterEgo and supported value types
 
@@ -188,7 +188,7 @@ AlterEgo alterego = AlterEgo.builder()
         .locale(Locale.UK)                       // default: Locale.UK (a fixed constant)
         .mappingStore(new InMemoryMappingStore())// default: none (unique()/stored() then throw)
         .nullPolicy(NullPolicy.PASS_THROUGH)     // default
-        .rawMappingKeys(false)                   // default: false (hashed keys — section 5.1)
+        .rawMappingKeys(false)                   // default: false (hashed keys - section 5.1)
         .uniqueMaxAttempts(64)                   // default: 64 (section 5.3)
         .build();
 ```
@@ -199,15 +199,15 @@ AlterEgo alterego = AlterEgo.builder()
   secret in a `byte[]`/`char[]` should still zero their own copy.
 - **Lifecycle**: `AlterEgo` is `AutoCloseable`. `close()` (and its alias `destroy()`) zeroes the
   instance's salt bytes and marks the instance closed; any later factory call on it throws
-  `IllegalStateException`. `close()` is idempotent. Closing is optional — an instance left open is
-  not a leak beyond the salt residing in memory — but a try-with-resources block, or an explicit
+  `IllegalStateException`. `close()` is idempotent. Closing is optional - an instance left open is
+  not a leak beyond the salt residing in memory - but a try-with-resources block, or an explicit
   `destroy()`, lets security-sensitive callers bound how long the salt lives. Every
   `Transformation` shares the lifetime of the instance that produced it: because they share the one
   salt array that `close()` zeroes, a transformation's lifetime cannot outlive its parent's.
   Applying a transformation after its parent is closed therefore throws `IllegalStateException`
   (it does **not** silently derive from the zeroed salt). Close an instance only once every
   transformation built from it is done being used.
-- **Locale**: defaults to the fixed constant `Locale.UK` (`en-GB`) — this library's primary
+- **Locale**: defaults to the fixed constant `Locale.UK` (`en-GB`) - this library's primary
   deployment. A *fixed* default is deterministic on every machine; what remains banned is
   `Locale.getDefault()`, which would tie output to machine configuration (ADR 0006). Non-UK users
   configure explicitly; an unshipped country fails fast (section 4). v1 built-ins consult only the
@@ -215,7 +215,7 @@ AlterEgo alterego = AlterEgo.builder()
 - **`rawMappingKeys`**: applies to every `stored()`/`unique()`/`context.mappings()` use from this
   instance. `false` (default) writes purpose-separated `HMAC(salt, input)` store keys (section 5.1,
   Appendix A.4); `true` writes the raw canonical input text as the key instead, for debugging a
-  store's contents directly — an explicit, instance-wide opt-out of the privacy-by-default
+  store's contents directly - an explicit, instance-wide opt-out of the privacy-by-default
   behaviour, not a per-transformation choice.
 - **`uniqueMaxAttempts`**: the retry budget `unique()` (section 5.3) exhausts before throwing
   `AlterEgoCollisionException`, applied to every `unique()` transformation from this instance. Must
@@ -231,7 +231,7 @@ Transformation<String> bind(String domain, Strategy<String> strategy);
 
 `domain` namespaces both the derived randomness and the mapping store, so two different
 transformations of the same input do not collide or correlate. Domains must match
-`[A-Za-z0-9:._-]{1,100}` (validated at bind time) — this keeps the derivation message in Appendix
+`[A-Za-z0-9:._-]{1,100}` (validated at bind time) - this keeps the derivation message in Appendix
 A.1 unambiguous. Built-ins use fixed, documented domain names (e.g.
 `"alterego:first-name"`), which keeps outputs stable across library versions; clients should use
 their own prefix (`"myapp:..."`).
@@ -239,7 +239,7 @@ their own prefix (`"myapp:..."`).
 Derivation and mapping-store persistence need a stable canonical text form for each value. Rather
 than an open-ended codec SPI, AlterEgo supports a fixed set of types, chosen to mirror what database
 columns typically store: text, numbers, dates, timestamps, flags, identifiers, and coded values.
-Canonical forms **must be injective** (distinct values ⇒ distinct canonical text): a non-injective
+Canonical forms **must be injective** (distinct values => distinct canonical text): a non-injective
 form would give two distinct inputs the same pseudonym and silently break
 `unique()`. The JDK `toString()` forms below are injective and are pinned as the canonical
 encodings:
@@ -248,15 +248,15 @@ encodings:
 |-------------------|---------------------------------------------------------------------|
 | `String`          | the value itself                                                    |
 | `Integer`, `Long` | `Integer.toString` / `Long.toString` (decimal, `-` sign)            |
-| `Boolean`         | `toString()` — `true` / `false`                                     |
-| `LocalDate`       | `toString()` — ISO-8601 (`2026-07-12`)                              |
-| `LocalTime`       | `toString()` — ISO-8601                                             |
-| `LocalDateTime`   | `toString()` — ISO-8601; note this omits zero seconds (`14:30`) and |
+| `Boolean`         | `toString()` - `true` / `false`                                     |
+| `LocalDate`       | `toString()` - ISO-8601 (`2026-07-12`)                              |
+| `LocalTime`       | `toString()` - ISO-8601                                             |
+| `LocalDateTime`   | `toString()` - ISO-8601; note this omits zero seconds (`14:30`) and |
 |                   | includes nanoseconds only when present; injective either way        |
-| `Instant`         | `toString()` — ISO-8601 UTC                                         |
-| `YearMonth`       | `toString()` — ISO-8601 (`2026-07`)                                 |
+| `Instant`         | `toString()` - ISO-8601 UTC                                         |
+| `YearMonth`       | `toString()` - ISO-8601 (`2026-07`)                                 |
 | `BigDecimal`      | `.stripTrailingZeros().toPlainString()`                             |
-| `UUID`            | `toString()` — lower case                                           |
+| `UUID`            | `toString()` - lower case                                           |
 | any `enum`        | `name()`                                                            |
 
 `bind(domain, type, strategy)` throws `AlterEgoConfigException` immediately for an unsupported
@@ -305,7 +305,7 @@ Two limits follow from determinism itself and are documented rather than hidden:
   the most common surname in the input is the most common pseudonym in the output. An attacker with
   population statistics can make good guesses about frequent values without the salt; similarly, a
   jittered date remains close to the truth by construction (`shiftDate(30)`
-  keeps it within 30 days). Where this matters, the mitigation is aggregation or suppression — out
+  keeps it within 30 days). Where this matters, the mitigation is aggregation or suppression - out
   of scope (section 1).
 - **Low-cardinality values gain almost nothing.** A deterministic mapping of a `Boolean` or a small
   enum is a relabelling of a handful of values and provides essentially no protection on its own.
@@ -315,7 +315,7 @@ Two limits follow from determinism itself and are documented rather than hidden:
 ### 3.4 Output stability
 
 Outputs are a function of: salt, locale, domain, dictionary contents, and the Appendix A
-algorithms — all of which are owned by this library, none by the JDK. Therefore:
+algorithms - all of which are owned by this library, none by the JDK. Therefore:
 
 - Dictionaries are versioned; a dictionary change is a breaking change and is called out in release
   notes.
@@ -335,9 +335,9 @@ no resources for the locale's country, malformed pattern, invalid options.
 Realistic replacement values are a property of the **country**, not the language. A dataset in Welsh
 is not a dataset about Wales, just as `en-GB` implies the English language, not an England location:
 names, towns, streets, postcodes, and phone numbers in data are UK-wide regardless the language of
-the application. Everything the built-ins consult — dictionaries (names, towns, streets,
+the application. Everything the built-ins consult - dictionaries (names, towns, streets,
 organisation components) and structural rules (postcode formats, fictional phone ranges, recognised
-legal suffixes) — therefore resolves by the locale's **country**: exact country match, else
+legal suffixes) - therefore resolves by the locale's **country**: exact country match, else
 `AlterEgoConfigException` (never a silent borrow from another country). The dictionaries are UK-wide
 pools that naturally include Welsh, Scottish, and Northern Irish names and places; although
 currently town and street entries use their English-language forms (Swansea, not Abertawe).
@@ -376,13 +376,13 @@ message. Where such a region exists, the built-in generates inside it **by defau
 | `nhsNumber()`               | never a live NHS number       | the NHS test range: numbers beginning  |
 |                             |                               | `999` are reserved for test data and   |
 |                             |                               | never issued; check digit valid (A.5)  |
-| `nationalInsuranceNumber()` | never an allocated NI number  | prefix `QQ` — `Q` is never used as a   |
+| `nationalInsuranceNumber()` | never an allocated NI number  | prefix `QQ` - `Q` is never used as a   |
 |                             |                               | first letter in allocated prefixes;    |
 |                             |                               | HMRC's own documentation example       |
-| `drivingLicenceNumber()`    | never a real GB driving       | surname block `99999` — impossible on  |
+| `drivingLicenceNumber()`    | never a real GB driving       | surname block `99999` - impossible on  |
 |                             | licence number                | a real licence, where a real surname   |
 |                             |                               | always contributes at least one letter |
-| `passportNumber()`          | never a valid UK passport     | two leading letters (`ZZ`) — real UK   |
+| `passportNumber()`          | never a valid UK passport     | two leading letters (`ZZ`) - real UK   |
 |                             | number                        | passport numbers are wholly numeric    |
 | `creditCardNumber()`        | never an issued card number   | leading digit `0`, an ISO/IEC 7812     |
 |                             |                               | major industry identifier no card      |
@@ -397,7 +397,7 @@ Two things follow from the mechanism and are documented plainly:
 - **Fictional values pass format checks but fail live lookups.** Drama ranges are format-valid (that
   is why Ofcom reserved them) and reserved domains are syntax-valid, so regex-shaped validation
   accepts the output; a system that validates against live reference data (PAF, number allocation,
-  MX lookup) will reject it — usually exactly the point of pseudonymised data.
+  MX lookup) will reject it - usually exactly the point of pseudonymised data.
 - **Opting out is explicit.** Where full realism matters more than the guarantee, options such as
   `PhoneOptions.realistic()` or `PostcodeOptions.realistic()` disable it, and their documentation
   states the risk: realistic output can collide with a real person's number or address.
@@ -408,18 +408,18 @@ vocabulary is authored rather than sourced from real UK population/geographic da
 avoid coinciding with a known real name (ADR 0010). This is a curation-time guarantee, not a
 structural or regulatory one like the other three: it depends on the wordlist actually having been
 reviewed carefully, not on an external authority's own reserved-value-space rules. The policy is
-per-category, not per-locale — any future country's surname/street dictionaries are authored the
+per-category, not per-locale - any future country's surname/street dictionaries are authored the
 same way, so the guarantee doesn't require a separate "fictional" locale per real one.
 
 The identifier transformations (section 4.8) fall into the same two families: `nhsNumber()`
 draws from an officially reserved test range, while `nationalInsuranceNumber()`,
 `drivingLicenceNumber()`, `passportNumber()`, and `creditCardNumber()` rely on structural
-impossibility — a prefix or field value a real identifier can never carry, chosen so the output
+impossibility - a prefix or field value a real identifier can never carry, chosen so the output
 still passes shape-and-checksum validation.
 
 Countries with no defined fictional range fall back to in-place digit replacement with **no
 guarantee**; the Javadoc of each built-in states, per country, which category applies. No guarantee
-of this kind is possible for first names, towns, or organisation names — each output word is real
+of this kind is possible for first names, towns, or organisation names - each output word is real
 (that is what makes it realistic); only the combination and its attachment to a record are
 synthetic. Candidate future additions in the same spirit: TEST-NET IP addresses (RFC 5737) and
 `.test`/`.invalid` domains (RFC 6761).
@@ -429,7 +429,7 @@ synthetic. Candidate future additions in the same spirit: TEST-NET IP addresses 
 | Method               | Behaviour                                                       |
 |----------------------|-----------------------------------------------------------------|
 | `firstName()`        | Replacement drawn from the country's first-name dictionary.     |
-| `lastName()`         | Replacement drawn from the country's surname dictionary —       |
+| `lastName()`         | Replacement drawn from the country's surname dictionary -       |
 |                      | authored to read as obviously fictional (section 4.1), not real |
 |                      | population data.                                                |
 | `fullName()`         | Tokenises and delegates to the name strategies (see below).     |
@@ -461,20 +461,20 @@ Each part goes through `context.derived(...)` with the corresponding built-in do
 
 Options (per-transformation, e.g. `firstName(NameOptions.preserveInitial())`):
 
-- `preserveInitial()` — output starts with the same letter as the input. If the dictionary has no
+- `preserveInitial()` - output starts with the same letter as the input. If the dictionary has no
   entry with that initial, the option is ignored for that input (unconstrained pick, deterministic).
 - Name dictionaries are flat, untagged lists in v1; tagged name dictionaries (e.g. by gender)
   are a possible later extension, not attempted in v1 because inference from the input is
-  unreliable. (Town dictionaries do carry structural tags — section 6.3.)
+  unreliable. (Town dictionaries do carry structural tags - section 6.3.)
 
 ### 4.3 Addresses
 
 | Method            | Behaviour                                                            |
 |-------------------|----------------------------------------------------------------------|
-| `streetAddress()` | House number drawn deterministically from 1–299, plus a complete     |
+| `streetAddress()` | House number drawn deterministically from 1-299, plus a complete     |
 |                   | street name composed from the country's dictionary (an authored,     |
 |                   | obviously-fictional theme word plus a real structural type word,     |
-|                   | e.g. "Example Road" — section 4.1) — the dictionary, not the code,   |
+|                   | e.g. "Example Road" - section 4.1) - the dictionary, not the code,   |
 |                   | owns the vocabulary.                                                 |
 | `city()`          | Replacement from the country's town/city dictionary.                 |
 | `postcode()`      | Country-specific format with the fictionality guarantee of 4.1 where |
@@ -509,10 +509,10 @@ alterego.shiftInstant(30, 86400)                     // Transformation<Instant>,
 
 Eight factory methods, each pairing a date strategy with (for `LocalDateTime`) a time strategy;
 `AlterEgo.DateField` and `AlterEgo.TimeField` are nested enums selecting which strategy runs. Each
-of the eight also has a twin taking a trailing `JitterOptions<T>` for clamping — sixteen methods in
+of the eight also has a twin taking a trailing `JitterOptions<T>` for clamping - sixteen methods in
 total.
 
-**Date strategies** — `LocalDate`, and the date part of every `shiftDateTime(...)` call:
+**Date strategies** - `LocalDate`, and the date part of every `shiftDateTime(...)` call:
 
 | Call                                  | Behaviour                                             |
 |---------------------------------------|-------------------------------------------------------|
@@ -524,7 +524,7 @@ total.
 |                                       | `nextInt(lengthOfMonth)` / `nextInt(lengthOfYear)`    |
 |                                       | (Appendix A.3), 1-based.                              |
 
-**Time strategies** — the time part of `shiftDateTime(...)` only, as the trailing argument(s):
+**Time strategies** - the time part of `shiftDateTime(...)` only, as the trailing argument(s):
 
 | Call                             | Behaviour                                                  |
 |----------------------------------|------------------------------------------------------------|
@@ -544,26 +544,26 @@ giving the six overloads `shiftDateTime(int days, int seconds)`,
 `shiftDateTime(AlterEgo.DateField field, AlterEgo.TimeField field)`. The date component is always
 drawn before the time component.
 
-**Instant strategies** — for `shiftInstant(int days, int seconds)`:
+**Instant strategies** - for `shiftInstant(int days, int seconds)`:
 Independent whole-day shift and whole-second shift, bounded by `days` and `seconds` respectively,
 applied to an `Instant`. Sub-second precision is preserved, not zeroed.
 
 - Nanoseconds are zeroed in the output of every `shiftDateTime(...)` overload, unconditionally,
-  regardless of which time strategy ran — carrying them over unperturbed from the input would leak
+  regardless of which time strategy ran - carrying them over unperturbed from the input would leak
   sub-second precision that is itself close to unique per record.
 - `JitterOptions<T>` (`T` is `LocalDate`, `LocalDateTime`, or `Instant`, matching the method) clamps
   the result, applied last, after the strategy has run:
-    - `JitterOptions.min(value)`, `JitterOptions.max(value)`, `JitterOptions.minmax(min, max)` — an
+    - `JitterOptions.min(value)`, `JitterOptions.max(value)`, `JitterOptions.minmax(min, max)` - an
       **inclusive** bound, or both in one call. Values that would fall outside a bound are clamped
-      to it, not rejected — values near a bound pile up on it; documented, not hidden. The library
+      to it, not rejected - values near a bound pile up on it; documented, not hidden. The library
       never reads the clock (section 3.4): a caller wanting "no future dates" writes
       `JitterOptions.max(LocalDate.now())`. Note the type-dependent meaning of "past", which the
       caller owns: a `LocalDate` strictly in the past excludes today
       (`max(LocalDate.now().minusDays(1))`), whereas a `LocalDateTime` strictly in the past is
       anything before now (`max(LocalDateTime.now().minusNanos(1))`).
-    - `JitterOptions` is an immutable value type with no "no bounds" state of its own — an unclamped
+    - `JitterOptions` is an immutable value type with no "no bounds" state of its own - an unclamped
       call simply omits the trailing `JitterOptions` argument.
-- Because every draw is derived from the input value, equal timestamps jitter identically —
+- Because every draw is derived from the input value, equal timestamps jitter identically -
   preserving equality relationships in the data. Ordering is **not** preserved: two distinct inputs'
   shifts are drawn independently, so a date before another in the input can land after it in the
   output (most likely when their true difference is small relative to the jitter range).
@@ -588,11 +588,11 @@ Pattern language (v1, deliberately small):
 
 Patterns are compiled once (at `pattern(...)` call time); a malformed pattern (e.g. trailing `\`)
 throws `AlterEgoPatternException` with the offending position. A raw pattern carries no fictionality
-guarantee (section 4.1): `pattern("LLDD DLL")` can and will produce real postcodes — use
+guarantee (section 4.1): `pattern("LLDD DLL")` can and will produce real postcodes - use
 `postcode()` when the guarantee matters. Possible later extensions, explicitly out of scope for the
 pattern language itself: character classes `[ABC]` and repetition counts `D{5}`. Checksum-carrying
 identifiers (NHS numbers, card numbers) are deliberately built-ins with pinned fictional value
-spaces (section 4.8), not generic pattern tokens — a generic Luhn token could not also express the
+spaces (section 4.8), not generic pattern tokens - a generic Luhn token could not also express the
 never-issued-prefix rules that make the output safe.
 
 There is deliberately no generic format-inferring transformation (section 1 non-goals):
@@ -610,7 +610,7 @@ phone digits) do so as documented per-transformation behaviour, not via a public
 | `mask(char c)`               | Mask every character with `c`; equivalent to             |
 |                              | `mask(c, 0)`.                                            |
 | `mask(char c, int keepLast)` | Mask all but the last `keepLast` characters with `c`.    |
-|                              | Inputs of length ≤ `keepLast` are returned unchanged;    |
+|                              | Inputs of length <= `keepLast` are returned unchanged;    |
 |                              | negative `keepLast` throws `AlterEgoConfigException`.    |
 
 `redact(type)` returns `constant(default)` for the given type, so it inherits every property of
@@ -618,13 +618,13 @@ phone digits) do so as documented per-transformation behaviour, not via a public
 for each supported value type: `""` (`String`), `0` (`Integer`), `0L` (`Long`), `false`
 (`Boolean`), `1970-01-01` (`LocalDate`), `1970-01-01T00:00` (`LocalDateTime`), the epoch
 (`Instant`), `00:00` (`LocalTime`), `1970-01` (`YearMonth`), `0` (`BigDecimal`), and the all-zeroes
-UUID. A type with no obvious safe default — notably any `enum` — throws
+UUID. A type with no obvious safe default - notably any `enum` - throws
 `AlterEgoConfigException`; use `constant(value)` with an explicit value for those.
 
 ### 4.8 Identifier transformations (UK documents and payment cards)
 
 Five `Transformation<String>` built-ins for common identifying numbers. Each generates a complete
-replacement in a pinned output format — the input's content is only the derivation input (section
+replacement in a pinned output format - the input's content is only the derivation input (section
 3.1) and is otherwise ignored; there is no in-place digit preservation, no options type, and no
 blank-input special case (the empty string is an input like any other). Every output satisfies the
 identifier's shape (and checksum, where one exists) while landing in the fictional space of section
@@ -633,19 +633,19 @@ Appendix A.5-A.9.
 
 | Method                      | Output format (fixed)               | Domain                               |
 |-----------------------------|-------------------------------------|--------------------------------------|
-| `nhsNumber()`               | `999 ddd dddc` — 10 digits, 3-3-4   | `alterego:nhs-number`                |
+| `nhsNumber()`               | `999 ddd dddc` - 10 digits, 3-3-4   | `alterego:nhs-number`                |
 |                             | spacing, `c` = valid mod-11 check   |                                      |
 |                             | digit (A.5)                         |                                      |
-| `nationalInsuranceNumber()` | `QQ dd dd dd S` — `S` drawn from    | `alterego:national-insurance-number` |
+| `nationalInsuranceNumber()` | `QQ dd dd dd S` - `S` drawn from    | `alterego:national-insurance-number` |
 |                             | `A`-`D` (A.6)                       |                                      |
 | `drivingLicenceNumber()`    | 16 characters, unspaced, DVLA       | `alterego:driving-licence-number`    |
 |                             | (Great Britain) layout: `99999` +   |                                      |
 |                             | 6-digit encoded date-of-birth block |                                      |
 |                             | + 2 initial letters + `9` + 2       |                                      |
 |                             | letters (A.7)                       |                                      |
-| `passportNumber()`          | `ZZddddddd` — `ZZ` plus 7 digits,   | `alterego:passport-number`           |
+| `passportNumber()`          | `ZZddddddd` - `ZZ` plus 7 digits,   | `alterego:passport-number`           |
 |                             | unspaced (A.8)                      |                                      |
-| `creditCardNumber()`        | `0ddd dddd dddd dddc` — 16 digits   | `alterego:credit-card-number`        |
+| `creditCardNumber()`        | `0ddd dddd dddd dddc` - 16 digits   | `alterego:credit-card-number`        |
 |                             | in four spaced groups, `c` = valid  |                                      |
 |                             | Luhn check digit (A.9)              |                                      |
 
@@ -657,33 +657,33 @@ dictionary-backed built-ins). `creditCardNumber()` is locale-independent (like
 
 Fictionality mechanisms, and what each rests on:
 
-- **`nhsNumber()`** — NHS numbers beginning `999` are reserved for test and synthetic data and are
+- **`nhsNumber()`** - NHS numbers beginning `999` are reserved for test and synthetic data and are
   never issued to a person (NHS England test-data guidance). This is a documented reserved range,
   the same guarantee family as Ofcom drama phone numbers. The check digit is computed normally
   (A.5), so the output passes full NHS-number validation including the checksum.
-- **`nationalInsuranceNumber()`** — HMRC's published prefix-validity rules never allocate prefixes
+- **`nationalInsuranceNumber()`** - HMRC's published prefix-validity rules never allocate prefixes
   whose first letter is `D`, `F`, `I`, `Q`, `U`, or `V`; `QQ` in particular is the prefix HMRC
   itself uses for example NI numbers in documentation. A `QQ`-prefixed number is structurally
   unallocatable. NI numbers carry no checksum; the suffix letter is drawn from the valid set `A`-
   `D`.
-- **`drivingLicenceNumber()`** — in the DVLA format, characters 1-5 encode the licence holder's
+- **`drivingLicenceNumber()`** - in the DVLA format, characters 1-5 encode the licence holder's
   surname, padded with `9`s only after the surname's own letters. A real surname always contributes
   at least one letter, so the block `99999` can never occur on a real licence. The remaining fields
   (date-of-birth block, initials, issue letters) are generated shape-valid (A.7) so the output
   passes DVLA-format validation. Northern Ireland's separate DVA format (8 digits) is not generated
-  in this version — the output is always the Great Britain layout.
-- **`passportNumber()`** — UK passport numbers are wholly numeric (9 digits); an output carrying the
+  in this version - the output is always the Great Britain layout.
+- **`passportNumber()`** - UK passport numbers are wholly numeric (9 digits); an output carrying the
   letters `ZZ` can never be a valid UK passport number, while still passing the generic
   passport-field validation (up to 9 alphanumeric characters) used by systems that accept multiple
   nationalities' documents. The guarantee is scoped to UK passports, like the postcode guarantee is
   scoped to UK postcodes.
-- **`creditCardNumber()`** — ISO/IEC 7812 reserves major industry identifier `0` (the first digit)
+- **`creditCardNumber()`** - ISO/IEC 7812 reserves major industry identifier `0` (the first digit)
   for ISO/TC 68 and future industry assignment; no payment card scheme issues PANs beginning `0`.
   The Luhn check digit is computed normally (A.9), so the output passes length-and-checksum
   validation while being unmistakably outside every issuing range.
 
 As with section 4.1's other structural guarantees, these outputs pass shape/checksum validation but
-fail live lookups (a PDS trace, a DVLA record check, an issuer BIN lookup) — usually exactly the
+fail live lookups (a PDS trace, a DVLA record check, an issuer BIN lookup) - usually exactly the
 point. There are deliberately no `realistic()` opt-outs for these five: a "realistic" NHS, NI,
 licence, passport, or card number is a real person's credential-shaped identifier, and the
 risk-to-value ratio is far worse than for phone numbers or postcodes. Systems that need
@@ -702,7 +702,7 @@ public interface MappingStore {
     String putIfAbsent(String namespace, String key, String value);
 
     /**
-     * Store key→value only if the key has no mapping AND the value is unused as an output
+     * Store key->value only if the key has no mapping AND the value is unused as an output
      * in this namespace. Must be atomic as a whole (one transaction for a JDBC store).
      */
     PutUniqueResult putIfAbsentUnique(String namespace, String key, String value);
@@ -727,12 +727,12 @@ public interface MappingStore {
 - Implementations must be thread-safe (parallel streams).
 - The library ships `InMemoryMappingStore` (`ConcurrentHashMap`-based, with an inverse index per
   namespace to make the value-in-use check O(1)). Its memory use grows without bound with the
-  number of distinct inputs — documented; large or long-lived datasets belong in a persistent store.
+  number of distinct inputs - documented; large or long-lived datasets belong in a persistent store.
   The library also ships `FileMappingStore` (section 5.4), a single-process persistent store backed
   by one local file. JDBC- or Redis-backed stores are left to clients or future modules; the SPI
   plus the contract test (`docs/testing.md`) are the contract.
 - **Privacy**: by default the *key* written to the store is the purpose-separated
-  `HMAC(salt, input)` from Appendix A.4, encoded as 64 lowercase hex characters — the store never
+  `HMAC(salt, input)` from Appendix A.4, encoded as 64 lowercase hex characters - the store never
   contains raw input data, and store contents cannot be used to reconstruct randomness keys. Storing
   raw keys is opt-in for debugging (`AlterEgo.Builder.rawMappingKeys(true)`, section 2.6). Keys are
   never decoded; stored *values* are decoded via the canonical forms of section 2.6, and a value
@@ -752,12 +752,12 @@ input:
 1. `get(key)`; if a mapping exists, return it.
 2. Run the underlying strategy to get a candidate (retry counter `0`).
 3. `putIfAbsentUnique(key, candidate)`:
-    - `Stored` — return the candidate.
-    - `ExistingMapping(v)` — another thread mapped this same input concurrently; return `v`.
-    - `ValueTaken` — increment the retry counter, re-derive the context (Appendix A.1), generate a
+    - `Stored` - return the candidate.
+    - `ExistingMapping(v)` - another thread mapped this same input concurrently; return `v`.
+    - `ValueTaken` - increment the retry counter, re-derive the context (Appendix A.1), generate a
       new candidate, and repeat step 3.
 4. After `AlterEgo.Builder.uniqueMaxAttempts` attempts (default 64, section 2.6), throw
-   `AlterEgoCollisionException` — with a message pointing out the likely cause (output space too
+   `AlterEgoCollisionException` - with a message pointing out the likely cause (output space too
    small for the input volume).
 
 Uniqueness necessarily depends on the mapping store's lifetime: it holds across everything that
@@ -766,7 +766,7 @@ shares one store, and no further. This is documented rather than hidden.
 **Order-independence caveat.** Undecorated transformations are fully order-independent (section
 3.1). `unique()` is the one necessary exception: when two inputs' natural candidates collide,
 whichever input is processed *first* keeps the natural candidate and the other is re-derived. Absent
-collisions — the overwhelmingly common case — `unique()` outputs are identical regardless of
+collisions - the overwhelmingly common case - `unique()` outputs are identical regardless of
 processing order; on collision, only the colliding inputs are affected, and the resolution is
 captured in the mapping store so it remains stable on every later run. This is inherent to any
 uniqueness guarantee, and the documentation says so.
@@ -791,23 +791,23 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
 - `open(file)` creates the file if it does not exist (the parent directory must already exist),
   acquires an **exclusive file lock** (`FileChannel.tryLock`) held for the store's lifetime, and
   replays the file into an in-memory index (same structure as `InMemoryMappingStore`: forward map
-  plus per-namespace inverse index). If the lock is already held — another store instance in this or
-  any other process has the file open — `open` throws `AlterEgoStoreException`. The store is
+  plus per-namespace inverse index). If the lock is already held - another store instance in this or
+  any other process has the file open - `open` throws `AlterEgoStoreException`. The store is
   single-process by design; multi-process sharing needs an external store.
 - All operations after `close()` throw `AlterEgoStoreException`. `close()` is idempotent and
   releases the lock. The store is thread-safe within its process (writes serialised on an internal
   monitor; reads served from the in-memory index).
 - Reads (`get`) never touch the file after `open`. Writes append exactly one record per **newly
-  stored mapping** — `putIfAbsent` on an existing key and `putIfAbsentUnique` returning
+  stored mapping** - `putIfAbsent` on an existing key and `putIfAbsentUnique` returning
   `ExistingMapping`/`ValueTaken` write nothing. The append is flushed to the OS before the call
   returns success. There is no fsync: an OS-level crash can lose the final record(s), which the
   torn-tail rule below makes safe; a process crash cannot, because success is only reported after
   the write.
-- The file only grows, by one line per distinct stored mapping — the same asymptotic footprint as
+- The file only grows, by one line per distinct stored mapping - the same asymptotic footprint as
   the in-memory store, and no compaction is needed because records are never superseded (mappings
   are permanent by contract).
 
-**File format (v1, frozen like the A.4 key encoding — this file is persistent user data).**
+**File format (v1, frozen like the A.4 key encoding - this file is persistent user data).**
 
 - UTF-8 text, `\n` line terminators only. A record is complete iff its line ends in `\n`.
 - Line 1 (header): exactly `alterego-mapping-store 1`. On creating a new (or empty) file the store
@@ -823,10 +823,12 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
   replay, and the next append overwrites it (the store positions writes at the end of the last
   complete line). This is safe because a torn record's `putIfAbsent`/`putIfAbsentUnique`
   call never returned success.
-- Any other malformation — a non-final line that does not parse, a wrong field count, an invalid
-  base64 field, or a **duplicate (namespace, key)** — is corruption or external editing, and
+- Any other malformation - a non-final line that does not parse, a wrong field count, an invalid
+  base64 field, or a **duplicate (namespace, key)** - is corruption or external editing, and
   `open` throws `AlterEgoStoreException` naming the file and line number. The store never silently
   drops or repairs interior data.
+
+## 6. Record coherence
 
 Transforming the fields of a record independently can produce incoherent combinations: a record
 reading *Manchester, E4 0VV, 020 4966 3211* mixes a northern town, a London postcode, and a London
@@ -839,7 +841,7 @@ A `RecordScope` bounds one record's transformation. It is created per record, us
 thread, and closed when the record is done (its attributes are then discarded). A single thread is
 not an arbitrary restriction: first-touch-wins (section 6.2) only has one deterministic winner if
 "first" is well-defined, and it is not across threads, which race. A parallel *stream of records*
-is fine — each element gets its own scope, and each scope still sees only one thread — but never
+is fine - each element gets its own scope, and each scope still sees only one thread - but never
 share one `RecordScope` instance across threads:
 
 ```java
@@ -863,7 +865,7 @@ public interface RecordScope extends AutoCloseable {
 }
 ```
 
-Scopes are cheap; in a stream of records, create one per element (safe under parallel streams — each
+Scopes are cheap; in a stream of records, create one per element (safe under parallel streams - each
 element has its own scope). Transformations applied *outside* any scope behave exactly as before:
 every field independent.
 
@@ -885,10 +887,10 @@ public interface RecordAttributes {
     <A> A computeIfAbsent(AttributeKey<A> key, Function<Randomness, A> resolver);
 
     /** First write wins; a second set with an equal value is a no-op; a conflicting
-     value throws AlterEgoCoherenceException — incoherence should be loud. */
+     value throws AlterEgoCoherenceException - incoherence should be loud. */
     <A> void set(AttributeKey<A> key, A value);
 
-    /** True inside a real scope, false outside any scope — costs no randomness and touches no
+    /** True inside a real scope, false outside any scope - costs no randomness and touches no
      attribute, unlike the other three methods; lets a strategy check cheaply whether
      attempting to *establish* shared state (not just read one) is worth doing at all. */
     boolean isActive();
@@ -904,11 +906,11 @@ Semantics, chosen so strategy code is identical in and out of a scope:
   Process a record's fields in a stable order (application code naturally does) and the whole record
   is reproducible. With a **keyed** scope (`alterego.record(key)`), `computeIfAbsent`
   resolvers receive `Randomness` derived from the record key and the attribute name (Appendix A.1,
-  purpose `alterego/1/record`) — so attribute values resolved that way are independent even of field
+  purpose `alterego/1/record`) - so attribute values resolved that way are independent even of field
   order. In an anonymous scope the resolver receives the asking strategy's own `Randomness`
   (first-asker resolution, documented).
 - **Outside any scope**, `get` is empty, `set` is discarded, and `computeIfAbsent` runs its resolver
-  and returns the value without retaining it — fields stay independent and strategies need no
+  and returns the value without retaining it - fields stay independent and strategies need no
   scope-awareness branching.
 - **Composites.** A `derived(...)` context (section 2.2) shares its parent's record attributes:
   the section 2.2 invariant concerns key derivation only, not record state, so `fullName()`-style
@@ -918,22 +920,22 @@ Semantics, chosen so strategy code is identical in and out of a scope:
 
 Record attributes are **not** the `MappingStore` and deliberately do not use its SPI: the store is
 persistent, cross-record, and pluggable; attributes are ephemeral, intra-record, in-memory state
-with the scope's lifetime — nothing about them needs to be pluggable (ADR 0008).
+with the scope's lifetime - nothing about them needs to be pluggable (ADR 0008).
 
 ### 6.3 Built-in coherence
 
 The built-ins share two published attribute keys (constants on `AlterEgoAttributes`):
 
-- `UK_POSTCODE_AREA` (`String`, e.g. `"M"` for Manchester) — set by `city()` from the chosen town's
+- `UK_POSTCODE_AREA` (`String`, e.g. `"M"` for Manchester) - set by `city()` from the chosen town's
   dictionary tag, or resolved by `postcode()` if it runs first.
-- `UK_NATION` (`UkNation` enum: `ENGLAND`, `WALES`, `SCOTLAND`, `NORTHERN_IRELAND`) — implied by the
+- `UK_NATION` (`UkNation` enum: `ENGLAND`, `WALES`, `SCOTLAND`, `NORTHERN_IRELAND`) - implied by the
   postcode area.
 
 Behaviour inside a scope: `city()` picks a town consistent with an already-fixed area, otherwise
 picks freely and sets the area and nation from the town's tags. `postcode()` and `phoneNumber()`
 build from the fixed area if one exists; if neither `city()` nor a caller-supplied `with(...)` has
 fixed one yet, whichever of them runs first *establishes* it via `computeIfAbsent`, picking a real
-town from the country's own dictionary (ignoring the town's name — only its area/nation tags) so a
+town from the country's own dictionary (ignoring the town's name - only its area/nation tags) so a
 later `city()` call is guaranteed a match, not an arbitrary or fabricated area. `isActive()` is what
 lets `postcode()`/`phoneNumber()` tell "nothing fixed, but inside a real scope" (worth establishing)
 apart from "outside any scope" (must not spend randomness on this at all, since it would silently
@@ -942,9 +944,9 @@ attributes at all. `postcode()`'s outward code built this way still keeps its in
 impossible-letter guarantee (the 4.1 guarantee is unaffected either way);
 `phoneNumber()` prefers a drama range matching the (fixed or newly established) place (e.g.
 `020 7946 xxxx` for London) and falls back to the geography-neutral `01632 960xxx` range when no
-matching drama range exists for that place — coherence is best-effort, fictionality is not.
+matching drama range exists for that place - coherence is best-effort, fictionality is not.
 
-Custom strategies join in the same way — e.g. a Companies House number strategy reads or resolves
+Custom strategies join in the same way - e.g. a Companies House number strategy reads or resolves
 `UK_NATION` and picks its prefix (`SC`, `NI`, none) accordingly, and conversely a strategy that
 knows the country can `set` it for later fields.
 
@@ -979,13 +981,13 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
 ## 8. Error handling
 
 - `AlterEgoException` (unchecked) is the root. Subtypes:
-    - `AlterEgoConfigException` — creation-time configuration errors (no resources for the country,
+    - `AlterEgoConfigException` - creation-time configuration errors (no resources for the country,
       unsupported value type, invalid domain, invalid options). Its subtype
       `AlterEgoPatternException` reports malformed patterns with the offending position.
-    - `AlterEgoStoreException` — mapping store required but not configured, store failure, or a
+    - `AlterEgoStoreException` - mapping store required but not configured, store failure, or a
       stored value that fails to decode.
-    - `AlterEgoCollisionException` — `unique()` exhausted its retry budget.
-    - `AlterEgoCoherenceException` — a record attribute was set to a value conflicting with the one
+    - `AlterEgoCollisionException` - `unique()` exhausted its retry budget.
+    - `AlterEgoCoherenceException` - a record attribute was set to a value conflicting with the one
       already fixed for the record (section 6.2).
 - Configuration errors surface when the transformation is created, never per element.
 - Strategies never throw for ordinary data (empty strings, unparseable names); they degrade to a
@@ -999,20 +1001,20 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
   the GitHub account).
 - **Gradle (Groovy DSL)**, `java-library` plugin, toolchain pinned to 25.
 - **No runtime dependencies.** Test dependencies: JUnit Jupiter (and AssertJ if fluent assertions
-  are wanted). No property-based-testing framework — property-style tests are plain JUnit loops over
+  are wanted). No property-based-testing framework - property-style tests are plain JUnit loops over
   deterministically enumerated inputs (ADR 0013).
 - Dictionaries and structural-rule tables are plain-text resource files, UTF-8, under
-  `src/main/resources/dictionaries/<country>/<name>.txt` (ISO 3166-1 alpha-2, e.g. `GB`) — under
+  `src/main/resources/dictionaries/<country>/<name>.txt` (ISO 3166-1 alpha-2, e.g. `GB`) - under
   `src/main/resources`, not the repo root, since they are loaded as classpath resources at runtime
-  (`getResourceAsStream`), not read from the filesystem — each with a version and provenance header
+  (`getResourceAsStream`), not read from the filesystem - each with a version and provenance header
   comment. One entry per line: the value, optionally followed by tab-separated tag fields (e.g. a
   town's postcode area and country). Lookup rules are defined in section 4.
-- **Provenance header, required for every dictionary file derived from downloaded data** — a comment
+- **Provenance header, required for every dictionary file derived from downloaded data** - a comment
   block naming: the source (organisation and dataset name), the exact original URL of the data as
   downloaded, the licence name and its exact original URL, and the retrieval date. The full licence
   text is additionally committed once per licence (not per file) under
   `src/main/resources/dictionaries/LICENCES/<licence-name>.txt`, referenced by name from each file's
-  header — so redistribution terms are traceable without relying on an external link staying live. A
+  header - so redistribution terms are traceable without relying on an external link staying live. A
   dictionary file with no header, or one citing a licence with no matching committed text, fails the
   build-time well-formedness check (`docs/testing.md`).
 - **Dictionary sourcing policy**: OGL, MIT, and CC0 are the acceptable licences; UK-government-
@@ -1021,26 +1023,26 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
   policy and every dictionary's actual sourcing decision are tracked in
   `docs/research/0001-alterego-dictionaries.md`.
 - **Licence: MIT**, in a root file named `LICENCE` (UK spelling for the filename; the licence's own
-  canonical text and title — "MIT License" — are left as written, since that is its official name).
+  canonical text and title - "MIT License" - are left as written, since that is its official name).
   MIT covers the source code only; it does not relicense the bundled OGL data.
   `LICENCE`'s own text says so explicitly and points to `NOTICE`, so the split is clear to anyone
   reading the licence, not just to anyone who happens to notice a second file exists.
 - **`NOTICE` file**, at the repository root, consolidating the exact required attribution string for
   every dictionary source in use. Attribution obligations under licences like OGL follow the data
-  wherever it is redistributed — including transitively, since every application that depends on
-  AlterEgo also redistributes the bundled dictionary data — so a per-file provenance header alone is
+  wherever it is redistributed - including transitively, since every application that depends on
+  AlterEgo also redistributes the bundled dictionary data - so a per-file provenance header alone is
   not enough visibility.
 - **Both `LICENCE` and `NOTICE` are packaged into `META-INF/` inside the built JAR** (a Gradle task
-  on the `jar` task; not automatic) — most consumers receive only the JAR, never the repository, so
+  on the `jar` task; not automatic) - most consumers receive only the JAR, never the repository, so
   both files must travel inside the artifact itself, not just sit at the repo root. `README.md`
   references both.
 
 ## 10. Testing strategy
 
-See `docs/testing.md` — consolidated there alongside `incognito`'s once both subprojects had grown
+See `docs/testing.md` - consolidated there alongside `incognito`'s once both subprojects had grown
 one.
 
-## Appendix A — Normative algorithms
+## Appendix A - Normative algorithms
 
 Everything in this appendix is frozen within a major version and enforced by the conformance vectors
 (`docs/testing.md`). An implementation is correct iff it reproduces the vectors byte-for-byte.
@@ -1062,7 +1064,7 @@ key     = HMAC-SHA256(salt, message)
 - `counter` is a 4-byte big-endian unsigned integer: `0` normally; the retry counter for
   `unique()` re-derivation. Store keys and record-attribute keys always use counter `0`.
 - A `char[]` salt is converted to bytes via UTF-8 before use.
-- `derived(subDomain, subInput)` performs exactly this derivation with counter `0` — identical to a
+- `derived(subDomain, subInput)` performs exactly this derivation with counter `0` - identical to a
   top-level transformation of `subInput` under `subDomain`.
 
 ### A.2 Randomness stream
@@ -1111,7 +1113,7 @@ exactly the order written.
 repeat:
     d[1..6] = digit() x 6                       // six fresh draws on every iteration
     digits  = 9, 9, 9, d1, d2, d3, d4, d5, d6   // the nine payload digits
-    sum     = Σ digits[i] * w[i]                // w = 10, 9, 8, 7, 6, 5, 4, 3, 2
+    sum     = SUM(digits[i] * w[i])             // w = 10, 9, 8, 7, 6, 5, 4, 3, 2
     c       = 11 - (sum mod 11)
     if c == 11: c = 0
 until c != 10                                    // 10 marks an unissuable number: redraw

@@ -36,10 +36,10 @@ tasks.withType<JavaCompile>().configureEach {
 
 dependencies {
     // alterego is exposed through Incognito's public API (e.g. PipelineContext.alterEgo()), so it
-    // is `api`, not `implementation` — consumers writing custom stages compile against its types.
+    // is `api`, not `implementation` - consumers writing custom stages compile against its types.
     api(project(":alterego"))
 
-    // Declarative YAML policy parser — an internal detail. TODO: move to a separate incognito-yaml
+    // Declarative YAML policy parser - an internal detail. TODO: move to a separate incognito-yaml
     // module so the core stays dependency-lean (docs/spec/incognito.md §1); currently bundled in
     // core.
     implementation(libs.snakeyaml)
@@ -52,12 +52,12 @@ dependencies {
 
     // Testcontainers for PostgreSQL integration testing (v1.0 Tier-1 engine).
     // 2.x is required for Docker Engine 29.x (older docker-java probes API 1.32, which the daemon
-    // rejects; needs ≥1.40). NOTE 2.x renamed the module artifacts (testcontainers-* prefix) and
+    // rejects; needs >=1.40). NOTE 2.x renamed the module artifacts (testcontainers-* prefix) and
     // moved PostgreSQLContainer to package org.testcontainers.postgresql.
     testImplementation(platform(libs.testcontainers.bom))
     testImplementation(libs.testcontainers.junit.jupiter)
     testImplementation(libs.testcontainers.postgresql)
-    // PostgreSQL JDBC driver — the integration tests connect via raw DriverManager.
+    // PostgreSQL JDBC driver - the integration tests connect via raw DriverManager.
     testRuntimeOnly(libs.postgresql)
 
 }
@@ -74,7 +74,7 @@ tasks.test {
 
 // The LICENCE must travel inside the built artifact: most consumers receive only the jar, never the
 // repository, so packaging it at the repo root alone is not enough (Maven Central also expects it).
-// No NOTICE is packaged — Incognito bundles no third-party data in the jar (the benchmark fixtures
+// No NOTICE is packaged - Incognito bundles no third-party data in the jar (the benchmark fixtures
 // under src/test/resources are test-only); their attribution lives with them, not in the artifact.
 tasks.named<Jar>("jar") {
     from(rootProject.file("LICENCE")) {
@@ -82,7 +82,7 @@ tasks.named<Jar>("jar") {
     }
 }
 
-// No repository/credentials are configured here — that's environment-specific and not this project's
+// No repository/credentials are configured here - that's environment-specific and not this project's
 // job to commit. This produces a correct, complete POM plus the three artifact jars (binary, sources,
 // javadoc) for `./gradlew publishToMavenLocal`; wiring an actual remote is a separate, later decision.
 publishing {
@@ -117,7 +117,7 @@ publishing {
         }
     }
     // Publish to this repository's GitHub Packages Maven registry. `./gradlew publish` pushes here;
-    // credentials come from the environment only (GITHUB_ACTOR/GITHUB_TOKEN), never committed — so
+    // credentials come from the environment only (GITHUB_ACTOR/GITHUB_TOKEN), never committed - so
     // locally `publish` has nowhere authenticated to push unless those are set. Mirrors alterego.
     repositories {
         maven {

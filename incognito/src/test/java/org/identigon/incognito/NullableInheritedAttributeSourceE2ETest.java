@@ -31,12 +31,12 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * {@code INHERITED_ATTRIBUTE} elsewhere must not crash the load when its value is actually
  * {@code NULL} for a row. Publishing that row's fabricated (also {@code null}) value into the
  * {@code AttributeCascadeStore} previously called {@code ConcurrentHashMap.put(key, null)}
- * unguarded, which throws {@link NullPointerException} by contract — crashing the whole load and
+ * unguarded, which throws {@link NullPointerException} by contract - crashing the whole load and
  * surfacing only as a generic "Pipeline execution failed" (the real cause was masked by
  * {@code DefaultIncognitoPipeline}'s outer catch).
  *
  * <p>{@code firm2} has a {@code NULL} name and no {@code contract} row references it, so nothing
- * ever tries to *read* the never-published attribute — this isolates the publish-time crash from
+ * ever tries to *read* the never-published attribute - this isolates the publish-time crash from
  * the separate question of what a reader should see for a genuinely null-valued ancestor value.
  *
  * <p>Requires Docker; skips gracefully otherwise.
@@ -68,7 +68,7 @@ class NullableInheritedAttributeSourceE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
@@ -80,7 +80,7 @@ class NullableInheritedAttributeSourceE2ETest {
                 try (Statement stmt = conn.createStatement()) {
                     stmt.execute(DDL);
                     // firm 1 has a real name and a referencing contract; firm 2's name is NULL and
-                    // nothing references it — nothing ever tries to read its inherited attribute.
+                    // nothing references it - nothing ever tries to read its inherited attribute.
                     stmt.execute("INSERT INTO firm (name) VALUES ('Alpha Holdings'), (NULL)");
                     stmt.execute("INSERT INTO contract (firm_id, firm_name) VALUES (1, 'Alpha Holdings')");
                 }

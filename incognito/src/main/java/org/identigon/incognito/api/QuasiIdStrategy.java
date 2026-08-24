@@ -12,9 +12,9 @@ package org.identigon.incognito.api;
 public enum QuasiIdStrategy {
     /** Fresh fictional value; distribution NOT preserved. Default for e.g. {@code dob}, {@code postcode}. */
     SYNTHESISE,
-    /** {@code AlterEgo.shiftDate(MONTH)}: random day within the value's own month → exact monthly volumes. */
+    /** {@code AlterEgo.shiftDate(MONTH)}: random day within the value's own month -> exact monthly volumes. */
     JITTER_WITHIN_MONTH,
-    /** {@code AlterEgo.shiftDate(YEAR)}: random day within the value's own year → exact yearly volumes. */
+    /** {@code AlterEgo.shiftDate(YEAR)}: random day within the value's own year -> exact yearly volumes. */
     JITTER_WITHIN_YEAR,
     /** Bounded ±window shift ({@code jitterDays}, with optional {@code coherenceGroup}, on the column policy). */
     JITTER_DAYS

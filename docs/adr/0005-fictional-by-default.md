@@ -32,12 +32,12 @@ documented as reducing safety.
 ### Consequences
 
 * Good, because outputs pass format-shaped validation but fail live lookups (PAF, number
-  allocation, MX) — usually exactly what pseudonymised data should do; the opt-outs exist for when
+  allocation, MX) - usually exactly what pseudonymised data should do; the opt-outs exist for when
   realism matters more.
 * Good, because property tests can assert range membership over large samples (fictionality
   tests).
 * Bad, because no such guarantee is possible for names, streets, cities, or organisations (each
   output word is real; only the combination is synthetic); each built-in's Javadoc states its
   category.
-* Neutral: raw `pattern(...)` output carries no guarantee — users are pointed at the guaranteed
+* Neutral: raw `pattern(...)` output carries no guarantee - users are pointed at the guaranteed
   built-ins.

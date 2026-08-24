@@ -40,7 +40,7 @@ import org.identigon.incognito.policy.TablePolicy;
  *   <li>Source-value survival: for DIRECT_ID columns, verifies that no real source value
  *       survived in the target (a sanity net beyond the email-domain check).</li>
  *   <li>Structural-uniqueness findings (SPEC §2.4, opt-in via {@code structuralUniqueness}): per-FK-edge
- *       relational fingerprints — a parent row singled out by its count of referencing child rows.</li>
+ *       relational fingerprints - a parent row singled out by its count of referencing child rows.</li>
  * </ul>
  */
 public final class VerificationStage implements PipelineStage {
@@ -70,21 +70,21 @@ public final class VerificationStage implements PipelineStage {
 
     /**
      * {@code PostcodeStrategy}'s default (non-{@code realistic}) guarantee (ADR 0005, alterego):
-     * the inward code's last letter is drawn only from these — letters Royal Mail never uses there
-     * — so the output can never coincide with a real, deliverable postcode.
+     * the inward code's last letter is drawn only from these - letters Royal Mail never uses there
+     * - so the output can never coincide with a real, deliverable postcode.
      */
     private static final List<String> POSTCODE_NEVER_USED_LETTERS = List.of("C", "I", "K", "M", "O", "V");
 
     /**
      * {@code NationalInsuranceNumberStrategy}'s guarantee (alterego): every output starts with the
-     * {@code QQ} prefix, which HMRC structurally never allocates — so the output can never coincide
+     * {@code QQ} prefix, which HMRC structurally never allocates - so the output can never coincide
      * with a real National Insurance number (NINO).
      */
     private static final String NINO_RESERVED_PREFIX = "QQ ";
 
     /**
      * {@code NhsNumberStrategy}'s guarantee (alterego): every output starts with the {@code 999}
-     * prefix, reserved for test/synthetic use and never issued to a real patient — so the output
+     * prefix, reserved for test/synthetic use and never issued to a real patient - so the output
      * can never coincide with a real NHS number.
      */
     private static final String NHS_NUMBER_RESERVED_PREFIX = "999 ";
@@ -92,14 +92,14 @@ public final class VerificationStage implements PipelineStage {
     /**
      * {@code PassportNumberStrategy}'s guarantee (alterego): every output starts with the
      * {@code ZZ} prefix, structurally impossible on a real UK passport (which must be 9 numeric
-     * digits) — so the output can never coincide with a real passport number.
+     * digits) - so the output can never coincide with a real passport number.
      */
     private static final String PASSPORT_NUMBER_RESERVED_PREFIX = "ZZ";
 
     /**
      * {@code DrivingLicenceNumberStrategy}'s guarantee (alterego): every output starts with the
      * {@code 99999} surname block, which implies a zero-letter surname and can never occur on a
-     * real licence — so the output can never coincide with a real driving licence number.
+     * real licence - so the output can never coincide with a real driving licence number.
      */
     private static final String DRIVING_LICENCE_NUMBER_RESERVED_PREFIX = "99999";
 
@@ -147,7 +147,7 @@ public final class VerificationStage implements PipelineStage {
         // alongside the human-readable prose that lands in this stage's result message.
         List<org.identigon.incognito.api.AnonymisationReport.SurvivalFinding> survivalFindings = new ArrayList<>();
         List<org.identigon.incognito.api.AnonymisationReport.LintFinding> lintFindings = new ArrayList<>();
-        // Tables that contributed at least one hard failure — the complement (in-policy, no failure)
+        // Tables that contributed at least one hard failure - the complement (in-policy, no failure)
         // are reported as fictionality-verified in the DPIA report.
         java.util.Set<String> failedTables = new java.util.HashSet<>();
 
@@ -157,7 +157,7 @@ public final class VerificationStage implements PipelineStage {
                 SchemaInspector.TableMetadata meta = metadataByName.get(tableName);
                 if (meta == null) continue;
 
-                // Check each FK constraint as a whole tuple — so a composite FK is verified across all
+                // Check each FK constraint as a whole tuple - so a composite FK is verified across all
                 // its columns, not one column at a time (SPEC §5.2).
                 for (SchemaInspector.ForeignKeyConstraint fk : meta.foreignKeyConstraints()) {
                     String parentTable = fk.parentTable();
@@ -224,8 +224,8 @@ public final class VerificationStage implements PipelineStage {
         }
 
         // 3. Misdeclaration lint: cross-check distinguishing:false columns against real distinct
-        //    counts on the SOURCE database (SPEC §4.1). This is NOT the privacy gate — the
-        //    distinguishing declaration is — this is a safety net against misdeclaration.
+        //    counts on the SOURCE database (SPEC §4.1). This is NOT the privacy gate - the
+        //    distinguishing declaration is - this is a safety net against misdeclaration.
         DistinguishingLint lintMode = policy.distinguishingLint();
         if (lintMode != DistinguishingLint.OFF) {
             int threshold = policy.maxCategoricalCardinality();
@@ -239,7 +239,7 @@ public final class VerificationStage implements PipelineStage {
                         ColumnPolicy colPolicy = entry.getValue();
                         if (colPolicy.role() != ColumnRole.SENSITIVE) continue;
                         if (!Boolean.FALSE.equals(colPolicy.distinguishing())) continue;
-                        // This is a SENSITIVE distinguishing:false column — check its real cardinality.
+                        // This is a SENSITIVE distinguishing:false column - check its real cardinality.
 
                         long distinctCount = countDistinctWithPgStatsPreFilter(
                             sourceConn, tableName, colPolicy.columnName(), threshold);
@@ -270,12 +270,12 @@ public final class VerificationStage implements PipelineStage {
         }
 
         // 4. Per-period volume tolerance for temporal QUASI_ID columns (SPEC §4.2, Appendix D).
-        //    JITTER_WITHIN_MONTH → monthly buckets must match exactly.
-        //    JITTER_WITHIN_YEAR  → yearly buckets must match exactly.
-        //    JITTER_DAYS         → YEARLY buckets within ±2% (min ±1 row). A ±N-day jitter routinely
+        //    JITTER_WITHIN_MONTH -> monthly buckets must match exactly.
+        //    JITTER_WITHIN_YEAR  -> yearly buckets must match exactly.
+        //    JITTER_DAYS         -> YEARLY buckets within ±2% (min ±1 row). A ±N-day jitter routinely
         //                          crosses month boundaries, so monthly buckets are not preserved and
         //                          would raise spurious drift warnings; the yearly bucket barely leaks.
-        //    SYNTHESISE          → distribution not preserved; skip.
+        //    SYNTHESISE          -> distribution not preserved; skip.
         try (Connection sourceConn = context.source().getConnection();
              Connection targetConn2 = context.target().getConnection()) {
             for (String tableName : plan.sequentialTableOrder()) {
@@ -332,7 +332,7 @@ public final class VerificationStage implements PipelineStage {
         }
 
         // 5. Source-value survival check for DIRECT_ID columns: verify that no real source value
-        //    survives in the target (a sanity net — if fabrication worked, the intersection is empty).
+        //    survives in the target (a sanity net - if fabrication worked, the intersection is empty).
         try (Connection sourceConn = context.source().getConnection();
              Connection targetConn3 = context.target().getConnection()) {
             for (String tableName : plan.sequentialTableOrder()) {
@@ -366,10 +366,10 @@ public final class VerificationStage implements PipelineStage {
                 "Source-value survival check failed", e);
         }
 
-        // 6. Structural-uniqueness findings (SPEC §2.4, opt-in — off by default): a per-FK-edge
+        // 6. Structural-uniqueness findings (SPEC §2.4, opt-in - off by default): a per-FK-edge
         //    relational fingerprint. Row counts and the FK graph are preserved 1:1, so a parent row
         //    with a rare/unique count of referencing children can be singled out from structure
-        //    alone, even though every field on it was fabricated. Advisory evidence only — never a
+        //    alone, even though every field on it was fabricated. Advisory evidence only - never a
         //    privacy gate, never a run-abort (there is no ERROR mode).
         List<org.identigon.incognito.api.AnonymisationReport.StructuralUniquenessFinding> structuralFindings =
             new ArrayList<>();
@@ -438,7 +438,7 @@ public final class VerificationStage implements PipelineStage {
      * we fall through to the exact {@code COUNT(DISTINCT)}.
      *
      * <p>pg_stats encodes: positive values = estimated distinct count; negative values = fraction
-     * of rows (e.g. −1.0 = all unique). A negative value or a value near/above the threshold
+     * of rows (e.g. -1.0 = all unique). A negative value or a value near/above the threshold
      * triggers the exact count.
      */
     private long countDistinctWithPgStatsPreFilter(
@@ -452,14 +452,14 @@ public final class VerificationStage implements PipelineStage {
             if (rs.next()) {
                 float nDistinct = rs.getFloat(1);
                 if (!rs.wasNull() && nDistinct >= 0 && nDistinct < threshold / PG_STATS_MARGIN) {
-                    // Comfortably below threshold — pg_stats says it's low-cardinality.
+                    // Comfortably below threshold - pg_stats says it's low-cardinality.
                     return (long) nDistinct;
                 }
                 // Otherwise: null, near/above threshold, or negative (fraction-of-rows, likely
-                // high) — fall through to the exact count.
+                // high) - fall through to the exact count.
             }
         } catch (SQLException e) {
-            // Not PostgreSQL, or pg_stats not accessible — pg_stats is only an optimisation, never the
+            // Not PostgreSQL, or pg_stats not accessible - pg_stats is only an optimisation, never the
             // privacy gate (SPEC §4.1), so fall through to the exact count. Surface at DEBUG only.
             LOG.log(System.Logger.Level.DEBUG,
                 "pg_stats pre-filter unavailable for {0}.{1} (SQLState {2}); using exact COUNT(DISTINCT)",
@@ -631,7 +631,7 @@ public final class VerificationStage implements PipelineStage {
 
     /**
      * Queries per-period bucket counts for a date column, returning a map of
-     * period-label → row-count.
+     * period-label -> row-count.
      */
     private Map<String, Long> queryBucketCounts(
             Connection conn, String tableName, String truncExpr) throws SQLException {
@@ -652,7 +652,7 @@ public final class VerificationStage implements PipelineStage {
      * Compares the fraction of sampled distinct source values that reappear in the target: a genuine
      * fabrication failure (e.g. an accidental passthrough) resurfaces ~all values and is a hard
      * failure, whereas a handful of coincidental shape-preserving collisions on low-entropy values is
-     * only a warning — so this net never fails a healthy run over a low-cardinality identifier.
+     * only a warning - so this net never fails a healthy run over a low-cardinality identifier.
      */
     private void verifySurvival(
             Connection sourceConn, Connection targetConn, String tableName,
@@ -694,12 +694,12 @@ public final class VerificationStage implements PipelineStage {
                     failures.add("Source-value survival: " + tableName + "." + columnName
                         + " has " + survived + " of " + sourceValues.size()
                         + " sampled distinct source values surviving in the target ("
-                        + String.format("%.0f%%", ratio * 100) + ") — fabrication may not have been applied");
+                        + String.format("%.0f%%", ratio * 100) + ") - fabrication may not have been applied");
                     failedTables.add(tableName);
                 } else {
                     warnings.add("Source-value survival (likely coincidental): " + tableName + "." + columnName
                         + " has " + survived + " of " + sourceValues.size()
-                        + " sampled distinct source values matching in the target — below the "
+                        + " sampled distinct source values matching in the target - below the "
                         + String.format("%.0f%%", SURVIVAL_FAILURE_RATIO * 100) + " failure threshold");
                 }
             }
@@ -710,7 +710,7 @@ public final class VerificationStage implements PipelineStage {
      * Computes the relational fingerprint for a single FK edge (SPEC §2.4) on the source database:
      * the distribution of referencing-child-row counts per parent row. Fabrication preserves row
      * counts and the FK graph exactly, so the source distribution is also the target's residual risk
-     * — no second scan of the target is needed. Returns {@code null} if no parent row on this edge
+     * - no second scan of the target is needed. Returns {@code null} if no parent row on this edge
      * is singled out (unique fingerprint) or rare, so callers only ever see edges worth reporting.
      */
     private org.identigon.incognito.api.AnonymisationReport.StructuralUniquenessFinding computeStructuralFinding(

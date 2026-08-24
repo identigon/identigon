@@ -30,7 +30,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 /**
  * Structural-uniqueness findings (SPEC §2.4): a subject can be singled out by its FK fan-out alone,
  * even with every field fabricated. One customer has 5 orders (a distinctive relational
- * fingerprint); the other 20 customers have exactly 1 order each —
+ * fingerprint); the other 20 customers have exactly 1 order each -
  * the finding must report the fan-out extreme and flag that one customer as uniquely fingerprinted.
  * Off by default; one test opts in via {@code structuralUniqueness(REPORT)}. Requires Docker.
  */
@@ -59,7 +59,7 @@ class StructuralUniquenessE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
         pg = new PostgreSQLContainer(TestPostgres.IMAGE)
             .withDatabaseName("structural").withUsername("test").withPassword("test");
         pg.start();
@@ -90,7 +90,7 @@ class StructuralUniquenessE2ETest {
         DataSource[] ds = freshDatabases("report");
 
         PipelineResult result = run(ds, StructuralUniquenessMode.REPORT);
-        assertTrue(result.success(), "pipeline should succeed — structural findings never fail the run");
+        assertTrue(result.success(), "pipeline should succeed - structural findings never fail the run");
 
         AnonymisationReport.StructuralUniquenessFinding finding = result.report().structuralFindings().stream()
             .filter(f -> f.parentTable().equals("customers") && f.childTable().equals("orders"))
@@ -141,7 +141,7 @@ class StructuralUniquenessE2ETest {
             conn.setAutoCommit(true);
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute("INSERT INTO customers (name) SELECT 'Customer ' || i FROM generate_series(1, 21) AS i");
-                // The customer with the smallest id gets 5 orders — a distinctive fan-out.
+                // The customer with the smallest id gets 5 orders - a distinctive fan-out.
                 stmt.execute("INSERT INTO orders (customer_id) "
                     + "(SELECT customer_id FROM customers ORDER BY customer_id LIMIT 1) "
                     + "UNION ALL (SELECT customer_id FROM customers ORDER BY customer_id LIMIT 1) "

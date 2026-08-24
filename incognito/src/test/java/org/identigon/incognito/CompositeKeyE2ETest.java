@@ -27,10 +27,10 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * Composite primary / foreign keys (SPEC §5.2) — the Phase-7 blocker.
+ * Composite primary / foreign keys (SPEC §5.2) - the Phase-7 blocker.
  *
- * <p>Schema: {@code author}, {@code book}, {@code authorship(author_id, book_id)} — a join table
- * with a <b>composite PK made of two single-column FKs</b> (the Pagila {@code film_actor} shape) —
+ * <p>Schema: {@code author}, {@code book}, {@code authorship(author_id, book_id)} - a join table
+ * with a <b>composite PK made of two single-column FKs</b> (the Pagila {@code film_actor} shape) -
  * and {@code chapter(author_id, book_id, chapter_no)} whose {@code (author_id, book_id)} is a
  * <b>genuine composite FK</b> referencing {@code authorship}'s composite PK.
  *
@@ -77,7 +77,7 @@ class CompositeKeyE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)

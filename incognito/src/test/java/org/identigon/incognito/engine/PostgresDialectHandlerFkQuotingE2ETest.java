@@ -41,7 +41,7 @@ class PostgresDialectHandlerFkQuotingE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping dialect-handler E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping dialect-handler E2E");
 
         pg = new PostgreSQLContainer(TestPostgres.IMAGE)
             .withDatabaseName("fk_quoting").withUsername("test").withPassword("test");

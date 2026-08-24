@@ -8,9 +8,9 @@ import java.util.function.Function;
 
 /**
  * The concrete {@link RecordScope}: a plain (single-thread use is already a documented
- * precondition — section 6.1), non-concurrent map of fixed attributes, plus an optional record
+ * precondition - section 6.1), non-concurrent map of fixed attributes, plus an optional record
  * key ({@code null} for an anonymous scope). Made visible to whatever {@link
- * TransformationContext} gets created while {@link #apply} is running via a thread-local — the
+ * TransformationContext} gets created while {@link #apply} is running via a thread-local - the
  * only way to reach it, since {@code Transformation<T>} is a plain {@code Function<T, T>} with no
  * scope parameter of its own.
  */

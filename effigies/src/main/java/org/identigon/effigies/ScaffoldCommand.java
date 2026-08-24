@@ -76,7 +76,7 @@ class ScaffoldCommand {
                     if (inferred.isPresent()) {
                         writer.write("        role:              # TODO classify (Suggestion: " + inferred.get().role() + " based on " + inferred.get().heuristic() + ")\n");
                     } else {
-                        writer.write("        role:              # TODO classify — see the role vocabulary; run fails closed until filled\n");
+                        writer.write("        role:              # TODO classify - see the role vocabulary; run fails closed until filled\n");
                     }
                 }
             }

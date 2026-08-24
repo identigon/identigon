@@ -2,15 +2,15 @@
 
 Incognito is a Java 25 library that clones a production database into a **schema-identical** test
 database with every piece of PII replaced by **clearly fictional** data. It preserves what makes a
-clone useful for testing — data volumes (including per-period volumes), referential integrity, the
-foreign-key topology, and cardinalities — while severing the link to any real person. Direct
+clone useful for testing - data volumes (including per-period volumes), referential integrity, the
+foreign-key topology, and cardinalities - while severing the link to any real person. Direct
 identifiers and quasi-identifiers are *fabricated*, not generalised or suppressed: Incognito is a
 fabrication engine, **not** a k-anonymity / l-diversity / t-closeness implementation (those are
-explicit non-goals — see [ADR 14](../docs/adr/0014-fabrication-not-k-anonymity.md)).
+explicit non-goals - see [ADR 14](../docs/adr/0014-fabrication-not-k-anonymity.md)).
 
 > **In one sentence:** *"I have a great production database and I want a test environment with
 > similar data volumes and similar relationships between entities, but with no danger of leaking
-> PII — a cloned database where the PII has been anonymised, and obviously anonymised, using
+> PII - a cloned database where the PII has been anonymised, and obviously anonymised, using
 > clearly fictional data."*
 
 See [`docs/spec/incognito.md`](../docs/spec/incognito.md) for the full behavioural contract, the
@@ -27,14 +27,14 @@ Incognito delegates all **field-value** transformation to its sibling library
 |                 | `alterego`                                                                                        | Incognito                                                                               |
 |:----------------|:------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|
 | **Scope**       | one value, or the fields of one record                                                                | a whole relational database                                                             |
-| **Job**         | fabricate a replacement value (name, e-mail, date shift, …), deterministic in `(salt, domain, value)` | clone a schema and load it while keeping every cross-row / cross-table invariant intact |
+| **Job**         | fabricate a replacement value (name, e-mail, date shift, ...), deterministic in `(salt, domain, value)` | clone a schema and load it while keeping every cross-row / cross-table invariant intact |
 | **Knows about** | values and formats                                                                                    | tables, primary/foreign keys, load order, triggers, sequences, DPIA reporting           |
 
 The boundary is simply: **AlterEgo fabricates fields; Incognito preserves relationships**
 ([ADR 15](../docs/adr/0015-two-libraries-two-responsibilities.md), refined by
 [ADR 21](../docs/adr/0021-shape-preserving-fabrication-stays-in-incognito.md)). Incognito never
 implements its
-own value substitution — where it needs a transformation AlterEgo does not yet expose, the fix is to
+own value substitution - where it needs a transformation AlterEgo does not yet expose, the fix is to
 add it to AlterEgo, not to hand-roll it.
 
 ## Quick start
@@ -47,7 +47,7 @@ AnonymisationPolicy policy = AnonymisationPolicy.builder()
                 .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
                 .column("email", ColumnRole.DIRECT_ID, DirectIdStrategy.ALTEREGO_EMAIL)
                 .column("dob", ColumnRole.QUASI_ID, QuasiIdStrategy.SYNTHESISE)
-                .column("status", ColumnRole.PAYLOAD))            // operational data — kept real
+                .column("status", ColumnRole.PAYLOAD))            // operational data - kept real
         .build();
 
 PipelineResult result = IncognitoPipeline.builder()
@@ -77,7 +77,7 @@ tables:
       id: { role: PRIMARY_KEY, surrogateStrategy: SEQUENTIAL_LONG }
       email: { role: DIRECT_ID,   directIdStrategy: ALTEREGO_EMAIL }
       dob: { role: QUASI_ID,    quasiIdStrategy: SYNTHESISE }
-      status: { role: PAYLOAD }   # operational data — kept real
+      status: { role: PAYLOAD }   # operational data - kept real
 ```
 
 ```java
@@ -94,23 +94,23 @@ parse(in);
 
 Every field of the Java builder has a key (`role`, `surrogateStrategy`, `directIdStrategy`,
 `quasiIdStrategy`, `distinguishing`, `jitterDays`, `references`, `derivedFrom`,
-`coherenceGroup`, …). All five benchmark end-to-end tests drive the pipeline from a `policy.yaml`
+`coherenceGroup`, ...). All five benchmark end-to-end tests drive the pipeline from a `policy.yaml`
 resource, so the YAML path is exercised against every real-schema scenario (composite and
 self-referential keys, opaque column types, table omission).
 
 ## How it works
 
 Every fabricated value is a deterministic function of a per-run secret salt, a domain, and the input
-value — via AlterEgo's HMAC-SHA256 keyed generation. Direct identifiers and quasi-identifiers are
+value - via AlterEgo's HMAC-SHA256 keyed generation. Direct identifiers and quasi-identifiers are
 replaced with fictional values (RFC 2606 reserved e-mail domains, wide date jitter, and so on), so a
 clone can never accidentally reference a real mailbox or single out a real person. Because
 identifiers are fabricated, **operational data can be kept real** for realistic testing, and a
-**low-cardinality sensitive flag can be kept real** too — once a row cannot be tied to a person, a
+**low-cardinality sensitive flag can be kept real** too - once a row cannot be tied to a person, a
 boolean discloses nothing about anyone.
 
 Relational coherence is Incognito's job: primary keys become fresh surrogates and foreign keys are
 rewritten to the same mapping ([key translation]); related dates shift by one shared, salt-keyed
-delta per entity so parent–child windows and orderings survive ([coherent jitter][adr5]);
+delta per entity so parent-child windows and orderings survive ([coherent jitter][adr5]);
 denormalised attributes are resolved from their root ancestor's fabricated value
 ([inherited attributes][adr7]); and cyclic / self-referential foreign keys load via a placeholder
 plus a second-pass update ([cyclic FKs][adr6]).
@@ -122,7 +122,7 @@ plus a second-pass update ([cyclic FKs][adr6]).
 
 ## Fail-closed by design
 
-An unclassified column **aborts the run** — Incognito never copies a column it was not told how to
+An unclassified column **aborts the run** - Incognito never copies a column it was not told how to
 handle, because an unspotted identifier is the one mistake that leaks real data
 ([ADR 17](../docs/adr/0017-fail-closed-classification.md)). Auto-inference only *suggests* roles; it
 never silently assigns one. Whether a `SENSITIVE` column is kept real or fabricated is a one-word
@@ -148,13 +148,13 @@ so it's a connection-config recommendation on your side.
 
 ## Licence
 
-MIT — see the [root LICENCE](../LICENCE).
+MIT - see the [root LICENCE](../LICENCE).
 
 ### Benchmark test data
 
 The Phase-7 benchmark fixtures under `src/test/resources/benchmarks/` are third-party sample
 databases used only in tests (never bundled into the published JAR). Each is redistributed under its
-own permissive licence — Spring PetClinic (Apache-2.0), Pagila (PostgreSQL License), Northwind
+own permissive licence - Spring PetClinic (Apache-2.0), Pagila (PostgreSQL License), Northwind
 (Ms-PL). Full provenance, download and licence URLs are in
 [`benchmarks/SOURCES.md`](src/test/resources/benchmarks/SOURCES.md), attribution in
 [`benchmarks/NOTICE`](src/test/resources/benchmarks/NOTICE), and verbatim licence texts under

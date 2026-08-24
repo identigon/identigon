@@ -7,7 +7,7 @@ import org.identigon.alterego.TransformationContext;
 /**
  * Composes an organisation name from the country's tagged component dictionary
  * (docs/spec/alterego.md section 4.2): three distinct words, {@code [MODIFIER-or-NOUN] + NOUN +
- * NOUN} — position 1 may be either category, positions 2 and 3 must be {@code NOUN} and distinct
+ * NOUN} - position 1 may be either category, positions 2 and 3 must be {@code NOUN} and distinct
  * from every word already chosen, so the same word can never repeat and two place-like
  * {@code MODIFIER} words can never land next to each other (ADR 26 has the reasoning;
  * docs/research/0001-alterego-dictionaries.md has the curation detail). A recognised legal

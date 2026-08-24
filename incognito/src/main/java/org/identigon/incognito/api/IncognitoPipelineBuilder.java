@@ -91,8 +91,8 @@ final class IncognitoPipelineBuilder implements IncognitoPipeline.Builder {
         }
         SaltMode resolvedSaltMode = saltMode != null ? saltMode : SaltMode.EPHEMERAL; // default
 
-        // Computed fresh into a LOCAL array on every build() call — never mutates `this.salt`/
-        // `this.saltMode` — so calling build() more than once on the same builder (PERSISTENT or
+        // Computed fresh into a LOCAL array on every build() call - never mutates `this.salt`/
+        // `this.saltMode` - so calling build() more than once on the same builder (PERSISTENT or
         // REPRODUCIBLE mode; a builder is not documented as single-use) hands each resulting
         // pipeline its own independent salt array. Without this, both pipelines would share one
         // mutable byte[]; whichever finishes first zeroes it (SPEC §5.1) out from under the other.
@@ -105,7 +105,7 @@ final class IncognitoPipelineBuilder implements IncognitoPipeline.Builder {
             case PERSISTENT -> this.salt == null ? null : this.salt.clone();
             // The seed is mixed into the salt actually handed to AlterEgo: two `reproducible` calls
             // with the same salt but different seeds must (per SPEC §5.2) produce different, but
-            // each individually reproducible, output — AlterEgo itself has no separate seed concept.
+            // each individually reproducible, output - AlterEgo itself has no separate seed concept.
             case REPRODUCIBLE -> this.salt == null ? null : deriveReproducibleSalt(this.salt, this.seed);
         };
 
@@ -131,7 +131,7 @@ final class IncognitoPipelineBuilder implements IncognitoPipeline.Builder {
         );
 
         // Disclose how this run was keyed so the DPIA report can state the anonymity claim's strength
-        // (SPEC §5.1/§5.2) — a PERSISTENT/REPRODUCIBLE run forfeits irreversibility and a reviewer
+        // (SPEC §5.1/§5.2) - a PERSISTENT/REPRODUCIBLE run forfeits irreversibility and a reviewer
         // must see that, not infer it.
         context.attributes().put(
             org.identigon.incognito.core.AnonymisationReportBuilder.ATTR_SALT_MODE, resolvedSaltMode);
@@ -149,8 +149,8 @@ final class IncognitoPipelineBuilder implements IncognitoPipeline.Builder {
 
     /**
      * Derives the salt actually used for a {@code reproducible(salt, seed)} run: {@code
-     * SHA-256(salt || seed)}. Deterministic in {@code (salt, seed)} — same inputs always yield the
-     * same output — so a fixed salt and seed remain byte-for-byte reproducible across runs, while
+     * SHA-256(salt || seed)}. Deterministic in {@code (salt, seed)} - same inputs always yield the
+     * same output - so a fixed salt and seed remain byte-for-byte reproducible across runs, while
      * varying the seed alone (holding salt fixed) varies the fabricated output, matching SPEC §5.2.
      * Package-private (not private) so a unit test can exercise it directly, without a live database.
      */

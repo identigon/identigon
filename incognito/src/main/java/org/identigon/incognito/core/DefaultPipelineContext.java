@@ -10,7 +10,7 @@ import org.identigon.incognito.api.PipelineContext;
 import org.identigon.incognito.policy.AnonymisationPolicy;
 
 /**
- * The default {@link PipelineContext} — an immutable record of the run's collaborators with a mutable
+ * The default {@link PipelineContext} - an immutable record of the run's collaborators with a mutable
  * concurrent attribute map for stages to share state.
  *
  * @param source       the source data source

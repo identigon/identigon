@@ -30,9 +30,9 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  *
  * <p>Uses a table with two SENSITIVE columns:
  * <ul>
- *   <li>{@code flag} — low cardinality (2 values): correctly declared {@code distinguishing: false}.</li>
- *   <li>{@code notes} — high cardinality (100 distinct values): mis-declared
- *       {@code distinguishing: false} — should trigger the lint.</li>
+ *   <li>{@code flag} - low cardinality (2 values): correctly declared {@code distinguishing: false}.</li>
+ *   <li>{@code notes} - high cardinality (100 distinct values): mis-declared
+ *       {@code distinguishing: false} - should trigger the lint.</li>
  * </ul>
  *
  * <p>Verifies all three modes: WARN continues with a warning, ERROR throws, OFF skips silently.
@@ -53,7 +53,7 @@ class DistinguishingLintTest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping lint E2E tests");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping lint E2E tests");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)

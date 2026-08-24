@@ -12,14 +12,14 @@ import java.util.function.Consumer;
  * or fabricated is <em>declared</em> per column via a boolean {@code distinguishing} flag (§2.2/§4.1);
  * {@code maxCategoricalCardinality} is only the threshold for the default-on misdeclaration lint
  * ({@code distinguishingLint}: WARN | ERROR | OFF) that flags a {@code distinguishing: false} column
- * looking free-text — it is not the gate.
+ * looking free-text - it is not the gate.
  *
  * @param autoInfer whether auto-inference may suggest roles (it never assigns them); default
- *     {@code false}. Deprecated — see {@link Builder#autoInfer(boolean)}.
+ *     {@code false}. Deprecated - see {@link Builder#autoInfer(boolean)}.
  * @param maxCategoricalCardinality the distinct-count threshold for the misdeclaration lint (§4.1)
  * @param distinguishingLint how the misdeclaration lint behaves (WARN / ERROR / OFF)
  * @param structuralUniqueness whether {@code VerificationStage} computes relational-fingerprint
- *     findings (SPEC §2.4); {@code OFF} by default — advisory DPIA evidence, never a run-abort
+ *     findings (SPEC §2.4); {@code OFF} by default - advisory DPIA evidence, never a run-abort
  * @param structuralRarenessK the "rare" cutoff for a structural-uniqueness finding: a parent row's
  *     child count is rare if fewer than this many parents in total share it
  * @param tables the per-table policies, keyed by table name
@@ -64,7 +64,7 @@ public record AnonymisationPolicy(
         public Builder() {}
 
         // Fail-closed by default (SPEC §7.2): auto-inference must be opted into, and it only
-        // suggests roles — it never silently classifies.
+        // suggests roles - it never silently classifies.
         private boolean autoInfer = false;
         private int maxCategoricalCardinality = 64;
         private org.identigon.incognito.api.DistinguishingLint distinguishingLint = org.identigon.incognito.api.DistinguishingLint.WARN;
@@ -80,7 +80,7 @@ public record AnonymisationPolicy(
          * @return this builder
          * @deprecated inference is authoring, not execution; {@code effigies} owns it now and this
          *     fail-closed engine's own copy is scheduled for removal at incognito's next major
-         *     version — see {@code docs/adr/0023-authoring-above-the-engine.md}.
+         *     version - see {@code docs/adr/0023-authoring-above-the-engine.md}.
          */
         @Deprecated(forRemoval = true)
         public Builder autoInfer(boolean autoInfer) {

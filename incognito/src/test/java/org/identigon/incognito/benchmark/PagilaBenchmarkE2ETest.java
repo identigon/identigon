@@ -31,7 +31,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * Phase-7 benchmark: Pagila — the canonical PostgreSQL Sakila port (pinned to tag {@code
+ * Phase-7 benchmark: Pagila - the canonical PostgreSQL Sakila port (pinned to tag {@code
  * pagila-v3.0.0}: no pgvector, no heavy partitioning). The DVD-rental domain adds, together, a real
  * 15-table Sakila graph with two <b>composite PKs</b> ({@code film_actor}, {@code film_category}),
  * seven <b>views</b> that must be excluded from cloning, opaque {@code bytea}/{@code tsvector}/array
@@ -39,7 +39,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * The partitioned {@code payment} table is excluded from the policy.
  *
  * <p>Schema and the ~5 MB {@code pagila-insert-data.sql} are both vendored (see
- * {@code benchmarks/SOURCES.md} for the upstream tag and recorded SHA-256) — no network fetch, so
+ * {@code benchmarks/SOURCES.md} for the upstream tag and recorded SHA-256) - no network fetch, so
  * the benchmark can't silently skip in a network-restricted CI environment. Requires Docker; skips
  * gracefully otherwise.
  */
@@ -62,7 +62,7 @@ class PagilaBenchmarkE2ETest {
         String insertData = resource("/benchmarks/pagila/pagila-insert-data.sql");
 
         String schema = resource("/benchmarks/pagila/schema.sql");
-        // `ALTER ... OWNER TO postgres` — that role does not exist in the test container.
+        // `ALTER ... OWNER TO postgres` - that role does not exist in the test container.
         String schemaLoadable = schema.lines()
             .filter(l -> !l.contains("OWNER TO"))
             .collect(Collectors.joining("\n"));
@@ -129,13 +129,13 @@ class PagilaBenchmarkE2ETest {
                 "rental FKs must resolve");
             assertEquals(0, scalar(tgt, "SELECT COUNT(*) FROM address a "
                 + "WHERE NOT EXISTS (SELECT 1 FROM city c WHERE c.city_id = a.city_id)"),
-                "address → city FK must resolve");
+                "address -> city FK must resolve");
 
             // PII fabricated: no real Sakila customer e-mail (the @sakilacustomer.org convention) survives.
             assertEquals(0, scalar(tgt, "SELECT COUNT(*) FROM customer WHERE email LIKE '%@sakilacustomer.org'"),
                 "customer e-mails must be fabricated");
 
-            // Biometric bytea (staff.picture) redacted — a staff photo is personal data, not audit-passthrough.
+            // Biometric bytea (staff.picture) redacted - a staff photo is personal data, not audit-passthrough.
             assertEquals(0, scalar(tgt, "SELECT COUNT(*) FROM staff WHERE picture IS NOT NULL"),
                 "staff photos must be dropped, not copied");
 

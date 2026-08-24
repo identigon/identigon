@@ -3,7 +3,7 @@ package org.identigon.effigies;
 import java.io.PrintStream;
 
 /**
- * Command-line entry point for <b>Effigies</b> — a thin authoring and orchestration front-end above
+ * Command-line entry point for <b>Effigies</b> - a thin authoring and orchestration front-end above
  * <a href="https://github.com/identigon/identigon/tree/main/incognito">incognito</a>. Effigies discovers a source
  * schema, helps author (and, later, infer) the declarative anonymisation policy, and drives the engine
  * to produce the anonymised clone. The engine stays deterministic and judgment-free; all inference and
@@ -67,7 +67,7 @@ public final class EffigiesCli {
 
     private static void printUsage(PrintStream w) {
         w.println("""
-            Identigon — author and run an incognito anonymisation from a source schema.
+            Identigon - author and run an incognito anonymisation from a source schema.
 
             Usage: java -jar identigon.jar <command> [options]
 

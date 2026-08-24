@@ -8,6 +8,6 @@ public enum DistinguishingLint {
     WARN,
     /** Fail the run on the first misdeclared column. */
     ERROR,
-    /** Skip the check entirely — no {@code COUNT(DISTINCT)} scan is run. */
+    /** Skip the check entirely - no {@code COUNT(DISTINCT)} scan is run. */
     OFF
 }

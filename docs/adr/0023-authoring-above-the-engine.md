@@ -9,20 +9,20 @@ decision-makers: David Conneely
 ## Context and Problem Statement
 
 Using incognito requires a fully-classified anonymisation policy: every column assigned a role and
-strategy, or the run fails closed (ADR 17). Producing that policy is real work — inspecting the
-schema, judging what each column is, writing YAML — and it is exactly the kind of judgment that is
+strategy, or the run fails closed (ADR 17). Producing that policy is real work - inspecting the
+schema, judging what each column is, writing YAML - and it is exactly the kind of judgment that is
 tedious for a human and well-suited to heuristics or an LLM/agent.
 
 There is pressure to push that judgment *down* into the engine: auto-infer roles, let a model
 classify columns, "just make it work" from a connection string. incognito already carries a small
-piece of this (`PolicyInferrer` and an `autoInfer` flag) — but, by its fail-closed design, inference
+piece of this (`PolicyInferrer` and an `autoInfer` flag) - but, by its fail-closed design, inference
 there only ever *suggests*; it never assigns a role, so it has no effect on what the engine
 produces. It is a half-exposed authoring feature sitting inside an execution engine.
 
 Two properties must not be compromised: the anonymisation run must stay **deterministic and
 reproducible** (a privacy tool cannot depend on a model call to anonymise), and it must stay
 **fail-closed** (nothing classifies a column silently). Meanwhile the authoring judgment wants room
-to evolve — regex heuristics today, an agent tomorrow.
+to evolve - regex heuristics today, an agent tomorrow.
 
 ## Considered Options
 
@@ -56,7 +56,7 @@ secrets (credentials, fixed-salt bytes) are injected out-of-band, never written 
 * Good, because the engine's guarantee is clean and defensible: it makes no judgment about what is
   sensitive; a human (aided by Effigies) declares it, and the DPIA report's survival/lint/structural
   findings and sample rows are the safety net that catches a wrong declaration.
-* Good, because authoring can evolve freely — regex → agent → hybrid — without ever touching the
+* Good, because authoring can evolve freely - regex -> agent -> hybrid - without ever touching the
   deterministic engine or its reproducibility/fail-closed guarantees.
 * Neutral: a model may participate in *authoring* a config, but never in *running* one; the
   `policy.yaml` is the durable, reviewable boundary between the two.

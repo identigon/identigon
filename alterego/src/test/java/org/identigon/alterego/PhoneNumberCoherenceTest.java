@@ -79,7 +79,7 @@ class PhoneNumberCoherenceTest {
 
   @Test
   void everyInScopeOutputStillFallsInsideAPublishedRange() {
-    // The fictionality guarantee (section 4.1) holds inside a scope too — a scope only changes
+    // The fictionality guarantee (section 4.1) holds inside a scope too - a scope only changes
     // *which* range gets picked, never removes the guarantee itself.
     java.util.Set<String> fixedPrefixes =
         java.util.Set.of(

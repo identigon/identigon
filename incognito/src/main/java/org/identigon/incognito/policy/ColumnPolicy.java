@@ -15,7 +15,7 @@ import org.identigon.incognito.api.SurrogateStrategy;
  * {@code referenced*} for {@code FOREIGN_KEY}; {@code derivedFrom*} for {@code INHERITED_ATTRIBUTE}.
  *
  * @param columnName the column name
- * @param role the column's {@link ColumnRole}; {@code null} if not yet declared — a policy author
+ * @param role the column's {@link ColumnRole}; {@code null} if not yet declared - a policy author
  *     omitting the {@code role} key is fail-closed (SPEC §7.2), not defaulted to {@code PAYLOAD}
  * @param surrogateStrategy how a {@code PRIMARY_KEY} is surrogated
  * @param directIdStrategy how a {@code DIRECT_ID}/{@code UNIQUE_CANDIDATE_KEY} is fabricated
@@ -49,7 +49,7 @@ public record ColumnPolicy(
     String derivedFromColumn
 ) {
     /**
-     * Validates required fields. {@code role} is deliberately NOT validated here — a {@code null}
+     * Validates required fields. {@code role} is deliberately NOT validated here - a {@code null}
      * role means "not yet declared", a distinct, legitimate state that
      * {@code SchemaDiscoveryStage} must detect and fail closed on with a specific, actionable
      * message (SPEC §7.2); rejecting it here instead would only produce a generic parse-failure
@@ -154,7 +154,7 @@ public record ColumnPolicy(
 
         /**
          * Sets the fixed placeholder {@link RedactionStrategy#CONSTANT} writes for this column,
-         * e.g. {@code "0000 0000 0000 0000"} for a card number. Text-type columns only — checked
+         * e.g. {@code "0000 0000 0000 0000"} for a card number. Text-type columns only - checked
          * at pipeline-build time, not per row (SPEC §7.2). Leave unset for the type-appropriate
          * default ({@code "REDACTED"} for text).
          *

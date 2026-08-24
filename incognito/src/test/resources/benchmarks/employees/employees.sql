@@ -1,4 +1,4 @@
---  Incognito benchmark fixture — assembled, not upstream-verbatim.
+--  Incognito benchmark fixture - assembled, not upstream-verbatim.
 --
 --  This single file is a mechanical assembly of the Bytebase "employee-sample-database"
 --  PostgreSQL `dataset_small` (schema `employee.sql` + its `load_*.sql` data includes),

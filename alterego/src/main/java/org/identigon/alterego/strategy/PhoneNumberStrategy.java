@@ -10,22 +10,22 @@ import org.identigon.alterego.TransformationContext;
 /**
  * Generates a fictional phone number (docs/spec/alterego.md section 4.1, section 4.4, section
  * 6.3): digits replaced in place, punctuation and grouping preserved. By default, if the country
- * has a published fictional-range table ({@code dictionaries/<country>/phone-ranges.txt} —
+ * has a published fictional-range table ({@code dictionaries/<country>/phone-ranges.txt} -
  * {@code docs/research/0003-alterego-phone-ranges.md} for GB's sourcing), the output is built
  * from one of those ranges'
  * display templates (its fixed digits copied verbatim, its trailing {@code XXX} replaced with 3
  * random digits), guaranteeing an unconnectable number.
  *
- * <p>Inside an active record scope, prefers the range tagged with the record's place — already
+ * <p>Inside an active record scope, prefers the range tagged with the record's place - already
  * fixed, or, if this is the first field to touch the record's place, freshly established from a
  * real town ({@link PlaceCoherence}, so a later {@code city()} call always agrees); if no range
  * matches that place, uses the {@code NONE}-tagged (geography-neutral, {@code 01632 960xxx})
- * range specifically — never an arbitrary other geographic range, and never the {@code
+ * range specifically - never an arbitrary other geographic range, and never the {@code
  * MOBILE}-tagged range. Outside any scope, this is the unchanged, unconstrained pick over every
  * shipped range.
  *
  * <p>A country with no range table falls back to plain in-place digit replacement, silently and
- * without a fictionality guarantee — a documented lesser category (section 4.1), not a failure.
+ * without a fictionality guarantee - a documented lesser category (section 4.1), not a failure.
  * {@code realistic} always uses that plain fallback, even for a country with a range table.
  */
 public final class PhoneNumberStrategy implements Strategy<String> {

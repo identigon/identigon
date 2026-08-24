@@ -6,7 +6,7 @@ organisation-name-components dictionary (docs/research/0001-alterego-dictionarie
 Source: UK IPO Trade Mark Data Release, Domestic UK Applications dataset (OGL v3.0).
 https://www.gov.uk/government/publications/ipo-trade-mark-data-release
 
-This never redistributes real owner names — only the resulting word-frequency counts are
+This never redistributes real owner names - only the resulting word-frequency counts are
 written out, and only generic/thematic words (not owner names themselves) are ever promoted
 into the shipped dictionary. The raw ZIP (60 MB compressed, ~800 MB decompressed) is not kept in
 this repository: it's a stable, versioned direct download (last modified 2018), so re-running
@@ -14,12 +14,12 @@ this script against a freshly downloaded copy reproduces the same output.
 
 Method:
 1. Stream-decode the pipe-delimited (not tab-delimited, despite gov.uk's own docs saying tab)
-   UTF-16 file directly from the ZIP, one row at a time — never write the 800 MB decompressed
+   UTF-16 file directly from the ZIP, one row at a time - never write the 800 MB decompressed
    file to disk.
 2. Keep only rows where Country == "United Kingdom", so mined vocabulary stays UK-flavoured
    rather than picking up foreign-registrant business terms.
 3. Deduplicate by owner Name first (a single owner can file many trade marks under the same
-   name — counting every row would let one prolific filer's name dominate token frequency).
+   name - counting every row would let one prolific filer's name dominate token frequency).
 4. Tokenise each distinct name into alphabetic words, uppercase for counting.
 5. Drop legal-suffix and legal-form words (handled separately by the spec's own suffix
    mechanism, section 4.2, or just legal boilerplate, not thematic vocabulary), common English
@@ -28,11 +28,11 @@ Method:
    this repo (tools/data-cache/ons-babynames-1996-2025.xlsx: every first name appearing anywhere
    in the ONS 1996-2025 series, not just the curated top-20s used elsewhere; and
    tools/data-cache/nrs-surnames-2025.xlsx's "Surnames TimeSeries 1975 to 2025" sheet: every
-   surname appearing anywhere in that series) — real sourced data, not a hand-typed stoplist.
+   surname appearing anywhere in that series) - real sourced data, not a hand-typed stoplist.
    Many UK trade mark owners are sole traders filing under their own name, so without this step
    personal names (John, Smith, Mrs...) dominate the raw frequency table.
 7. Write every surviving token and its distinct-owner-name frequency to
-   tools/data-cache/org-components-candidates.tsv, sorted by frequency descending — a small,
+   tools/data-cache/org-components-candidates.tsv, sorted by frequency descending - a small,
    repeatable, reviewable artifact, not the raw data itself.
 
 Run: python3 tools/mine_org_components.py <path-to-downloaded-opendatadomestic.zip>

@@ -27,12 +27,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * Exercises the fail-closed guards for load configurations Incognito cannot safely handle — cases
+ * Exercises the fail-closed guards for load configurations Incognito cannot safely handle - cases
  * that must abort loudly, never silently corrupt or drop (SPEC §5.2/§9, §7.3 invariant 6):
  * <ul>
- *   <li>a <b>non-superuser</b> target with cyclic FKs (cannot suppress FK enforcement) → fail fast;</li>
- *   <li>a <b>composite FK referencing a cyclic table</b> → not yet supported;</li>
- *   <li>a <b>cyclic FK on a table with no single-column PK</b> → nothing to key the pass-2 UPDATE on.</li>
+ *   <li>a <b>non-superuser</b> target with cyclic FKs (cannot suppress FK enforcement) -> fail fast;</li>
+ *   <li>a <b>composite FK referencing a cyclic table</b> -> not yet supported;</li>
+ *   <li>a <b>cyclic FK on a table with no single-column PK</b> -> nothing to key the pass-2 UPDATE on.</li>
  * </ul>
  * Every other E2E test runs as superuser with resolvable keys, so these paths were previously
  * unexercised. Requires Docker; skips gracefully otherwise.
@@ -51,7 +51,7 @@ class FailClosedGuardE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         pg = new PostgreSQLContainer(TestPostgres.IMAGE)
             .withDatabaseName("guard").withUsername("test").withPassword("test");
@@ -98,7 +98,7 @@ class FailClosedGuardE2ETest {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // Guard 1: a non-superuser target with cyclic FKs cannot suppress FK enforcement → fail fast.
+    // Guard 1: a non-superuser target with cyclic FKs cannot suppress FK enforcement -> fail fast.
     // ---------------------------------------------------------------------------------------------
     @Test
     void nonSuperuserWithCyclicFkFailsFast() throws Exception {
@@ -129,7 +129,7 @@ class FailClosedGuardE2ETest {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // Guard 4: a composite FK referencing a cyclic table is not yet supported → fail closed.
+    // Guard 4: a composite FK referencing a cyclic table is not yet supported -> fail closed.
     // ---------------------------------------------------------------------------------------------
     @Test
     void compositeFkToCyclicTableFailsClosed() throws Exception {

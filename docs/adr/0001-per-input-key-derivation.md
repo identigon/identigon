@@ -31,17 +31,17 @@ key = HMAC-SHA256(salt, purpose || 0x00 || domain || 0x00 || canonical(input) ||
 ```
 
 as specified byte-exactly in the specification's Appendix A.1. All randomness a strategy sees flows
-from this key. The `purpose` tag separates the three uses of a derivation — randomness keys,
-mapping-store keys, and keyed record-attribute resolution — so they never share a key; the
+from this key. The `purpose` tag separates the three uses of a derivation - randomness keys,
+mapping-store keys, and keyed record-attribute resolution - so they never share a key; the
 `counter` is 0 except for `unique()` collision retries.
 
 ### Consequences
 
 * Good, because outputs are independent of stream order and parallelism; referential integrity
   across datasets holds with no shared state.
-* Bad, because the salt is a secret: anyone holding it can confirm guesses about input→output
+* Bad, because the salt is a secret: anyone holding it can confirm guesses about input->output
   pairs.
-* Neutral: each element costs one HMAC computation plus a few HMAC blocks of stream output —
+* Neutral: each element costs one HMAC computation plus a few HMAC blocks of stream output -
   negligible next to the surrounding I/O.
 * Neutral: the derivation message layout is frozen for the major version and enforced by
   conformance vectors.

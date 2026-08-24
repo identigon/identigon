@@ -7,7 +7,7 @@ import java.util.Deque;
  * Minimal, dependency-free JSON serialiser for the DPIA artefact. Owns comma placement,
  * brace/bracket nesting, and string escaping, so the emitted JSON cannot be structurally malformed.
  * Produces compact single-line output with a readable {@code "key": value} / {@code , } token style.
- * Not a general-purpose library — it supports exactly the shapes {@link DpiaArtefactEmitter} needs.
+ * Not a general-purpose library - it supports exactly the shapes {@link DpiaArtefactEmitter} needs.
  */
 final class JsonWriter {
 

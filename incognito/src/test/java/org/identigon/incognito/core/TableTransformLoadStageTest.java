@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Phase-4 unit coverage for the string {@code UNIQUE_CANDIDATE_KEY} collision fallback. The key
  * property (Goal 1): the fallback is EXACTLY length-preserving, so it can never overflow a
- * fixed-width / CHECK-constrained column — the bug in the earlier draft, which appended a 6-digit
+ * fixed-width / CHECK-constrained column - the bug in the earlier draft, which appended a 6-digit
  * suffix and grew short values.
  */
 class TableTransformLoadStageTest {

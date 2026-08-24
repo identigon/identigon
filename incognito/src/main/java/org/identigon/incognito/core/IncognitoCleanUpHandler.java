@@ -28,7 +28,7 @@ public final class IncognitoCleanUpHandler {
     /**
      * Logs a coarse WARNING that a best-effort compensation step failed, so a target left inconsistent
      * (triggers disabled, partial data, unsynced sequences) is not silently invisible to the operator.
-     * Deliberately records only the operation, table and SQLState — never the exception message, which
+     * Deliberately records only the operation, table and SQLState - never the exception message, which
      * must never carry a field value (SPEC §7.3).
      */
     private static void warnCompensation(String operation, String table, SQLException e) {
@@ -39,7 +39,7 @@ public final class IncognitoCleanUpHandler {
 
     /**
      * Compensates a failed run: re-enables triggers, truncates partially loaded tables, and resyncs
-     * sequences. Best-effort — guaranteed never to throw, so it can never replace/mask the original
+     * sequences. Best-effort - guaranteed never to throw, so it can never replace/mask the original
      * failure that triggered it (its caller is inside that failure's {@code catch} block, with no
      * surrounding try/catch of its own).
      *
@@ -49,7 +49,7 @@ public final class IncognitoCleanUpHandler {
         try {
             doCompensate(context);
         } catch (RuntimeException e) {
-            // e.g. a ClassCastException from an unexpectedly-typed context attribute — never let an
+            // e.g. a ClassCastException from an unexpectedly-typed context attribute - never let an
             // internal compensation bug propagate and hide the real pipeline failure that called us.
             LOG.log(System.Logger.Level.WARNING,
                 "compensation failed unexpectedly ({0}); target may be left inconsistent",
@@ -108,7 +108,7 @@ public final class IncognitoCleanUpHandler {
             }
 
             // Recreate any FK constraints dropped for an owner-mode cyclic load (SPEC §9). The tables
-            // were just emptied, so the constraints validate trivially — leaving them dropped would be
+            // were just emptied, so the constraints validate trivially - leaving them dropped would be
             // a silent schema regression.
             Object droppedObj = context.attributes().get("incognito.droppedForeignKeys");
             if (droppedObj instanceof List<?> droppedList && !droppedList.isEmpty()) {

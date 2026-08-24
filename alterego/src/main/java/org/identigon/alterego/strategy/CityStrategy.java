@@ -15,10 +15,10 @@ import org.identigon.alterego.UkNation;
  * UK_POSTCODE_AREA} and {@code UK_NATION} from the chosen town's tags, so a later {@code
  * postcode()}/{@code phoneNumber()} in the same scope can follow. Outside any scope (or with
  * nothing yet fixed), this is exactly the unconstrained pick over the same underlying rows in the
- * same order as before record coherence existed — byte-identical output.
+ * same order as before record coherence existed - byte-identical output.
  *
  * <p>If an area is fixed but matches no town in the dictionary (e.g. a caller pre-seeded {@code
- * UK_POSTCODE_AREA} to a value with no town entry), this falls back to an unconstrained pick —
+ * UK_POSTCODE_AREA} to a value with no town entry), this falls back to an unconstrained pick -
  * still deterministic, since the fallback consumes the same context randomness either way, the
  * same family of fallback as {@code NameOptions.preserveInitial()}'s no-matching-initial case.
  * Documented v1 limitation, not silently dropped.
@@ -26,7 +26,7 @@ import org.identigon.alterego.UkNation;
  * <p>Each attribute is set from the chosen town's tags whenever it is not already present (not
  * only when *neither* was fixed yet): if the area was already fixed (by a pre-seed, or
  * established by {@code postcode()}/{@code phoneNumber()} running first) but {@code UK_NATION}
- * was not — since neither of those builtins knows a nation, only an area — this is what fixes it
+ * was not - since neither of those builtins knows a nation, only an area - this is what fixes it
  * too, consistently with the chosen town. Checking presence first, rather than calling {@code
  * set} unconditionally and relying on its no-op-if-equal behaviour, matters specifically for the
  * unmatched-fixed-area fallback above: the chosen (unconstrained) town's own area will generally

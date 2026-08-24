@@ -8,7 +8,7 @@ package org.identigon.alterego;
  *
  * <p><b>Use one instance from a single thread only.</b> This is not an arbitrary restriction:
  * record attributes resolve first-touch-wins, which only has one deterministic winner if
- * "first" is well-defined — and it is not across threads, which race. A parallel stream of
+ * "first" is well-defined - and it is not across threads, which race. A parallel stream of
  * records is fine and cheap: give each element its own scope. What must never happen is sharing
  * one {@code RecordScope} instance across threads.
  */

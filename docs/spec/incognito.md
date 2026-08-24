@@ -1,9 +1,9 @@
-# Incognito — Specification
+# Incognito - Specification
 
 Incognito clones a production database into a **schema-identical test database** in which all
 personal data has been replaced with **clearly fictional** data. It preserves data volumes
 (including per-period volumes) and the relationships between entities, so the clone is realistic for
-API development and consumer testing — while carrying no real personal data and no danger of PII
+API development and consumer testing - while carrying no real personal data and no danger of PII
 leakage.
 
 The core technique is **fabrication**: every direct identifier and quasi-identifier is replaced with
@@ -14,7 +14,7 @@ drawn from deliberately fictional vocabularies (fictional surnames, RFC 2606 res
 domains, reserved phone ranges, fictional postcodes), the clone is self-evidently not real data.
 
 Incognito is **not** a statistical-privacy tool. It does not run, and is not designed to support,
-statistical analysis of the anonymised data — so **k-anonymity, l-diversity, and t-closeness are
+statistical analysis of the anonymised data - so **k-anonymity, l-diversity, and t-closeness are
 explicit non-goals** (§1.2, §2.3). Fabrication is simpler and a stronger anonymisation argument than
 generalising real values, precisely because we never need the real values to remain analytically
 useful.
@@ -35,7 +35,7 @@ roles and transformation strategies (§4), fail-closed classification (§7.2), a
 must-not-regress invariants (§7.3) define what Incognito does; the appendices pin the `alterego`
 integration, the
 `SYNTHESISE`-by-type mapping, the store-keying convention, and the orchestration and cyclic-FK load
-details. Where the code and this document disagree, this document is intended to win — flag the gap
+details. Where the code and this document disagree, this document is intended to win - flag the gap
 rather than encode new behaviour.
 
 ---
@@ -44,8 +44,8 @@ rather than encode new behaviour.
 
 ### 1.1 Goals (v1.0)
 
-1. **Schema-identical clone.** The target matches the source DDL — data types, `NOT NULL`, unique
-   constraints, foreign keys, identity columns — so the same application and API code runs unchanged
+1. **Schema-identical clone.** The target matches the source DDL - data types, `NOT NULL`, unique
+   constraints, foreign keys, identity columns - so the same application and API code runs unchanged
    against it.
 2. **Similar data volumes.** Overall row counts are preserved (rows are not dropped in v1.0), and
    **per-period volumes** are preserved for temporal data (roughly the same number of
@@ -56,11 +56,11 @@ rather than encode new behaviour.
    preserved, so joins and traversals behave as in production.
 4. **No PII leakage.** Every direct identifier and quasi-identifier is replaced with fabricated
    data, so no real individual can be singled out, linked, or inferred from the **fabricated
-   identifier and quasi-identifier fields** — no real identifier or quasi-identifier value remains.
-   (Residual paths that live *outside* those fields — retained self-identifying values and
-   structural fingerprints — are enumerated and surfaced, not hidden;
+   identifier and quasi-identifier fields** - no real identifier or quasi-identifier value remains.
+   (Residual paths that live *outside* those fields - retained self-identifying values and
+   structural fingerprints - are enumerated and surfaced, not hidden;
    see [§2.4](#24-threat-model--residual-limitations).)
-5. **Obviously anonymised (fictionality).** Replacement values are *clearly fictional* — they cannot
+5. **Obviously anonymised (fictionality).** Replacement values are *clearly fictional* - they cannot
    be mistaken for, or misused as, real personal data. This is a first-class goal: it removes the
    risk of a tester or downstream system treating clone data as if it were real, and it makes the
    "this is not personal data" argument self-evident.
@@ -74,12 +74,12 @@ rather than encode new behaviour.
    analysis of the anonymised data, and does **not** preserve any well-defined statistical
    relationship between the fabricated data and the originals. Distributions of *volumes over time*
    are preserved (Goal 2), but correlations, joint distributions, and value-level relationships are
-   **not** — any such relationship in the output is incidental, not a promise, and must not be
+   **not** - any such relationship in the output is incidental, not a promise, and must not be
    relied upon.
 2. **Statistical-privacy models (k-anonymity, l-diversity, t-closeness).** These are **explicit
    non-goals**. They exist to bound re-identification *while keeping real values analytically
-   useful* — the very utility we disclaim above. Incognito fabricates identifiers/quasi-identifiers
-   instead, so there is no "≥k share this real value" bound, no l-diversity check, and no
+   useful* - the very utility we disclaim above. Incognito fabricates identifiers/quasi-identifiers
+   instead, so there is no ">=k share this real value" bound, no l-diversity check, and no
    t-closeness measurement. (Rationale in §2.3; k-anonymity may return post-v1.0 only as an optional
    mode for a consumer who explicitly needs generalised- *real* values.)
 3. **Formal re-identification bounds / differential privacy.** Incognito does not compute
@@ -104,40 +104,40 @@ rather than encode new behaviour.
   command; a documented degraded mode uses `ALTER TABLE ... DISABLE TRIGGER USER` plus explicit FK
   dropping.
 
-### 1.4 Relationship to `alterego` — two libraries, two responsibilities
+### 1.4 Relationship to `alterego` - two libraries, two responsibilities
 
 Incognito and [`alterego`](../../alterego) are deliberately separate libraries, and the split
-is **not** because Incognito performs statistical or dataset-wide analysis — it does not. (That was
+is **not** because Incognito performs statistical or dataset-wide analysis - it does not. (That was
 a k-anonymity-era assumption: forming equivalence classes needs a *global* pass over a table. With
-fabrication there is no such pass — see §2.3.) Incognito **streams** row-by-row (`fetchSize = 5000`)
+fabrication there is no such pass - see §2.3.) Incognito **streams** row-by-row (`fetchSize = 5000`)
 and never holds a dataset in memory. The real reason for two libraries is a difference of
 **responsibility**, not of batch size:
 
 |                 | `alterego`                                                                                                           | Incognito                                                                                     |
 |:----------------|:-------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------|
 | **Scope**       | A single **value**, or the fields of one **record**.                                                                     | A whole **relational database**.                                                              |
-| **Job**         | Given a value, produce a fabricated replacement (name, e-mail, date shift, …), deterministic in `(salt, domain, value)`. | Clone a schema and load it while keeping every **cross-row / cross-table** invariant intact.  |
+| **Job**         | Given a value, produce a fabricated replacement (name, e-mail, date shift, ...), deterministic in `(salt, domain, value)`. | Clone a schema and load it while keeping every **cross-row / cross-table** invariant intact.  |
 | **State**       | Essentially stateless w.r.t. the dataset; DB-agnostic; reusable on a CSV, an API payload, a message, or one record.      | Holds bounded **per-entity relational state**: key maps, jitter deltas, inherited attributes. |
 | **Knows about** | Values and formats.                                                                                                      | Tables, primary/foreign keys, load order, triggers, sequences, DPIA reporting.                |
 
 Incognito **consumes** AlterEgo as its field-transformation engine and owns everything AlterEgo
 structurally cannot: schema discovery and column-role classification; topological ordering (parents
-before children); **key translation** (`PRIMARY_KEY` → surrogate, `FOREIGN_KEY` rewritten to the
+before children); **key translation** (`PRIMARY_KEY` -> surrogate, `FOREIGN_KEY` rewritten to the
 *same* mapped parent surrogate); **coherent cross-entity temporal deltas** (a child event inherits
-its parent's day-shift — AlterEgo's per-field jitter draws an *independent* delta per call and
+its parent's day-shift - AlterEgo's per-field jitter draws an *independent* delta per call and
 structurally cannot do this, Appendix A); **root-ancestor attribute cascade**; bulk loading with
 trigger isolation and sequence resync; and the accountability report.
 
-These are all **referential-coherence** concerns — meaningless for AlterEgo's single-value contract,
+These are all **referential-coherence** concerns - meaningless for AlterEgo's single-value contract,
 and folding them in would couple AlterEgo to JDBC and relational schemas, destroying its reuse as a
 standalone value transformer. So the boundary is simply: **AlterEgo fabricates fields; Incognito
 preserves relationships.** The earlier "records vs datasets" framing was really this distinction all
-along — it only *looked* statistical while k-anonymity was still in scope.
+along - it only *looked* statistical while k-anonymity was still in scope.
 
 > **Principle (delegation of value transformation).** Incognito must **not** implement its own
 > field-value redaction, anonymisation, substitution, or format-preserving generation. Every
-> transformation of a *value* — masking, constants, shape/pattern-preserving fabrication, date
-> shifting — is delegated to `alterego`; Incognito only *decides* (from policy and schema)
+> transformation of a *value* - masking, constants, shape/pattern-preserving fabrication, date
+> shifting - is delegated to `alterego`; Incognito only *decides* (from policy and schema)
 > **which** transformation each column gets and **coordinates** it across rows and tables. If
 > Incognito needs a value transformation AlterEgo does not yet expose, the fix is to add the
 > primitive
@@ -156,34 +156,34 @@ along — it only *looked* statistical while k-anonymity was still in scope.
 
 Under GDPR Recital 26 and Article 29 WP Opinion 05/2014, data is anonymous when a subject cannot be
 **singled out**, **linked**, or **inferred**. A "sensitive" value is only a problem if it can be
-tied to a real individual — anonymous data, including special-category values, falls outside GDPR
+tied to a real individual - anonymous data, including special-category values, falls outside GDPR
 entirely. So the whole problem reduces to **severing linkage**.
 
 Incognito severs the two normal linkage anchors outright:
 
 | Risk (WP29)                                                                                        | How Incognito addresses it                                                                                                                                                     |
 |:---------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Singling out / Linkability** via **direct identifiers** (name, e-mail, account no., national ID) | **Fabricated.** Replaced by `AlterEgo`'s HMAC-SHA256 keyed generation from a secret salt that is destroyed on completion — irreversible and non-linkable across clones (§5.1). |
-| **Singling out / Linkability** via **quasi-identifiers** (dob, postcode, sex, …)                   | **Fabricated** (synthesised or jittered, §4). No real QI value survives, so the classic "combination of QIs" re-identification path has nothing to match against.              |
+| **Singling out / Linkability** via **direct identifiers** (name, e-mail, account no., national ID) | **Fabricated.** Replaced by `AlterEgo`'s HMAC-SHA256 keyed generation from a secret salt that is destroyed on completion - irreversible and non-linkable across clones (§5.1). |
+| **Singling out / Linkability** via **quasi-identifiers** (dob, postcode, sex, ...)                   | **Fabricated** (synthesised or jittered, §4). No real QI value survives, so the classic "combination of QIs" re-identification path has nothing to match against.              |
 | **Inference** of a sensitive attribute from quasi-identifiers                                      | **Closed by construction.** With QIs fabricated, there is no real QI to infer a sensitive value *from*; l-diversity-style machinery is unnecessary (§2.3).                     |
 | **Misuse of clone data as if real**                                                                | **Fictionality guarantee.** Replacements are drawn from deliberately fictional vocabularies and reserved ranges (§4.3), so clone data is self-evidently fake.                  |
 
 Because identifiers and quasi-identifiers are fabricated, **operational data can be kept real**
-(needed for realistic API testing), and **low-cardinality sensitive flags can be kept real** too —
+(needed for realistic API testing), and **low-cardinality sensitive flags can be kept real** too -
 once a row cannot be tied to a person, a boolean like `Hold All Payment Flag` discloses nothing
 about anyone (§2.2).
 
 ### 2.2 The role of "Sensitive" attributes after fabrication
 
 A sensitive value matters only if it can act as, or be tied to, an identifier. After fabrication,
-the policy **declares** which of two kinds each `SENSITIVE` column is — Incognito does not guess
+the policy **declares** which of two kinds each `SENSITIVE` column is - Incognito does not guess
 from the data (§4.1):
 
-- **Non-distinguishing sensitive fields** (`distinguishing: false` — booleans, small code sets:
-  `Referred to Debt Recovery Flag`, `Intervened Flag`, …) are shared by many rows, single out no
+- **Non-distinguishing sensitive fields** (`distinguishing: false` - booleans, small code sets:
+  `Referred to Debt Recovery Flag`, `Intervened Flag`, ...) are shared by many rows, single out no
   one, and are **kept real** for test realism.
-- **Distinguishing / rare / free-text sensitive fields** (`distinguishing: true` — a distinctive
-  narrative, a rare code, an unusual amount) can themselves single a person out — they are
+- **Distinguishing / rare / free-text sensitive fields** (`distinguishing: true` - a distinctive
+  narrative, a rare code, an unusual amount) can themselves single a person out - they are
   effectively quasi-identifiers and must be **fabricated or redacted**. A `distinguishing: true`
   column that carries no `QuasiIdStrategy` or `RedactionStrategy`, or a `SENSITIVE` column that
   declares *no* `distinguishing` value at all, fails the run (fail-closed, §4.1).
@@ -191,29 +191,29 @@ from the data (§4.1):
 Declaring whether a value is `distinguishing` is a one-word policy decision the author is best
 placed to make; it replaces an automatic distinct-count gate (a k-anonymity-era residue, §2.3) and
 removes the last point where the privacy decision depended on reading source *values*. A
-misdeclaration lint (§4.1) — **on by default** — still cross-checks each `distinguishing: false`
+misdeclaration lint (§4.1) - **on by default** - still cross-checks each `distinguishing: false`
 declaration against the real distinct count and warns if it looks mis-declared.
 
 ### 2.3 Why not k-anonymity
 
 Classical k-anonymity/l-diversity exist to bound re-identification **while retaining real,
 analytically useful values** (generalised into ranges). Incognito's non-goal is exactly that
-analytical utility — so retaining real values buys nothing and costs complexity, forced record
-suppression, and a weaker story for a DPO ("≥k people share this real value" vs. "no field contains
+analytical utility - so retaining real values buys nothing and costs complexity, forced record
+suppression, and a weaker story for a DPO (">=k people share this real value" vs. "no field contains
 real data"). Fabrication is simpler, preserves volumes better, and is a stronger anonymisation
 argument. k-anonymity may return post-v1.0 as an *optional* per-column mode for a consumer who
 explicitly needs generalised-real values; it is not the default and not required.
 
 ### 2.4 Threat model & residual limitations
 
-Incognito reduces, but a DPIA must still weigh, these residual risks — surfaced in the report, not
+Incognito reduces, but a DPIA must still weigh, these residual risks - surfaced in the report, not
 hidden:
 
 - **Structural / relational re-identification.** Row counts and the FK graph are preserved 1:1, so a
   subject with a distinctive relational fingerprint (e.g. the one entity with 300 linked children)
-  may be re-identifiable from *structure* even with fabricated fields — and any real value on that
+  may be re-identifiable from *structure* even with fabricated fields - and any real value on that
   row (a kept operational/sensitive field) is then disclosed. Incognito does not (and, by design,
-  cannot) mitigate this — preserving structure is a requirement, not a defect — but an opt-in
+  cannot) mitigate this - preserving structure is a requirement, not a defect - but an opt-in
   **structural-uniqueness report** (`structuralUniqueness: REPORT`, off by default) quantifies the
   exposure per FK edge: how many parent rows are singled out by a rare or unique count of
   referencing children (§4.1-style advisory evidence, never a privacy gate or a run-abort).
@@ -221,7 +221,7 @@ hidden:
   can itself identify (§2.2). Declaring `distinguishing: true` fabricates/redacts distinctive
   sensitive columns, and the default-on lint (§4.1) flags a `distinguishing: false` column that
   looks free-text; but the DPIA must still confirm the declarations are correct and that no
-  *operational* column is inadvertently identifying — a mis-declared `distinguishing: false` leaks
+  *operational* column is inadvertently identifying - a mis-declared `distinguishing: false` leaks
   unless the lint (in `WARN` or `ERROR` mode) catches it.
 - **Undeclared identifiers.** A real identifier mistakenly left `OPERATIONAL`/`PAYLOAD` passes
   through. Fail-closed classification (§7.2) forces an explicit decision per column but cannot judge
@@ -238,7 +238,7 @@ A DPIA / motivated-intruder assessment remains the final arbiter of "anonymous."
 
 ## 3. Core Pipeline Architecture
 
-Execution is a sequence of decoupled stages. `IncognitoPipeline` generates a fresh ≥128-bit secret
+Execution is a sequence of decoupled stages. `IncognitoPipeline` generates a fresh >=128-bit secret
 salt for `AlterEgo` per run and destroys it on completion. Tables are processed sequentially in
 strict topological DAG order (parents before children).
 
@@ -257,10 +257,10 @@ strict topological DAG order (parents before children).
                                      │
                                      ▼
 2. TableTransformStage (iterates the DAG in topological order)
-   - Fabricates DIRECT_ID via AlterEgo (.unique() with sequence-fallback for high cardinality — §4.1)
-   - Fabricates QUASI_ID (synthesise, or coherent jitter for temporal — §4.2)
+   - Fabricates DIRECT_ID via AlterEgo (.unique() with sequence-fallback for high cardinality - §4.1)
+   - Fabricates QUASI_ID (synthesise, or coherent jitter for temporal - §4.2)
    - Keeps OPERATIONAL / PAYLOAD real; applies each SENSITIVE column's declared distinguishing flag (§4.1)
-   - Resolves INHERITED_ATTRIBUTE from root ancestor (AttributeCascadeStore — §6.1)
+   - Resolves INHERITED_ATTRIBUTE from root ancestor (AttributeCascadeStore - §6.1)
    - Propagates entity temporal jitter deltas via AttributeCascadeStore (§4.2)
    - Translates PRIMARY_KEY to surrogates; records them in KeyTranslationStore
    - Rewrites FOREIGN_KEY to mapped parent surrogates; placeholders for cyclic FKs
@@ -285,34 +285,34 @@ strict topological DAG order (parents before children).
 ## 4. Transformation Model
 
 The heart of Incognito is a **per-column transformation dial**, all of it backed by `alterego`.
-There is no multidimensional partitioning and no two-pass profiling — each row is transformed as it
+There is no multidimensional partitioning and no two-pass profiling - each row is transformed as it
 streams (`fetchSize = 5000`) in topological order.
 
-### 4.1 Column roles → transformation
+### 4.1 Column roles -> transformation
 
 | `ColumnRole` (Level-1/2 classification) | Transformation                                                                                                                                                                                                                                                                                                                                                                 |
 |:----------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `DIRECT_ID` (Direct Identifier)         | **Fabricate** via `DirectIdStrategy` (name / e-mail / phone / generic). Default `ALTEREGO_GENERIC`.                                                                                                                                                                                                                                                                            |
 | `UNIQUE_CANDIDATE_KEY`                  | Fabricate via `AlterEgo.unique()` (guaranteed collision-free within the table; length-preserving sequence fallback if dictionary exhausted).                                                                                                                                                                                                                                   |
-| `QUASI_ID` (Quasi-Identifier)           | **Fabricate** via `QuasiIdStrategy` — `SYNTHESISE` (fresh fictional value) or a jitter mode for temporal data (§4.2).                                                                                                                                                                                                                                                          |
-| `SENSITIVE` (Level-2 Sensitive)         | **Declared `distinguishing` flag** (§2.2, see below). `distinguishing: false` → **kept real**. `distinguishing: true` → must carry a `QuasiIdStrategy` (fabricated like a QI) **or** a `RedactionStrategy` (`CLEAR`/`MASK`/`CONSTANT`). Omitting `distinguishing`, or a `distinguishing: true` column with no strategy, is `IncognitoException.ConfigException` (fail-closed). |
-| `PAYLOAD` (Operational)                 | **Kept real** — the operational data that makes the clone useful for API testing.                                                                                                                                                                                                                                                                                              |
+| `QUASI_ID` (Quasi-Identifier)           | **Fabricate** via `QuasiIdStrategy` - `SYNTHESISE` (fresh fictional value) or a jitter mode for temporal data (§4.2).                                                                                                                                                                                                                                                          |
+| `SENSITIVE` (Level-2 Sensitive)         | **Declared `distinguishing` flag** (§2.2, see below). `distinguishing: false` -> **kept real**. `distinguishing: true` -> must carry a `QuasiIdStrategy` (fabricated like a QI) **or** a `RedactionStrategy` (`CLEAR`/`MASK`/`CONSTANT`). Omitting `distinguishing`, or a `distinguishing: true` column with no strategy, is `IncognitoException.ConfigException` (fail-closed). |
+| `PAYLOAD` (Operational)                 | **Kept real** - the operational data that makes the clone useful for API testing.                                                                                                                                                                                                                                                                                              |
 | `PRIMARY_KEY`                           | Surrogate translation via `SurrogateStrategy`; recorded in `KeyTranslationStore`.                                                                                                                                                                                                                                                                                              |
 | `FOREIGN_KEY`                           | Rewritten to the mapped parent surrogate; placeholder + 2-pass UPDATE for cyclic FKs.                                                                                                                                                                                                                                                                                          |
 | `INHERITED_ATTRIBUTE`                   | Resolved from the **root ancestor** entity via `AttributeCascadeStore` (§6.1).                                                                                                                                                                                                                                                                                                 |
 | `GENERATED_COLUMN`                      | Excluded from `INSERT` (computed column; distinct from an identity PK, §7 note).                                                                                                                                                                                                                                                                                               |
 
 `OPERATIONAL` in a source-data classification maps to `PAYLOAD` (kept). `SENSITIVE` is **not** an
-l-diversity target — it is the declared `distinguishing: true | false` split above.
+l-diversity target - it is the declared `distinguishing: true | false` split above.
 
 **Region coherence within a row.** `DirectIdStrategy.ALTEREGO_CITY`/`ALTEREGO_POSTCODE`/
-`ALTEREGO_PHONE` columns on the same table agree on the same fictional UK region within each row —
+`ALTEREGO_PHONE` columns on the same table agree on the same fictional UK region within each row -
 a fabricated city, postcode, and phone number never land in unrelated parts of the country, even
 though each is an independently-classified column. See Appendix A for the mechanism
 (`alterego`'s `RecordScope`, opened once per source row).
 
 **The gate is the declaration, not a probe.** Because keep-vs-fabricate is now **declared** by the
-policy author, the privacy decision no longer reads any source *value* — Incognito acts purely on
+policy author, the privacy decision no longer reads any source *value* - Incognito acts purely on
 the `distinguishing` flag and the presence of a strategy, both checked at config time before a row
 is touched (fail-closed). This removes the last dataset-level value probe from the privacy path.
 
@@ -322,33 +322,33 @@ default** an exact `SELECT COUNT(DISTINCT col)` on every `distinguishing: false`
 when the true count exceeds `maxCategoricalCardinality` (default 64). Its behaviour is set by
 `distinguishingLint`:
 
-- **`WARN`** (default) — **record a warning in the report** and continue. Each flagged column is
+- **`WARN`** (default) - **record a warning in the report** and continue. Each flagged column is
   also captured as a structured `AnonymisationReport.LintFinding` (table, column, distinct count,
   threshold) so a reviewer can query the misdeclaration candidates, not only read the prose.
-- **`ERROR`** — fail the run with `IncognitoException.ConstraintException` (belt-and-braces / CI
+- **`ERROR`** - fail the run with `IncognitoException.ConstraintException` (belt-and-braces / CI
   gate). The run aborts before a report is built, so `LintFinding`s appear only in `WARN` mode.
-- **`OFF`** — skip the check entirely (e.g. very large tables where a per-column scan is too
+- **`OFF`** - skip the check entirely (e.g. very large tables where a per-column scan is too
   costly).
 
 It is still **not** the privacy decision: a run does not keep a value real *because* of a statistic,
-only because the author declared it non-distinguishing — the lint merely flags a declaration that
+only because the author declared it non-distinguishing - the lint merely flags a declaration that
 looks mistaken. (PostgreSQL `pg_stats.n_distinct` may be consulted first as a cheap pre-filter,
 falling back to the exact count near the threshold.)
 
 ### 4.2 Temporal fabrication & volume preservation
 
-Goal 2 (similar per-period volumes) is met entirely with `AlterEgo` date jitter — no generalisation
+Goal 2 (similar per-period volumes) is met entirely with `AlterEgo` date jitter - no generalisation
 required. `QuasiIdStrategy` offers:
 
-- **`JITTER_WITHIN_MONTH` / `JITTER_WITHIN_YEAR`** — `AlterEgo.shiftDate(MONTH|YEAR)`: a uniform
+- **`JITTER_WITHIN_MONTH` / `JITTER_WITHIN_YEAR`** - `AlterEgo.shiftDate(MONTH|YEAR)`: a uniform
   random day within the value's *own* month/year. Every record **stays in its bucket**, so
   per-period volumes are preserved **exactly**, while the real date is destroyed.
-- **`JITTER_DAYS(window)`** — bounded ±window shift; distribution preserved at scales coarser than
+- **`JITTER_DAYS(window)`** - bounded ±window shift; distribution preserved at scales coarser than
   the window.
-- **`SYNTHESISE`** — a fresh value from a plausible range; distribution not preserved. For
+- **`SYNTHESISE`** - a fresh value from a plausible range; distribution not preserved. For
   strongly-identifying temporal QIs (e.g. `dob`).
 
-The `QuasiIdStrategy` value selects the *mode*; its **parameters are not enum values** — the
+The `QuasiIdStrategy` value selects the *mode*; its **parameters are not enum values** - the
 `JITTER_DAYS` window and the coherence group are set on `ColumnPolicy.Builder` via `jitterDays(int)`
 and `coherenceGroup(String)` (§7).
 
@@ -365,17 +365,17 @@ day-deltas shift calendar dates while keeping time-of-day offsets intact. Cohere
 sources so they cannot be mistaken for real data:
 
 - Names from fictional surname dictionaries.
-- E-mail domains from the RFC 2606 reserved set (`example.com`, …).
+- E-mail domains from the RFC 2606 reserved set (`example.com`, ...).
 - Phone numbers in locale reserved fictional ranges.
 - Postcodes/streets with fictionality guarantees.
 - Domains and URLs from the same RFC 2606 reserved set/TLDs (`example.com`, `*.test`,
-  `*.invalid`, …) — never a live, resolvable, or registrable name.
-- National Insurance numbers (NINOs) with the structurally-unallocatable `QQ` prefix — never
+  `*.invalid`, ...) - never a live, resolvable, or registrable name.
+- National Insurance numbers (NINOs) with the structurally-unallocatable `QQ` prefix - never
   issued by HMRC.
-- NHS numbers with the reserved `999` test-range prefix — never issued to a real patient.
-- UK passport numbers with the structurally-impossible `ZZ` prefix — a real passport must be 9
+- NHS numbers with the reserved `999` test-range prefix - never issued to a real patient.
+- UK passport numbers with the structurally-impossible `ZZ` prefix - a real passport must be 9
   numeric digits.
-- GB driving licence numbers with the zero-letter-surname `99999` block — never occurs on a real
+- GB driving licence numbers with the zero-letter-surname `99999` block - never occurs on a real
   licence.
 
 `VerificationStage` asserts these on the target, skipping `NULL` cells during verification. It also
@@ -383,7 +383,7 @@ runs a **source-value survival** net over every non-reserved `DIRECT_ID` column:
 value that reappears in the target is captured as a structured `AnonymisationReport.SurvivalFinding`
 (sampled distinct count, survived count, and a `hardFailure` verdict). A high survival ratio is an
 un-fabricated passthrough that fails the run; a handful of coincidental shape-preserving collisions
-on a low-entropy value is recorded but passes — quantified singling-out evidence (Art. 29 WP
+on a low-entropy value is recorded but passes - quantified singling-out evidence (Art. 29 WP
 05/2014) for the DPIA, not just a log line.
 
 ### 4.4 Determinism & referential consistency
@@ -393,7 +393,7 @@ makes output differ. A **reproducible mode** (§5.2) fixes salt + RNG seed for t
 
 ### 4.5 Volumes and optional outlier dropping
 
-By default **no rows are dropped** — overall volume is preserved exactly (Goal 2). An **optional**
+By default **no rows are dropped** - overall volume is preserved exactly (Goal 2). An **optional**
 outlier-dropping mode is deferred to post-v1.0.
 
 ---
@@ -403,13 +403,14 @@ outlier-dropping mode is deferred to post-v1.0.
 ### 5.1 Secret salt and key-material lifecycle
 
 `AlterEgo` derives every fabricated value from
-`key = HMAC-SHA256(salt, purpose‖0x00‖domain‖0x00‖canonical‖0x00‖counter)`. Incognito generates the
-salt (`SecureRandom`, ≥128-bit) internally and constructs `AlterEgo` with `rawMappingKeys = false`.
+`key = HMAC-SHA256(salt, purpose||0x00||domain||0x00||canonical||0x00||counter)`. Incognito
+generates the salt (`SecureRandom`, >=128-bit) internally and constructs `AlterEgo` with
+`rawMappingKeys = false`.
 
 **Handling rules:**
 
 - Salt MUST NOT be logged, written to disk, or included in reports. The report discloses only the
-  salt *mode* (`AnonymisationReport.saltMode`) — never the salt bytes — so a reviewer can weigh the
+  salt *mode* (`AnonymisationReport.saltMode`) - never the salt bytes - so a reviewer can weigh the
   run's anonymity claim (a `PERSISTENT`/`REPRODUCIBLE` run forfeits irreversibility, §5.2) under the
   Recital 26 "means reasonably likely to be used" test.
 - On completion Incognito zeroes its salt copy and releases the `AlterEgo` instance.
@@ -420,7 +421,7 @@ salt (`SecureRandom`, ≥128-bit) internally and constructs `AlterEgo` with `raw
   fictional dictionary would be exhausted (more distinct values than the vocabulary can supply),
   Incognito derives a unique value from a running sequence instead of throwing
   `AlterEgoCollisionException`. **Caveat (Goal 1):** the fallback must respect the column's
-  type/format — a naively appended `Value_NNNNNN` string would violate a numeric column, a
+  type/format - a naively appended `Value_NNNNNN` string would violate a numeric column, a
   fixed-width/format `CHECK`, or a length limit. So the scheme is **length-preserving and
   type-aware**: a bare numeric sequence for numeric columns, and for strings a zero-padded sequence
   *overlaid on the fabricated value's tail* so the original length is preserved exactly (never
@@ -447,7 +448,7 @@ removes any ambiguity about which enum applies: `surrogateStrategy` (PK), `direc
 `SENSITIVE` column also requires a `distinguishing: true | false` flag (§4.1). `references`/
 `derivedFrom` are nested `{ table, column }` maps. `redactionStrategy: CONSTANT` may optionally
 carry a `redactionConstant` (a fixed text placeholder, e.g. `"0000 0000 0000 0000"` for a card
-number) — text-type columns only, checked at pipeline-build time; the default without one is the
+number) - text-type columns only, checked at pipeline-build time; the default without one is the
 generic `"REDACTED"`.
 
 ```yaml
@@ -468,10 +469,10 @@ tables:
       dob: { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
       postcode: { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
       last_seen: { role: QUASI_ID, quasiIdStrategy: JITTER_DAYS, jitterDays: 14 }
-      debt_recovery_flag: { role: SENSITIVE, distinguishing: false } # flag shared by many → kept real
-      case_notes: { role: SENSITIVE, distinguishing: true, redactionStrategy: CLEAR }  # free text → redacted
+      debt_recovery_flag: { role: SENSITIVE, distinguishing: false } # flag shared by many -> kept real
+      case_notes: { role: SENSITIVE, distinguishing: true, redactionStrategy: CLEAR }  # free text -> redacted
       card_number: { role: SENSITIVE, distinguishing: true, redactionStrategy: CONSTANT, redactionConstant: "0000 0000 0000 0000" }
-      status: { role: PAYLOAD }                               # operational → kept real
+      status: { role: PAYLOAD }                               # operational -> kept real
 
   contracts:
     columns:
@@ -485,16 +486,16 @@ tables:
 
 An `INHERITED_ATTRIBUTE` column declares its source with `derived_from: <table>.<column>` (e.g.
 `firm_type` derived from `firms.firm_type`). When resolving it for a child, `TableTransformStage`
-follows the child's foreign-key chain **up to that declared source table** — the *root ancestor* —
+follows the child's foreign-key chain **up to that declared source table** - the *root ancestor* -
 and reads the value published there via `AttributeCascadeStore.get(rootTable, rootId, attr)`.
 
-In a diamond (`firm → office → schedule` and `firm → contract → schedule`), both paths lead to the
-same `firm`, so the resolved value comes from that single ancestor and **convergent paths cannot
-conflict** — eliminating the false-positive "path conflict" that a two-branch comparison would raise
+In a diamond (`firm -> office -> schedule` and `firm -> contract -> schedule`), both paths lead to
+the same `firm`, so the resolved value comes from that single ancestor and **convergent paths cannot
+conflict** - eliminating the false-positive "path conflict" that a two-branch comparison would raise
 from incidental intermediate variance.
 
 **By design, inheritance is always from the declared `derived_from` ancestor.** A different value
-sitting on an *intermediate* table (`office`, `contract`) is **not** treated as an override — it is
+sitting on an *intermediate* table (`office`, `contract`) is **not** treated as an override - it is
 simply not part of this attribute's inheritance. If a consumer genuinely needs an intermediate
 value, that is a separate column/policy, not an `INHERITED_ATTRIBUTE`. Root-finding uses the
 dependency DAG: the FK path from child to the `derived_from` table must be unique-or-convergent; if
@@ -504,6 +505,8 @@ row), that is a genuine ambiguity and fails with `IncognitoException.ConstraintE
 ---
 
 ## 7. Core Java 25 Interfaces & Package Blueprint
+
+### 7.1 Package blueprint
 
 ```java
 package org.identigon.incognito.api;
@@ -552,7 +555,7 @@ public enum QuasiIdStrategy {
 
 public enum RedactionStrategy {CLEAR, MASK, CONSTANT}
 
-// SENSITIVE columns declare a required boolean `distinguishing` flag on ColumnPolicy (§2.2/§4.1) —
+// SENSITIVE columns declare a required boolean `distinguishing` flag on ColumnPolicy (§2.2/§4.1) -
 // no enum, no automatic distinct-count gate:
 //   distinguishing == false -> kept real (a flag/category shared by many; singles out no one).
 //   distinguishing == true  -> must carry a QuasiIdStrategy (fabricate) or RedactionStrategy (redact),
@@ -617,8 +620,8 @@ public record AnonymisationPolicy(...) {                       // fields elided
 
 public record TablePolicy(...) {                               // fields elided
     public static class Builder {
-        // Fluent shortcuts — the single-modifier common cases:
-        Builder column(String name, ColumnRole role);                             // QUASI_ID(SYNTHESISE)/PAYLOAD/... (SENSITIVE needs distinguishing → use full form)
+        // Fluent shortcuts - the single-modifier common cases:
+        Builder column(String name, ColumnRole role);                             // QUASI_ID(SYNTHESISE)/PAYLOAD/... (SENSITIVE needs distinguishing -> use full form)
 
         Builder column(String name, ColumnRole role, SurrogateStrategy strategy);  // PRIMARY_KEY
 
@@ -628,7 +631,7 @@ public record TablePolicy(...) {                               // fields elided
 
         Builder column(String name, ColumnRole role, RedactionStrategy strategy);  // distinguishing:true SENSITIVE (sets distinguishing=true)
 
-        // Full form — for columns needing PARAMETERS (e.g. JITTER_DAYS window + coherenceGroup):
+        // Full form - for columns needing PARAMETERS (e.g. JITTER_DAYS window + coherenceGroup):
         Builder column(String name, ColumnPolicy.Builder col);
     }
 }
@@ -750,12 +753,12 @@ public interface AttributeCascadeStore extends AutoCloseable {
 
 Every discovered column must resolve to a `ColumnRole` before the run. Auto-inference (opt-in) only
 *suggests* roles into the report; it never silently assigns one. A column with no explicit and no
-accepted inferred role **fails the run** with `IncognitoException.ConfigException` — Incognito never
+accepted inferred role **fails the run** with `IncognitoException.ConfigException` - Incognito never
 copies an unclassified column assuming it is harmless. This is the mechanism that stops an unspotted
 identifier leaking through as `PAYLOAD`.
 
 **`autoInfer` / `PolicyInferrer` are deprecated (`forRemoval = true`).** Inference is authoring, not
-execution — fail-closed classification means it never affected engine output — and it now lives in
+execution - fail-closed classification means it never affected engine output - and it now lives in
 `effigies`' own `PolicyInferrer`, which is what actually interviews users during authoring. This
 copy is retained only for the fail-closed error message's diagnostic hint and is scheduled for
 removal at incognito's next major version; see `docs/adr/0023-authoring-above-the-engine.md` for
@@ -764,34 +767,34 @@ monorepo.
 
 A `PAYLOAD` (or kept `SENSITIVE`) column whose JDBC type is complex/opaque and untransformable in
 v1.0 (geometry, `JSONB`, array, `INET`, BLOB) is flagged in the report as *"untransformed
-potentially-identifying type"* — visible to the DPIA, not silently leaked. This is how the deferred
+potentially-identifying type"* - visible to the DPIA, not silently leaked. This is how the deferred
 complex types (§1.2) stay safe: they cannot be transformed, so if retained they are surfaced.
 
 ### 7.3 Implementation invariants (must-not-regress)
 
-These are review invariants — the negative form of guarantees stated positively elsewhere. Violating
+These are review invariants - the negative form of guarantees stated positively elsewhere. Violating
 any is a defect regardless of passing tests:
 
 - **No `hashCode()`-derived fabricated values or jitter deltas.** The source value is known, so a
-  `hashCode` output is un-salted and trivially reversible — a re-identification leak. Every
+  `hashCode` output is un-salted and trivially reversible - a re-identification leak. Every
   fabricated value and every jitter delta derives from `alterego`'s salt-keyed HMAC stream
   (§5.1), never `Object.hashCode()`.
 - **No session settings on a throwaway connection.** `session_replication_role='replica'` (and any
   per-session state) must be set on the **same** connection that performs the inserts; it is
   per-session and resets on close (§9). Setting it on a different connection silently leaves FK
   enforcement/triggers active during load.
-- **No `shiftDate(YEAR)` for a strongly-identifying date** (e.g. `dob`) — it preserves the real
+- **No `shiftDate(YEAR)` for a strongly-identifying date** (e.g. `dob`) - it preserves the real
   year; use wide jitter or synthesise (Appendix B).
 - **No silent skipping** of tables or columns (cyclic, unclassified, or untransformable): fail loud
-  or surface in the report — never drop (§7.2).
+  or surface in the report - never drop (§7.2).
 - **`pg_stats` is an optimisation, never the privacy gate.** The keep-vs-fabricate decision is the
   `distinguishing` declaration alone (§4.1).
 - **The salt and row values are never logged.** The library performs no logging today (no framework,
-  no calls) — a deliberate stance: the secret salt must never be persisted or logged (§5.1), and the
+  no calls) - a deliberate stance: the secret salt must never be persisted or logged (§5.1), and the
   source/target rows are PII-shaped, so a logger is a leakage channel. If operational logging is
   ever added it must use the JDK `System.Logger` facade (zero-dependency, pluggable to the host app)
   and emit only **coarse operational events** (stage boundaries, cleanup steps, otherwise-swallowed
-  failures) — never the salt and never any source or transformed field value.
+  failures) - never the salt and never any source or transformed field value.
 
 ---
 
@@ -833,30 +836,30 @@ v1.0 targets **PostgreSQL** only; `GenericDialectHandler` is an uncertified ANSI
 - **Gradle (Kotlin DSL)**, `java-library` + `maven-publish` plugins, toolchain pinned to 25; the
   build produces binary, sources, and javadoc jars and packages `LICENCE` into `META-INF/`.
   `./gradlew javadoc` is quality-gated (`Xdoclint:all` + `-Xwerror`).
-- **Dependencies:** `alterego` (`api` — the field-transformation engine, exposed via
-  `PipelineContext`) and SnakeYAML (`implementation` — YAML policy parsing; a future
+- **Dependencies:** `alterego` (`api` - the field-transformation engine, exposed via
+  `PipelineContext`) and SnakeYAML (`implementation` - YAML policy parsing; a future
   `incognito-yaml` module split is planned, §1). Test scope only: JUnit Jupiter, Testcontainers
   (PostgreSQL), the PostgreSQL JDBC driver, H2.
 - **Delegation boundary (§1.4):** Incognito owns relational coherence and orchestration and
-  delegates *all* field-value transformation to `alterego` — it never hand-rolls substitution,
+  delegates *all* field-value transformation to `alterego` - it never hand-rolls substitution,
   redaction, or format-preserving generation.
 - **Licence: MIT**, in a root file named `LICENCE` (UK spelling for the filename). Incognito bundles
   **no third-party data** in the JAR; the benchmark fixtures under `src/test/resources/benchmarks/`
   are test-only, with their own provenance and licences (`SOURCES.md`, `NOTICE`, `LICENCES/`).
 - **Documents:** this `docs/spec/incognito.md` (the authoritative contract), `PLAN.md` (phases,
-  follow-ups, deferrals), `docs/adr/` (decisions with their reasons — do not revisit, supersede),
+  follow-ups, deferrals), `docs/adr/` (decisions with their reasons - do not revisit, supersede),
   `CHANGELOG.md`, and `AGENTS.md` (agent instructions and the §7.3 must-not-regress invariants).
 
 ---
 
 ## 11. Testing Strategy
 
-See `docs/testing.md` — consolidated there alongside `alterego`'s once both subprojects had grown
+See `docs/testing.md` - consolidated there alongside `alterego`'s once both subprojects had grown
 one.
 
 ---
 
-## Appendix A — `alterego` integration cheat-sheet
+## Appendix A - `alterego` integration cheat-sheet
 
 Verified against `../alterego`. An implementer should not guess this API.
 
@@ -864,14 +867,14 @@ Verified against `../alterego`. An implementer should not guess this API.
 
 ```java
 AlterEgo ae = AlterEgo.builder()
-        .salt(secretSaltBytes)            // ≥16 bytes; Incognito owns/zeroes it (§5.1)
+        .salt(secretSaltBytes)            // >=16 bytes; Incognito owns/zeroes it (§5.1)
         .locale(locale)                   // default Locale.UK
         .mappingStore(new InMemoryMappingStore())  // required for .unique()/.stored()
-        .rawMappingKeys(false)            // never true — keys must be HMAC(salt,·), not plaintext
+        .rawMappingKeys(false)            // never true - keys must be HMAC(salt, _), not plaintext
         .build();
 ```
 
-**Applying a transformation.** `Transformation<T> extends java.util.function.Function<T,T>` — you **
+**Applying a transformation.** `Transformation<T> extends java.util.function.Function<T,T>` - you **
 `bind` once and `.apply(value)` per row**:
 
 ```java
@@ -879,60 +882,60 @@ Transformation<String> email = ae.emailAddress();   // bind once (reuse across a
 String fake = email.apply(sourceEmail);              // per row; deterministic in (salt, domain, value)
 ```
 
-**Strategy → AlterEgo call:**
+**Strategy -> AlterEgo call:**
 | Incognito strategy | AlterEgo call | | :--- | :--- | | `DirectIdStrategy.ALTEREGO_NAME` |
 `ae.fullName()` | | `ALTEREGO_FIRST_NAME` | `ae.firstName()` | | `ALTEREGO_LAST_NAME` |
-`ae.lastName()` — authored, obviously-fictional surnames (ADR 0010) | | `ALTEREGO_ORGANISATION` |
+`ae.lastName()` - authored, obviously-fictional surnames (ADR 0010) | | `ALTEREGO_ORGANISATION` |
 `ae.organisationName()` | | `ALTEREGO_CITY` | `ae.city()` | | `ALTEREGO_STREET_ADDRESS` |
-`ae.streetAddress()` — authored, obviously-fictional streets (ADR 0010) | | `ALTEREGO_POSTCODE` |
-`ae.postcode()` — GB format only; alterego ships no other country's postcode table yet, the same
+`ae.streetAddress()` - authored, obviously-fictional streets (ADR 0010) | | `ALTEREGO_POSTCODE` |
+`ae.postcode()` - GB format only; alterego ships no other country's postcode table yet, the same
 GB-only reality every other typed generator already has (only GB dictionaries are bundled) | |
-`ALTEREGO_EMAIL` | `ae.emailAddress()` — RFC 2606 reserved domain by default | | `ALTEREGO_PHONE` |
-`ae.phoneNumber()` | | `ALTEREGO_DOMAIN` | `ae.domainName()` — RFC 2606 reserved domains/TLDs | |
-`ALTEREGO_URL` | `ae.url()` — a scheme plus `ae.domainName()`, with an optional random path | |
-`ALTEREGO_NINO` | `ae.nationalInsuranceNumber()` — GB only; every output carries the
+`ALTEREGO_EMAIL` | `ae.emailAddress()` - RFC 2606 reserved domain by default | | `ALTEREGO_PHONE` |
+`ae.phoneNumber()` | | `ALTEREGO_DOMAIN` | `ae.domainName()` - RFC 2606 reserved domains/TLDs | |
+`ALTEREGO_URL` | `ae.url()` - a scheme plus `ae.domainName()`, with an optional random path | |
+`ALTEREGO_NINO` | `ae.nationalInsuranceNumber()` - GB only; every output carries the
 structurally-unallocatable `QQ` prefix (never issued by HMRC), so it can never coincide with a
-real NINO | | `ALTEREGO_NHS_NUMBER` | `ae.nhsNumber()` — GB only; every output carries the
+real NINO | | `ALTEREGO_NHS_NUMBER` | `ae.nhsNumber()` - GB only; every output carries the
 reserved `999` test-range prefix (never issued to a real patient), so it can never coincide with
-a real NHS number | | `ALTEREGO_PASSPORT_NUMBER` | `ae.passportNumber()` — GB only; every output
+a real NHS number | | `ALTEREGO_PASSPORT_NUMBER` | `ae.passportNumber()` - GB only; every output
 carries the structurally-impossible `ZZ` prefix (a real UK passport must be 9 numeric digits), so
 it can never coincide with a real passport number | | `ALTEREGO_DRIVING_LICENCE_NUMBER` |
-`ae.drivingLicenceNumber()` — GB only; every output carries the zero-letter-surname `99999` block,
+`ae.drivingLicenceNumber()` - GB only; every output carries the zero-letter-surname `99999` block,
 which never occurs on a real licence | | `ALTEREGO_GENERIC` | shape-preserving fabrication
 (length + `D`/`L`/`l`/`A` character classes) on
-AlterEgo's salt-keyed stream — **code-like fields only**; the preserved shape is identifying for
+AlterEgo's salt-keyed stream - **code-like fields only**; the preserved shape is identifying for
 names/addresses, and it carries no fictionality guarantee | | `UNIQUE_CANDIDATE_KEY` | any of the
-above **`.unique()`** — e.g. `ae.pattern(shape).unique()`. Needs the mapping store. See
-sequence-fallback (§5.1). | | `QuasiIdStrategy.SYNTHESISE` | per source type — **Appendix B** | |
+above **`.unique()`** - e.g. `ae.pattern(shape).unique()`. Needs the mapping store. See
+sequence-fallback (§5.1). | | `QuasiIdStrategy.SYNTHESISE` | per source type - **Appendix B** | |
 `JITTER_WITHIN_MONTH` / `_YEAR` | `ae.shiftDate(AlterEgo.DateField.MONTH \| YEAR)` | | `JITTER_DAYS`
-(standalone) | `ae.shiftDate(jitterDays)` — uniform over `[-jitterDays, +jitterDays]` | |
+(standalone) | `ae.shiftDate(jitterDays)` - uniform over `[-jitterDays, +jitterDays]` | |
 `RedactionStrategy.CLEAR` | `null` (nullable) or a type-empty value | | `RedactionStrategy.MASK` |
-`ae.mask(maskChar, keepLast)` | | `RedactionStrategy.CONSTANT` | `ae.constant(fixedValue)` —
+`ae.mask(maskChar, keepLast)` | | `RedactionStrategy.CONSTANT` | `ae.constant(fixedValue)` -
 `fixedValue` is `ColumnPolicy.redactionConstant` when the author set one (text columns only,
 checked at build time; e.g. `"0000 0000 0000 0000"` for a card number), else the type-appropriate
 default (`"REDACTED"` for text) | |
 
 **Custom generators** (e.g. a numeric QI):
-`ae.bind(domain, Integer.class, (input, ctx) -> derive(ctx.random()))` — `Strategy<T>` is a
+`ae.bind(domain, Integer.class, (input, ctx) -> derive(ctx.random()))` - `Strategy<T>` is a
 `@FunctionalInterface`; all randomness comes from `ctx.random()` (an HMAC-SHA256 stream), never
 `java.util.Random`.
 
 **Per-column domains.** Built-in generators use a fixed domain, so two columns with the same source
-value produce the same fake value (fine — deterministic). For **`.unique()` columns give each column
-its own `bind(domain, …)`** so uniqueness is namespaced per column, not shared across columns.
+value produce the same fake value (fine - deterministic). For **`.unique()` columns give each column
+its own `bind(domain, ...)`** so uniqueness is namespaced per column, not shared across columns.
 
 **Coherent date jitter is NOT AlterEgo's record scope.** `RecordScope` (`ae.record(key)`) shares
 *attributes* (e.g. a region for postcode/phone coherence), but each `shiftDate` call draws an
-**independent** delta from `context.random()` — two date fields in one record get *different*
+**independent** delta from `context.random()` - two date fields in one record get *different*
 offsets. So for interval/parent-child coherence Incognito computes **one shared delta per entity
 itself** (Appendix D), not via AlterEgo per-field jitter.
 
 **Record scope IS used, for exactly the region-coherence case above.** `TableTransformLoadStage`
-opens one `RecordScope` per source row (keyed on the row's own source PK — deterministic,
+opens one `RecordScope` per source row (keyed on the row's own source PK - deterministic,
 reproducible-mode-safe), and every `DIRECT_ID`/`UNIQUE_CANDIDATE_KEY` typed generator runs through
 it via `scope.apply(transformation, value)`, not a bare `transformation.apply(value)`. This is a
-no-op for every strategy except `ALTEREGO_CITY`/`ALTEREGO_POSTCODE`/`ALTEREGO_PHONE` — only those
-three ever consult record-scoped attributes — so when two or more of them classify columns on the
+no-op for every strategy except `ALTEREGO_CITY`/`ALTEREGO_POSTCODE`/`ALTEREGO_PHONE` - only those
+three ever consult record-scoped attributes - so when two or more of them classify columns on the
 same table, they cohere on the same UK region within each row; every other strategy's output is
 unaffected either way.
 
@@ -940,11 +943,11 @@ unaffected either way.
 
 ---
 
-## Appendix B — `SYNTHESISE` by source type
+## Appendix B - `SYNTHESISE` by source type
 
-`SYNTHESISE` has no single generator — it depends on the column's type. **A `QUASI_ID` whose
+`SYNTHESISE` has no single generator - it depends on the column's type. **A `QUASI_ID` whose
 type has no built-in mapping below and no typed hint fails fail-closed with `ConfigException`
-at discovery — never a silent passthrough or shape-fabrication.** The type-specific `VARCHAR`
+at discovery - never a silent passthrough or shape-fabrication.** The type-specific `VARCHAR`
 rows (postcode/city/street/organisation) are **author-declared**, not auto-detected (ADR 17):
 the author adds a `directIdStrategy` hint to the `QUASI_ID` column (e.g. `ALTEREGO_POSTCODE`),
 and Incognito routes the value through that typed, guaranteed-fictional generator. Absent a
@@ -953,27 +956,27 @@ else fails closed.
 
 | Source SQL/Java type                   | `SYNTHESISE` generator                                                                                                                                                                                                |
 |:---------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `DATE` / `LocalDate` (e.g. `dob`)      | `ae.shiftDate(wideWindowDays)` with a window wide enough to destroy the identifying part (e.g. ±1825 days ≈ ±5 y for `dob`, so the year no longer pins age). *Not* `shiftDate(YEAR)` for `dob` (keeps the real year). |
-| `VARCHAR` + `directIdStrategy` hint    | the hinted typed generator — `ae.postcode()` / `ae.city()` / `ae.streetAddress()` / `ae.organisationName()` / … (guaranteed-fictional; author-declared, never auto-detected).                                         |
+| `DATE` / `LocalDate` (e.g. `dob`)      | `ae.shiftDate(wideWindowDays)` with a window wide enough to destroy the identifying part (e.g. ±1825 days =~ ±5 y for `dob`, so the year no longer pins age). *Not* `shiftDate(YEAR)` for `dob` (keeps the real year). |
+| `VARCHAR` + `directIdStrategy` hint    | the hinted typed generator - `ae.postcode()` / `ae.city()` / `ae.streetAddress()` / `ae.organisationName()` / ... (guaranteed-fictional; author-declared, never auto-detected).                                         |
 | other `VARCHAR` (no hint)              | shape-preserving fabrication (format-preserving).                                                                                                                                                                     |
-| numeric (`INT`/`DECIMAL`, e.g. salary) | **no built-in** → require a `directIdStrategy` hint or an explicit custom `Strategy` via `bind(...)`, else `ConfigException`. Do not passthrough or shape-fabricate a real number.                                     |
+| numeric (`INT`/`DECIMAL`, e.g. salary) | **no built-in** -> require a `directIdStrategy` hint or an explicit custom `Strategy` via `bind(...)`, else `ConfigException`. Do not passthrough or shape-fabricate a real number.                                     |
 | `TIMESTAMP` / `LocalDateTime`          | `ae.shiftDateTime(...)` (day + time components)                                                                                                                                                                       |
-| `boolean` / tiny enum                  | no built-in → needs a hint or custom strategy, else `ConfigException` (usually operational, not a QI)                                                                                                                 |
+| `boolean` / tiny enum                  | no built-in -> needs a hint or custom strategy, else `ConfigException` (usually operational, not a QI)                                                                                                                 |
 
 ---
 
-## Appendix C — Store keying convention (source keys, not surrogates)
+## Appendix C - Store keying convention (source keys, not surrogates)
 
 All three stores key on **SOURCE** identifiers, because during the streaming transform a child row
 holds its parent's *source* FK value, and surrogates are only assigned as rows are processed.
 
-- **`KeyTranslationStore`** — `put(table, sourcePk, newSurrogate)`. FK rewrite: the child's source
+- **`KeyTranslationStore`** - `put(table, sourcePk, newSurrogate)`. FK rewrite: the child's source
   FK value *is* the parent's source PK, so `get(parentTable, childSourceFkValue)` yields the new
   surrogate to write. Composite keys use `CompositeKey` as the id.
-- **`AttributeCascadeStore.put/get`** — keyed `(parentTable, sourceParentId, attr)`; a parent
+- **`AttributeCascadeStore.put/get`** - keyed `(parentTable, sourceParentId, attr)`; a parent
   publishes the value it will actually load (fabricated if the attribute is itself fabricated), and
   the child reads it by its source FK value.
-- **`putJitterDelta/getJitterDelta`** — keyed `(entityTable, sourceEntityId) → deltaDays`; a child
+- **`putJitterDelta/getJitterDelta`** - keyed `(entityTable, sourceEntityId) -> deltaDays`; a child
   reads its parent's delta by the source FK value.
 
 Invariant: **anything a child looks up about its parent is keyed by the source FK value the child
@@ -981,7 +984,7 @@ already holds.**
 
 ---
 
-## Appendix D — Orchestration, per-row dispatch, cyclic-FK load, and default constants
+## Appendix D - Orchestration, per-row dispatch, cyclic-FK load, and default constants
 
 **Default constants** (all overridable): streaming `fetchSize = 5000`;
 `maxCategoricalCardinality = 64`; `distinguishingLint = WARN` (on by default; §4.1);
@@ -1002,11 +1005,11 @@ try {
         TargetDatabaseLoadStage.load(table, rows, ctx)     // batch insert; defer cyclic FKs
     resolveDeferredCyclicFKs(ctx)                    // 2-pass UPDATE
     VerificationStage.run(ctx, report)               // integrity + fictionality + volumes
-    return new PipelineResult(true, …, report)
+    return new PipelineResult(true, ..., report)
 } catch (Exception e) {
     IncognitoCleanUpHandler.compensate(ctx)          // re-enable triggers/FKs, resync seq, truncate
     throw e
-} finally { zero(salt); ae = null; /* drop reference for GC — AlterEgo has no clear() (§5.1) */ }
+} finally { zero(salt); ae = null; /* drop reference for GC - AlterEgo has no clear() (§5.1) */ }
 ```
 
 **Per-row transform dispatch (per column, by role):**
@@ -1029,7 +1032,7 @@ switch (columnRole):
 
 `deltaFor(entity)` is one salt-keyed, deterministic day-offset per entity (e.g. derive it by
 applying `ae.shiftDate(window)` to a per-entity anchor date and taking the offset), applied
-uniformly to every date in the group — this is what preserves orderings and parent-child windows
+uniformly to every date in the group - this is what preserves orderings and parent-child windows
 exactly.
 
 **Cyclic-FK load (Tarjan SCC + placeholder / 2-pass):**
@@ -1048,6 +1051,6 @@ for each deferred (table, newPk, fkColumn, realTargetSourceId):
 // A cycle with no nullable edge and no way to break is an IncognitoException.SchemaException.
 ```
 
-These are reference shapes, not the only valid implementation — but they pin the decisions
+These are reference shapes, not the only valid implementation - but they pin the decisions
 (source-key stores, one-delta-per-entity coherence, placeholder+2-pass ordering) that are easy to
 get subtly and silently wrong.

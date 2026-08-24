@@ -23,7 +23,7 @@ Related fields need shared state with a defined scope.
 Chosen option: "a plain, non-pluggable `RecordScope` object", because neither alternative's
 pluggability or persistence is needed for state that is ephemeral and dies with the record.
 
-The `MappingStore` SPI was rejected: the store is persistent, cross-record, pluggable key→value
+The `MappingStore` SPI was rejected: the store is persistent, cross-record, pluggable key->value
 state; record coherence is ephemeral, intra-record state that dies with the record. Forcing it
 through the store would demand record keys for every record, pollute persistence with transient
 data, and drag thread-safety and lifetime questions into every store implementation. A new
@@ -39,7 +39,7 @@ the record key and attribute name (purpose `alterego/1/record`), making resolved
 independent of field order.
 
 Outside any scope, the same strategy code runs unchanged: `get` is empty, `set` is discarded,
-`computeIfAbsent` resolves without retaining — fields stay independent.
+`computeIfAbsent` resolves without retaining - fields stay independent.
 
 ### Consequences
 
@@ -51,6 +51,6 @@ Outside any scope, the same strategy code runs unchanged: `get` is empty, `set` 
 * Bad, because stored/unique mappings predate record attributes and are returned as-is; strict
   coherence plus persistent mappings requires the caller to scope the store deliberately.
   Documented caveat.
-* Neutral: a `RecordScope` instance must be used from one thread only — first-touch-wins has
+* Neutral: a `RecordScope` instance must be used from one thread only - first-touch-wins has
   exactly one deterministic winner only if "first" is well-defined, which requires a single thread.
   This is cheap to satisfy: a parallel stream of records just gives each element its own scope.

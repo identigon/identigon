@@ -19,7 +19,7 @@ public interface PipelineStage {
      *
      * @param stageName the stage's name
      * @param success whether the stage succeeded
-     * @param processedCount a stage-specific count (rows loaded, tables discovered, warnings, …)
+     * @param processedCount a stage-specific count (rows loaded, tables discovered, warnings, ...)
      * @param message a human-readable summary
      */
     record StageResult(String stageName, boolean success, long processedCount, String message) {}

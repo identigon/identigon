@@ -35,7 +35,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * {@code alterego}'s own {@code RecordCoherenceIntegrationTest} proves the underlying mechanism
  * does in isolation. Verified here via postcode/phone (the postcode's own leading area letters
  * must match the phone's area dialling code, per the same area-&gt;dialling-code table that test
- * uses) — city is exactly the same mechanism/code path, not independently re-verified. Requires
+ * uses) - city is exactly the same mechanism/code path, not independently re-verified. Requires
  * Docker; skips gracefully otherwise.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -64,7 +64,7 @@ class RecordCoherenceE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
@@ -142,7 +142,7 @@ class RecordCoherenceE2ETest {
 
                 assertTrue(phoneMatchesAreaOrNeutralFallback(area, phone),
                     "postcode '" + postcode + "' (area '" + area + "') and phone '" + phone
-                        + "' are not coherent — RecordScope isn't linking them within the row");
+                        + "' are not coherent - RecordScope isn't linking them within the row");
                 checked++;
             }
         }
@@ -151,7 +151,7 @@ class RecordCoherenceE2ETest {
 
     /**
      * The same area -&gt; dialling-code table {@code alterego}'s own
-     * {@code RecordCoherenceIntegrationTest} uses as ground truth for the coherence guarantee —
+     * {@code RecordCoherenceIntegrationTest} uses as ground truth for the coherence guarantee -
      * duplicated here deliberately, so this test verifies incognito's *wiring* against a fixed,
      * independently-known-correct expectation, not against whatever alterego happens to do today.
      */

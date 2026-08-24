@@ -10,7 +10,7 @@ decision-makers: David Conneely
 
 Schemas often denormalise an ancestor attribute onto descendant rows (a firm's type copied onto its
 contracts and schedules). For the clone to stay coherent, a denormalised copy must show the
-ancestor's **fabricated** value — the same value the ancestor row now carries — not its own
+ancestor's **fabricated** value - the same value the ancestor row now carries - not its own
 original value and not an independently fabricated one.
 
 Backfilled 2026-07-30, documenting a decision made earlier in the project's development.
@@ -33,7 +33,7 @@ to the cascade store. A descendant resolves its value by **walking the FK chain*
 linkage) up to the declared root-ancestor table and reading the ancestor's published value.
 Resolution is **fail-closed**:
 
-* a null ancestor (nullable FK is null) yields `null` — nothing to leak;
+* a null ancestor (nullable FK is null) yields `null` - nothing to leak;
 * two *distinct* ancestor rows reached (a genuine fork) throws `ConstraintException`;
 * an ancestor reached but with no published value (an ordering/config error) throws.
 
@@ -42,8 +42,8 @@ It never returns the child's own real value.
 ### Consequences
 
 * Good, because denormalised copies remain consistent with the fabricated ancestor across arbitrary
-  FK depth (parent, grandparent, …), not just one hop.
-* Neutral: requires the ancestor to load before its descendants — guaranteed by topological order.
+  FK depth (parent, grandparent, ...), not just one hop.
+* Neutral: requires the ancestor to load before its descendants - guaranteed by topological order.
 * Good, because the publish/linkage machinery is gated on inheritance being in use, so schemas
   without `INHERITED_ATTRIBUTE` pay nothing. Verified end-to-end by `CoherenceE2ETest`
-  (`firm → contract → schedule`, including the grandparent hop).
+  (`firm -> contract -> schedule`, including the grandparent hop).

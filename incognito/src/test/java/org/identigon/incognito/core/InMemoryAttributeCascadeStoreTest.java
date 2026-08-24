@@ -16,9 +16,9 @@ class InMemoryAttributeCascadeStoreTest {
         store.put("firm", 7L, "firm_type", "LLP");
 
         assertEquals("LLP", store.get("firm", 7L, "firm_type").orElseThrow());
-        assertTrue(store.get("firm", 8L, "firm_type").isEmpty(), "different id → miss");
-        assertTrue(store.get("office", 7L, "firm_type").isEmpty(), "different table → miss");
-        assertTrue(store.get("firm", 7L, "other").isEmpty(), "different attribute → miss");
+        assertTrue(store.get("firm", 8L, "firm_type").isEmpty(), "different id -> miss");
+        assertTrue(store.get("office", 7L, "firm_type").isEmpty(), "different table -> miss");
+        assertTrue(store.get("firm", 7L, "other").isEmpty(), "different attribute -> miss");
     }
 
     @Test
@@ -26,15 +26,15 @@ class InMemoryAttributeCascadeStoreTest {
         AttributeCascadeStore store = new InMemoryAttributeCascadeStore();
         store.putJitterDelta("contract_window", "contract", 42L, 5L);
 
-        // Same (group, table, id) → hit.
+        // Same (group, table, id) -> hit.
         assertEquals(5L, store.getJitterDelta("contract_window", "contract", 42L).orElseThrow());
 
-        // A DIFFERENT coherence group must NOT see this delta — this is the contamination guard:
+        // A DIFFERENT coherence group must NOT see this delta - this is the contamination guard:
         // a child with several FK parents only inherits the delta anchoring ITS group.
         assertTrue(store.getJitterDelta("customer_window", "contract", 42L).isEmpty(),
             "delta must not leak across coherence groups");
 
-        // Different entity id in the same group → miss.
+        // Different entity id in the same group -> miss.
         assertTrue(store.getJitterDelta("contract_window", "contract", 99L).isEmpty());
     }
 
@@ -59,6 +59,6 @@ class InMemoryAttributeCascadeStoreTest {
 
         assertEquals("LLP", store.resolveSharedAncestor("firm", 1L, "firm", 2L, "firm_type").orElseThrow());
         assertFalse(store.resolveSharedAncestor("firm", 1L, "firm", 3L, "firm_type").isPresent(),
-            "disagreeing branch values → no shared value");
+            "disagreeing branch values -> no shared value");
     }
 }

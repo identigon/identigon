@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/** Pure unit coverage for {@link GenericDialectHandler#buildInsertSql} — no database needed. */
+/** Pure unit coverage for {@link GenericDialectHandler#buildInsertSql} - no database needed. */
 class GenericDialectHandlerTest {
 
     private final GenericDialectHandler handler = new GenericDialectHandler();

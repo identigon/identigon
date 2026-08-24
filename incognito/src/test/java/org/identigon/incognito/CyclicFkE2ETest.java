@@ -27,14 +27,14 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * De-risking E2E for cyclic (self-referential) foreign keys — the untested Phase-6 machinery
+ * De-risking E2E for cyclic (self-referential) foreign keys - the untested Phase-6 machinery
  * (Tarjan SCC detection, {@code CyclicFkException} deferral + placeholder insert, and the Pass-2
  * {@code UPDATE} in {@link org.identigon.incognito.core.BulkDatabaseLoadStage}).
  *
- * <p>Schema: {@code employee(id, name, buddy_id)} with {@code buddy_id → employee(id)}. Buddies
- * are seeded as <b>mutual pairs</b> ({@code 1↔2}, {@code 3↔4}), which form a genuine 2-cycle: no
+ * <p>Schema: {@code employee(id, name, buddy_id)} with {@code buddy_id -> employee(id)}. Buddies
+ * are seeded as <b>mutual pairs</b> ({@code 1<->2}, {@code 3<->4}), which form a genuine 2-cycle: no
  * topological processing order exists, so at least one row per pair is always a forward reference
- * to a not-yet-loaded row and <b>must</b> be deferred — guaranteeing the cyclic path runs regardless
+ * to a not-yet-loaded row and <b>must</b> be deferred - guaranteeing the cyclic path runs regardless
  * of scan order. Employee 5 has no buddy (null FK).
  *
  * <p>Asserts the placeholder is fully resolved (no {@code -1} survives), referential integrity holds,
@@ -65,7 +65,7 @@ class CyclicFkE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
@@ -77,7 +77,7 @@ class CyclicFkE2ETest {
                 try (Statement stmt = conn.createStatement()) {
                     stmt.execute(DDL);
                     // Insert with null buddies (IDENTITY assigns ids 1..5), then wire up the mutual
-                    // pairs via UPDATE — a self-ref FK can't be set to an id that doesn't exist yet.
+                    // pairs via UPDATE - a self-ref FK can't be set to an id that doesn't exist yet.
                     stmt.execute("INSERT INTO employee (name) VALUES "
                         + "('Alice'), ('Bob'), ('Carol'), ('Dave'), ('Erin')");
                     stmt.execute("UPDATE employee SET buddy_id = 2 WHERE id = 1"); // 1 -> 2
@@ -151,7 +151,7 @@ class CyclicFkE2ETest {
                 "no dangling buddy_id");
 
             // Topology preserved through surrogate remapping: exactly one employee has no buddy,
-            // and every buddy relationship is still mutual (a → b implies b → a).
+            // and every buddy relationship is still mutual (a -> b implies b -> a).
             assertEquals(1, scalar(conn, "SELECT COUNT(*) FROM employee WHERE buddy_id IS NULL"),
                 "the un-buddied employee survives");
             assertEquals(0, scalar(conn,

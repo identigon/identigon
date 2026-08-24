@@ -28,7 +28,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * Views and materialised views must be excluded from discovery (SPEC §7.2) — Pagila has both.
+ * Views and materialised views must be excluded from discovery (SPEC §7.2) - Pagila has both.
  * {@code SchemaInspector} filters {@code getTables} to type {@code TABLE}; this proves a plain
  * {@code VIEW} and a {@code MATERIALIZED VIEW} are neither classified, loaded, nor reported.
  * Requires Docker; skips gracefully otherwise.
@@ -57,7 +57,7 @@ class ViewExclusionE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
@@ -105,7 +105,7 @@ class ViewExclusionE2ETest {
         Assumptions.assumeTrue(sourceDs != null, "Docker/PostgreSQL not available");
 
         // Policy classifies ONLY the base table. If a view leaked into discovery, fail-closed
-        // classification would abort (its columns are unclassified) — so success alone is meaningful.
+        // classification would abort (its columns are unclassified) - so success alone is meaningful.
         AnonymisationPolicy policy = AnonymisationPolicy.builder()
             .table("person", t -> t
                 .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
@@ -131,7 +131,7 @@ class ViewExclusionE2ETest {
             assertEquals(2, scalar(conn, "SELECT COUNT(*) FROM person"), "base table loaded");
             // The plain view reflects the loaded (fabricated) base table automatically.
             assertEquals(0, scalar(conn, "SELECT COUNT(*) FROM person_v WHERE email LIKE '%@realcorp.com'"),
-                "no real email visible through the view — fabrication applied to the base table");
+                "no real email visible through the view - fabrication applied to the base table");
         }
     }
 

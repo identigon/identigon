@@ -1,4 +1,4 @@
-# source: AlterEgo project: authored, deliberately fictional street-name theme words — not sourced from real UK street-name frequency data (see docs/research/0001-alterego-dictionaries.md, "Street names", and ADR 10)
+# source: AlterEgo project: authored, deliberately fictional street-name theme words - not sourced from real UK street-name frequency data (see docs/research/0001-alterego-dictionaries.md, "Street names", and ADR 10)
 # data-url: https://github.com/identigon/identigon/blob/main/docs/research/0001-alterego-dictionaries.md
 # licence: MIT
 # licence-url: https://github.com/identigon/lib-alterego/blob/main/LICENCE

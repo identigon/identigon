@@ -98,7 +98,7 @@ class DictionaryWellFormednessTest {
   @Test
   void sameValueWithDifferentTagsIsNotADuplicate() {
     // A tagged dictionary may legitimately repeat a value under different tags (e.g. London
-    // spans several UK postcode areas) — only an exact repeated (value, tags) row is rejected.
+    // spans several UK postcode areas) - only an exact repeated (value, tags) row is rejected.
     Dictionary multiAreaTown =
         DictionaryParser.parse(
             VALID_HEADER + "London\tE\tENGLAND\nLondon\tSW\tENGLAND\nLondon\tWC\tENGLAND\n", "test");

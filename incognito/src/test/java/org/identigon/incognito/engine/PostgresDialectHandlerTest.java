@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * Pure unit coverage for {@link PostgresDialectHandler#buildInsertSql} — no database needed, since
+ * Pure unit coverage for {@link PostgresDialectHandler#buildInsertSql} - no database needed, since
  * it's just string assembly. Complements {@link PostgresDialectHandlerFkQuotingE2ETest} (which
  * covers FK constraint quoting) and {@code PostgresDialectHandlerIdentifierQuotingE2ETest} (which
  * covers the DB-touching methods this class can't reach without a connection).

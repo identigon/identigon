@@ -36,7 +36,7 @@ final class Derivation {
   /**
    * Builds a {@link HmacRandomness} stream for keyed record-attribute resolution (section 6.2,
    * Appendix A.1, purpose {@code alterego/1/record}): the domain slot carries the attribute
-   * name, the canonical slot carries the record key, counter always {@code 0} — independent of
+   * name, the canonical slot carries the record key, counter always {@code 0} - independent of
    * which field asks first.
    */
   static Randomness recordRandomness(byte[] salt, String attributeName, String recordKey) {

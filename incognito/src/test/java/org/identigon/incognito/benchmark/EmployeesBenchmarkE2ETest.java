@@ -31,18 +31,18 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * Phase-7 benchmark: the classic <b>employees</b> temporal HR database — the archetypal DPIA
+ * Phase-7 benchmark: the classic <b>employees</b> temporal HR database - the archetypal DPIA
  * scenario (names, birth dates, salaries). It exercises, together on real data, a shape no other
  * test does: <b>composite primary keys whose first column is a surrogated foreign key and whose
- * remaining columns are kept temporal values</b> — {@code salary(emp_no, from_date)} and
- * {@code title(emp_no, title, from_date)} — where {@code emp_no} is reassigned by a
+ * remaining columns are kept temporal values</b> - {@code salary(emp_no, from_date)} and
+ * {@code title(emp_no, title, from_date)} - where {@code emp_no} is reassigned by a
  * {@link SurrogateStrategy#SEQUENTIAL_LONG} surrogate on the {@code SERIAL} {@code employee} PK and
  * must be rewritten consistently into every child composite key. Alongside: a strongly-identifying
- * {@code birth_date} (SPEC §7.3 invariant 5 — synthesised, never year-shifted), {@code DIRECT_ID}
+ * {@code birth_date} (SPEC §7.3 invariant 5 - synthesised, never year-shifted), {@code DIRECT_ID}
  * names, and two {@code VIEW}s that must be excluded from cloning yet remain live over the clone.
  *
  * <p>Fixture: {@code resources/benchmarks/employees/employees.sql} (Bytebase {@code dataset_small},
- * CC BY-SA 3.0 — see {@code benchmarks/SOURCES.md}). Requires Docker; skips gracefully otherwise.
+ * CC BY-SA 3.0 - see {@code benchmarks/SOURCES.md}). Requires Docker; skips gracefully otherwise.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EmployeesBenchmarkE2ETest {
@@ -61,7 +61,7 @@ class EmployeesBenchmarkE2ETest {
 
         String full = resource("/benchmarks/employees/employees.sql");
         // The fixture is schema (DDL, incl. views/trigger/RLS) then an inlined DATA section. The
-        // schema-only slice for the target is everything before that marker — a plain "drop INSERT
+        // schema-only slice for the target is everything before that marker - a plain "drop INSERT
         // lines" filter would corrupt the multi-row INSERTs and the trigger body's INSERT INTO audit.
         int dataStart = full.indexOf("---- DATA (inlined");
         String schemaOnly = dataStart < 0 ? full : full.substring(0, full.lastIndexOf('\n', dataStart));
@@ -103,7 +103,7 @@ class EmployeesBenchmarkE2ETest {
                     "row count preserved for " + table);
             }
 
-            // Composite PKs intact — no collapsed or duplicated rows after remapping.
+            // Composite PKs intact - no collapsed or duplicated rows after remapping.
             assertEquals(9488, scalar(tgt, "SELECT COUNT(DISTINCT (emp_no, from_date)) FROM salary"),
                 "salary composite PK (emp_no, from_date) preserved");
             assertEquals(1470, scalar(tgt, "SELECT COUNT(DISTINCT (emp_no, title, from_date)) FROM title"),

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * A stored value that fails to decode into its canonical type (corrupted store, renamed enum
- * constant) throws {@link AlterEgoStoreException} with a useful message (spec section 5.1) —
+ * constant) throws {@link AlterEgoStoreException} with a useful message (spec section 5.1) -
  * shared by {@code stored()} and {@code unique()}, since both decode through the same path.
  */
 class DecodeFailureTest {

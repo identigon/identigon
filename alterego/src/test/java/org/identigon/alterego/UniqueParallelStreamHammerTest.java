@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * A real {@code unique()} transformation, backed by {@link InMemoryMappingStore}, driven through
- * a parallel stream (spec section 10) — shows no duplicate outputs and no lost mappings under
+ * a parallel stream (spec section 10) - shows no duplicate outputs and no lost mappings under
  * genuine concurrent load, not just via the store's own contract test.
  */
 class UniqueParallelStreamHammerTest {
@@ -23,7 +23,7 @@ class UniqueParallelStreamHammerTest {
   @Test
   void parallelStreamThroughUniqueProducesNoDuplicatesAndNoLostMappings() {
     AlterEgo eg = AlterEgo.builder().salt(SALT).mappingStore(new InMemoryMappingStore()).build();
-    // pattern("DDD") has 1000 possible outputs — comfortably more than the 300 distinct inputs
+    // pattern("DDD") has 1000 possible outputs - comfortably more than the 300 distinct inputs
     // below, so this exercises real (but not exhaustion-forcing) collision retries under
     // concurrency without risking a spurious AlterEgoCollisionException.
     Transformation<String> t = eg.pattern("DDD").unique();

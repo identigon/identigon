@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Evaluates Identigon end to end. Native PowerShell port of run-quickstart.sh (POSIX sh) for
-    Windows without a POSIX shell handy — behaviour matches that script exactly; see it for the
+    Windows without a POSIX shell handy - behaviour matches that script exactly; see it for the
     fuller narrative comments.
 
 .DESCRIPTION
@@ -90,14 +90,14 @@ function Invoke-Checked {
 
 function Test-RequiredTools {
     if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-        Fail "Docker is required — install it and make sure the daemon is running."
+        Fail "Docker is required - install it and make sure the daemon is running."
     }
     if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
         Fail "Java 25 is required."
     }
     docker info *> $null
     if ($LASTEXITCODE -ne 0) {
-        Fail "Docker doesn't seem to be running — start Docker and try again."
+        Fail "Docker doesn't seem to be running - start Docker and try again."
     }
 }
 
@@ -115,7 +115,7 @@ function Invoke-PsqlInContainer {
 }
 
 # Starts a fresh container and loads schema + seed data. Always wipes any previous container first
-# — this is only called when there's no existing state worth preserving (see call sites).
+# - this is only called when there's no existing state worth preserving (see call sites).
 function Start-FreshContainer {
     Write-Step "Starting a throwaway PostgreSQL container ($ContainerName, port $PgPort)"
     docker rm -f $ContainerName *> $null
@@ -156,14 +156,14 @@ function Start-FreshContainer {
 
 function Build-JarIfMissing {
     if (-not (Test-Path $Jar)) {
-        Write-Step "Building the Identigon CLI jar (first run only — this can take a minute)"
+        Write-Step "Building the Identigon CLI jar (first run only - this can take a minute)"
         Push-Location $RepoRoot
         try {
             Invoke-Checked (Join-Path $RepoRoot 'gradlew.bat') ':effigies:assemble' '-q'
         } finally {
             Pop-Location
         }
-        if (-not (Test-Path $Jar)) { Fail "Build finished but $Jar wasn't produced — see the Gradle output above." }
+        if (-not (Test-Path $Jar)) { Fail "Build finished but $Jar wasn't produced - see the Gradle output above." }
     }
 }
 
@@ -185,7 +185,7 @@ function Show-Results([string]$ReportDir) {
 function Invoke-Demo {
     Test-RequiredTools
     if (Test-Path $WorkDir) {
-        Fail "$WorkDir exists from a previous 'setup' — run '.\run-quickstart.ps1 run' to finish that, or '.\run-quickstart.ps1 clean' first if you want the one-shot demo instead."
+        Fail "$WorkDir exists from a previous 'setup' - run '.\run-quickstart.ps1 run' to finish that, or '.\run-quickstart.ps1 clean' first if you want the one-shot demo instead."
     }
     $demoDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
     New-Item -ItemType Directory -Path $demoDir | Out-Null
@@ -197,16 +197,16 @@ function Invoke-Demo {
         $env:IDENTIGON_SOURCE_PASSWORD = $PgPassword
         $env:IDENTIGON_TARGET_PASSWORD = $PgPassword
 
-        Write-Step "Step 1/3 — discover: reading the source schema (metadata only, no row values)"
+        Write-Step "Step 1/3 - discover: reading the source schema (metadata only, no row values)"
         Invoke-Checked java -jar $Jar discover --source-url $SourceUrl --source-user postgres
 
-        Write-Step "Step 2/3 — scaffold: what Identigon can classify on its own"
+        Write-Step "Step 2/3 - scaffold: what Identigon can classify on its own"
         Invoke-Checked java -jar $Jar scaffold --source-url $SourceUrl --source-user postgres --out (Join-Path $demoDir 'policy.draft.yaml')
-        Write-Host "(Written to $demoDir\policy.draft.yaml — open it to see the suggestions and TODOs."
+        Write-Host "(Written to $demoDir\policy.draft.yaml - open it to see the suggestions and TODOs."
         Write-Host " This one-shot demo uses the finished policy.yaml in this directory instead of the draft;"
         Write-Host " run '.\run-quickstart.ps1 setup' if you want to author the draft yourself.)"
 
-        Write-Step "Step 3/3 — run: anonymising the clone"
+        Write-Step "Step 3/3 - run: anonymising the clone"
         Push-Location $demoDir
         try {
             Invoke-Checked java -jar $Jar run --policy (Join-Path $ScriptDir 'policy.yaml') `
@@ -224,7 +224,7 @@ function Invoke-Demo {
     } catch {
         Write-Host ""
         Write-Host "Something went wrong: $_" -ForegroundColor Red
-        Write-Host "The throwaway container ($ContainerName) was left running for inspection — remove it with: .\run-quickstart.ps1 clean" -ForegroundColor Red
+        Write-Host "The throwaway container ($ContainerName) was left running for inspection - remove it with: .\run-quickstart.ps1 clean" -ForegroundColor Red
         exit 1
     }
 }
@@ -232,7 +232,7 @@ function Invoke-Demo {
 function Invoke-Setup {
     Test-RequiredTools
     if (Test-Path $WorkDir) {
-        Fail "$WorkDir already exists — run '.\run-quickstart.ps1 clean' first if you want to start over, or '.\run-quickstart.ps1 run' if a draft is already there and you're ready to anonymise."
+        Fail "$WorkDir already exists - run '.\run-quickstart.ps1 clean' first if you want to start over, or '.\run-quickstart.ps1 run' if a draft is already there and you're ready to anonymise."
     }
 
     try {
@@ -254,7 +254,7 @@ function Invoke-Setup {
         Write-Host ""
         Write-Host "Next: open this repo in an AI coding assistant that supports Agent Skills (Claude Code,"
         Write-Host "Antigravity, GitHub Copilot, ...) and ask it to use the identigon-policy-author skill"
-        Write-Host "(.agents/skills/identigon-policy-author/SKILL.md) to interview you and classify every column —"
+        Write-Host "(.agents/skills/identigon-policy-author/SKILL.md) to interview you and classify every column -"
         Write-Host "for example:"
         Write-Host ""
         Write-Host "  Use the identigon-policy-author skill to help me classify"
@@ -262,7 +262,7 @@ function Invoke-Setup {
         Write-Host ""
         Write-Host "The skill assigns roles (DIRECT_ID, QUASI_ID, SENSITIVE, ...) through interview; it doesn't pick"
         Write-Host "strategies (directIdStrategy, quasiIdStrategy, distinguishing, redactionStrategy) for you, so ask"
-        Write-Host "it to fill those in too, or hand-edit them yourself — the checked-in policy.yaml in this directory"
+        Write-Host "it to fill those in too, or hand-edit them yourself - the checked-in policy.yaml in this directory"
         Write-Host "is a finished worked example of the full strategy vocabulary if you want something to compare"
         Write-Host "against."
         Write-Host ""
@@ -271,12 +271,12 @@ function Invoke-Setup {
         Write-Host "  .\run-quickstart.ps1 run"
         Write-Host ""
         Write-Host "to anonymise using your own policy and see the DPIA report. (Rerunning 'run' fails closed with a"
-        Write-Host "clear error if any column is still unclassified — that's the tool working as intended, not a bug;"
+        Write-Host "clear error if any column is still unclassified - that's the tool working as intended, not a bug;"
         Write-Host "go back and finish the draft.)"
     } catch {
         Write-Host ""
         Write-Host "Something went wrong: $_" -ForegroundColor Red
-        Write-Host "The throwaway container ($ContainerName) was left running for inspection — remove it with: .\run-quickstart.ps1 clean" -ForegroundColor Red
+        Write-Host "The throwaway container ($ContainerName) was left running for inspection - remove it with: .\run-quickstart.ps1 clean" -ForegroundColor Red
         exit 1
     }
 }
@@ -319,7 +319,7 @@ function Invoke-Run([string]$PolicyArg) {
     } catch {
         Write-Host ""
         Write-Host "Something went wrong: $_" -ForegroundColor Red
-        Write-Host "The throwaway container ($ContainerName) was left running for inspection — remove it with: .\run-quickstart.ps1 clean" -ForegroundColor Red
+        Write-Host "The throwaway container ($ContainerName) was left running for inspection - remove it with: .\run-quickstart.ps1 clean" -ForegroundColor Red
         exit 1
     }
 }

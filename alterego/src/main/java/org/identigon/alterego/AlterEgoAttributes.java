@@ -3,7 +3,7 @@ package org.identigon.alterego;
 /**
  * Published {@link AttributeKey} constants the built-ins use to cohere within a record scope
  * (section 6.3). The underlying key strings (not these Java constant names) feed keyed-scope
- * derivation and, once shipped, are frozen — do not change either string after release, since
+ * derivation and, once shipped, are frozen - do not change either string after release, since
  * that would silently change every keyed-scope output.
  */
 public final class AlterEgoAttributes {

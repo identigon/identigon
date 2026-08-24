@@ -29,7 +29,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * Per-period volume tolerance (SPEC §4.2, Appendix D). {@code JITTER_WITHIN_MONTH} shifts a date
- * only within its own month, so monthly bucket counts must be preserved <b>exactly</b> — the
+ * only within its own month, so monthly bucket counts must be preserved <b>exactly</b> - the
  * VerificationStage volume check must report no drift. Also confirms a coherence-grouped
  * {@code JITTER_DAYS} column stays within tolerance rather than failing the run. Requires Docker.
  */
@@ -55,7 +55,7 @@ class VolumeToleranceE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
@@ -66,7 +66,7 @@ class VolumeToleranceE2ETest {
                 conn.setAutoCommit(true);
                 try (Statement stmt = conn.createStatement()) {
                     stmt.execute(DDL);
-                    // Jan: 2, Feb: 1, Mar: 3 — dates spread within each month.
+                    // Jan: 2, Feb: 1, Mar: 3 - dates spread within each month.
                     stmt.execute("INSERT INTO events (ts) VALUES "
                         + "(DATE '2024-01-05'), (DATE '2024-01-28'),"
                         + "(DATE '2024-02-14'),"
@@ -128,7 +128,7 @@ class VolumeToleranceE2ETest {
             assertEquals(0, monthCount(conn, "2024-04-01"), "no bucket leaked into a neighbouring month");
         }
 
-        // JITTER_WITHIN_MONTH is exact — the verification volume check must not flag drift.
+        // JITTER_WITHIN_MONTH is exact - the verification volume check must not flag drift.
         String verifyMsg = result.report().stageResults().stream()
             .filter(r -> r.stageName().equals("VerificationStage")).findFirst().orElseThrow().message();
         assertFalse(verifyMsg.contains("Volume drift"),

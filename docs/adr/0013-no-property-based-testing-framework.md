@@ -18,7 +18,7 @@ use by AI coding agents at all.
 AlterEgo was pinned to the older, clean 1.9.1, so it was never exposed. But the dependency is a
 standing liability: the agent instructions explicitly permitted jqwik, this repository's later
 milestones are implemented by AI agents, and a routine version bump would reintroduce the payload.
-The value jqwik provided here was small — six `@Property` methods with simple generators (bounded
+The value jqwik provided here was small - six `@Property` methods with simple generators (bounded
 ints, strings, string lists) and no reliance on shrinking to find rare defects.
 
 ## Considered Options
@@ -42,10 +42,10 @@ for each.
 * **Deterministic enumeration, not a seeded PRNG.** A fixed input set reproduces identically on
   every run with no seed to capture or report, and matches the style already used elsewhere in the
   suite (e.g. `FictionalityTest`, the parallel-stream tests). The curated lists deliberately
-  include edge cases jqwik's default string generation covered — empty string, whitespace,
+  include edge cases jqwik's default string generation covered - empty string, whitespace,
   punctuation, mixed case, non-ASCII, emoji.
 * Allowed test dependencies are now JUnit Jupiter, plus AssertJ if fluent assertions are ever
-  wanted. Any property-based-testing framework (jqwik, QuickTheories, or another) is out —
+  wanted. Any property-based-testing framework (jqwik, QuickTheories, or another) is out -
   re-adding one needs a new ADR superseding this.
 
 QuickTheories was considered and rejected: for six simple invariants the shrinking is not worth a
@@ -55,7 +55,7 @@ new dependency, and dropping the framework aligns with the project's zero-depend
 
 * Good, because no dependency change reaches the published artifact: jqwik was test-scope only and
   never in the POM, so consumers are unaffected. No CHANGELOG entry.
-* Bad, because automatic input shrinking to a minimal failing case is lost. Accepted — the
+* Bad, because automatic input shrinking to a minimal failing case is lost. Accepted - the
   converted tests assert shape/range/stability invariants where the failing input is already
   obvious from the assertion message, not deep search properties where shrinking earns its keep.
 * Neutral: the agent instructions' hard invariant on allowed test dependencies is updated to permit

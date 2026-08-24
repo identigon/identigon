@@ -29,7 +29,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * {@code ColumnPolicy.redactionConstant} — a caller-chosen fixed placeholder for a
+ * {@code ColumnPolicy.redactionConstant} - a caller-chosen fixed placeholder for a
  * {@code RedactionStrategy.CONSTANT} column (e.g. {@code "0000 0000 0000 0000"} for a card
  * number), text-type columns only, checked at pipeline-build time rather than per row. Requires
  * Docker; skips gracefully otherwise.
@@ -57,7 +57,7 @@ class RedactionConstantE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping Testcontainers E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping Testcontainers E2E");
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
@@ -140,7 +140,7 @@ class RedactionConstantE2ETest {
             .table("payment_method", t -> t
                 .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
                 .column("card_number", ColumnRole.PAYLOAD)
-                .column(ColumnPolicy.builder("amount")   // INTEGER — not a text type
+                .column(ColumnPolicy.builder("amount")   // INTEGER - not a text type
                     .role(ColumnRole.SENSITIVE)
                     .distinguishing(true)
                     .redactionStrategy(RedactionStrategy.CONSTANT)

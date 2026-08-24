@@ -56,7 +56,7 @@ class OwnerModeFkDropE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping owner-mode FK-drop E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping owner-mode FK-drop E2E");
 
         pg = new PostgreSQLContainer(TestPostgres.IMAGE)
             .withDatabaseName("owner_source").withUsername("test").withPassword("test");
@@ -118,14 +118,14 @@ class OwnerModeFkDropE2ETest {
         try (Connection conn = targetDs.getConnection()) {
             assertEquals(4, scalar(conn, "SELECT COUNT(*) FROM emp"), "rows preserved");
 
-            // The self-referential FK was resolved by the pass-2 UPDATE — no dangling references.
+            // The self-referential FK was resolved by the pass-2 UPDATE - no dangling references.
             assertEquals(0, scalar(conn, "SELECT COUNT(*) FROM emp WHERE boss = -1"),
                 "no placeholder left behind");
             assertEquals(0, scalar(conn, "SELECT COUNT(*) FROM emp e WHERE e.boss IS NOT NULL "
                 + "AND NOT EXISTS (SELECT 1 FROM emp m WHERE m.id = e.boss)"),
                 "boss must reference a real employee");
 
-            // The dropped FK constraint was recreated — the schema is intact afterwards.
+            // The dropped FK constraint was recreated - the schema is intact afterwards.
             assertEquals(1, scalar(conn,
                 "SELECT COUNT(*) FROM pg_constraint WHERE conrelid = 'emp'::regclass AND contype = 'f'"),
                 "the foreign-key constraint is back in place");

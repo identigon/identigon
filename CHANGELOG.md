@@ -1,21 +1,21 @@
 # Changelog
 
 Release notes for the `identigon` monorepo as a whole. `alterego`, `incognito`, and `effigies`
-version together (lockstep — see any subproject's "lockstep versioning" ADR): one version number,
+version together (lockstep - see any subproject's "lockstep versioning" ADR): one version number,
 one tag, one entry here per release, with a subsection per subproject that actually changed that
 release (a subproject with nothing to report that release has no subsection).
 
-Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioned,
-dated, human-curated entries — adapted for a monorepo: each version groups changes by subproject
+Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) - versioned,
+dated, human-curated entries - adapted for a monorepo: each version groups changes by subproject
 rather than by change type.
 
 Every release before 1.0.0 (when the three subprojects joined lockstep) is folded in below with a
-project-prefixed version tag (`alterego-0.1.0`, `incognito-1.0.0`, `effigies-1.0.0`, …) instead of a
-bare number, since each subproject's own pre-lockstep numbering restarted independently and would
-otherwise collide with this file's own `1.0.0` (the first *shared* release) — most visibly,
+project-prefixed version tag (`alterego-0.1.0`, `incognito-1.0.0`, `effigies-1.0.0`, ...) instead
+of a bare number, since each subproject's own pre-lockstep numbering restarted independently and
+would otherwise collide with this file's own `1.0.0` (the first *shared* release) - most visibly,
 `incognito` and `effigies` each had their own unrelated `1.0.0` before joining lockstep. Each
 subproject's standing output-stability guarantees / hard invariants, previously repeated at the top
-of its own now-retired `CHANGELOG.md`, live in its `docs/spec/` member instead — restating them here
+of its own now-retired `CHANGELOG.md`, live in its `docs/spec/` member instead - restating them here
 too would be the same fact in two places.
 
 ## [Unreleased]
@@ -26,8 +26,8 @@ too would be the same fact in two places.
   `config/spotbugs/exclude.xml` moved to the shared root `config/spotbugs/exclude-alterego.xml`
   (alongside `config/pmd/ruleset.xml`); the identical Spotless/SpotBugs/PMD settings that were
   copy-pasted into each subproject's `build.gradle.kts` are now declared once in the root's
-  `subprojects { }` block. Only the SpotBugs `excludeFilter` path — genuinely different per
-  subproject — stays local. One user-visible build change: the SpotBugs XML report is no longer
+  `subprojects { }` block. Only the SpotBugs `excludeFilter` path - genuinely different per
+  subproject - stays local. One user-visible build change: the SpotBugs XML report is no longer
   produced here (only HTML), matching incognito/effigies; nothing was consuming it. The
   find-sec-bugs plugin dependency (identical in all three `dependencies { }` blocks) moved into the
   same root config. JUnit BOM aligned to `6.1.3` across all three subprojects (was `5.11.4` here,
@@ -44,45 +44,45 @@ too would be the same fact in two places.
 
 - **`DirectIdStrategy.ALTEREGO_NINO`, `.ALTEREGO_NHS_NUMBER`, `.ALTEREGO_PASSPORT_NUMBER`, and
   `.ALTEREGO_DRIVING_LICENCE_NUMBER` added**, wiring all four remaining `alterego` GB identifier
-  generators (already present, unwired — ADR 0012) through to `TableTransformLoadStage`
+  generators (already present, unwired - ADR 0012) through to `TableTransformLoadStage`
   (fabrication), `AnonymisationReportBuilder` (illustrative DPIA samples), and `VerificationStage`
-  (new fictionality checks: every fabricated value must carry its guaranteed-fictional prefix —
-  `QQ` / `999` / `ZZ` / `99999` respectively — alongside the existing email/postcode/domain/URL
+  (new fictionality checks: every fabricated value must carry its guaranteed-fictional prefix -
+  `QQ` / `999` / `ZZ` / `99999` respectively - alongside the existing email/postcode/domain/URL
   checks). Each covered by its own live E2E test against a real Postgres. `creditCardNumber()` is
-  the one identifier builtin still unwired — deliberately, since a card number is `SENSITIVE`
-  (confirmed, same treatment as a bank account), not a plain `DIRECT_ID` — see the
+  the one identifier builtin still unwired - deliberately, since a card number is `SENSITIVE`
+  (confirmed, same treatment as a bank account), not a plain `DIRECT_ID` - see the
   `redactionConstant` entry below for how that gap actually closed.
-- **`ColumnPolicy.redactionConstant` added** — an optional caller-chosen fixed placeholder for a
+- **`ColumnPolicy.redactionConstant` added** - an optional caller-chosen fixed placeholder for a
   `RedactionStrategy.CONSTANT` column (e.g. `"0000 0000 0000 0000"` for a card number), instead of
   the generic `"REDACTED"` every `CONSTANT`-redacted text column got before. Text-type columns
   only; a non-text column with one set fails closed with a clear `ConfigException` at
   pipeline-build time, not per row (SPEC §7.2). Wired through `YamlPolicyParser` and the DPIA
-  report's illustrative samples too. This is the closure for the credit-card-number gap above —
-  redact to one obviously-fake constant, rather than fabricating a typed per-row value — and is
+  report's illustrative samples too. This is the closure for the credit-card-number gap above -
+  redact to one obviously-fake constant, rather than fabricating a typed per-row value - and is
   general-purpose beyond credit cards (any `SENSITIVE distinguishing: true` text column wanting a
   specific placeholder).
 - **`TableTransformLoadStage` now opens one `alterego` `RecordScope` per source row**, keyed on the
   row's own source PK (deterministic, reproducible-mode-safe), and routes every
   `DIRECT_ID`/`UNIQUE_CANDIDATE_KEY` typed generator through it instead of calling the
   transformation bare. A no-op for every strategy except `ALTEREGO_CITY`/`ALTEREGO_POSTCODE`/
-  `ALTEREGO_PHONE` — the only three that ever consult record-scoped attributes — so a table
+  `ALTEREGO_PHONE` - the only three that ever consult record-scoped attributes - so a table
   classifying two or more of those three now fabricates them coherently: same fictional UK region
   within a row, never independently-picked unrelated parts of the country. Verified with a new
   `RecordCoherenceE2ETest` against a real Postgres, reusing the same area-to-dialling-code mapping
   `alterego`'s own `RecordCoherenceIntegrationTest` treats as ground truth. `SPECIFICATION.md`
   §4.1/Appendix A updated.
-- **Spotless/SpotBugs config consolidated to the monorepo root** alongside the PMD move below —
+- **Spotless/SpotBugs config consolidated to the monorepo root** alongside the PMD move below -
   `config/spotbugs/exclude-incognito.xml`; see the alterego entry above for the mechanics, including
   the find-sec-bugs and JUnit BOM alignment.
 - **`PolicyInferrer` and `AnonymisationPolicy.Builder.autoInfer(boolean)` are now
-  `@Deprecated(forRemoval = true)`.** Inference is authoring, not execution — the maintained version
-  has lived in `effigies`' own `PolicyInferrer` since the 1.0.0 split — and this copy is scheduled
+  `@Deprecated(forRemoval = true)`.** Inference is authoring, not execution - the maintained version
+  has lived in `effigies`' own `PolicyInferrer` since the 1.0.0 split - and this copy is scheduled
   for removal at incognito's next major version (see `docs/adr/0023-authoring-above-the-engine.md`).
   No behavioural change yet; this is the
   deprecation notice ahead of that removal.
 - **Identifier quoting fixed in both dialect handlers.** `PostgresDialectHandler` (`buildInsertSql`,
   `preLoadTable`'s owner-mode fallback, `postLoadTable`, `resyncSequence`) and
-  `GenericDialectHandler.buildInsertSql` now quote every raw table/column identifier — previously
+  `GenericDialectHandler.buildInsertSql` now quote every raw table/column identifier - previously
   only the FK drop/recreate path did. A reserved-word or mixed-case table/column name broke
   inconsistently depending on which code path touched it; none of the benchmark fixtures happen to
   use such names, so this was silent until now.
@@ -97,63 +97,63 @@ too would be the same fact in two places.
   config with alterego/effigies (previously alterego-only; see the alterego entry above).
 - **`YamlPolicyParser` no longer crashes on a `scaffold`-shaped draft policy.** Every `role:`/
   `surrogateStrategy:`/`directIdStrategy:`/`quasiIdStrategy:`/`redactionStrategy:` key
-  `scaffold` writes is present with a blank (YAML `null`) value, by design — `containsKey(...)`
+  `scaffold` writes is present with a blank (YAML `null`) value, by design - `containsKey(...)`
   is true for those, so each was resolved via `EnumType.valueOf(String.valueOf(null).toUpperCase())`,
   i.e. `EnumType.valueOf("NULL")`, throwing an unhandled `IllegalArgumentException` instead of
   leaving the field unset for the existing fail-closed validation to report clearly. Found running
   the effigies quickstart's new `setup`/`run` workflow (below) against a real database for the
-  first time — previously masked because live testing had always used a fully-classified policy.
+  first time - previously masked because live testing had always used a fully-classified policy.
   Now checks the value itself (`!= null`), not just key presence; the fail-closed error is once
   again the clear, column-by-column message `scaffold`'s own output promises.
 
 ### effigies
 
 - **Fixed: `identigon.jar` could not connect to a real PostgreSQL database at all.** effigies never
-  declared a runtime dependency on the PostgreSQL JDBC driver — incognito is deliberately
+  declared a runtime dependency on the PostgreSQL JDBC driver - incognito is deliberately
   driver-agnostic (works against any caller-supplied `DataSource`) and only pulls the driver in
   `testRuntimeOnly` scope for its own Testcontainers tests, so nothing in the dependency graph ever
   put `org.postgresql.Driver` on the CLI's own runtime classpath, despite the jar-merging task's
   own comment claiming "JDBC drivers" were bundled. `SimpleDataSource`'s
   `DriverManager.getConnection(...)` therefore always threw `SQLException: No suitable driver
   found`, surfaced to the user as an opaque `Failed to inspect schema` with the real cause
-  swallowed. Every documented `java -jar build/libs/identigon.jar discover/scaffold/run` example —
-  in this repo's own READMEs and the public Getting Started guide — was unusable exactly as
+  swallowed. Every documented `java -jar build/libs/identigon.jar discover/scaffold/run` example -
+  in this repo's own READMEs and the public Getting Started guide - was unusable exactly as
   written. Found running the effigies quickstart's `run-quickstart.sh`/`.ps1` (below) against a
   real database for the first time; `runtimeOnly(libs.postgresql)` added to
   `effigies/build.gradle.kts` fixes it.
 - **Added a `quickstart/` worked example** (originally `effigies/examples/quickstart/`; moved to
-  the repository root in a later restructuring) — a small first-party PostgreSQL schema
+  the repository root in a later restructuring) - a small first-party PostgreSQL schema
   (`customers`/`orders`/`support_tickets`, no third-party data, no Docker/Testcontainers
   dependency) with a hand-authored `policy.yaml` and a step-by-step README, so evaluating the
-  `discover` → `scaffold` → `run` workflow no longer requires a real production database or one of
+  `discover` -> `scaffold` -> `run` workflow no longer requires a real production database or one of
   incognito's Docker-gated benchmark fixtures. Linked from the main README's new "Try it in five
   minutes" section. Demonstrates every `DirectIdStrategy`/`QuasiIdStrategy` family in one schema,
   including the new `ALTEREGO_NINO` (see the incognito entry above) and,
   deliberately, the `ALTEREGO_GENERIC` fallback for a bank-account column with no typed generator
   yet.
 - **Added `quickstart/run-quickstart.sh` (POSIX `sh`) and `run-quickstart.ps1`
-  (PowerShell)** — twin, behaviourally-identical scripts; Docker + Java 25 only, nothing else to
+  (PowerShell)** - twin, behaviourally-identical scripts; Docker + Java 25 only, nothing else to
   install. `run-quickstart` (no args) is a one-shot demo: starts a throwaway Postgres container,
   loads the schema and sample data, builds the CLI jar if needed, runs
-  `discover` → `scaffold` → `run` against the finished `policy.yaml`, and prints the fabricated
+  `discover` -> `scaffold` -> `run` against the finished `policy.yaml`, and prints the fabricated
   rows plus the DPIA report location. `setup` / `run` instead exercises the real authoring
   workflow: `setup` stops after `scaffold`, leaving a draft for the `identigon-policy-author` Agent
   Skill (or a human) to classify by hand, and `run` reuses the same container and anonymises
-  against whatever policy results — failing closed with a clear error if any column is still
-  unclassified (see the incognito `YamlPolicyParser` fix above — this is the workflow that found
+  against whatever policy results - failing closed with a clear error if any column is still
+  unclassified (see the incognito `YamlPolicyParser` fix above - this is the workflow that found
   it). `clean` tears down the throwaway container and any generated files either way. The manual
   step-by-step walkthrough in the example's README is unchanged, for anyone who wants to run or
   understand each step without a script. Both scripts were exercised end to end (all four
   commands, both fresh-container and container-reuse paths, and the fail-closed path) against a
-  real Docker Desktop + PostgreSQL, which is how the two bugs above were actually found — not just
+  real Docker Desktop + PostgreSQL, which is how the two bugs above were actually found - not just
   written and assumed correct. Two portability bugs fixed along the way, neither Bash/PowerShell
   version-specific: the readiness check could pass against the official Postgres image's brief
   *temporary* startup instance (for `initdb`) moments before it restarts for the real listener, a
-  narrow window where a query could hit the socket mid-restart — now requires two consecutive
+  narrow window where a query could hit the socket mid-restart - now requires two consecutive
   successful `pg_isready` checks, not one. Windows-only wrinkles, one per script: the `sh` version
   now avoids `docker inspect -f '{{...}}'` (MSYS2/Git-Bash mangles `{{ }}` template arguments to
   native Windows executables) in favour of a template-free `docker ps -q -f name=...` check, and
-  uses `printf '%s\n'` instead of `echo` for any value that might contain backslashes — POSIX
+  uses `printf '%s\n'` instead of `echo` for any value that might contain backslashes - POSIX
   `echo` is free to interpret them as escapes, and every Windows path has some; the `.ps1` version
   avoids naming a parameter `$Args` (PowerShell's own reserved automatic-variable name), which
   silently breaks splatting it onward to a wrapped command.
@@ -167,41 +167,41 @@ too would be the same fact in two places.
   (previously untested), splitting the CLI commands into a directly-testable core to do it without
   needing to fake environment variables.
 - **PMD added to the build**, sharing a root `config/pmd/ruleset.xml` with `alterego`/`incognito`.
-  No behavioural change here — only a `StringBuilder` under-sized for what it accumulates.
-- **Spotless/SpotBugs config consolidated to the monorepo root** —
+  No behavioural change here - only a `StringBuilder` under-sized for what it accumulates.
+- **Spotless/SpotBugs config consolidated to the monorepo root** -
   `config/spotbugs/exclude-effigies.xml`; see the alterego entry in this section for the mechanics,
   including the find-sec-bugs and JUnit BOM alignment.
 - **The runnable jar is now `identigon.jar`, not `effigies.jar`.** Consumers only ever run this
   one artifact (alterego/incognito stay internal, sibling-project dependencies), so the jar name,
   the `--version`/`--help`/usage banner text, and the manifest `Implementation-Title` now say
   "Identigon" instead of "Effigies". The Gradle module, its `org.identigon.effigies` package, and
-  the `EffigiesCli` class name are unchanged — this is the public artifact name only, not a module
+  the `EffigiesCli` class name are unchanged - this is the public artifact name only, not a module
   rename.
 - **JaCoCo added to the build**, sharing the root `subprojects { }` block's report/`check`-task
   config with alterego/incognito (previously alterego-only; see the alterego entry in that
-  section). Javadoc/doclint enforcement stays deliberately absent here — effigies is a CLI, not a
+  section). Javadoc/doclint enforcement stays deliberately absent here - effigies is a CLI, not a
   published library.
 
 ### monorepo
 
 - **Markdown line-length lint added.** `.markdownlint-cli2.jsonc` runs `markdownlint-cli2` as a
   pre-commit hook, `MD013` only (100-column line length; code blocks, tables, and headings
-  exempt) — deliberately narrow, matching what was actually asked for when the hook was added.
+  exempt) - deliberately narrow, matching what was actually asked for when the hook was added.
   Existing violations across the repo were fixed in the same change. Two more rules were checked
   read-only (full default rule set) and fixed directly since they were mechanical: every bare
   fenced code block now has a `text`/`sh` language tag (`MD040`), and every bare citation URL is
   wrapped in `<...>` (`MD034`). The rest of the default rule set (table/list formatting, heading
-  conventions) needs real editorial judgment, not a mechanical fix — tracked in `PLAN.md`, not
+  conventions) needs real editorial judgment, not a mechanical fix - tracked in `PLAN.md`, not
   done here.
 - **Dependabot added** (`gradle` + `github-actions`, weekly) to keep dependency versions current
   across the monorepo.
 - **CI reports made downloadable.** `_build.yml` uploads each matrix leg's (`ubuntu-latest`/
   `windows-latest`) JUnit XML, JaCoCo (HTML/XML/CSV), PMD (HTML/XML), and SpotBugs (HTML) reports
   as a `build-reports-<os>` artifact via `actions/upload-artifact`, even when the build step fails
-  — previously these only existed buried in the raw Gradle log.
-- **Gradle version catalog added** (`gradle/libs.versions.toml`). Every shared version — root
+  - previously these only existed buried in the raw Gradle log.
+- **Gradle version catalog added** (`gradle/libs.versions.toml`). Every shared version - root
   plugin versions, SpotBugs/PMD `toolVersion`s, find-sec-bugs, the JUnit BOM, snakeyaml, H2, the
-  Testcontainers BOM, the Postgres driver — was a literal string repeated in one or more
+  Testcontainers BOM, the Postgres driver - was a literal string repeated in one or more
   `build.gradle.kts` files; all ten now have exactly one declaration. No version actually changed
   (verified: the published `incognito` POM still resolves `snakeyaml` to `2.2`, matching before).
   CI's downloadable per-run artifact (see above) makes this easy to spot-check going forward: the
@@ -232,7 +232,7 @@ Initial implementation, milestones M0-M6 of `alterego/PLAN.md` (now deleted; see
 - `MappingStore` SPI, `InMemoryMappingStore`, and the `stored()`/`unique()` decorators, with the
   full section 2.5 decorator algebra and a reusable store contract test.
 - Record coherence: `RecordScope` (anonymous and keyed), `RecordAttributes`, and built-in coherence
-  between `city()`/`postcode()`/`phoneNumber()` via `UK_POSTCODE_AREA`/`UK_NATION` — whichever of
+  between `city()`/`postcode()`/`phoneNumber()` via `UK_POSTCODE_AREA`/`UK_NATION` - whichever of
   the three runs first in a scope establishes the record's place for the others to follow.
 - Extensibility: any `Strategy<T>` lambda bound via `AlterEgo.bind(...)` gets full built-in parity
   (determinism, `unique()`, `stored()`, record coherence, `derived(...)` composition).
@@ -264,7 +264,7 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
 
 ### Added
 
-- **Pipeline & policy engine** (Phases 1–3): `IncognitoPipeline` builder with auto-assembled default
+- **Pipeline & policy engine** (Phases 1-3): `IncognitoPipeline` builder with auto-assembled default
   stages; `AnonymisationPolicy` / `TablePolicy` / `ColumnPolicy` records and builders; a
   programmatic and YAML (`YamlPolicyParser`) policy surface; `SchemaInspector` (tables, PKs, FKs,
   unique candidate keys, identity vs generated columns); `TableDependencyGraph` topological
@@ -285,40 +285,41 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
   tolerances, the default-on misdeclaration lint, and a source-value survival net);
   `AnonymisationReportBuilder` (with the §7.2 opaque-type passthrough audit) and a
   `DpiaArtefactEmitter` that writes JSON, HTML, or Markdown.
-- **alterego 0.3.0 adoption:** **type-aware redaction** — `CONSTANT`/`MASK` now delegate to
+- **alterego 0.3.0 adoption:** **type-aware redaction** - `CONSTANT`/`MASK` now delegate to
   `AlterEgo.redact(Class<T>)`/`constant`/`mask`, so numeric, temporal, boolean and opaque
   `SENSITIVE`
-  columns get a type-appropriate constant instead of failing at insert; **salt destruction** — the
+  columns get a type-appropriate constant instead of failing at insert; **salt destruction** - the
   `AlterEgo` instance's internal salt clone is now zeroed on completion via `AlterEgo.close()`, not
   just Incognito's own copy; and **`TIMESTAMP`/`LocalDateTime` quasi-identifier `SYNTHESISE`** (a
   timestamp DOB is shifted within the salt-keyed ±5y window, preserving type and time-of-day).
 - **Observability** via the JDK `System.Logger` facade (zero-dependency): previously-swallowed
   best-effort compensation failures now log a `WARNING`, and benign fallbacks (owner-mode trigger
   handling, pg_stats-unavailable) log at `DEBUG`. Each record carries only the operation, table and
-  SQLState — never the salt, a field value, or the raw exception message (§7.3/§5.1).
+  SQLState - never the salt, a field value, or the raw exception message (§7.3/§5.1).
 - **Owner-mode cyclic-FK load** (SPEC §9): a non-superuser target that *owns* its tables now clones
   cyclic/self-referential FKs by dropping the cyclic FK constraints for the load and recreating them
-  verbatim (`pg_get_constraintdef`) after the pass-2 `UPDATE` — where a superuser uses
+  verbatim (`pg_get_constraintdef`) after the pass-2 `UPDATE` - where a superuser uses
   `session_replication_role`. The drop/recreate is atomic (transactional DDL) and is recreated on
   failure too; a role that can do neither still fails fast.
 
 ### Fixed
 
 - **Enum / user-type passthrough.** A kept (`PAYLOAD`) column of a PostgreSQL `enum` or other
-  user-defined type failed on re-insert — the read `String` was bound as `varchar`, so any table
+  user-defined type failed on re-insert - the read `String` was bound as `varchar`, so any table
   with an enum column (e.g. Pagila's `film.rating`) could not be cloned. `String` values now bind as
-  `Types.OTHER` so PostgreSQL casts them to the column's actual type (enum, `tsvector`, `uuid`, …).
+  `Types.OTHER` so PostgreSQL casts them to the column's actual type (enum, `tsvector`, `uuid`,
+  ...).
 - `JITTER_DAYS` no longer raises spurious per-period volume-drift *warnings*: because a ±N-day
   jitter crosses month boundaries, the verification volume check now buckets it **yearly** (not
-  monthly), where a day-window barely leaks. Cosmetic — it never failed the run.
+  monthly), where a day-window barely leaks. Cosmetic - it never failed the run.
 
 ### Known gaps
 
 - Composite PK **and** cyclic FK on the same table (each supported alone; the combination fails
-  closed — `FailClosedGuardE2ETest`). Tracked in root `PLAN.md`
+  closed - `FailClosedGuardE2ETest`). Tracked in root `PLAN.md`
   (`docs/tasks/incognito-composite-pk-cyclic-fk.md`).
 - Generic shape-preserving fabrication (`ALTEREGO_GENERIC` / string-`SYNTHESISE`) carries no
-  fictionality guarantee — inherent for an arbitrary shape; use a typed strategy where the guarantee
+  fictionality guarantee - inherent for an arbitrary shape; use a typed strategy where the guarantee
   matters. It runs on alterego's `bind` extension API (salt-keyed, deterministic) and lives in
   Incognito by decision, not a delegation gap (see ADR 21).
 - Declarative table **partitioning** is not cloned (partition children are discovered but the
@@ -327,7 +328,7 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
 
 **Note:** incognito's independently-versioned history as a standalone repository continued to
 `1.1.0` after this release, before rejoining this monorepo's lockstep numbering at `1.0.0` (see the
-lockstep-versioning ADR) — that `1.1.0` release's own changes were never recorded in a `CHANGELOG.md`
+lockstep-versioning ADR) - that `1.1.0` release's own changes were never recorded in a `CHANGELOG.md`
 entry before the repositories merged, and are not reconstructed here.
 
 ## [alterego-0.4.0] - 2026-08-09
@@ -374,25 +375,25 @@ entry before the repositories merged, and are not reconstructed here.
   incognito and alterego from GitHub Packages.
 - `EffigiesCli` dispatch skeleton (`discover` / `scaffold` / `run` declared; `help` / `version`
   live), covered by `EffigiesCliTest`.
-- Base docs: `README.md`, `SPECIFICATION.md`, `PLAN.md`, `docs/adr/` (ADR 23 — authoring above the
+- Base docs: `README.md`, `SPECIFICATION.md`, `PLAN.md`, `docs/adr/` (ADR 23 - authoring above the
   engine), and an initial `docs/tasks/` handoff for schema discovery + scaffold.
 
-## [1.0.0] — 2026-08-10
+## [1.0.0] - 2026-08-10
 
 ### alterego
 
 - Merged into the `identigon` monorepo alongside `incognito` and `effigies`, each a Gradle
   subproject with full history preserved. Versioning is now lockstep across all three, sourced from
   the monorepo root (see `docs/adr/0024-lockstep-versioning.md`). A deliberate re-baseline to
-  1.0.0, not a claim that four minor versions' worth of API changes happened at once — alterego's
-  own history before this point is the `alterego-0.1.0`–`0.4.0` entries above.
+  1.0.0, not a claim that four minor versions' worth of API changes happened at once - alterego's
+  own history before this point is the `alterego-0.1.0`-`0.4.0` entries above.
 
 ### incognito
 
 - Merged into the `identigon` monorepo alongside `alterego` and `effigies`, each a Gradle
   subproject with full history preserved. Versioning is now lockstep across all three, sourced from
   the monorepo root (see `docs/adr/0024-lockstep-versioning.md`). Moves backward in number from
-  incognito's last independent release, `1.1.0` → `1.0.0` — deliberate, not a downgrade; see the
+  incognito's last independent release, `1.1.0` -> `1.0.0` - deliberate, not a downgrade; see the
   ADR.
 - **`DirectIdStrategy`: `ALTEREGO_POSTCODE`, `ALTEREGO_DOMAIN`, `ALTEREGO_URL`.** Three previously
   unexposed `alterego` typed generators (`postcode()`, `domainName()`, `url()`) are now reachable
@@ -405,5 +406,5 @@ entry before the repositories merged, and are not reconstructed here.
 - Merged into the `identigon` monorepo alongside `alterego` and `incognito`, each a Gradle
   subproject with full history preserved. Versioning is now lockstep across all three, sourced from
   the monorepo root (see `docs/adr/0024-lockstep-versioning.md`). The version number itself
-  is unchanged from effigies' prior standalone release — both are 1.0.0 — this entry exists so that
+  is unchanged from effigies' prior standalone release - both are 1.0.0 - this entry exists so that
   change in what "1.0.0" means isn't silently missing from the record.

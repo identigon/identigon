@@ -20,7 +20,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 /**
  * Regression test: {@link SchemaInspector#inspect} must not record a column as independently
  * unique ({@code TableMetadata.uniqueCandidateKeys()}) when it is merely one column of a
- * multi-column composite unique index — only the sole column of a genuinely single-column unique
+ * multi-column composite unique index - only the sole column of a genuinely single-column unique
  * index qualifies.
  *
  * <p>Requires Docker; skips gracefully otherwise.
@@ -39,7 +39,7 @@ class SchemaInspectorCompositeUniqueIndexTest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping schema-inspector E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping schema-inspector E2E");
 
         pg = new PostgreSQLContainer(TestPostgres.IMAGE)
             .withDatabaseName("composite_unique").withUsername("test").withPassword("test");

@@ -9,8 +9,8 @@ decision-makers: David Conneely
 ## Context and Problem Statement
 
 A schema-identical clone must load tables whose foreign keys form a cycle, including the common
-self-referential case (`employee.manager_id → employee`). Strict topological ordering — parents
-before children — cannot order a cycle: some row always references a row not yet loaded. Silently
+self-referential case (`employee.manager_id -> employee`). Strict topological ordering - parents
+before children - cannot order a cycle: some row always references a row not yet loaded. Silently
 dropping such tables (an earlier behaviour) is a data-integrity hole.
 
 Backfilled 2026-07-30, documenting a decision made earlier in the project's development.
@@ -39,11 +39,11 @@ than leaving a dangling placeholder.
 
 * Good, because cyclic and self-referential schemas load with referential integrity intact after
   Pass 2.
-* Neutral: Pass 1 relies on suppressing FK enforcement — `session_replication_role = 'replica'`
+* Neutral: Pass 1 relies on suppressing FK enforcement - `session_replication_role = 'replica'`
   (superuser), or a documented degraded owner-mode; a non-superuser without FK-dropping fails loud
   on the placeholder insert.
 * Bad, because composite primary/foreign keys were not supported at the time of this decision
   (Pass 2 keyed on a single-column PK only); until then a cyclic table without a single-column PK
   fails-closed rather than corrupting data. (Composite PK support landed separately; the
-  composite-PK-and-cyclic-FK combination remains open — see root `PLAN.md`.)
+  composite-PK-and-cyclic-FK combination remains open - see root `PLAN.md`.)
 * Neutral: verified end-to-end by a mutual self-reference test (`CyclicFkE2ETest`).

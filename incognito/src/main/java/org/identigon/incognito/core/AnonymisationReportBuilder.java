@@ -143,7 +143,7 @@ public final class AnonymisationReportBuilder {
 
                     // Opaque-type audit (SPEC §7.2): a KEPT column of a complex/untransformable JDBC
                     // type is surfaced in the DPIA report so a retained potentially-identifying value
-                    // (JSONB, array, geometry, INET, BLOB, …) is visible, never silently passed through.
+                    // (JSONB, array, geometry, INET, BLOB, ...) is visible, never silently passed through.
                     if (keptReal) {
                         Integer sqlType = tableMeta.columnTypes() == null ? null : tableMeta.columnTypes().get(colName);
                         String opaque = opaqueTypeName(sqlType);
@@ -175,13 +175,13 @@ public final class AnonymisationReportBuilder {
             structuralFindings, stageResults);
     }
 
-    /** Fixed dummy seeds — one per illustrative sample row. Different seeds give varied sample values. */
+    /** Fixed dummy seeds - one per illustrative sample row. Different seeds give varied sample values. */
     private static final List<String> SEEDS = List.of("sample-a", "sample-b", "sample-c");
 
     /**
      * A fixed, <b>non-secret</b> salt used only to key the illustrative example generator. It protects
      * nothing and is deliberately hardcoded so the samples are deterministic and reproducible, and it
-     * is unrelated to the run's real salt — the samples therefore have zero linkage to any real or run
+     * is unrelated to the run's real salt - the samples therefore have zero linkage to any real or run
      * data.
      */
     private static final byte[] EXAMPLE_SALT =
@@ -247,7 +247,7 @@ public final class AnonymisationReportBuilder {
      * A sample value for a QUASI_ID (or SENSITIVE-jittered) column, matching what the run actually
      * does: a typed {@code directIdStrategy} hint routes to that generator; otherwise a temporal type
      * shifts, and a non-temporal one is synthesised (a shape-preserving fabrication not reproduced
-     * concretely here — shown as a placeholder so the sample never misrepresents a text column as a
+     * concretely here - shown as a placeholder so the sample never misrepresents a text column as a
      * date).
      */
     private static String quasiIdExample(
@@ -295,7 +295,7 @@ public final class AnonymisationReportBuilder {
 
     /**
      * If {@code sqlType} is a complex/opaque JDBC type that v1.0 does not transform (JSONB, arrays,
-     * geometry, INET, XML, LOBs, …), returns its JDBC type name; otherwise {@code null}. PostgreSQL
+     * geometry, INET, XML, LOBs, ...), returns its JDBC type name; otherwise {@code null}. PostgreSQL
      * maps JSONB/JSON/INET/geometry to {@link java.sql.Types#OTHER}, and SQL arrays to
      * {@link java.sql.Types#ARRAY}.
      */

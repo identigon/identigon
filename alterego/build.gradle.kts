@@ -72,7 +72,7 @@ tasks.named<Jar>("jar") {
     }
 }
 
-// Maven Central itself is not wired up yet (a separate, later decision — see the signing block
+// Maven Central itself is not wired up yet (a separate, later decision - see the signing block
 // below), but GitHub Packages is: CI publishes every push to main there as a snapshot feed. The
 // credentials are read from the environment only, never committed; locally, `./gradlew publish`
 // simply has nowhere authenticated to push unless GITHUB_ACTOR/GITHUB_TOKEN are set.
@@ -120,7 +120,7 @@ publishing {
 
 // Maven Central requires every artifact to be PGP-signed. Signing activates only when a key is
 // supplied (an ASCII-armored key in SIGNING_KEY, optional passphrase in SIGNING_PASSWORD), so
-// local `build` and CI `build` runs — which have no key — are unaffected; a release job sets the
+// local `build` and CI `build` runs - which have no key - are unaffected; a release job sets the
 // env vars from secrets. The remaining Central step (which staging endpoint/plugin to publish
 // through) is a deliberate, still-open decision, kept out of the build until it is made.
 signing {

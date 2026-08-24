@@ -39,7 +39,7 @@ class PostcodeTest {
 
   @Test
   void realisticOptionCanProduceLettersOutsideTheNeverUsedSet() {
-    // Not a guarantee either way — realistic() only lifts the restriction, drawing from the
+    // Not a guarantee either way - realistic() only lifts the restriction, drawing from the
     // full alphabet, so across enough samples at least one should fall outside the fictional set.
     Transformation<String> t = gb().postcode(PostcodeOptions.realistic());
     boolean sawOutsideNeverUsedSet = false;

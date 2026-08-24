@@ -19,7 +19,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 /**
  * Regression test: {@link PostgresDialectHandler#preLoadTable} must not silently lose the original
  * "insufficient privilege" exception when its owner-mode fallback (ALTER TABLE ... DISABLE TRIGGER
- * USER) also fails — both must be visible to whoever debugs the failure.
+ * USER) also fails - both must be visible to whoever debugs the failure.
  *
  * <p>A non-superuser connection reaches the fallback (SET session_replication_role fails with
  * SQLState 42501); pointing it at a table that does not exist makes the fallback statement itself
@@ -42,7 +42,7 @@ class PostgresDialectHandlerPreLoadFailureChainingE2ETest {
         } catch (Exception e) {
             dockerAvailable = false;
         }
-        Assumptions.assumeTrue(dockerAvailable, "Docker not available — skipping dialect-handler E2E");
+        Assumptions.assumeTrue(dockerAvailable, "Docker not available - skipping dialect-handler E2E");
 
         pg = new PostgreSQLContainer(TestPostgres.IMAGE)
             .withDatabaseName("preload_chaining").withUsername("test").withPassword("test");
@@ -79,7 +79,7 @@ class PostgresDialectHandlerPreLoadFailureChainingE2ETest {
         assertEquals("42P01", thrown.getSQLState(), "fallback failure should be 'undefined_table'");
 
         // ...but the original insufficient-privilege failure that triggered the fallback must not
-        // be silently lost — it should be attached as a suppressed exception.
+        // be silently lost - it should be attached as a suppressed exception.
         boolean originalCauseKept = false;
         for (Throwable suppressed : thrown.getSuppressed()) {
             if (suppressed instanceof SQLException se && "42501".equals(se.getSQLState())) {

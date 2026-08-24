@@ -23,8 +23,8 @@ Chosen option: "a fixed set of supported types with pinned canonical encodings",
 practice transformations operate on strings, dates, date-times, enumerations, UUIDs, and integers,
 and a fixed set lets every canonical form be reviewed for injectivity up front.
 
-Support a fixed set of types — `String`, `Integer`, `Long`, `Boolean`, `LocalDate`,
-`LocalDateTime`, `Instant`, `UUID`, and any enum — with pinned canonical encodings (the JDK
+Support a fixed set of types - `String`, `Integer`, `Long`, `Boolean`, `LocalDate`,
+`LocalDateTime`, `Instant`, `UUID`, and any enum - with pinned canonical encodings (the JDK
 `toString()` / `name()` forms; specification section 2.6). The set mirrors what database columns
 typically store: text, numbers, dates, timestamps, flags, identifiers, and coded values. Non-String
 types are bound with a class token: `alterego.bind(domain, UUID.class, strategy)`. Unsupported
@@ -35,7 +35,7 @@ two inputs share a pseudonym and `unique()` breaks silently.
 
 ### Consequences
 
-* Good, because there is no public codec SPI in v1 — one less abstraction to document, test, and
+* Good, because there is no public codec SPI in v1 - one less abstraction to document, test, and
   freeze.
 * Good, because adding further types (`LocalTime`, `YearMonth`, ...) later is a non-breaking
   change; a codec mechanism can still be added if a real need appears.

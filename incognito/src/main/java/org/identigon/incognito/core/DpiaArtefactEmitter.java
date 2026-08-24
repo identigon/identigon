@@ -16,7 +16,7 @@ import org.identigon.incognito.api.PipelineStage;
  *
  * <p>This is <b>opt-in</b>: the pipeline always builds the {@link AnonymisationReport} (available
  * from {@code PipelineResult.report()}), but it never writes a file automatically. A caller that
- * wants a persisted DPIA artefact invokes one of these methods with that report — e.g.
+ * wants a persisted DPIA artefact invokes one of these methods with that report - e.g.
  * {@code DpiaArtefactEmitter.emitJson(result.report(), path)}.
  */
 public final class DpiaArtefactEmitter {
@@ -36,7 +36,7 @@ public final class DpiaArtefactEmitter {
     // --- JSON ---------------------------------------------------------------------------------
 
     /**
-     * Emits the report as a JSON document — the machine-readable DPIA artifact for ingestion into a
+     * Emits the report as a JSON document - the machine-readable DPIA artifact for ingestion into a
      * governance system.
      * @param report the anonymisation report to emit
      * @param outputPath the path where the JSON file will be written
@@ -150,7 +150,7 @@ public final class DpiaArtefactEmitter {
     // --- HTML ---------------------------------------------------------------------------------
 
     /**
-     * Emits the report as a self-contained HTML document — the presentation-ready DPIA artifact.
+     * Emits the report as a self-contained HTML document - the presentation-ready DPIA artifact.
      * @param report the anonymisation report to emit
      * @param outputPath the path where the HTML file will be written
      * @throws IncognitoException if writing fails
@@ -298,7 +298,7 @@ public final class DpiaArtefactEmitter {
         try (Writer writer = Files.newBufferedWriter(outputPath)) {
             writer.write("# Incognito Anonymisation Report (DPIA Artifact)\n\n");
 
-            writer.write(String.format("**Salt mode:** `%s` — %s%n%n",
+            writer.write(String.format("**Salt mode:** `%s` - %s%n%n",
                 report.saltMode() == null ? "unknown" : report.saltMode().name(),
                 saltModeNote(report.saltMode())));
 
@@ -309,7 +309,7 @@ public final class DpiaArtefactEmitter {
             }
             if (!report.survivalFindings().isEmpty()) {
                 writer.write("""
-                    ### Source-Value Survival (SPEC §4.3 — singling-out evidence)
+                    ### Source-Value Survival (SPEC §4.3 - singling-out evidence)
 
                     | Table | Column | Sampled | Survived | Verdict |
                     |---|---|---|---|---|
@@ -323,7 +323,7 @@ public final class DpiaArtefactEmitter {
             }
             if (!report.lintFindings().isEmpty()) {
                 writer.write("""
-                    ### Misdeclaration Lint (SPEC §4.1 — distinguishing:false kept opaque)
+                    ### Misdeclaration Lint (SPEC §4.1 - distinguishing:false kept opaque)
 
                     | Table | Column | Distinct Values | Threshold |
                     |---|---|---|---|
@@ -336,7 +336,7 @@ public final class DpiaArtefactEmitter {
             }
             if (!report.structuralFindings().isEmpty()) {
                 writer.write("""
-                    ### Structural Re-identification Risk (SPEC §2.4 — relational fingerprints)
+                    ### Structural Re-identification Risk (SPEC §2.4 - relational fingerprints)
 
                     | Parent Table | Child Table | FK Column(s) | Distinct Parents | Max Child Count | Unique Fingerprints | Rare Fingerprints (<k) | k |
                     |---|---|---|---|---|---|---|---|

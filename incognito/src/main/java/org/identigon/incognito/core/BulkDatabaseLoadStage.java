@@ -56,7 +56,7 @@ public final class BulkDatabaseLoadStage implements AutoCloseable {
         for (int i = 0; i < row.length; i++) {
             Object value = row[i];
             // Bind String values as 'unknown' (Types.OTHER) so PostgreSQL casts them to the column's
-            // actual type — the way a string literal does. This lets a kept enum / user-type value
+            // actual type - the way a string literal does. This lets a kept enum / user-type value
             // (e.g. an mpaa_rating) round-trip, where a plain varchar bind fails with a type mismatch.
             if (value instanceof String) {
                 insertStmt.setObject(i + 1, value, java.sql.Types.OTHER);
@@ -86,8 +86,8 @@ public final class BulkDatabaseLoadStage implements AutoCloseable {
     @Override
     public void close() throws SQLException {
         // Every step below must still be attempted even if an earlier one fails (matching the
-        // original nested try/finally), but the FIRST failure — typically the most actionable one,
-        // e.g. a batch constraint violation — must remain primary. A plain try/finally would let a
+        // original nested try/finally), but the FIRST failure - typically the most actionable one,
+        // e.g. a batch constraint violation - must remain primary. A plain try/finally would let a
         // later failure (e.g. closing an already-broken statement) silently replace it; chaining
         // every subsequent failure as suppressed keeps all of them visible instead.
         SQLException primary = null;

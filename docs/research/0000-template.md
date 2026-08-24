@@ -2,7 +2,7 @@
 
 <!--
 Copy to NNNN-descriptive-filename.md, four-digit zero-padded, numbered across the whole monorepo
-(not per subproject) — the same convention as docs/adr/. Keep this file as 0000; it is the
+(not per subproject) - the same convention as docs/adr/. Keep this file as 0000; it is the
 template. Confidence levels and what counts as research are in DOC-MAP.md. Delete this comment in
 the copy.
 -->
@@ -16,7 +16,7 @@ What is true, stated plainly. Lead with the answer.
 ## Evidence
 
 Each source, what it says, and what it was checked against. Where sources disagree, say so and say
-which won and why — that reconciliation is the part nobody can reconstruct later.
+which won and why - that reconciliation is the part nobody can reconstruct later.
 
 ## Dead ends
 

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Locks the salt-lifecycle invariant (SPEC §5.1/§8.1, hard invariant 3): on completion the pipeline
- * destroys the secret salt — both Incognito's own copy (zeroed) and the {@code AlterEgo} instance's
+ * destroys the secret salt - both Incognito's own copy (zeroed) and the {@code AlterEgo} instance's
  * internal clone (via {@code close()}, after which the instance is unusable). Runs the destruction in
  * {@code DefaultIncognitoPipeline}'s {@code finally}, so it holds whether the run succeeds or fails.
  * No Docker required.
