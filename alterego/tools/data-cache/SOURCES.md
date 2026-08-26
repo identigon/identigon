@@ -7,7 +7,7 @@ depend on these pages staying up or unchanged. All OGL v3.0 (Open Government Lic
 `dictionaries/LICENCES/OGL-v3.txt` for the licence text.
 
 | File | Source | Data URL | Retrieved |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `ons-surnames-2014-2024.xlsx` | ONS: Twenty most common surnames for births in England and Wales, 2014 and 2024 | <https://www.ons.gov.uk/aboutus/transparencyandgovernance/freedomofinformationfoi/twentymostcommonsurnamesforbirthsinenglandandwales2014and2024> | 2026-07-14 |
 | `ons-babynames-1996-2025.xlsx` | ONS: Baby names in England and Wales, 1996 to 2025 | <https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/livebirths/datasets/babynamesinenglandandwalesfrom1996> | 2026-07-14 |
 | `nrs-surnames-2025.xlsx` | National Records of Scotland: Most common surnames, 2025 (includes the 1975-2025 time series) | <https://www.nrscotland.gov.uk/publications/most-common-surnames-2025/> | 2026-07-14 |

@@ -51,8 +51,8 @@ also be visually obvious.
   in the fictional-by-default table via a weaker *kind* of guarantee than the other three: it
   depends on the wordlist actually being reviewed carefully, not a structural/regulatory reserved
   space. Documented as such.
-* Neutral: breaking change to golden outputs touching `lastName()`/`fullName()`/`streetAddress()`
-  - regenerated and re-frozen as part of this decision, not silently.
+* Neutral: breaking change to golden outputs touching `lastName()`/`fullName()`/`streetAddress()` -
+  regenerated and re-frozen as part of this decision, not silently.
 * Neutral: `surnames.txt`/`street-themes.txt` no longer carry a third-party (OGL) attribution -
   they fall under this project's own MIT licence as original authored content instead.
   `street-types.txt` is unaffected (still real, still OGL via Royal Mail PAF data) and keeps its

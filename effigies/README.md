@@ -18,7 +18,7 @@ carries out the substitution.
 Three layers, each with one job:
 
 | Layer | Responsibility | Deterministic? | Judgment / LLM? |
-|:------|:---------------|:---------------|:----------------|
+| :------ | :--------------- | :--------------- | :---------------- |
 | [alterego](../alterego) | fabricate one field value | yes | no |
 | [incognito](../incognito) | clone the schema + orchestrate the load from a policy | yes | no |
 | **Effigies (this directory)** | discover schema, author/infer the policy, drive a run | authoring is advisory; the produced config + runs are deterministic | **yes - here only** |
@@ -57,7 +57,9 @@ report working end to end before pointing Identigon at a real database.
 The typical workflow uses three CLI commands and an AI Agent Skill.
 
 ### 1. Discover & Scaffold
+
 Inspect the source database to emit a starter (fail-closed) `policy.yaml`:
+
 ```bash
 # Read the source schema (metadata only)
 export IDENTIGON_SOURCE_PASSWORD="secret"
@@ -68,17 +70,21 @@ java -jar build/libs/identigon.jar scaffold --source-url "jdbc:postgresql://..."
 ```
 
 ### 2. Interactive Policy Authoring (The Agent Skill)
+
 Effigies ships with a built-in Agent Skill for AI assistants (Claude, Antigravity, Copilot, etc.)
 that interactively interviews you to safely classify the remaining columns.
 
 Activate the skill in your agent (located at
 `.agents/skills/identigon-policy-author/SKILL.md`). The agent will:
+
 - Read your scaffolded `policy.yaml`.
 - Batch related columns (e.g., all audit timestamps) to prevent fatigue.
 - Ask for your explicit confirmation before applying roles (maintaining the fail-closed guarantee).
 
 ### 3. Orchestration (`run`)
+
 Once the policy is authored, drive the `incognito` engine to produce the clone:
+
 ```bash
 export IDENTIGON_SOURCE_PASSWORD="secret"
 export IDENTIGON_TARGET_PASSWORD="secret"
@@ -91,6 +97,7 @@ java -jar build/libs/identigon.jar run \
   --source-url "jdbc:postgresql://..." --source-user "admin" \
   --target-url "jdbc:postgresql://..." --target-user "admin"
 ```
+
 The engine will execute the pipeline and surface the DPIA accountability report as
 `dpia-report.html` (presentation-ready), `dpia-report.json` (machine-readable), and
 `dpia-report.md` (human-diffable).

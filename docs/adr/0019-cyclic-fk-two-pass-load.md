@@ -29,8 +29,8 @@ data.
 
 Detect strongly-connected components with **Tarjan's SCC**, condense them, and topologically order
 the condensation (parents before children; a cycle becomes one component). For a foreign key that
-cannot yet be resolved during a component's load, insert a **type-appropriate placeholder** (Pass
-1) with FK enforcement suppressed on the insert connection, record a deferred update, and after all
+cannot yet be resolved during a component's load, insert a **type-appropriate placeholder** (Pass 1)
+with FK enforcement suppressed on the insert connection, record a deferred update, and after all
 tables are loaded run a second-pass **`UPDATE`** setting the real mapped surrogate (Pass 2). It is
 **fail-closed**: a deferred FK on a row with no resolvable single-column primary key throws rather
 than leaving a dangling placeholder.

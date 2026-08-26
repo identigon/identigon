@@ -9,7 +9,8 @@ statement relied on - the same discipline as `docs/research/0003-alterego-phone-
 only a secondary source was to hand, that is stated and the primary source is named for
 confirmation.
 
-Retrieved: 2026-07-26 (except `phoneNumber()`, dated in `docs/research/0003-alterego-phone-ranges.md`).
+Retrieved: 2026-07-26 (except `phoneNumber()`, dated in
+`docs/research/0003-alterego-phone-ranges.md`).
 
 Rules with self-contained provenance, not repeated here:
 
@@ -32,7 +33,8 @@ Rules with self-contained provenance, not repeated here:
 - **Source**: gov.uk, "Appendix C - Valid Postcode Format" (ILR specification), which gives the
   regex with the final-two-letter set `[ABD-HJLNP-UW-Z]`. Corroborated by Wikipedia, "Postcodes
   in the United Kingdom", and ideal-postcodes.co.uk's "UK Postcode Format" guide.
-- **URL**: <https://assets.publishing.service.gov.uk/media/5a81ebbded915d74e6234d42/Appendix_C_ILR_2017_to_2018_v1_Published_28April17.pdf>
+- **URL**:
+  <https://assets.publishing.service.gov.uk/media/5a81ebbded915d74e6234d42/Appendix_C_ILR_2017_to_2018_v1_Published_28April17.pdf>
 
 ## nhsNumber() - `999` reserved test range
 
@@ -42,7 +44,8 @@ Rules with self-contained provenance, not repeated here:
   Service). Statement relied on: "Synthetic patient records ... always start 999 ... The NHS
   number is valid but is from a range of numbers from which real NHS numbers will never be
   issued." (Real synthetic records also use family names beginning `XXTESTPATIENT`.)
-- **URL**: <https://digital.nhs.uk/services/e-referral-service/document-library/synthetic-data-in-live-environments>
+- **URL**:
+  <https://digital.nhs.uk/services/e-referral-service/document-library/synthetic-data-in-live-environments>
 - **Check digit**: standard mod-11, weights 10..2 over the first nine digits, `11 - (sum mod 11)`,
   with `11 -> 0` and `10` meaning an invalid number (redraw). Widely documented; corroborated by
   the `wardle.org` NHS-number write-up and multiple open-source validators.

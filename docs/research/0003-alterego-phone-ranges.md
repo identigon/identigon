@@ -64,28 +64,28 @@ and `XXX` stripped, reconstruct the value exactly.
 
 **Full table as published** (all 20 ranges; see "v1 scope" above for which are shipped):
 
-| Geographic area                | Area code | Range               |
-|---------------------------------|-----------|----------------------|
-| Leeds                           | 0113      | 496 0000-496 0999    |
-| Sheffield                       | 0114      | 496 0000-496 0999    |
-| Nottingham                      | 0115      | 496 0000-496 0999    |
-| Leicester                       | 0116      | 496 0000-496 0999    |
-| Bristol                         | 0117      | 496 0000-496 0999    |
-| Reading                         | 0118      | 496 0000-496 0999    |
-| Birmingham                      | 0121      | 496 0000-496 0999    |
-| Edinburgh                       | 0131      | 496 0000-496 0999    |
-| Glasgow                         | 0141      | 496 0000-496 0999    |
-| Liverpool                       | 0151      | 496 0000-496 0999    |
-| Manchester                      | 0161      | 496 0000-496 0999    |
-| London                          | 020       | 7946 0000-7946 0999  |
-| Tyneside/Durham/Sunderland      | 0191      | 498 0000-498 0999    |
-| Northern Ireland                | 028       | 9649 6000-9649 6999  |
-| Cardiff                         | 029       | 2018 0000-2018 0999  |
-| No area (generic fallback)      | 01632     | 960000-960999        |
-| Mobile                          | -         | 07700 900000-900999  |
-| Freephone                       | -         | 08081 570000-570999  |
-| Premium rate services           | -         | 0909 8790000-8790999 |
-| UK-wide                         | -         | 03069 990000-990999  |
+| Geographic area            | Area code | Range                |
+|----------------------------|-----------|----------------------|
+| Leeds                      | 0113      | 496 0000-496 0999    |
+| Sheffield                  | 0114      | 496 0000-496 0999    |
+| Nottingham                 | 0115      | 496 0000-496 0999    |
+| Leicester                  | 0116      | 496 0000-496 0999    |
+| Bristol                    | 0117      | 496 0000-496 0999    |
+| Reading                    | 0118      | 496 0000-496 0999    |
+| Birmingham                 | 0121      | 496 0000-496 0999    |
+| Edinburgh                  | 0131      | 496 0000-496 0999    |
+| Glasgow                    | 0141      | 496 0000-496 0999    |
+| Liverpool                  | 0151      | 496 0000-496 0999    |
+| Manchester                 | 0161      | 496 0000-496 0999    |
+| London                     | 020       | 7946 0000-7946 0999  |
+| Tyneside/Durham/Sunderland | 0191      | 498 0000-498 0999    |
+| Northern Ireland           | 028       | 9649 6000-9649 6999  |
+| Cardiff                    | 029       | 2018 0000-2018 0999  |
+| No area (generic fallback) | 01632     | 960000-960999        |
+| Mobile                     | -         | 07700 900000-900999  |
+| Freephone                  | -         | 08081 570000-570999  |
+| Premium rate services      | -         | 0909 8790000-8790999 |
+| UK-wide                    | -         | 03069 990000-990999  |
 
 ### Record coherence: area tagging
 

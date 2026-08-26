@@ -24,11 +24,11 @@ release) for what has changed between versions.
 Incognito delegates all **field-value** transformation to its sibling library
 [`alterego`](../alterego) and owns everything relational on top:
 
-|                 | `alterego`                                                                                        | Incognito                                                                               |
-|:----------------|:------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|
-| **Scope**       | one value, or the fields of one record                                                                | a whole relational database                                                             |
+|                 | `alterego`                                                                                              | Incognito                                                                               |
+|:----------------|:--------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|
+| **Scope**       | one value, or the fields of one record                                                                  | a whole relational database                                                             |
 | **Job**         | fabricate a replacement value (name, e-mail, date shift, ...), deterministic in `(salt, domain, value)` | clone a schema and load it while keeping every cross-row / cross-table invariant intact |
-| **Knows about** | values and formats                                                                                    | tables, primary/foreign keys, load order, triggers, sequences, DPIA reporting           |
+| **Knows about** | values and formats                                                                                      | tables, primary/foreign keys, load order, triggers, sequences, DPIA reporting           |
 
 The boundary is simply: **AlterEgo fabricates fields; Incognito preserves relationships**
 ([ADR 15](../docs/adr/0015-two-libraries-two-responsibilities.md), refined by

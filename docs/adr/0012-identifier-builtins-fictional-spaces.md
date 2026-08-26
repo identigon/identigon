@@ -33,7 +33,7 @@ outputs never correlate across identifier types - the same reason every other bu
 Fictionality mechanism per identifier (full statements in spec 4.8):
 
 | Built-in | Space | Resting on |
-|---|---|---|
+| --- | --- | --- |
 | `nhsNumber()` | `999` prefix | NHS reserved test range (documented, never issued), valid mod-11 check digit |
 | `nationalInsuranceNumber()` | `QQ` prefix | HMRC prefix rules: first letter `Q` never allocated; HMRC's own example prefix |
 | `drivingLicenceNumber()` | surname block `99999` | structurally impossible: a real surname always contributes at least one letter |

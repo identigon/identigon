@@ -96,13 +96,13 @@ too would be the same fact in two places.
 - **JaCoCo added to the build**, sharing the root `subprojects { }` block's report/`check`-task
   config with alterego/effigies (previously alterego-only; see the alterego entry above).
 - **`YamlPolicyParser` no longer crashes on a `scaffold`-shaped draft policy.** Every `role:`/
-  `surrogateStrategy:`/`directIdStrategy:`/`quasiIdStrategy:`/`redactionStrategy:` key
-  `scaffold` writes is present with a blank (YAML `null`) value, by design - `containsKey(...)`
-  is true for those, so each was resolved via `EnumType.valueOf(String.valueOf(null).toUpperCase())`,
-  i.e. `EnumType.valueOf("NULL")`, throwing an unhandled `IllegalArgumentException` instead of
-  leaving the field unset for the existing fail-closed validation to report clearly. Found running
-  the effigies quickstart's new `setup`/`run` workflow (below) against a real database for the
-  first time - previously masked because live testing had always used a fully-classified policy.
+  `surrogateStrategy:`/`directIdStrategy:`/`quasiIdStrategy:`/`redactionStrategy:` key `scaffold`
+  writes is present with a blank (YAML `null`) value, by design - `containsKey(...)` is true for
+  those, so each was resolved via `EnumType.valueOf(String.valueOf(null).toUpperCase())`, i.e.
+  `EnumType.valueOf("NULL")`, throwing an unhandled `IllegalArgumentException` instead of leaving
+  the field unset for the existing fail-closed validation to report clearly. Found running the
+  effigies quickstart's new `setup`/`run` workflow (below) against a real database for the first
+  time - previously masked because live testing had always used a fully-classified policy.
   Now checks the value itself (`!= null`), not just key presence; the fail-closed error is once
   again the clear, column-by-column message `scaffold`'s own output promises.
 
@@ -328,8 +328,8 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
 
 **Note:** incognito's independently-versioned history as a standalone repository continued to
 `1.1.0` after this release, before rejoining this monorepo's lockstep numbering at `1.0.0` (see the
-lockstep-versioning ADR) - that `1.1.0` release's own changes were never recorded in a `CHANGELOG.md`
-entry before the repositories merged, and are not reconstructed here.
+lockstep-versioning ADR) - that `1.1.0` release's own changes were never recorded in a
+`CHANGELOG.md` entry before the repositories merged, and are not reconstructed here.
 
 ## [alterego-0.4.0] - 2026-08-09
 

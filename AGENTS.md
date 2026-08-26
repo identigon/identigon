@@ -22,19 +22,22 @@ subproject per release). Each subproject's specification now lives under root `d
 the relevant one(s) before
 writing any code, for whichever subproject(s) you're touching:
 
-**alterego/**
+## alterego/
+
 - `docs/spec/alterego.md` - the behavioural contract, including the normative Appendix A. Every
   observable behaviour is defined there; if you find a gap, flag it - do not invent behaviour.
 - `alterego/docs/tasks/M<n>.md` - if present, the ordered checklist for the current milestone. Work
   top to bottom, ticking items off as you complete them, and delete the file once the milestone
   ships - its history lives in git, not as a lingering doc.
 
-**incognito/**
+## incognito/
+
 - `docs/spec/incognito.md` - the behavioural contract (privacy model, roles, strategies, the §7.3
   must-not-regress invariants). Every observable behaviour is defined there; if you find a gap, flag
   it - do not invent behaviour.
 
-**effigies/**
+## effigies/
+
 - `docs/spec/effigies.md` - the behavioural contract. Every observable behaviour is defined there;
   if you find a gap, flag it - do not invent behaviour.
 

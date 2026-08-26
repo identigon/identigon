@@ -553,16 +553,16 @@ applied to an `Instant`. Sub-second precision is preserved, not zeroed.
   sub-second precision that is itself close to unique per record.
 - `JitterOptions<T>` (`T` is `LocalDate`, `LocalDateTime`, or `Instant`, matching the method) clamps
   the result, applied last, after the strategy has run:
-    - `JitterOptions.min(value)`, `JitterOptions.max(value)`, `JitterOptions.minmax(min, max)` - an
-      **inclusive** bound, or both in one call. Values that would fall outside a bound are clamped
-      to it, not rejected - values near a bound pile up on it; documented, not hidden. The library
-      never reads the clock (section 3.4): a caller wanting "no future dates" writes
-      `JitterOptions.max(LocalDate.now())`. Note the type-dependent meaning of "past", which the
-      caller owns: a `LocalDate` strictly in the past excludes today
-      (`max(LocalDate.now().minusDays(1))`), whereas a `LocalDateTime` strictly in the past is
-      anything before now (`max(LocalDateTime.now().minusNanos(1))`).
-    - `JitterOptions` is an immutable value type with no "no bounds" state of its own - an unclamped
-      call simply omits the trailing `JitterOptions` argument.
+  - `JitterOptions.min(value)`, `JitterOptions.max(value)`, `JitterOptions.minmax(min, max)` - an
+    **inclusive** bound, or both in one call. Values that would fall outside a bound are clamped
+    to it, not rejected - values near a bound pile up on it; documented, not hidden. The library
+    never reads the clock (section 3.4): a caller wanting "no future dates" writes
+    `JitterOptions.max(LocalDate.now())`. Note the type-dependent meaning of "past", which the
+    caller owns: a `LocalDate` strictly in the past excludes today
+    (`max(LocalDate.now().minusDays(1))`), whereas a `LocalDateTime` strictly in the past is
+    anything before now (`max(LocalDateTime.now().minusNanos(1))`).
+  - `JitterOptions` is an immutable value type with no "no bounds" state of its own - an unclamped
+    call simply omits the trailing `JitterOptions` argument.
 - Because every draw is derived from the input value, equal timestamps jitter identically -
   preserving equality relationships in the data. Ordering is **not** preserved: two distinct inputs'
   shifts are drawn independently, so a date before another in the input can land after it in the
@@ -610,7 +610,7 @@ phone digits) do so as documented per-transformation behaviour, not via a public
 | `mask(char c)`               | Mask every character with `c`; equivalent to             |
 |                              | `mask(c, 0)`.                                            |
 | `mask(char c, int keepLast)` | Mask all but the last `keepLast` characters with `c`.    |
-|                              | Inputs of length <= `keepLast` are returned unchanged;    |
+|                              | Inputs of length <= `keepLast` are returned unchanged;   |
 |                              | negative `keepLast` throws `AlterEgoConfigException`.    |
 
 `redact(type)` returns `constant(default)` for the given type, so it inherits every property of
@@ -981,14 +981,14 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
 ## 8. Error handling
 
 - `AlterEgoException` (unchecked) is the root. Subtypes:
-    - `AlterEgoConfigException` - creation-time configuration errors (no resources for the country,
-      unsupported value type, invalid domain, invalid options). Its subtype
-      `AlterEgoPatternException` reports malformed patterns with the offending position.
-    - `AlterEgoStoreException` - mapping store required but not configured, store failure, or a
-      stored value that fails to decode.
-    - `AlterEgoCollisionException` - `unique()` exhausted its retry budget.
-    - `AlterEgoCoherenceException` - a record attribute was set to a value conflicting with the one
-      already fixed for the record (section 6.2).
+  - `AlterEgoConfigException` - creation-time configuration errors (no resources for the country,
+    unsupported value type, invalid domain, invalid options). Its subtype
+    `AlterEgoPatternException` reports malformed patterns with the offending position.
+  - `AlterEgoStoreException` - mapping store required but not configured, store failure, or a
+    stored value that fails to decode.
+  - `AlterEgoCollisionException` - `unique()` exhausted its retry budget.
+  - `AlterEgoCoherenceException` - a record attribute was set to a value conflicting with the one
+    already fixed for the record (section 6.2).
 - Configuration errors surface when the transformation is created, never per element.
 - Strategies never throw for ordinary data (empty strings, unparseable names); they degrade to a
   reasonable transformation (e.g. the `fullName()` surname fallback).
@@ -1089,6 +1089,7 @@ All primitives consume from the stream in the order the strategy calls them.
   do { v = next8() & Long.MAX_VALUE } while (v >= limit)
   return v % bound
   ```
+
 - `nextInt(bound)`: `(int) nextLong(bound)` with the same precondition.
 - `nextBoolean()`: `nextLong(2) == 1`.
 - `pick(list)`: `list.get(nextInt(list.size()))`; empty list throws `IllegalArgumentException`.

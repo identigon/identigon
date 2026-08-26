@@ -7,8 +7,9 @@ names, e-mails, phone numbers, a National Insurance number (NINO), coherent date
 redacted free-text field, all in one pass.
 
 Five files: [`schema.sql`](schema.sql) (DDL only - load into both databases),
-[`seed-data.sql`](seed-data.sql) (sample rows - load into the source only), [`policy.yaml`](policy.yaml)
-(a finished classification for every column, to run directly or to compare your own against), and
+[`seed-data.sql`](seed-data.sql) (sample rows - load into the source only),
+[`policy.yaml`](policy.yaml) (a finished classification for every column, to run directly or to
+compare your own against), and
 two behaviourally-identical driver scripts - [`run-quickstart.sh`](run-quickstart.sh) (POSIX `sh`;
 macOS/Linux/WSL/Git Bash) and [`run-quickstart.ps1`](run-quickstart.ps1) (native PowerShell; no
 POSIX shell needed on Windows) - either running a one-shot demo, or the real
@@ -145,7 +146,7 @@ psql -h localhost -U postgres -d quickstart_target -c "SELECT category, notes FR
 
 Worth checking for yourself:
 
-- Every `nino` starts with `QQ ` - the guaranteed-fictional prefix HMRC never allocates.
+- Every `nino` starts with `QQ` - the guaranteed-fictional prefix HMRC never allocates.
 - `bank_account` values are a different but same-shaped string per row - fabricated, but (unlike
   the NINO) with no fictionality guarantee; see the comment in `policy.yaml`.
 - For each order, `shipped_on` is still on-or-after `ordered_on`, and the gap between the two

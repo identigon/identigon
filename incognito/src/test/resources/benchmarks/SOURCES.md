@@ -12,7 +12,7 @@ authors, and marking the changes made (see below).
 All URLs retrieved **2026-07-31**.
 
 | Dataset | Upstream | Vendored here | Download URL | Licence | Licence text |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | PetClinic | [spring-projects/spring-petclinic](https://github.com/spring-projects/spring-petclinic) (`main`) | `petclinic/schema.sql`, `petclinic/data.sql` | `.../src/main/resources/db/postgres/{schema,data}.sql` | Apache-2.0 | `LICENCES/Apache-2.0.txt` |
 | Pagila | [devrimgunduz/pagila](https://github.com/devrimgunduz/pagila) (`pagila-v3.0.0`) | `pagila/schema.sql`, `pagila/pagila-insert-data.sql` | `.../refs/tags/pagila-v3.0.0/pagila-{schema,insert-data}.sql` | PostgreSQL License | `LICENCES/PostgreSQL-License.txt` |
 | Northwind | [pthom/northwind_psql](https://github.com/pthom/northwind_psql) (`master`) | `northwind/northwind.sql` | `.../northwind.sql` | Ms-PL | `LICENCES/Ms-PL.txt` |
@@ -79,7 +79,8 @@ carries the original licence header inline.
   altered.** The changes made (assembly + meta-command removal) are stated in the file's own
   header, satisfying the CC BY-SA "indicate changes" term; the work stays under CC BY-SA 3.0
   (share-alike).
-- **Download URLs:** `https://raw.githubusercontent.com/bytebase/employee-sample-database/main/postgres/dataset_small/employee.sql`
+- **Download URLs:**
+  `https://raw.githubusercontent.com/bytebase/employee-sample-database/main/postgres/dataset_small/employee.sql`
   plus `load_department.sql`, `load_employee.sql`, `load_dept_emp.sql`, `load_dept_manager.sql`,
   `load_title.sql`, `load_salary1.sql` in the same directory.
 - **Licence:** CC BY-SA 3.0 Unported - <https://creativecommons.org/licenses/by-sa/3.0/> (copy:
@@ -98,7 +99,8 @@ fictionality net), a self-referential `employee.reports_to` FK, and a `TIMESTAMP
   it loads into an existing database via a plain JDBC statement stream. No table or data row
   was altered; the upstream header and licence reference are preserved. The change is stated
   in the file's own header.
-- **Download:** `https://raw.githubusercontent.com/lerocha/chinook-database/master/ChinookDatabase/DataSources/Chinook_PostgreSql.sql`
+- **Download:**
+  `https://raw.githubusercontent.com/lerocha/chinook-database/master/ChinookDatabase/DataSources/Chinook_PostgreSql.sql`
 - **Licence:** MIT - <https://github.com/lerocha/chinook-database/blob/master/LICENSE.md> (copy:
   `LICENCES/MIT-Chinook.txt`).
 

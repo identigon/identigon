@@ -1,18 +1,28 @@
 {
-  // Line-length gate only (MD013). This repo's convention (AGENTS.md's Code style section) is a
-  // 100-column wrap for Markdown prose, with tables and code blocks exempt because there's no
-  // sensible way to "wrap" either without corrupting them, and headings exempt because a heading
-  // is one line by construction -- there's no wrap to apply, only a rename, which isn't this
-  // tool's job. Everything else markdownlint checks (heading structure, list style, blank-line
-  // conventions, etc.) is deliberately left off: nobody's asked for that yet, and this repo's
-  // existing docs have never been audited against it.
+  // Full default rule set, audited and enabled deliberately (see PLAN.md history / git log for the
+  // sweep that got the existing docs compliant). "default" is omitted -- true is markdownlint's own
+  // default, so stating it would be redundant. MD013 keeps the same 100-column prose convention
+  // (AGENTS.md's Code style section) with tables and code blocks exempt because there's no sensible
+  // way to "wrap" either without corrupting them, and headings exempt because a heading is one line
+  // by construction -- there's no wrap to apply, only a rename, which isn't this tool's job.
+  // `stern` closes most of the gap non-strict mode leaves open (an ordinary prose line with one
+  // long trailing word is otherwise silently forgiven) while still exempting a line that is
+  // *purely* one unbreakable token -- a bare URL on its own line, most commonly. Unlike `strict`,
+  // it does not flag those: it only stops forgiving a long token that shares a line with other
+  // prose. Long links that aren't alone on their own line still needed a manual reflow to match.
+  // MD024 (no-duplicate-heading) uses `siblings_only` because CHANGELOG.md legitimately repeats
+  // "Added"/"Fixed"/subproject-name headings once per version entry (Keep a Changelog convention);
+  // `siblings_only` only flags duplicates within the same parent section, not document-wide.
   "config": {
-    "default": false,
     "MD013": {
       "line_length": 100,
       "code_blocks": false,
       "tables": false,
-      "headings": false
+      "headings": false,
+      "stern": true
+    },
+    "MD024": {
+      "siblings_only": true
     }
   }
 }

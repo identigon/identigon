@@ -14,8 +14,8 @@ Requirement keywords - MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - are used as def
 ## 1. Scope
 
 Covers the behaviour of all three subprojects that make up the `identigon` pipeline. Does not cover
-build/release mechanics (Gradle wiring, lockstep versioning) - that is the concern of `docs/adr/` and
-each module's own `build.gradle.kts`, not a behavioural contract.
+build/release mechanics (Gradle wiring, lockstep versioning) - that is the concern of `docs/adr/`
+and each module's own `build.gradle.kts`, not a behavioural contract.
 
 ## 2. Members
 

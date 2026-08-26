@@ -99,7 +99,8 @@ each nation's naming rather than token it, without creating a distortion in the 
 - **England and Wales**: "Baby names in England and Wales, 1996 to 2025" - Office for National
   Statistics. Top 20 boys' + top 20 girls' names for both 2025 (the most recent year published)
   and 1996 (the first year this ONS series covers) used.
-  Data: <https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/livebirths/datasets/babynamesinenglandandwalesfrom1996>
+  Data:
+  <https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/livebirths/datasets/babynamesinenglandandwalesfrom1996>
   Licence: Open Government Licence v3.0 -
   <http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/>
   Retrieved: 2026-07-14
@@ -238,9 +239,9 @@ dictionaries: every first name appearing anywhere in the ONS 1996-2025 baby name
 NRS's "Surnames TimeSeries 1975 to 2025" (3,672 surnames) - both real, sourced, already-cited
 data, not invented. This removed 14,119 tokens from the candidate list.
 
-Names are generated as three tagged words (`MODIFIER-or-NOUN` + `NOUN` + `NOUN`), not a flat pool
-- see [ADR 26](../adr/0026-organisation-name-three-word-tagged-composition.md) for the decision,
-the rejected alternatives, and the combination-count reasoning.
+Names are generated as three tagged words (`MODIFIER-or-NOUN` + `NOUN` + `NOUN`), not a flat pool -
+see [ADR 26](../adr/0026-organisation-name-three-word-tagged-composition.md) for the decision, the
+rejected alternatives, and the combination-count reasoning.
 
 **NOUN (44 entries)**: the original top-50-by-frequency cut from the candidate list, minus "Sons"
 (dropped: it grammatically wants a personal surname before it, e.g. "Smith & Sons", which this
