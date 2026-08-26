@@ -20,6 +20,8 @@ too would be the same fact in two places.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-26
+
 ### alterego
 
 - **Spotless/SpotBugs/PMD build config consolidated to the monorepo root.**

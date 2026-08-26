@@ -15,7 +15,7 @@ plugins {
 // build is that release or a SNAPSHOT of it is NOT a human decision: it's derived from whether HEAD
 // is exactly a tagged commit, so nobody has to remember to flip a suffix, and an ordinary push to
 // main can never accidentally overwrite an immutable release coordinate.
-val baseVersion = "1.0.0"
+val baseVersion = "1.1.0"
 
 val isExactlyTagged = providers.exec {
     commandLine("git", "describe", "--tags", "--exact-match")
