@@ -26,7 +26,7 @@ writing any code, for whichever subproject(s) you're touching:
 
 - `docs/spec/alterego.md` - the behavioural contract, including the normative Appendix A. Every
   observable behaviour is defined there; if you find a gap, flag it - do not invent behaviour.
-- `alterego/docs/tasks/M<n>.md` - if present, the ordered checklist for the current milestone. Work
+- `docs/tasks/alterego-M<n>.md` - if present, the ordered checklist for the current milestone. Work
   top to bottom, ticking items off as you complete them, and delete the file once the milestone
   ships - its history lives in git, not as a lingering doc.
 

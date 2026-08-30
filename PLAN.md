@@ -1,7 +1,8 @@
 # Identigon - Implementation Plan
 
 Single ranked backlog for the whole monorepo. Entries are **deleted** when done, never annotated -
-a plan that accumulates completed items stops being read. Optionally tagged `**Project:**`
+a plan that accumulates completed items stops being read. **One paragraph each** - see
+[DOC-MAP.md](DOC-MAP.md). Optionally tagged `**Project:**`
 (`alterego` / `incognito` / `effigies`) for work scoped to one subproject; an untagged entry is
 cross-cutting or applies to no single subproject. See the root `CHANGELOG.md` for what's already
 shipped.

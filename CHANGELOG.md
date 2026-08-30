@@ -186,15 +186,15 @@ too would be the same fact in two places.
 
 ### monorepo
 
-- **Markdown line-length lint added.** `.markdownlint-cli2.jsonc` runs `markdownlint-cli2` as a
-  pre-commit hook, `MD013` only (100-column line length; code blocks, tables, and headings
-  exempt) - deliberately narrow, matching what was actually asked for when the hook was added.
-  Existing violations across the repo were fixed in the same change. Two more rules were checked
-  read-only (full default rule set) and fixed directly since they were mechanical: every bare
-  fenced code block now has a `text`/`sh` language tag (`MD040`), and every bare citation URL is
-  wrapped in `<...>` (`MD034`). The rest of the default rule set (table/list formatting, heading
-  conventions) needs real editorial judgment, not a mechanical fix - tracked in `PLAN.md`, not
-  done here.
+- **Markdown line-length lint added, then the full default `markdownlint-cli2` rule set enabled.**
+  `.markdownlint-cli2.jsonc` runs `markdownlint-cli2` as a pre-commit hook. It started `MD013`-only
+  (100-column line length; code blocks, tables, and headings exempt), with existing violations
+  fixed in the same change. Every other default rule was then audited and turned on: `MD013` gained
+  `stern` mode (forgives a bare long token alone on its own line - typically a URL - but not one
+  sharing a line with prose); `MD024` (no-duplicate-heading) uses `siblings_only` so Keep a
+  Changelog's repeated `### Added`/`### Fixed` headings per version stay legal; the rest (`MD004`,
+  `MD007`, `MD012`, `MD022`, `MD031`, `MD032`, `MD034`, `MD036`, `MD038`, `MD040`, `MD060`, ...)
+  needed no config, just fixing the content across the repo's markdown files.
 - **Dependabot added** (`gradle` + `github-actions`, weekly) to keep dependency versions current
   across the monorepo.
 - **CI reports made downloadable.** `_build.yml` uploads each matrix leg's (`ubuntu-latest`/
