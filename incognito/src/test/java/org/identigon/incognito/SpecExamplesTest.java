@@ -1,7 +1,6 @@
 package org.identigon.incognito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -20,12 +19,8 @@ import org.junit.jupiter.api.Test;
 class SpecExamplesTest {
 
     @Test
-    // autoInfer(boolean) is deprecated (scheduled for removal at incognito's next major version)
-    // but still exercised here deliberately, matching the docs/spec/incognito.md example verbatim.
-    @SuppressWarnings("removal")
     void policyExampleBuilds() {
         AnonymisationPolicy policy = AnonymisationPolicy.builder()
-            .autoInfer(false)
             .table("customers", table -> table
                 .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
                 .column("full_name", ColumnRole.DIRECT_ID, DirectIdStrategy.ALTEREGO_NAME)
@@ -36,7 +31,6 @@ class SpecExamplesTest {
             )
             .build();
 
-        assertFalse(policy.autoInfer(), "fail-closed default");
         assertEquals(64, policy.maxCategoricalCardinality());
         assertTrue(policy.table("customers").isPresent());
         assertEquals(ColumnRole.DIRECT_ID,

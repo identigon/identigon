@@ -19,9 +19,6 @@ import org.identigon.incognito.policy.TablePolicy;
  * topological execution plan for table processing. Results are stored in the pipeline
  * context's {@code attributes()} map for downstream stages.
  */
-// Uses the deprecated (forRemoval) PolicyInferrer throughout, deliberately, for the fail-closed
-// error-message hint until incognito's next major version removes it -- see PolicyInferrer's Javadoc.
-@SuppressWarnings("removal")
 public final class SchemaDiscoveryStage implements PipelineStage {
 
     /** Key used to store the discovered schema metadata in the pipeline context attributes. */
@@ -32,17 +29,17 @@ public final class SchemaDiscoveryStage implements PipelineStage {
 
     /**
      * Key used to store the auto-inference role suggestions in the pipeline context attributes.
-     * <b>Note:</b> since an unclassified column always aborts the run ({@code ConfigException},
-     * SPEC §7.2), this map is only ever stored on a fully-successful validation pass - where, by
-     * definition, every column was already classified and there was nothing to suggest. Genuinely
-     * populated suggestions currently only ever reach the thrown exception's message, listing
-     * every unclassified column in a table at once, not a returned {@code AnonymisationReport}.
+     * <b>Always empty.</b> incognito's own inference (the {@code autoInfer} flag and
+     * {@code PolicyInferrer}) was removed at v2.0.0 - inference now lives entirely in
+     * {@code effigies}' own {@code PolicyInferrer} (ADR 23), which incognito cannot reach (it would
+     * invert the dependency direction). Retained only so
+     * {@link org.identigon.incognito.api.AnonymisationReport.TableReport#inferSuggestions()} still
+     * has something to read; nothing populates it any more.
      */
     public static final String ATTR_INFER_SUGGESTIONS = "incognito.schema.inferSuggestions";
 
     private final SchemaInspector schemaInspector;
     private final TableDependencyGraph dependencyGraph;
-    private final org.identigon.incognito.policy.PolicyInferrer inferrer = new org.identigon.incognito.policy.PolicyInferrer();
 
     /** Creates a schema-discovery stage with the default inspector and dependency graph. */
     public SchemaDiscoveryStage() {
@@ -95,9 +92,7 @@ public final class SchemaDiscoveryStage implements PipelineStage {
      *
      * @param metadata the discovered source schema (e.g. from {@link SchemaInspector#inspect})
      * @param policy   the policy to validate against it
-     * @return per-table auto-infer suggestions - always empty on success (SPEC §7.2: an
-     *     unclassified column always fails closed, so a returned map never carries a real
-     *     suggestion; see {@link #ATTR_INFER_SUGGESTIONS})
+     * @return per-table auto-infer suggestions - always empty (see {@link #ATTR_INFER_SUGGESTIONS})
      * @throws IncognitoException.ConfigException if any table fails the check
      */
     public java.util.Map<String, java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion>> validate(
@@ -133,12 +128,12 @@ public final class SchemaDiscoveryStage implements PipelineStage {
             java.util.Map<String, java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion>> allSuggestions,
             List<String> failures) {
 
-        java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion> tableSuggestions = new java.util.ArrayList<>();
+        // Always empty - see ATTR_INFER_SUGGESTIONS's Javadoc. Kept only because the map this feeds
+        // still needs an (empty) entry per table.
+        java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion> tableSuggestions = java.util.List.of();
         // Collected across the WHOLE table rather than thrown on the first hit, so one run reports
         // every unclassified column at once instead of the user fixing them one at a time across
-        // repeated runs. (This still always aborts the run - auto-infer only suggests, never
-        // assigns, SPEC §7.2; it does not make suggestions reach a *returned* report, since a
-        // fail-closed run never returns one - see ATTR_INFER_SUGGESTIONS's Javadoc.)
+        // repeated runs.
         java.util.List<String> unclassifiedMessages = new java.util.ArrayList<>();
 
         for (String column : table.columns()) {
@@ -153,22 +148,10 @@ public final class SchemaDiscoveryStage implements PipelineStage {
             // both "unclassified": both must fail closed identically. Checking Optional.isEmpty()
             // alone would silently miss the latter, since a ColumnPolicy still exists for it.
             if (declared.isEmpty() || declared.get().role() == null) {
-                // Auto-inference only SUGGESTS a role; it never silently assigns one, so an
-                // unclassified column ALWAYS fails-closed (SPEC §7.2) regardless of the policy's
-                // autoInfer setting - it must never pass through as real data. SPEC §7.2's "opt-in"
-                // language governs whether a suggestion reaches the REPORT (ATTR_INFER_SUGGESTIONS,
-                // which - see its Javadoc - is moot here anyway: a fail-closed run never returns
-                // one); it says nothing about this MESSAGE. The hint below is deliberately shown
-                // unconditionally: it never assigns anything, so autoInfer gates nothing it needs
-                // to gate, and suppressing it when autoInfer is off (the default) would make the
-                // common case's error message less helpful, not more correct.
-                var inferred = inferrer.inferRole(column);
-                String hint = inferred
-                    .map(r -> " (auto-infer suggests " + r.role() + " via " + r.heuristic() + ")")
-                    .orElse("");
-                unclassifiedMessages.add("'" + column + "'" + hint);
-                inferred.ifPresent(r -> tableSuggestions.add(
-                    new org.identigon.incognito.api.AnonymisationReport.InferSuggestion(column, r.role(), r.heuristic())));
+                // An unclassified column ALWAYS fails closed (SPEC §7.2) - it must never pass
+                // through as real data. incognito itself makes no guess at what it might be;
+                // effigies' scaffold/validate commands are where a suggestion comes from (ADR 23).
+                unclassifiedMessages.add("'" + column + "'");
             } else {
                 ColumnPolicy colPol = declared.get();
                 if (colPol.role() == ColumnRole.SENSITIVE) {
@@ -202,7 +185,8 @@ public final class SchemaDiscoveryStage implements PipelineStage {
             failures.add("table '" + table.tableName() + "' has " + unclassifiedMessages.size()
                 + " unclassified column(s) with no declared ColumnRole in the policy: "
                 + String.join(", ", unclassifiedMessages)
-                + ". Classify each explicitly - auto-infer only suggests, never assigns.");
+                + ". Classify each explicitly - see effigies' scaffold/validate commands for"
+                + " suggested roles.");
         }
     }
 

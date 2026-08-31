@@ -88,7 +88,6 @@ class ScaffoldCommand {
                 tablesByName.put(t.tableName(), t);
             }
 
-            writer.write("autoInfer: false\n");
             writer.write("tables:\n");
             for (SchemaInspector.TableMetadata table : tables) {
                 writer.write("  " + table.tableName() + ":\n");

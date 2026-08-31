@@ -15,6 +15,9 @@ class YamlConfigTest {
 
     @Test
     void testParseValidConfig() {
+        // autoInfer: true is a no-op left over from before v2.0.0 (AnonymisationPolicy.Builder no
+        // longer has the method) - included deliberately, to demonstrate a pre-v2.0.0 policy.yaml
+        // that still declares it keeps parsing rather than failing on an unrecognised key.
         String yamlString = """
             autoInfer: true
             maxCategoricalCardinality: 100
@@ -49,7 +52,6 @@ class YamlConfigTest {
 
         AnonymisationPolicy policy = parser.parse(inputStream);
 
-        assertTrue(policy.autoInfer());
         assertEquals(100, policy.maxCategoricalCardinality());
         assertNotNull(policy.tables());
         assertEquals(2, policy.tables().size());
@@ -140,7 +142,6 @@ class YamlConfigTest {
 
         AnonymisationPolicy policy = parser.parse(inputStream);
 
-        assertFalse(policy.autoInfer());
         assertEquals(64, policy.maxCategoricalCardinality());
         assertEquals(StructuralUniquenessMode.OFF, policy.structuralUniqueness(), "off by default (SPEC §2.4)");
         assertEquals(5, policy.structuralRarenessK());

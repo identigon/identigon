@@ -482,7 +482,6 @@ generic `"REDACTED"`.
 
 ```yaml
 # incognito-policy.yaml
-autoInfer: false                 # fail-closed default
 maxCategoricalCardinality: 64    # misdeclaration-lint threshold: flag a distinguishing:false column above it (§4.1)
 distinguishingLint: WARN         # default; cross-check distinguishing:false vs COUNT(DISTINCT). WARN | ERROR | OFF (§4.1)
 structuralUniqueness: OFF        # default; per-FK-edge relational-fingerprint findings. OFF | REPORT (§2.4)
@@ -631,8 +630,6 @@ public record AnonymisationPolicy(...) {                       // fields elided
     public static Builder builder();
 
     public static class Builder {
-        Builder autoInfer(boolean enable);          // default FALSE (fail-closed)
-
         Builder maxCategoricalCardinality(int n);   // default 64 (§4.1)
 
         Builder distinguishingLint(DistinguishingLint mode); // default WARN (§4.1)
@@ -798,13 +795,12 @@ schema - no target connection, no `PipelineContext`, no dependency-graph computa
 calls it internally; `effigies`' `validate` command calls it directly, pairing it with its own
 `SchemaInspector.inspect(source)` call to check a policy without committing to a full `run`.
 
-**`autoInfer` / `PolicyInferrer` are deprecated (`forRemoval = true`).** Inference is authoring, not
-execution - fail-closed classification means it never affected engine output - and it now lives in
-`effigies`' own `PolicyInferrer`, which is what actually interviews users during authoring. This
-copy is retained only for the fail-closed error message's diagnostic hint and is scheduled for
-removal at incognito's next major version; see `docs/adr/0023-authoring-above-the-engine.md` for
-the reasoning and `docs/adr/0024-lockstep-versioning.md` for how that major lands across the
-monorepo.
+**Inference lives in `effigies` only.** incognito's own `autoInfer` flag and `PolicyInferrer` were
+removed at v2.0.0 - inference is authoring, not execution, and fail-closed classification meant it
+never affected engine output even while it was here. `effigies`' own `PolicyInferrer` is what
+actually interviews users during authoring now; see
+`docs/adr/0023-authoring-above-the-engine.md` for the reasoning and
+`docs/adr/0024-lockstep-versioning.md` for why that removal was this major's trigger.
 
 A `PAYLOAD` (or kept `SENSITIVE`) column whose JDBC type is complex/opaque and untransformable in
 v1.0 (geometry, `JSONB`, array, `INET`, BLOB) is flagged in the report as *"untransformed

@@ -43,9 +43,7 @@ public class YamlPolicyParser {
      * @return Parsed AnonymisationPolicy object.
      * @throws IncognitoException.ConfigException if parsing fails or YAML is invalid.
      */
-    // "removal": still parses the deprecated autoInfer key for policy.yaml back-compat until
-    // incognito's next major version removes it (see AnonymisationPolicy.Builder#autoInfer).
-    @SuppressWarnings({"unchecked", "removal"})
+    @SuppressWarnings("unchecked")
     public AnonymisationPolicy parse(InputStream inputStream) throws IncognitoException.ConfigException {
         try {
             Yaml yaml = new Yaml(new SafeConstructor(new org.yaml.snakeyaml.LoaderOptions()));
@@ -56,9 +54,10 @@ public class YamlPolicyParser {
 
             AnonymisationPolicy.Builder builder = AnonymisationPolicy.builder();
 
-            if (root.containsKey("autoInfer")) {
-                builder.autoInfer((Boolean) root.get("autoInfer"));
-            }
+            // A policy.yaml written before v2.0.0 may still carry `autoInfer: false` (or `true`) -
+            // silently ignored, like any other unrecognised key here, rather than rejected: the key
+            // no longer means anything (AnonymisationPolicy.Builder#autoInfer was removed), but a
+            // leftover no-op key in an otherwise-valid file shouldn't fail the parse.
             if (root.containsKey("maxCategoricalCardinality")) {
                 builder.maxCategoricalCardinality((Integer) root.get("maxCategoricalCardinality"));
             }

@@ -70,7 +70,6 @@ The same policy can live in a YAML file instead of Java, so classification is da
 and diff rather than code. `YamlPolicyParser` reads it into the identical `AnonymisationPolicy`:
 
 ```yaml
-autoInfer: false          # fail-closed: every column must be classified explicitly
 tables:
   customers:
     columns:

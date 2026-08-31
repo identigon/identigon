@@ -14,8 +14,6 @@ import java.util.function.Consumer;
  * ({@code distinguishingLint}: WARN | ERROR | OFF) that flags a {@code distinguishing: false} column
  * looking free-text - it is not the gate.
  *
- * @param autoInfer whether auto-inference may suggest roles (it never assigns them); default
- *     {@code false}. Deprecated - see {@link Builder#autoInfer(boolean)}.
  * @param maxCategoricalCardinality the distinct-count threshold for the misdeclaration lint (§4.1)
  * @param distinguishingLint how the misdeclaration lint behaves (WARN / ERROR / OFF)
  * @param structuralUniqueness whether {@code VerificationStage} computes relational-fingerprint
@@ -25,7 +23,6 @@ import java.util.function.Consumer;
  * @param tables the per-table policies, keyed by table name
  */
 public record AnonymisationPolicy(
-    boolean autoInfer,
     int maxCategoricalCardinality,
     org.identigon.incognito.api.DistinguishingLint distinguishingLint,
     org.identigon.incognito.api.StructuralUniquenessMode structuralUniqueness,
@@ -60,33 +57,15 @@ public record AnonymisationPolicy(
 
     /** Fluent builder for an {@link AnonymisationPolicy}. */
     public static class Builder {
-        /** Creates a builder with fail-closed defaults (auto-inference off, lint {@code WARN}). */
+        /** Creates a builder with fail-closed defaults (lint {@code WARN}). */
         public Builder() {}
 
-        // Fail-closed by default (SPEC §7.2): auto-inference must be opted into, and it only
-        // suggests roles - it never silently classifies.
-        private boolean autoInfer = false;
         private int maxCategoricalCardinality = 64;
         private org.identigon.incognito.api.DistinguishingLint distinguishingLint = org.identigon.incognito.api.DistinguishingLint.WARN;
         private org.identigon.incognito.api.StructuralUniquenessMode structuralUniqueness =
             org.identigon.incognito.api.StructuralUniquenessMode.OFF;
         private int structuralRarenessK = 5;
         private final Map<String, TablePolicy> tables = new LinkedHashMap<>();
-
-        /**
-         * Enables auto-inference of column roles (suggestions only, never applied). Default {@code false}.
-         *
-         * @param autoInfer whether to enable auto-inference
-         * @return this builder
-         * @deprecated inference is authoring, not execution; {@code effigies} owns it now and this
-         *     fail-closed engine's own copy is scheduled for removal at incognito's next major
-         *     version - see {@code docs/adr/0023-authoring-above-the-engine.md}.
-         */
-        @Deprecated(forRemoval = true)
-        public Builder autoInfer(boolean autoInfer) {
-            this.autoInfer = autoInfer;
-            return this;
-        }
 
         /**
          * Sets the VARCHAR/SENSITIVE categorical threshold for the misdeclaration lint (SPEC §4.1).
@@ -164,7 +143,7 @@ public record AnonymisationPolicy(
          * @return the built {@link AnonymisationPolicy}
          */
         public AnonymisationPolicy build() {
-            return new AnonymisationPolicy(autoInfer, maxCategoricalCardinality, distinguishingLint,
+            return new AnonymisationPolicy(maxCategoricalCardinality, distinguishingLint,
                 structuralUniqueness, structuralRarenessK, tables);
         }
     }

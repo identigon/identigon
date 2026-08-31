@@ -89,7 +89,7 @@ report discloses it, so a reviewer can weigh the anonymity claim.
 
 Effigies **reuses** rather than re-implements: schema discovery via incognito's
 `SchemaInspector`, the policy model + `YamlPolicyParser`, and the `IncognitoPipeline` execution +
-DPIA report. The one capability that **migrates into** Effigies is role **inference** (currently
-`PolicyInferrer` / the `autoInfer` concept in incognito): it is authoring, it never affected the
-engine's output (fail-closed), and it belongs above the engine. That migration pairs with
-incognito's 2.0.
+DPIA report. The one capability that **migrated into** Effigies is role **inference** - incognito's
+own `PolicyInferrer` and `autoInfer` concept, removed at incognito's 2.0: it was authoring, it never
+affected the engine's output (fail-closed), and it belongs above the engine. Effigies' own
+`PolicyInferrer` is the only one left.

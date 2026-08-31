@@ -61,7 +61,6 @@ class RunCommandTest {
 
         Path policy = tempDir.resolve("policy.yaml");
         Files.writeString(policy, """
-            autoInfer: false
             tables:
               PERSON:
                 columns:
@@ -104,7 +103,6 @@ class RunCommandTest {
     void tooShortAPersistentSaltFailsBeforeEitherDatabaseIsTouched(@TempDir Path tempDir) throws Exception {
         Path policy = tempDir.resolve("policy.yaml");
         Files.writeString(policy, """
-            autoInfer: false
             tables:
               PERSON:
                 columns:
@@ -134,7 +132,6 @@ class RunCommandTest {
     void reportsAPipelineFailureRatherThanThrowing(@TempDir Path tempDir) throws Exception {
         Path policy = tempDir.resolve("policy.yaml");
         Files.writeString(policy, """
-            autoInfer: false
             tables:
               PERSON:
                 columns:

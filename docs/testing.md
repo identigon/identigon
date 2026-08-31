@@ -79,9 +79,9 @@ grown one.
 
 ### effigies
 
-- CLI commands (`discover`, `scaffold`, `run`) are split into a directly-testable core so behaviour
-  can be exercised without faking environment variables; each has its own unit test
-  (`DiscoverCommandTest`, `ScaffoldCommandTest`, `RunCommandTest`).
+- CLI commands (`discover`, `scaffold`, `validate`, `run`) are split into a directly-testable core
+  so behaviour can be exercised without faking environment variables; each has its own unit test
+  (`DiscoverCommandTest`, `ScaffoldCommandTest`, `ValidateCommandTest`, `RunCommandTest`).
 - `PolicyInferrer`'s naming-heuristic suggestions and `SimpleDataSource`'s connection handling each
   have their own unit test. No Testcontainers here - effigies delegates all engine behaviour to
   `incognito`, which is where that coverage lives.

@@ -73,7 +73,6 @@ class ValidateCommandTest {
 
         Path policy = tempDir.resolve("policy.yaml");
         Files.writeString(policy, """
-            autoInfer: false
             tables:
               PERSON:
                 columns:
@@ -106,7 +105,6 @@ class ValidateCommandTest {
 
         Path policy = tempDir.resolve("policy.yaml");
         Files.writeString(policy, """
-            autoInfer: false
             tables:
               PERSON:
                 columns:
@@ -131,7 +129,6 @@ class ValidateCommandTest {
     void reportsASchemaInspectionFailureRatherThanThrowing(@TempDir Path tempDir) throws Exception {
         Path policy = tempDir.resolve("policy.yaml");
         Files.writeString(policy, """
-            autoInfer: false
             tables:
               PERSON:
                 columns:

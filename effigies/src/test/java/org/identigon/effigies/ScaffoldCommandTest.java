@@ -80,7 +80,7 @@ class ScaffoldCommandTest {
             new PrintStream(err, true, StandardCharsets.UTF_8));
 
         assertEquals(0, code, "err: " + err.toString(StandardCharsets.UTF_8));
-        assertTrue(Files.readString(file.toPath()).contains("autoInfer: false"),
+        assertTrue(Files.readString(file.toPath()).contains("tables:"),
             "the file must actually have been rewritten with a scaffold");
     }
 
@@ -116,7 +116,7 @@ class ScaffoldCommandTest {
 
         String content = Files.readString(file.toPath());
 
-        assertTrue(content.contains("autoInfer: false"));
+        assertTrue(content.contains("tables:"));
         assertTrue(content.contains("  users:"));
         assertTrue(content.contains("      id:            # type: INTEGER, pk"));
         assertTrue(content.contains("        role:              #"));

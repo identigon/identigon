@@ -7,9 +7,8 @@
 # and `scaffold` against your own copy of this schema first if you want to see the authoring step
 # for yourself before reading the answer below.
 #
-# autoInfer stays false (the default) - every column below is classified explicitly. Fail-closed:
-# an unclassified column aborts the run rather than being copied silently.
-autoInfer: false
+# Every column below is classified explicitly. Fail-closed: an unclassified column aborts the run
+# rather than being copied silently.
 
 tables:
   customers:

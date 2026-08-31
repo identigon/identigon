@@ -58,6 +58,16 @@ too would be the same fact in two places.
   already-inspected schema - no target connection, no `PipelineContext`, no dependency-graph
   computation. `process` now calls it internally; no behaviour change there. See effigies' new
   `validate` command below for the first caller.
+- **BREAKING: `PolicyInferrer` and `AnonymisationPolicy.Builder.autoInfer(boolean)` are removed.**
+  Both were `@Deprecated(forRemoval = true)` since inference migrated to `effigies`' own
+  `PolicyInferrer` (ADR 23); this was always going to be incognito's next major version (ADR 24),
+  and it lands here. `AnonymisationPolicy.autoInfer` (the record component) is gone too - nothing
+  else in the engine ever read it. `YamlPolicyParser` now silently ignores a leftover `autoInfer:`
+  key in an old `policy.yaml` rather than acting on it, the same as any other key it doesn't
+  recognise - it no longer means anything, but a stale key in an otherwise-valid file shouldn't
+  fail the parse. The unclassified-column fail-closed message no longer carries an auto-infer hint
+  inline; it now points at effigies' `scaffold`/`validate` commands instead, which is where a
+  suggestion actually comes from.
 
 ### effigies
 
@@ -123,6 +133,9 @@ too would be the same fact in two places.
   package-private-unless-actually-an-entry-point convention every sibling command class already
   follows - narrowed to package-private (nothing outside the package used it) rather than
   documenting an API that was never meant to be one.
+- **`scaffold` no longer emits `autoInfer: false`.** incognito's `autoInfer` key is gone (see
+  incognito above); writing it into every generated `policy.yaml` would have been actively
+  misleading now that it means nothing.
 
 ## [1.1.0] - 2026-08-26
 

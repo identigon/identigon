@@ -43,13 +43,6 @@ shipped.
   `docs/research/0002-alterego-fictional-ranges.md`. Has a regional element (`SC`/`NI`/plain) that
   would feed
   `UK_NATION` record coherence if it returns.
-- [ ] **Project:** incognito - **Remove `PolicyInferrer` and
-  `AnonymisationPolicy.Builder.autoInfer(boolean)` (committed, next major).** Both are
-  `@Deprecated(forRemoval = true)`. Inference is authoring, not execution - fail-closed means it
-  never affected engine output - and the maintained version now lives in `effigies`' own
-  `PolicyInferrer`; this copy only survives for the fail-closed error message's diagnostic hint.
-  See `docs/adr/0023-authoring-above-the-engine.md` for the reasoning and
-  `docs/adr/0024-lockstep-versioning.md` for the version-bump mechanics.
 - [ ] **Project:** incognito - **Multi-edge structural fingerprints.** The shipped
   structural-uniqueness report scores one FK edge at a time; combining several edges into one joint
   fingerprint per subject is more faithful to real singling-out but harder to threshold defensibly.
