@@ -1,9 +1,13 @@
 package org.identigon.effigies;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.Types;
 import java.util.List;
@@ -13,6 +17,72 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class ScaffoldCommandTest {
+
+    private record Result(int code, String out, String err) {}
+
+    private static Result invoke(String... args) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        int code = ScaffoldCommand.execute(args,
+            new PrintStream(out, true, StandardCharsets.UTF_8),
+            new PrintStream(err, true, StandardCharsets.UTF_8));
+        return new Result(code, out.toString(StandardCharsets.UTF_8), err.toString(StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void helpFlagPrintsUsageAndSucceedsWithoutAnyOtherArgRequired() {
+        Result r = invoke("--help");
+        assertEquals(0, r.code());
+        assertTrue(r.out().contains("Usage: scaffold"));
+    }
+
+    @Test
+    void helpFlagIsRecognisedAnywhereInArgsNotJustFirst() {
+        Result r = invoke("--source-url", "jdbc:h2:mem:unused", "-h");
+        assertEquals(0, r.code());
+        assertTrue(r.out().contains("Usage: scaffold"));
+    }
+
+    @Test
+    void refusesToOverwriteAnExistingFileWithoutForce(@TempDir File tempDir) throws Exception {
+        File file = new File(tempDir, "policy.scaffold.yaml");
+        Files.writeString(file.toPath(), "pre-existing content");
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        int code = ScaffoldCommand.run(new SimpleDataSource("jdbc:no-such-dialect://nowhere", "u", "p"),
+            file, false,
+            new PrintStream(out, true, StandardCharsets.UTF_8),
+            new PrintStream(err, true, StandardCharsets.UTF_8));
+
+        assertEquals(1, code);
+        String errStr = err.toString(StandardCharsets.UTF_8);
+        assertTrue(errStr.contains("already exists"), errStr);
+        assertTrue(errStr.contains("--force"), errStr);
+        assertEquals("pre-existing content", Files.readString(file.toPath()),
+            "must not touch the file - or even connect to the database - when refusing to overwrite");
+    }
+
+    @Test
+    void forceOverwritesAnExistingFile(@TempDir File tempDir) throws Exception {
+        File file = new File(tempDir, "policy.scaffold.yaml");
+        Files.writeString(file.toPath(), "pre-existing content");
+        String url = "jdbc:h2:mem:" + java.util.UUID.randomUUID() + ";DB_CLOSE_DELAY=-1";
+        try (java.sql.Connection conn = java.sql.DriverManager.getConnection(url, "sa", "");
+             java.sql.Statement stmt = conn.createStatement()) {
+            stmt.execute("CREATE TABLE t (id BIGINT PRIMARY KEY)");
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        int code = ScaffoldCommand.run(new SimpleDataSource(url, "sa", ""), file, true,
+            new PrintStream(out, true, StandardCharsets.UTF_8),
+            new PrintStream(err, true, StandardCharsets.UTF_8));
+
+        assertEquals(0, code, "err: " + err.toString(StandardCharsets.UTF_8));
+        assertTrue(Files.readString(file.toPath()).contains("autoInfer: false"),
+            "the file must actually have been rewritten with a scaffold");
+    }
 
     @Test
     void testWriteScaffold(@TempDir File tempDir) throws Exception {

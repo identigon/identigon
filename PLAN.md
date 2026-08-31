@@ -17,30 +17,6 @@ shipped.
   make every fail-closed error much cheaper to iterate against while authoring, and gives CI a
   pre-flight check for a policy going stale after a schema migration (pairs with the existing
   `dpia-report.json`-based CI gate).
-- [ ] **Project:** effigies - **`RunCommand` should validate the salt length before connecting to
-  anything.** `AlterEgo`'s builder requires a salt of at least 16 bytes but only enforces it deep
-  inside pipeline construction; `RunCommand` currently null-checks `IDENTIGON_SALT` but not its
-  length, so a short salt (`persistent`/`reproducible` mode) fails mid-pipeline rather than at the
-  same point the missing-salt check already fires. Add the length check next to the existing null
-  check.
-- [ ] **Publish the `ColumnRole` vocabulary as a docs page.** The scaffold's TODO comment says "see
-  the role vocabulary" (`ScaffoldCommand`) but nothing in `docs/` states it - only `ColumnRole`'s
-  Javadoc does. Render its nine usable values and five `RESERVED (post-v1.0)` values (which fail
-  fast if assigned) as a page under `docs/` an author can actually reach.
-- [ ] **Project:** incognito - **State that `GENERATED ALWAYS AS IDENTITY` is not a "generated
-  column."** `SchemaInspector`/`SchemaDiscoveryStage` only treat JDBC's `IS_GENERATEDCOLUMN`
-  (computed `GENERATED ALWAYS AS (expr)`) as generated and excluded from classification; identity
-  primary keys (`GENERATED ALWAYS AS IDENTITY`) are tracked separately (`identityColumns`) and
-  still require a role. Both are spelled "generated" in PostgreSQL DDL, and this is easy to assume
-  wrongly. One clarifying sentence in `docs/spec/incognito.md`.
-- [ ] **Project:** effigies - **CLI ergonomics: per-subcommand `--help`, `scaffold --force`, UTF-8
-  stdout.** Three small usability gaps found by hitting them: `EffigiesCli.run` only matches
-  `help`/`-h`/`--help` as `args[0]`, so `discover --help` falls through to `DiscoverCommand` and
-  prints its usage line only as a side effect of missing required flags; `scaffold` refuses to
-  overwrite an existing output file with no `--force`, so re-scaffolding after a schema change
-  needs a manual `rm`; and `main()` constructs `System.out`/`System.err` without an explicit UTF-8
-  charset, so `§` (used throughout SPEC-referencing error messages) renders as `?` in a
-  POSIX-locale environment (common in minimal containers/CI images).
 - [ ] **A new `workflow_dispatch` release workflow, tagging + publishing `alterego.jar`,
   `incognito.jar` and `identigon.jar` to GitHub Packages and as attested GitHub Release assets
   (ADR-0028).** Split effigies' own `jar` task back to

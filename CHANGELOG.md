@@ -41,6 +41,18 @@ too would be the same fact in two places.
   table with a problem, and even within one table stopped at the first `SENSITIVE`/`DIRECT_ID`/
   `QUASI_ID` issue hit (only unclassified columns were already collected per-table). Every check
   is now accumulated across every table before a single `ConfigException` lists them all.
+- **New public constant `IncognitoPipeline.MIN_SALT_BYTES`**, re-exported from `AlterEgo`'s own
+  minimum-salt-length requirement, so a caller can validate a `persistentSalt`/`reproducible` salt
+  up front instead of waiting for `build()` to reject it (see effigies below for the first caller).
+- **The `ColumnRole` vocabulary is now documented in one reachable place**, `docs/spec/incognito.md`
+  §4.1: the nine usable roles (already there, in the role -> transformation table) plus the five
+  `RESERVED (post-v1.0)` roles, previously described only in `ColumnRole`'s own Javadoc.
+- **Clarified that `GENERATED_COLUMN` does not cover `GENERATED ALWAYS AS IDENTITY`.** PostgreSQL
+  spells a computed column and an identity primary key with the same `GENERATED ALWAYS AS` prefix,
+  easy to assume wrongly are the same thing; only the computed case (`IS_GENERATEDCOLUMN`) is
+  `GENERATED_COLUMN`. An identity PK (`IS_AUTOINCREMENT`) is tracked separately and still requires a
+  role, ordinarily `PRIMARY_KEY` - it was never actually excluded from classification, but nothing
+  said so in one place. Doc-only; no behaviour change.
 
 ### effigies
 
@@ -68,6 +80,27 @@ too would be the same fact in two places.
   `CREDIT_CARD_PATTERN`: it suggested
   `DIRECT_ID`, but a card number has no typed fictional-generator and is conventionally redacted -
   it now suggests `SENSITIVE`, matching how `incognito` actually treats one.
+- **`run` now validates a `persistent`/`reproducible` `IDENTIGON_SALT`'s length before opening
+  either database connection.** `AlterEgo`'s builder already rejected a too-short salt, but only
+  once pipeline construction reached it - after both connections were open. `run` now checks it
+  against the new `IncognitoPipeline.MIN_SALT_BYTES`, next to its existing missing-`IDENTIGON_SALT`
+  check.
+- **`scaffold`'s TODO comments now point somewhere an author can actually reach.** "see the role
+  vocabulary" named nothing that existed in `docs/`; the unclassified-column stub now points at
+  `docs/spec/incognito.md` §4.1 (see incognito above), and the ambiguous-`DIRECT_ID` stub points at
+  `DirectIdStrategy`'s own Javadoc instead, which is where the typed-generator choice actually
+  lives.
+- **Three CLI ergonomics fixes.** `discover --help`/`scaffold --help`/`run --help` (or `-h`,
+  anywhere in the subcommand's own args) now print that subcommand's usage and exit `0` -
+  previously only bare `help`/`-h`/`--help` as the very first argument was recognised, so e.g.
+  `discover --help` fell through to `DiscoverCommand`'s own parsing and printed the same usage
+  line only as a side effect of missing `--source-url`/`--source-user` (`EXIT_USAGE`, not a
+  deliberate help request).
+  `scaffold` gained `--force` to overwrite an existing output file (previously always refused, so
+  re-scaffolding after a schema change needed a manual `rm` first). `main()` now constructs
+  `System.out`/`System.err` with an explicit UTF-8 `PrintStream` instead of the JVM's platform
+  default, which is not UTF-8 in a POSIX-locale environment (common in minimal containers/CI images)
+  and previously rendered `§` - used throughout SPEC-referencing error messages - as `?` there.
 
 ## [1.1.0] - 2026-08-26
 

@@ -10,15 +10,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.sql.DataSource;
 import org.identigon.incognito.api.ColumnRole;
 import org.identigon.incognito.api.DirectIdStrategy;
 import org.identigon.incognito.engine.SchemaInspector;
 
 class ScaffoldCommand {
+    private static final String USAGE =
+        "Usage: scaffold --source-url <url> --source-user <user> [--out <file>] [--force]";
+
     static int execute(String[] args, PrintStream out, PrintStream err) {
+        if (CliArgs.hasHelpFlag(args)) {
+            out.println(USAGE);
+            return 0;
+        }
+
         String url = null;
         String user = null;
         String outFile = "./policy.scaffold.yaml";
+        boolean force = false;
         for (int i = 0; i < args.length; i++) {
             if ("--source-url".equals(args[i]) && i + 1 < args.length) {
                 url = args[++i];
@@ -26,10 +36,12 @@ class ScaffoldCommand {
                 user = args[++i];
             } else if ("--out".equals(args[i]) && i + 1 < args.length) {
                 outFile = args[++i];
+            } else if ("--force".equals(args[i])) {
+                force = true;
             }
         }
         if (url == null || user == null) {
-            err.println("Usage: scaffold --source-url <url> --source-user <user> [--out <file>]");
+            err.println(USAGE);
             return EffigiesCli.EXIT_USAGE;
         }
 
@@ -39,18 +51,25 @@ class ScaffoldCommand {
             return EffigiesCli.EXIT_USAGE;
         }
 
-        File file = new File(outFile);
-        if (file.exists()) {
-            err.println("Error: output file already exists: " + outFile);
+        return run(new SimpleDataSource(url, user, password), new File(outFile), force, out, err);
+    }
+
+    /**
+     * The testable core: given an already-resolved {@link DataSource} and output file, inspects the
+     * schema and writes the scaffold. Split out from {@link #execute} so tests can exercise it
+     * directly against a real database without needing to fake environment variables.
+     */
+    static int run(DataSource dataSource, File file, boolean force, PrintStream out, PrintStream err) {
+        if (file.exists() && !force) {
+            err.println("Error: output file already exists: " + file + " (use --force to overwrite)");
             return 1;
         }
 
-        SimpleDataSource dataSource = new SimpleDataSource(url, user, password);
         SchemaInspector inspector = new SchemaInspector();
         try {
             List<SchemaInspector.TableMetadata> tables = inspector.inspect(dataSource);
             writeScaffold(file, tables);
-            out.println("Scaffold written to " + outFile);
+            out.println("Scaffold written to " + file);
             return 0;
         } catch (Exception e) {
             err.println("Error: " + e);
@@ -123,7 +142,8 @@ class ScaffoldCommand {
 
         Optional<PolicyInferrer.InferredRole> inferred = inferrer.inferRole(col);
         if (inferred.isEmpty()) {
-            writer.write("        role:              # TODO classify - see the role vocabulary; run fails closed until filled\n");
+            writer.write("        role:              # TODO classify - see docs/spec/incognito.md"
+                + " §4.1 for the full ColumnRole vocabulary; run fails closed until filled\n");
             return;
         }
 
@@ -135,7 +155,8 @@ class ScaffoldCommand {
             if (strategy.isPresent()) {
                 writer.write("        directIdStrategy:  # TODO if DIRECT_ID (Suggestion: " + strategy.get() + ")\n");
             } else {
-                writer.write("        directIdStrategy:  # TODO if DIRECT_ID - see the role vocabulary for the right typed generator\n");
+                writer.write("        directIdStrategy:  # TODO if DIRECT_ID - see DirectIdStrategy's"
+                    + " Javadoc for the right typed generator\n");
             }
         } else if (role.role() == ColumnRole.SENSITIVE) {
             writer.write("        distinguishing:    # TODO if SENSITIVE (true|false - does this alone identify someone?)\n");

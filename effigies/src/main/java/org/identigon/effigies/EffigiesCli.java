@@ -1,6 +1,7 @@
 package org.identigon.effigies;
 
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Command-line entry point for <b>Effigies</b> - a thin authoring and orchestration front-end above
@@ -25,7 +26,12 @@ public final class EffigiesCli {
      * @param args the command-line arguments; the first is the subcommand
      */
     public static void main(String[] args) {
-        System.exit(run(args, System.out, System.err));
+        // Explicit UTF-8, not the platform default: `§`, used throughout SPEC-referencing error
+        // messages (and any non-ASCII schema identifier echoed back by discover/scaffold), renders
+        // as `?` under a POSIX-locale JVM default charset - common in minimal containers/CI images.
+        PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        PrintStream err = new PrintStream(System.err, true, StandardCharsets.UTF_8);
+        System.exit(run(args, out, err));
     }
 
     /**

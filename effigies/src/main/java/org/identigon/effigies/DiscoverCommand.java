@@ -6,7 +6,14 @@ import javax.sql.DataSource;
 import org.identigon.incognito.engine.SchemaInspector;
 
 class DiscoverCommand {
+    private static final String USAGE = "Usage: discover --source-url <url> --source-user <user>";
+
     static int execute(String[] args, PrintStream out, PrintStream err) {
+        if (CliArgs.hasHelpFlag(args)) {
+            out.println(USAGE);
+            return 0;
+        }
+
         String url = null;
         String user = null;
         for (int i = 0; i < args.length; i++) {
@@ -17,7 +24,7 @@ class DiscoverCommand {
             }
         }
         if (url == null || user == null) {
-            err.println("Usage: discover --source-url <url> --source-user <user>");
+            err.println(USAGE);
             return EffigiesCli.EXIT_USAGE;
         }
 

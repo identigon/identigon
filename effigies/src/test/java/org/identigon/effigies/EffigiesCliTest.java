@@ -46,6 +46,19 @@ class EffigiesCliTest {
     }
 
     @Test
+    void perSubcommandHelpSucceedsWithoutRequiringItsOtherArgs() {
+        // Previously `discover --help` fell through to DiscoverCommand's own arg parsing, which
+        // only ever printed its usage line as a side effect of missing --source-url/--source-user
+        // (exit EXIT_USAGE, not a deliberate help request). Each subcommand must recognise --help
+        // itself now, and succeed.
+        for (String cmd : new String[] {"discover", "scaffold", "run"}) {
+            Result r = invoke(cmd, "--help");
+            assertEquals(0, r.code(), cmd + " --help exit code");
+            assertTrue(r.out().contains("Usage: " + cmd), cmd + " --help usage message");
+        }
+    }
+
+    @Test
     void unknownCommandFailsWithUsage() {
         Result r = invoke("frobnicate");
         assertEquals(EffigiesCli.EXIT_USAGE, r.code());
