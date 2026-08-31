@@ -1,6 +1,6 @@
 ---
-status: "accepted"
-date: 2026-07-30
+status: "accepted (refined by ADR-0029)"
+date: 2026-08-31
 decision-makers: David Conneely
 ---
 
