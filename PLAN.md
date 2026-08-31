@@ -9,45 +9,6 @@ shipped.
 
 ## Outstanding
 
-- [ ] **A new `workflow_dispatch` release workflow, tagging + publishing `alterego.jar`,
-  `incognito.jar` and `identigon.jar` to GitHub Packages and as attested GitHub Release assets
-  (ADR-0028).** Split effigies' own `jar` task back to
-  a normal thin jar (today's `effigies/build.gradle.kts` overrides it to *be* the fat merge, so
-  there is currently no artifact containing only effigies' own classes), and move the fat-jar
-  assembly to a new `identigonJar` task in the **root** `build.gradle.kts` - not inside effigies.
-  `identigon.jar` is named for `rootProject.name`, not for the effigies subproject; it represents
-  the whole monorepo, which only root can legitimately speak for, and this is root's established
-  role for monorepo-wide facts already (`PLAN.md`, `CHANGELOG.md`, `docs/adr/`). The root task
-  resolves a detached configuration depending on `project(":effigies")` (incognito/alterego arrive
-  transitively, so root never names them directly) and otherwise does exactly what today's
-  `tasks.jar` block does - same manifest, same LICENCE/NOTICE handling. Give effigies a
-  `publishing {}` block for its now-thin jar (`org.identigon:effigies`, accurate POM, no
-  javadoc/sources) so `./gradlew publish` covers it too, same shape as alterego/incognito; the fat
-  jar is also published there, under that same coordinate with a `standalone` classifier, not as
-  the primary artifact. Add `.github/workflows/release.yml` (`workflow_dispatch`, a required `tag`
-  input naming an *existing*, already-pushed release tag - tag creation itself stays a manual,
-  local, SSH-signed step, since CI cannot and should not hold the maintainer's personal signing
-  key, discovered while implementing this): it checks out that tag, cross-checks the version it
-  encodes against `baseVersion` in `build.gradle.kts`, builds, publishes the release version, then
-  reuses that same build's output - renamed, unversioned - as `gh release upload` assets on a
-  GitHub Release it creates for that tag, plus an `actions/attest` step over the jars (not
-  `actions/attest-build-provenance` - as of its own v4 that's just a wrapper over
-  `actions/attest`, and its README now points new implementations at the latter). `main.yml`'s
-  existing `publish` job is untouched; the release ritual must still push the version-bump commit
-  and let that ordinary build finish (publishing it as a SNAPSHOT) *before* tagging, or `main.yml`
-  could publish the release version first and leave `release.yml`'s own publish step rejected.
-- [ ] **Get Javadoc doclint enforcement (`Xdoclint:all`/`Xwerror`) working on every subproject,
-  not just wherever a javadoc jar happens to be published.** Surfaced while implementing the item
-  above: giving effigies a `publishing {}` block (no `withJavadocJar()`) exposed that the root
-  `build.gradle.kts`'s shared doclint guard only ever applied where `withJavadocJar()` had been
-  called (alterego, incognito) - not a deliberate scope decision, just what "wherever a subproject
-  publishes one" happened to mean before effigies could publish anything at all. Effigies' own
-  `javadoc` task currently has real violations (e.g. `PolicyInferrer`'s public class/constructor/
-  method all lack doc comments) that strict mode would catch. Two things to do together: fix the
-  existing gaps, and decide + implement how enforcement should actually be scoped going forward -
-  every subproject unconditionally (Javadoc completeness is a code-quality question independent of
-  whether a javadoc jar ships), or something narrower. `./gradlew javadoc` at the root should be
-  the one command that exercises this everywhere it's meant to apply.
 - [ ] **Project:** incognito - **Composite PK + cyclic FK together.** Currently fails closed with a
   clear message rather than corrupting data; not exercised by any benchmark. Bigger than "widen the
   pass-2 `UPDATE` to key on every PK column" - the real gap is deferred *composite-FK* resolution

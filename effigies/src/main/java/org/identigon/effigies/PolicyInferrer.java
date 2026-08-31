@@ -10,7 +10,7 @@ import org.identigon.incognito.api.DirectIdStrategy;
  * Auto-infers baseline column roles based on column name heuristics and regex patterns.
  * Migrated from incognito to Effigies to preserve fail-closed engine execution.
  */
-public class PolicyInferrer {
+class PolicyInferrer {
 
     // Anchored to the end of the column name (not ".*x.*") where the unanchored form would flag an
     // obviously-not-a-value column as if it held the identifier itself -- e.g. "email_verified" (a
@@ -27,7 +27,7 @@ public class PolicyInferrer {
     // individually identifying the way an email or NHS number is.
     private static final Pattern POSTCODE_PATTERN = Pattern.compile("(?i).*(post_?code|postal_?code|zip_?code|zip)$");
 
-    public record InferredRole(ColumnRole role, String heuristic) {}
+    record InferredRole(ColumnRole role, String heuristic) {}
 
     // Heuristic name -> the single DirectIdStrategy it maps to unambiguously, for scaffold's
     // directIdStrategy stub. NATIONAL_ID_PATTERN is deliberately absent: it matches ssn/tax_id (no
@@ -41,7 +41,7 @@ public class PolicyInferrer {
         "DRIVING_LICENCE_PATTERN", DirectIdStrategy.ALTEREGO_DRIVING_LICENCE_NUMBER
     );
 
-    public Optional<InferredRole> inferRole(String columnName) {
+    Optional<InferredRole> inferRole(String columnName) {
         if (EMAIL_PATTERN.matcher(columnName).matches()) return Optional.of(new InferredRole(ColumnRole.DIRECT_ID, "EMAIL_PATTERN"));
         if (PHONE_PATTERN.matcher(columnName).matches()) return Optional.of(new InferredRole(ColumnRole.DIRECT_ID, "PHONE_PATTERN"));
         if (NAME_PATTERN.matcher(columnName).matches()) return Optional.of(new InferredRole(ColumnRole.DIRECT_ID, "NAME_PATTERN"));
@@ -63,7 +63,7 @@ public class PolicyInferrer {
      * scaffold's {@code directIdStrategy} stub - empty if the heuristic doesn't determine one
      * typed generator (e.g. {@code NATIONAL_ID_PATTERN}, which spans several).
      */
-    public Optional<DirectIdStrategy> suggestedDirectIdStrategy(String heuristic) {
+    Optional<DirectIdStrategy> suggestedDirectIdStrategy(String heuristic) {
         return Optional.ofNullable(STRATEGY_BY_HEURISTIC.get(heuristic));
     }
 }

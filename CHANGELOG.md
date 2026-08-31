@@ -113,6 +113,16 @@ too would be the same fact in two places.
   while authoring, and usable as a CI pre-flight check for a policy going stale after a schema
   migration. The `identigon-policy-author` Agent Skill now points at it as a pre-flight step before
   its closing `run` reminder.
+- **Javadoc doclint (`Xdoclint:all`/`Xwerror`) now applies to every subproject unconditionally**,
+  not just wherever a javadoc jar happens to be published (alterego and incognito, previously -
+  `withJavadocJar()` was standing in for "has a public API worth holding to this standard", which
+  isn't what it means; effigies has one too, despite shipping no javadoc jar of its own, being a
+  CLI rather than a published library). `./gradlew javadoc` at the root is the one command that
+  exercises this everywhere. Fixed the gaps this surfaced: `PolicyInferrer` (effigies) was `public`
+  with no doc comments on any of it, the only effigies class not already following the
+  package-private-unless-actually-an-entry-point convention every sibling command class already
+  follows - narrowed to package-private (nothing outside the package used it) rather than
+  documenting an API that was never meant to be one.
 
 ## [1.1.0] - 2026-08-26
 
