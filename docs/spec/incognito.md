@@ -300,10 +300,32 @@ streams (`fetchSize = 5000`) in topological order.
 | `PRIMARY_KEY`                           | Surrogate translation via `SurrogateStrategy`; recorded in `KeyTranslationStore`.                                                                                                                                                                                                                                                                                                |
 | `FOREIGN_KEY`                           | Rewritten to the mapped parent surrogate; placeholder + 2-pass UPDATE for cyclic FKs.                                                                                                                                                                                                                                                                                            |
 | `INHERITED_ATTRIBUTE`                   | Resolved from the **root ancestor** entity via `AttributeCascadeStore` (§6.1).                                                                                                                                                                                                                                                                                                   |
-| `GENERATED_COLUMN`                      | Excluded from `INSERT` (computed column; distinct from an identity PK, §7 note).                                                                                                                                                                                                                                                                                                 |
+| `GENERATED_COLUMN`                      | Excluded from `INSERT` (computed column; distinct from an identity PK, see note below).                                                                                                                                                                                                                                                                                          |
 
 `OPERATIONAL` in a source-data classification maps to `PAYLOAD` (kept). `SENSITIVE` is **not** an
 l-diversity target - it is the declared `distinguishing: true | false` split above.
+
+**`GENERATED_COLUMN` is narrower than the DDL keyword suggests.** PostgreSQL spells both a computed
+column (`GENERATED ALWAYS AS (expr) STORED`) and an identity primary key
+(`GENERATED ALWAYS AS IDENTITY`) with the same `GENERATED ALWAYS AS` prefix, but only the former is
+`GENERATED_COLUMN` here - JDBC's `IS_GENERATEDCOLUMN` flags only the computed case
+(`SchemaInspector.TableMetadata.generatedColumns`). An identity primary key is tracked separately
+(`identityColumns`, `IS_AUTOINCREMENT`) and is **not** excluded from classification - it still needs
+a role (ordinarily `PRIMARY_KEY`) and a `SurrogateStrategy`, like any other primary key.
+
+**Reserved roles (post-v1.0, §1.2 non-goal 6).** Five further `ColumnRole` values parse but have no
+transformation yet; assigning one to a column is `IncognitoException.ConfigException` in v1.0:
+
+| `ColumnRole`       | Reserved for                                                       |
+|:-------------------|:-------------------------------------------------------------------|
+| `BIOMETRIC_MEDIA`  | Facial photo or image BLOB subject to GDPR Art. 9 biometric rules. |
+| `SPATIAL_GEOMETRY` | PostGIS or spatial coordinate point (`POINT`, `GEOMETRY`).         |
+| `ARRAY_ELEMENT`    | Element within a SQL array (e.g. `text[]`).                        |
+| `NETWORK_INET`     | IP address string or `INET`/`CIDR` type.                           |
+| `JSON_DOCUMENT`    | Embedded JSON or JSONB document column.                            |
+
+Together with the nine roles in the table above, this is the complete `ColumnRole` vocabulary - the
+authoritative reference an author (or `effigies scaffold`'s TODO comments) can point at.
 
 **Region coherence within a row.** `DirectIdStrategy.ALTEREGO_CITY`/`ALTEREGO_POSTCODE`/
 `ALTEREGO_PHONE` columns on the same table agree on the same fictional UK region within each row -
@@ -417,6 +439,11 @@ generates the salt (`SecureRandom`, >=128-bit) internally and constructs `AlterE
 - The salt modes `ephemeralSalt()` (default), `persistentSalt(byte[])`, and
   `reproducible(byte[], long)` are mutually exclusive; setting more than one is an
   `IncognitoException.ConfigException` (enforced by the builder).
+- A caller-supplied salt (`persistentSalt(byte[])`, `reproducible(byte[], long)`) must be at least
+  `IncognitoPipeline.MIN_SALT_BYTES` bytes, re-exported from `AlterEgo`'s own requirement; a shorter
+  one is an `IncognitoException.ConfigException` (enforced by the builder). The constant lets a
+  caller fail fast on a too-short salt before touching either database - effigies' `run` command
+  does this, next to its existing missing-salt check.
 - **High-cardinality `UNIQUE_CANDIDATE_KEY` sequence fallback.** When `AlterEgo.unique()`'s
   fictional dictionary would be exhausted (more distinct values than the vocabulary can supply),
   Incognito derives a unique value from a running sequence instead of throwing
