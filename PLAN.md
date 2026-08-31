@@ -9,6 +9,87 @@ shipped.
 
 ## Outstanding
 
+- [ ] **Project:** incognito - **`DIRECT_ID` columns with no `directIdStrategy` silently fall back
+  to `ALTEREGO_GENERIC`.** `TableTransformLoadStage.buildDirectIdTransformer` defaults a null
+  strategy to `ALTEREGO_GENERIC` (shape-preserving fabrication, no fictionality guarantee) instead
+  of failing closed, and `VerificationStage`'s fictionality checks have no case for it either, so a
+  degraded column still reports `Fictionality Verified: true` in the DPIA report. Inconsistent with
+  the `SENSITIVE`/`distinguishing` precedent (`SchemaDiscoveryStage.validateTablePolicy` already
+  requires that flag explicitly) and with fail-closed generally: a `DIRECT_ID` with no strategy is
+  an unmade decision, not a default. Require `directIdStrategy` on every `DIRECT_ID`, failing
+  closed at policy-validation time the same way.
+- [ ] **Project:** effigies - **`scaffold` should emit strategy stubs, not just `role:`.**
+  `ScaffoldCommand.writeScaffold` writes only a `role:` TODO per column; the decisions that
+  determine output quality (`directIdStrategy` for `DIRECT_ID`, `distinguishing` for `SENSITIVE`,
+  `references` for `FOREIGN_KEY`) are left for the author to hand-write from scratch even though
+  `PolicyInferrer` and `SchemaInspector` already know enough to suggest them (the matched
+  heuristic, the resolved FK target). Emit a commented TODO stub with the suggestion inline for
+  each, the same "suggest, never assign" pattern already used for `role:`. Worth landing alongside
+  the item above: once `directIdStrategy` fails closed, an un-stubbed scaffold becomes a hard stop
+  rather than a silent gap.
+- [ ] **Project:** incognito - **Fail-closed policy validation should accumulate across all
+  tables, not stop at the first.** `SchemaDiscoveryStage.validateTablePolicy` already collects
+  every unclassified column *within* one table before throwing, specifically so the author fixes
+  them in one pass - but `process`'s outer loop over tables throws on the first table with a
+  problem, so a schema with unclassified columns in several tables still takes one run per table to
+  discover them all. Collect across every table and throw once, listing all of them.
+- [ ] **Project:** effigies - **A `validate` command: check a policy against a schema with no
+  target database or data movement.** `SchemaDiscoveryStage.validateTablePolicy`'s fail-closed
+  messages are the best diagnostics in the tool but are only reachable by committing to a full
+  `run`. A `identigon validate --policy ./policy.yaml --source-url ... --source-user ...`
+  subcommand - schema inspection plus policy validation only, no target connection, no load - would
+  make every fail-closed error much cheaper to iterate against while authoring, and gives CI a
+  pre-flight check for a policy going stale after a schema migration (pairs with the existing
+  `dpia-report.json`-based CI gate).
+- [ ] **Project:** effigies - **`RunCommand` should validate the salt length before connecting to
+  anything.** `AlterEgo`'s builder requires a salt of at least 16 bytes but only enforces it deep
+  inside pipeline construction; `RunCommand` currently null-checks `IDENTIGON_SALT` but not its
+  length, so a short salt (`persistent`/`reproducible` mode) fails mid-pipeline rather than at the
+  same point the missing-salt check already fires. Add the length check next to the existing null
+  check.
+- [ ] **Publish the `ColumnRole` vocabulary as a docs page.** The scaffold's TODO comment says "see
+  the role vocabulary" (`ScaffoldCommand`) but nothing in `docs/` states it - only `ColumnRole`'s
+  Javadoc does. Render its nine usable values and five `RESERVED (post-v1.0)` values (which fail
+  fast if assigned) as a page under `docs/` an author can actually reach.
+- [ ] **Project:** incognito - **State that `GENERATED ALWAYS AS IDENTITY` is not a "generated
+  column."** `SchemaInspector`/`SchemaDiscoveryStage` only treat JDBC's `IS_GENERATEDCOLUMN`
+  (computed `GENERATED ALWAYS AS (expr)`) as generated and excluded from classification; identity
+  primary keys (`GENERATED ALWAYS AS IDENTITY`) are tracked separately (`identityColumns`) and
+  still require a role. Both are spelled "generated" in PostgreSQL DDL, and this is easy to assume
+  wrongly. One clarifying sentence in `docs/spec/incognito.md`.
+- [ ] **Project:** effigies - **CLI ergonomics: per-subcommand `--help`, `scaffold --force`, UTF-8
+  stdout.** Three small usability gaps found by hitting them: `EffigiesCli.run` only matches
+  `help`/`-h`/`--help` as `args[0]`, so `discover --help` falls through to `DiscoverCommand` and
+  prints its usage line only as a side effect of missing required flags; `scaffold` refuses to
+  overwrite an existing output file with no `--force`, so re-scaffolding after a schema change
+  needs a manual `rm`; and `main()` constructs `System.out`/`System.err` without an explicit UTF-8
+  charset, so `§` (used throughout SPEC-referencing error messages) renders as `?` in a
+  POSIX-locale environment (common in minimal containers/CI images).
+- [ ] **A new `workflow_dispatch` release workflow, tagging + publishing `alterego.jar`,
+  `incognito.jar` and `identigon.jar` to GitHub Packages and as attested GitHub Release assets
+  (ADR-0028).** Split effigies' own `jar` task back to a normal thin jar (today's
+  `effigies/build.gradle.kts` overrides it to *be* the fat merge, so there is currently no artifact
+  containing only effigies' own classes), and move the fat-jar assembly to a new `identigonJar`
+  task in the **root** `build.gradle.kts` - not inside effigies. `identigon.jar` is named for
+  `rootProject.name`, not for the effigies subproject; it represents the whole monorepo, which only
+  root can legitimately speak for, and this is root's established role for monorepo-wide facts
+  already (`PLAN.md`, `CHANGELOG.md`, `docs/adr/`). The root task resolves a detached configuration
+  depending on `project(":effigies")` (incognito/alterego arrive transitively, so root never names
+  them directly) and otherwise does exactly what today's `tasks.jar` block does - same manifest,
+  same LICENCE/NOTICE handling. Give effigies a `publishing {}` block for its now-thin jar
+  (`org.identigon:effigies`, accurate POM, no javadoc/sources) so `./gradlew publish` covers it too,
+  same shape as alterego/incognito; if the fat jar is also wanted on GitHub Packages, publish it
+  under that same coordinate with a classifier, not as the primary artifact. Add
+  `.github/workflows/release.yml` (manually dispatched, run once a commit bumping the version and
+  its `CHANGELOG.md` entry is already on `main` - no tag needed beforehand): it reads `baseVersion`
+  from root `build.gradle.kts`, creates and pushes the `vX.Y.Z` tag itself, builds, publishes the
+  release version, then reuses that same build's output - renamed, unversioned - as `gh release
+  upload` assets on a GitHub Release it creates for that tag, plus an `actions/attest` step over the
+  jars (not `actions/attest-build-provenance` - as of its own v4 that's just a wrapper over
+  `actions/attest`, and its README now points new implementations at the latter). `main.yml`'s
+  existing `publish` job is untouched, and the workflow creating its own tag (rather than a human
+  pushing one beforehand) is what keeps `main.yml` from ever racing it to publish the release
+  version first.
 - [ ] **Project:** incognito - **Composite PK + cyclic FK together.** Currently fails closed with a
   clear message rather than corrupting data; not exercised by any benchmark. Bigger than "widen the
   pass-2 `UPDATE` to key on every PK column" - the real gap is deferred *composite-FK* resolution
