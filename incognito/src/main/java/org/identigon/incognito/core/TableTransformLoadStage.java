@@ -485,6 +485,9 @@ public final class TableTransformLoadStage implements PipelineStage {
     private ColumnTransformer buildDirectIdTransformer(
             ColumnPolicy colPolicy, AlterEgo alterEgo, String tableName) {
         DirectIdStrategy strategy = colPolicy.directIdStrategy();
+        // Only reachable null for UNIQUE_CANDIDATE_KEY, which shares this method: a DIRECT_ID
+        // column with a null strategy fails closed in SchemaDiscoveryStage.validateTablePolicy
+        // (ADR 29) before TableTransformLoadStage ever runs.
         if (strategy == null) strategy = DirectIdStrategy.ALTEREGO_GENERIC;
 
         String domain = "incognito:" + tableName + ":" + colPolicy.columnName();

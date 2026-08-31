@@ -15,8 +15,9 @@
         <Bug pattern="DMI_RANDOM_USED_ONLY_ONCE,URF_UNREAD_FIELD,VA_FORMAT_STRING_USES_NEWLINE,WMI_WRONG_MAP_ITERATOR" />
     </Match>
 
-    <!-- Test scope exclusions -->
+    <!-- Test scope exclusions, including the empty "sa" password H2's own in-memory-test convention
+         uses (DirectIdStrategyRequiredTest) alongside the Testcontainers constant-password pattern -->
     <Match>
-        <Bug pattern="DLS_DEAD_LOCAL_STORE,DM_DEFAULT_ENCODING,DMI_CONSTANT_DB_PASSWORD,HARD_CODE_PASSWORD,LG_LOST_LOGGER_DUE_TO_WEAK_REFERENCE" />
+        <Bug pattern="DLS_DEAD_LOCAL_STORE,DM_DEFAULT_ENCODING,DMI_CONSTANT_DB_PASSWORD,DMI_EMPTY_DB_PASSWORD,HARD_CODE_PASSWORD,LG_LOST_LOGGER_DUE_TO_WEAK_REFERENCE" />
     </Match>
 </FindBugsFilter>

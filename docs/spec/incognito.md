@@ -292,7 +292,7 @@ streams (`fetchSize = 5000`) in topological order.
 
 | `ColumnRole` (Level-1/2 classification) | Transformation                                                                                                                                                                                                                                                                                                                                                                   |
 |:----------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `DIRECT_ID` (Direct Identifier)         | **Fabricate** via `DirectIdStrategy` (name / e-mail / phone / generic). Default `ALTEREGO_GENERIC`.                                                                                                                                                                                                                                                                              |
+| `DIRECT_ID` (Direct Identifier)         | **Fabricate** via a **declared** `DirectIdStrategy` (name / e-mail / phone / generic). No implicit default - a `DIRECT_ID` with no `directIdStrategy` is `IncognitoException.ConfigException` (fail-closed).                                                                                                                                                                     |
 | `UNIQUE_CANDIDATE_KEY`                  | Fabricate via `AlterEgo.unique()` (guaranteed collision-free within the table; length-preserving sequence fallback if dictionary exhausted).                                                                                                                                                                                                                                     |
 | `QUASI_ID` (Quasi-Identifier)           | **Fabricate** via `QuasiIdStrategy` - `SYNTHESISE` (fresh fictional value) or a jitter mode for temporal data (§4.2).                                                                                                                                                                                                                                                            |
 | `SENSITIVE` (Level-2 Sensitive)         | **Declared `distinguishing` flag** (§2.2, see below). `distinguishing: false` -> **kept real**. `distinguishing: true` -> must carry a `QuasiIdStrategy` (fabricated like a QI) **or** a `RedactionStrategy` (`CLEAR`/`MASK`/`CONSTANT`). Omitting `distinguishing`, or a `distinguishing: true` column with no strategy, is `IncognitoException.ConfigException` (fail-closed). |
@@ -445,8 +445,10 @@ and destroyed on completion.
 The strategy is given by a **role-specific key** (not a single polymorphic `strategy:`), which
 removes any ambiguity about which enum applies: `surrogateStrategy` (PK), `directIdStrategy`
 (DIRECT_ID / UNIQUE_CANDIDATE_KEY), `quasiIdStrategy` (QUASI_ID), `redactionStrategy` (SENSITIVE). A
-`SENSITIVE` column also requires a `distinguishing: true | false` flag (§4.1). `references`/
-`derivedFrom` are nested `{ table, column }` maps. `redactionStrategy: CONSTANT` may optionally
+`SENSITIVE` column also requires a `distinguishing: true | false` flag (§4.1), and a `DIRECT_ID`
+column requires `directIdStrategy` to be present (§4.1) - `UNIQUE_CANDIDATE_KEY` does not; it
+defaults to `ALTEREGO_GENERIC`. `references`/`derivedFrom` are nested `{ table, column }` maps.
+`redactionStrategy: CONSTANT` may optionally
 carry a `redactionConstant` (a fixed text placeholder, e.g. `"0000 0000 0000 0000"` for a card
 number) - text-type columns only, checked at pipeline-build time; the default without one is the
 generic `"REDACTED"`.

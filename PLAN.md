@@ -9,24 +9,15 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Project:** incognito - **`DIRECT_ID` columns with no `directIdStrategy` silently fall back
-  to `ALTEREGO_GENERIC`.** `TableTransformLoadStage.buildDirectIdTransformer` defaults a null
-  strategy to `ALTEREGO_GENERIC` (shape-preserving fabrication, no fictionality guarantee) instead
-  of failing closed, and `VerificationStage`'s fictionality checks have no case for it either, so a
-  degraded column still reports `Fictionality Verified: true` in the DPIA report. Inconsistent with
-  the `SENSITIVE`/`distinguishing` precedent (`SchemaDiscoveryStage.validateTablePolicy` already
-  requires that flag explicitly) and with fail-closed generally: a `DIRECT_ID` with no strategy is
-  an unmade decision, not a default. Require `directIdStrategy` on every `DIRECT_ID`, failing
-  closed at policy-validation time the same way.
 - [ ] **Project:** effigies - **`scaffold` should emit strategy stubs, not just `role:`.**
   `ScaffoldCommand.writeScaffold` writes only a `role:` TODO per column; the decisions that
   determine output quality (`directIdStrategy` for `DIRECT_ID`, `distinguishing` for `SENSITIVE`,
   `references` for `FOREIGN_KEY`) are left for the author to hand-write from scratch even though
   `PolicyInferrer` and `SchemaInspector` already know enough to suggest them (the matched
   heuristic, the resolved FK target). Emit a commented TODO stub with the suggestion inline for
-  each, the same "suggest, never assign" pattern already used for `role:`. Worth landing alongside
-  the item above: once `directIdStrategy` fails closed, an un-stubbed scaffold becomes a hard stop
-  rather than a silent gap.
+  each, the same "suggest, never assign" pattern already used for `role:`. More pressing now that
+  `directIdStrategy` fails closed (ADR 29): an un-stubbed scaffold is a hard stop, not a silent
+  gap.
 - [ ] **Project:** incognito - **Fail-closed policy validation should accumulate across all
   tables, not stop at the first.** `SchemaDiscoveryStage.validateTablePolicy` already collects
   every unclassified column *within* one table before throwing, specifically so the author fixes

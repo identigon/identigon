@@ -150,6 +150,19 @@ public final class SchemaDiscoveryStage implements PipelineStage {
                             "Fail-closed: SENSITIVE column '" + column + "' in table '" + table.tableName()
                                 + "' is distinguishing: true, but declares no RedactionStrategy or QuasiIdStrategy (SPEC §4.1).");
                     }
+                } else if (colPol.role() == ColumnRole.DIRECT_ID) {
+                    // No implicit ALTEREGO_GENERIC default (ADR 29): a DIRECT_ID with no declared
+                    // strategy is an unmade decision, not a default, the same principle already
+                    // applied to SENSITIVE/distinguishing above. UNIQUE_CANDIDATE_KEY shares
+                    // buildDirectIdTransformer but is deliberately not covered here - it was never
+                    // claimed to carry a fictionality guarantee, so its silent ALTEREGO_GENERIC
+                    // default is unaffected.
+                    if (colPol.directIdStrategy() == null) {
+                        throw new IncognitoException.ConfigException(
+                            "Fail-closed: DIRECT_ID column '" + column + "' in table '" + table.tableName()
+                                + "' does not declare a directIdStrategy. It must be explicit - "
+                                + "ALTEREGO_GENERIC is a valid choice, but not a silent one (SPEC §4.1).");
+                    }
                 } else if (colPol.role() == ColumnRole.QUASI_ID) {
                     validateSynthesiseType(table, column, colPol);
                 }

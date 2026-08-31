@@ -30,6 +30,12 @@ too would be the same fact in two places.
 ### incognito
 
 - Same GitHub Release mirroring as alterego, above - no change to `org.identigon:incognito` itself.
+- **A `DIRECT_ID` column now requires an explicit `directIdStrategy`.** Previously a `DIRECT_ID`
+  with no declared strategy silently fell back to `ALTEREGO_GENERIC` (shape-preserving
+  fabrication with no fictionality guarantee, ADR 21); it now fails closed at schema-discovery
+  time instead, the same way an undeclared `SENSITIVE` `distinguishing` flag already does (ADR
+  16). `ALTEREGO_GENERIC` remains fully valid as an explicit choice; `UNIQUE_CANDIDATE_KEY` is
+  unaffected. See `docs/adr/0029-declared-direct-id-strategy.md`.
 
 ### effigies
 
