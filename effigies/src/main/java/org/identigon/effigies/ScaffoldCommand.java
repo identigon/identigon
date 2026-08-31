@@ -6,8 +6,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import org.identigon.incognito.api.ColumnRole;
+import org.identigon.incognito.api.DirectIdStrategy;
 import org.identigon.incognito.engine.SchemaInspector;
 
 class ScaffoldCommand {
@@ -60,6 +64,11 @@ class ScaffoldCommand {
         // runs on (the platform default is not UTF-8 on Windows).
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
             PolicyInferrer inferrer = new PolicyInferrer();
+            Map<String, SchemaInspector.TableMetadata> tablesByName = new HashMap<>();
+            for (SchemaInspector.TableMetadata t : tables) {
+                tablesByName.put(t.tableName(), t);
+            }
+
             writer.write("autoInfer: false\n");
             writer.write("tables:\n");
             for (SchemaInspector.TableMetadata table : tables) {
@@ -71,15 +80,65 @@ class ScaffoldCommand {
                     }
                     writer.write("      " + col + ":            # "
                         + ColumnMetadataFormatter.format(table, col) + "\n");
-
-                    Optional<PolicyInferrer.InferredRole> inferred = inferrer.inferRole(col);
-                    if (inferred.isPresent()) {
-                        writer.write("        role:              # TODO classify (Suggestion: " + inferred.get().role() + " based on " + inferred.get().heuristic() + ")\n");
-                    } else {
-                        writer.write("        role:              # TODO classify - see the role vocabulary; run fails closed until filled\n");
-                    }
+                    writeRoleStub(writer, table, col, tablesByName, inferrer);
                 }
             }
+        }
+    }
+
+    /**
+     * Writes the {@code role:} TODO stub for one column, plus - where the choice determining
+     * output quality is itself known or inferable - a second stub for it ({@code
+     * directIdStrategy}, {@code distinguishing}, {@code references}, {@code surrogateStrategy}):
+     * never assigned, only suggested, the same "suggest, never assign" pattern as {@code role:}
+     * itself. Structural facts from {@link SchemaInspector} (a column IS the primary key, or IS a
+     * foreign key) take priority over {@link PolicyInferrer}'s name-based heuristics - a known
+     * constraint outranks a guess.
+     */
+    private static void writeRoleStub(
+            BufferedWriter writer, SchemaInspector.TableMetadata table, String col,
+            Map<String, SchemaInspector.TableMetadata> tablesByName, PolicyInferrer inferrer) throws IOException {
+
+        if (table.foreignKeys().containsKey(col)) {
+            String parentTable = table.foreignKeys().get(col);
+            writer.write("        role:              # TODO classify (Suggestion: FOREIGN_KEY -> "
+                + parentTable + ", structurally discovered - not a guess)\n");
+            SchemaInspector.TableMetadata parent = tablesByName.get(parentTable);
+            if (parent != null && parent.primaryKeyColumns().size() == 1) {
+                writer.write("        references:        # TODO if FOREIGN_KEY (Suggestion: {table: "
+                    + parentTable + ", column: " + parent.primaryKeyColumns().get(0) + "})\n");
+            } else {
+                writer.write("        references:        # TODO if FOREIGN_KEY - target table is "
+                    + parentTable + "; its column isn't determined here (composite or unknown PK)\n");
+            }
+            return;
+        }
+
+        if (table.primaryKeyColumns().contains(col)) {
+            writer.write("        role:              # TODO classify (Suggestion: PRIMARY_KEY,"
+                + " structurally discovered - not a guess)\n");
+            writer.write("        surrogateStrategy: # TODO if PRIMARY_KEY (Suggestion: SEQUENTIAL_LONG)\n");
+            return;
+        }
+
+        Optional<PolicyInferrer.InferredRole> inferred = inferrer.inferRole(col);
+        if (inferred.isEmpty()) {
+            writer.write("        role:              # TODO classify - see the role vocabulary; run fails closed until filled\n");
+            return;
+        }
+
+        PolicyInferrer.InferredRole role = inferred.get();
+        writer.write("        role:              # TODO classify (Suggestion: " + role.role()
+            + " based on " + role.heuristic() + ")\n");
+        if (role.role() == ColumnRole.DIRECT_ID) {
+            Optional<DirectIdStrategy> strategy = inferrer.suggestedDirectIdStrategy(role.heuristic());
+            if (strategy.isPresent()) {
+                writer.write("        directIdStrategy:  # TODO if DIRECT_ID (Suggestion: " + strategy.get() + ")\n");
+            } else {
+                writer.write("        directIdStrategy:  # TODO if DIRECT_ID - see the role vocabulary for the right typed generator\n");
+            }
+        } else if (role.role() == ColumnRole.SENSITIVE) {
+            writer.write("        distinguishing:    # TODO if SENSITIVE (true|false - does this alone identify someone?)\n");
         }
     }
 }

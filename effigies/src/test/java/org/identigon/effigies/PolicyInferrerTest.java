@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 import org.identigon.incognito.api.ColumnRole;
+import org.identigon.incognito.api.DirectIdStrategy;
 import org.junit.jupiter.api.Test;
 
 class PolicyInferrerTest {
@@ -79,11 +80,13 @@ class PolicyInferrerTest {
     }
 
     @Test
-    void suggestsDirectIdForCreditCardColumns() {
+    void suggestsSensitiveForCreditCardColumns() {
+        // SENSITIVE, not DIRECT_ID: no typed fictional-card-number generator exists, and a card
+        // number is conventionally redacted (RedactionStrategy.CONSTANT), the same as a bank account.
         for (String col : new String[] {"credit_card", "credit_card_number", "card_number", "cc_number"}) {
             Optional<PolicyInferrer.InferredRole> role = inferrer.inferRole(col);
             assertTrue(role.isPresent(), col + " should be suggested");
-            assertEquals(ColumnRole.DIRECT_ID, role.get().role(), col);
+            assertEquals(ColumnRole.SENSITIVE, role.get().role(), col);
             assertEquals("CREDIT_CARD_PATTERN", role.get().heuristic(), col);
         }
     }
@@ -111,5 +114,22 @@ class PolicyInferrerTest {
     void suggestsNothingForAnUnrecognisedColumnName() {
         assertEquals(Optional.empty(), inferrer.inferRole("status"));
         assertEquals(Optional.empty(), inferrer.inferRole("quantity"));
+    }
+
+    @Test
+    void suggestsAnUnambiguousDirectIdStrategyPerHeuristic() {
+        assertEquals(DirectIdStrategy.ALTEREGO_EMAIL, inferrer.suggestedDirectIdStrategy("EMAIL_PATTERN").orElseThrow());
+        assertEquals(DirectIdStrategy.ALTEREGO_PHONE, inferrer.suggestedDirectIdStrategy("PHONE_PATTERN").orElseThrow());
+        assertEquals(DirectIdStrategy.ALTEREGO_NAME, inferrer.suggestedDirectIdStrategy("NAME_PATTERN").orElseThrow());
+        assertEquals(DirectIdStrategy.ALTEREGO_PASSPORT_NUMBER, inferrer.suggestedDirectIdStrategy("PASSPORT_PATTERN").orElseThrow());
+        assertEquals(DirectIdStrategy.ALTEREGO_DRIVING_LICENCE_NUMBER,
+            inferrer.suggestedDirectIdStrategy("DRIVING_LICENCE_PATTERN").orElseThrow());
+    }
+
+    @Test
+    void suggestsNoDirectIdStrategyForAnAmbiguousHeuristic() {
+        // NATIONAL_ID_PATTERN spans ssn/tax_id (no typed generator exists for either) and
+        // nino/nhs_number (two different generators) - no single strategy is a safe suggestion.
+        assertEquals(Optional.empty(), inferrer.suggestedDirectIdStrategy("NATIONAL_ID_PATTERN"));
     }
 }
