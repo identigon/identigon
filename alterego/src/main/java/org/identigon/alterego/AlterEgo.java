@@ -34,7 +34,8 @@ import org.identigon.alterego.strategy.UrlStrategy;
  */
 public final class AlterEgo implements AutoCloseable {
 
-  private static final int MIN_SALT_BYTES = 16;
+  /** The minimum length, in bytes, {@link Builder#salt(byte[])} requires. */
+  public static final int MIN_SALT_BYTES = 16;
 
   private final byte[] salt;
   private final Locale locale;

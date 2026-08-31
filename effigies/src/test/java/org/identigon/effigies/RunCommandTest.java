@@ -101,6 +101,36 @@ class RunCommandTest {
     }
 
     @Test
+    void tooShortAPersistentSaltFailsBeforeEitherDatabaseIsTouched(@TempDir Path tempDir) throws Exception {
+        Path policy = tempDir.resolve("policy.yaml");
+        Files.writeString(policy, """
+            autoInfer: false
+            tables:
+              PERSON:
+                columns:
+                  ID:
+                    role: PRIMARY_KEY
+                    surrogateStrategy: SEQUENTIAL_LONG
+            """);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        // Neither database exists at this URL - if the salt-length check ran late (inside pipeline
+        // construction, after a connection is opened), this would fail with a connection error
+        // instead of the salt-length message.
+        int code = RunCommand.run(
+            new SimpleDataSource("jdbc:no-such-dialect://nowhere", "u", "p"),
+            new SimpleDataSource("jdbc:no-such-dialect://nowhere", "u", "p"),
+            policy, "persistent", "short".getBytes(StandardCharsets.UTF_8), null,
+            new PrintStream(out, true, StandardCharsets.UTF_8),
+            new PrintStream(err, true, StandardCharsets.UTF_8));
+
+        assertEquals(1, code);
+        assertTrue(err.toString(StandardCharsets.UTF_8).contains("IDENTIGON_SALT must be at least"),
+            err.toString(StandardCharsets.UTF_8));
+    }
+
+    @Test
     void reportsAPipelineFailureRatherThanThrowing(@TempDir Path tempDir) throws Exception {
         Path policy = tempDir.resolve("policy.yaml");
         Files.writeString(policy, """

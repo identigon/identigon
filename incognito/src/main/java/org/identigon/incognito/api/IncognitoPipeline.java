@@ -13,6 +13,14 @@ import org.identigon.incognito.policy.AnonymisationPolicy;
 public interface IncognitoPipeline {
 
     /**
+     * The minimum length, in bytes, {@link Builder#persistentSalt(byte[])} and
+     * {@link Builder#reproducible(byte[], long)} require - re-exported from
+     * {@code AlterEgo.MIN_SALT_BYTES} so a caller can validate a salt before {@link Builder#build()}
+     * without depending on {@code alterego} directly.
+     */
+    int MIN_SALT_BYTES = org.identigon.alterego.AlterEgo.MIN_SALT_BYTES;
+
+    /**
      * Starts building a pipeline. {@code IncognitoPipelineBuilder} is package-private in this
      * (api) package, so this factory does not create an api -&gt; core dependency cycle.
      *
@@ -78,7 +86,7 @@ public interface IncognitoPipeline {
         /**
          * Uses a caller-supplied fixed salt - opt-in linkable mode that forfeits irreversibility.
          *
-         * @param salt the persistent salt bytes
+         * @param salt the persistent salt bytes, at least {@link IncognitoPipeline#MIN_SALT_BYTES}
          * @return this builder
          */
         Builder persistentSalt(byte[] salt);
@@ -86,7 +94,7 @@ public interface IncognitoPipeline {
         /**
          * Uses a fixed salt and RNG seed for deterministic, reproducible output (for tests).
          *
-         * @param salt the fixed salt bytes
+         * @param salt the fixed salt bytes, at least {@link IncognitoPipeline#MIN_SALT_BYTES}
          * @param seed the fixed RNG seed
          * @return this builder
          */

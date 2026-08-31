@@ -15,7 +15,15 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 class RunCommand {
+    private static final String USAGE = "Usage: run --source-url <url> --source-user <user> "
+        + "--target-url <url> --target-user <user> [--policy <file>]";
+
     static int execute(String[] args, PrintStream out, PrintStream err) {
+        if (CliArgs.hasHelpFlag(args)) {
+            out.println(USAGE);
+            return 0;
+        }
+
         String policyFile = "./policy.yaml";
         String srcUrl = null;
         String srcUser = null;
@@ -37,7 +45,7 @@ class RunCommand {
         }
 
         if (srcUrl == null || srcUser == null || tgtUrl == null || tgtUser == null) {
-            err.println("Usage: run --source-url <url> --source-user <user> --target-url <url> --target-user <user> [--policy <file>]");
+            err.println(USAGE);
             return EffigiesCli.EXIT_USAGE;
         }
 
@@ -108,6 +116,17 @@ class RunCommand {
      */
     static int run(DataSource sourceDs, DataSource targetDs, Path policyPath, String saltMode,
             byte[] salt, Long seed, PrintStream out, PrintStream err) {
+        // AlterEgo's builder enforces this same minimum, but only once construction reaches it -
+        // deep inside IncognitoPipeline.Builder#build(), after both connections have already been
+        // opened. Catching a too-short salt here, before either DataSource is touched, gives the
+        // same fail-fast treatment the missing-salt check (in execute(), before this method is even
+        // called) already gets.
+        if (("persistent".equals(saltMode) || "reproducible".equals(saltMode))
+                && salt != null && salt.length < IncognitoPipeline.MIN_SALT_BYTES) {
+            err.println("Error: IDENTIGON_SALT must be at least " + IncognitoPipeline.MIN_SALT_BYTES
+                + " bytes, got: " + salt.length + " bytes");
+            return 1;
+        }
         try {
             IncognitoPipeline.Builder builder = IncognitoPipeline.builder()
                 .source(sourceDs)
