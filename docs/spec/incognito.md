@@ -792,6 +792,12 @@ for `DIRECT_ID`, §4.1; `SYNTHESISE`-by-type for `QUASI_ID`, Appendix B) before 
 one run reports every problem across the whole schema at once - not one table, or one column, per
 run.
 
+**Reachable without a full run.** `SchemaDiscoveryStage.validate(List<TableMetadata>,
+AnonymisationPolicy)` is this same check, public, and callable directly against an already-inspected
+schema - no target connection, no `PipelineContext`, no dependency-graph computation. `process`
+calls it internally; `effigies`' `validate` command calls it directly, pairing it with its own
+`SchemaInspector.inspect(source)` call to check a policy without committing to a full `run`.
+
 **`autoInfer` / `PolicyInferrer` are deprecated (`forRemoval = true`).** Inference is authoring, not
 execution - fail-closed classification means it never affected engine output - and it now lives in
 `effigies`' own `PolicyInferrer`, which is what actually interviews users during authoring. This

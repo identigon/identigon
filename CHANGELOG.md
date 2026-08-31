@@ -53,6 +53,11 @@ too would be the same fact in two places.
   `GENERATED_COLUMN`. An identity PK (`IS_AUTOINCREMENT`) is tracked separately and still requires a
   role, ordinarily `PRIMARY_KEY` - it was never actually excluded from classification, but nothing
   said so in one place. Doc-only; no behaviour change.
+- **`SchemaDiscoveryStage.validate(List<TableMetadata>, AnonymisationPolicy)` is now public.** The
+  same fail-closed check `process` already ran, pulled out so it is callable directly against an
+  already-inspected schema - no target connection, no `PipelineContext`, no dependency-graph
+  computation. `process` now calls it internally; no behaviour change there. See effigies' new
+  `validate` command below for the first caller.
 
 ### effigies
 
@@ -101,6 +106,13 @@ too would be the same fact in two places.
   `System.out`/`System.err` with an explicit UTF-8 `PrintStream` instead of the JVM's platform
   default, which is not UTF-8 in a POSIX-locale environment (common in minimal containers/CI images)
   and previously rendered `§` - used throughout SPEC-referencing error messages - as `?` there.
+- **New `validate` command.** `SchemaDiscoveryStage`'s fail-closed messages were the tool's best
+  diagnostics but only reachable by committing to a full `run`. `validate --policy ./policy.yaml
+  --source-url ... --source-user ...` checks a policy against the source schema with no target
+  connection and no data movement - the same errors `run` would raise, cheaper to iterate against
+  while authoring, and usable as a CI pre-flight check for a policy going stale after a schema
+  migration. The `identigon-policy-author` Agent Skill now points at it as a pre-flight step before
+  its closing `run` reminder.
 
 ## [1.1.0] - 2026-08-26
 

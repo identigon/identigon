@@ -65,26 +65,9 @@ public final class SchemaDiscoveryStage implements PipelineStage {
         // 1. Inspect the source database schema.
         List<SchemaInspector.TableMetadata> metadata = schemaInspector.inspect(context.source());
 
-        java.util.Map<String, java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion>> suggestions = new java.util.HashMap<>();
-
-        // 2. Validate policy: every discovered column in policy-declared tables must have a role,
-        //    plus the role-specific requirements below (SENSITIVE/distinguishing, DIRECT_ID/
-        //    directIdStrategy, QUASI_ID/SYNTHESISE-by-type). Accumulated across every table and
-        //    every check, not thrown on the first hit, so one run reports everything wrong at once
-        //    instead of the author fixing issues one table (or one column) at a time across
-        //    repeated runs.
-        List<String> failures = new java.util.ArrayList<>();
-        AnonymisationPolicy policy = context.policy();
-        for (SchemaInspector.TableMetadata table : metadata) {
-            policy.table(table.tableName()).ifPresent(tablePolicy ->
-                validateTablePolicy(table, tablePolicy, suggestions, failures)
-            );
-        }
-        if (!failures.isEmpty()) {
-            throw new IncognitoException.ConfigException(
-                "Fail-closed: " + failures.size() + " issue(s) found - fix all at once, not one run"
-                    + " at a time:\n  - " + String.join("\n  - ", failures));
-        }
+        // 2. Validate policy against the discovered schema (fail-closed; SPEC §7.2).
+        java.util.Map<String, java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion>> suggestions =
+            validate(metadata, context.policy());
 
         // 3. Build the topological execution plan.
         TableDependencyGraph.TopologicalExecutionPlan plan =
@@ -101,6 +84,41 @@ public final class SchemaDiscoveryStage implements PipelineStage {
             metadata.size(),
             "Discovered " + metadata.size() + " tables, processing order: " + plan.sequentialTableOrder()
         );
+    }
+
+    /**
+     * Validates {@code policy} against already-discovered {@code metadata} - the same fail-closed
+     * check {@link #process} runs (SPEC §7.2), callable directly against just a schema inspection,
+     * with no target connection, no dependency-graph computation, and no {@link PipelineContext}
+     * needed. This is what makes {@code effigies}' {@code validate} command possible: the engine's
+     * best diagnostics, reachable without committing to a full {@code run}.
+     *
+     * @param metadata the discovered source schema (e.g. from {@link SchemaInspector#inspect})
+     * @param policy   the policy to validate against it
+     * @return per-table auto-infer suggestions - always empty on success (SPEC §7.2: an
+     *     unclassified column always fails closed, so a returned map never carries a real
+     *     suggestion; see {@link #ATTR_INFER_SUGGESTIONS})
+     * @throws IncognitoException.ConfigException if any table fails the check
+     */
+    public java.util.Map<String, java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion>> validate(
+            List<SchemaInspector.TableMetadata> metadata, AnonymisationPolicy policy) {
+        java.util.Map<String, java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion>> suggestions = new java.util.HashMap<>();
+
+        // Accumulated across every table and every check, not thrown on the first hit, so one run
+        // reports everything wrong at once instead of the author fixing issues one table (or one
+        // column) at a time across repeated runs.
+        List<String> failures = new java.util.ArrayList<>();
+        for (SchemaInspector.TableMetadata table : metadata) {
+            policy.table(table.tableName()).ifPresent(tablePolicy ->
+                validateTablePolicy(table, tablePolicy, suggestions, failures)
+            );
+        }
+        if (!failures.isEmpty()) {
+            throw new IncognitoException.ConfigException(
+                "Fail-closed: " + failures.size() + " issue(s) found - fix all at once, not one run"
+                    + " at a time:\n  - " + String.join("\n  - ", failures));
+        }
+        return suggestions;
     }
 
     /**

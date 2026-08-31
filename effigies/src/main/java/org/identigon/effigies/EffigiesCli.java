@@ -10,8 +10,8 @@ import java.nio.charset.StandardCharsets;
  * to produce the anonymised clone. The engine stays deterministic and judgment-free; all inference and
  * scaffolding lives here (see {@code docs/adr/0001-authoring-above-the-engine.md}).
  *
- * <p>The {@code discover}, {@code scaffold}, and {@code run} subcommands are implemented; see
- * {@code PLAN.md} for the roadmap.
+ * <p>The {@code discover}, {@code scaffold}, {@code validate}, and {@code run} subcommands are
+ * implemented; see {@code PLAN.md} for the roadmap.
  */
 public final class EffigiesCli {
 
@@ -60,6 +60,9 @@ public final class EffigiesCli {
             case "scaffold" -> {
                 yield ScaffoldCommand.execute(args, out, err);
             }
+            case "validate" -> {
+                yield ValidateCommand.execute(args, out, err);
+            }
             case "run" -> {
                 yield RunCommand.execute(args, out, err);
             }
@@ -80,6 +83,7 @@ public final class EffigiesCli {
             Commands:
               discover    Inspect a source database and describe its schema (metadata only, no data).
               scaffold    Emit a starter policy.yaml (fail-closed: every column left to be classified).
+              validate    Check a policy against a source schema - no target, no data movement.
               run         Execute incognito against a finished policy.yaml to produce the clone.
               version     Print the version.
               help        Show this help.""");

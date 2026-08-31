@@ -46,14 +46,22 @@ respect incognito's own contract.
 
 ## 3. Commands (intended contract)
 
-The CLI is `java -jar identigon.jar <command> [options]`. `discover`, `scaffold`, `run`, `version`,
-and `help` are implemented; a bad or unknown invocation returns exit code 2.
+The CLI is `java -jar identigon.jar <command> [options]`. `discover`, `scaffold`, `validate`, `run`,
+`version`, and `help` are implemented; a bad or unknown invocation returns exit code 2. Every
+subcommand also recognises `--help`/`-h` anywhere in its own arguments, printing its usage line and
+exiting `0`.
 
 - **`discover`** - inspect a source database and describe its schema (metadata only). Produces a
   human-readable summary and a machine-readable form for the later phases. Requires read access to
   the source's catalog; reads no row data.
 - **`scaffold`** - emit a starter `policy.yaml`: every discovered column listed, discovered metadata
   as comments, **every column left unclassified** (fail-closed). A draft, not a runnable config.
+  Refuses to overwrite an existing output file unless `--force` is given.
+- **`validate`** - check a `policy.yaml` against a source schema: the same fail-closed diagnostics
+  `run` would raise, without a target connection or any data movement. Requires only source
+  connection details (`--source-url`, `--source-user`, `IDENTIGON_SOURCE_PASSWORD`) - cheaper to
+  iterate against while authoring, and usable as a CI pre-flight check for a policy going stale
+  after a schema migration.
 - **`run`** - execute incognito against a finished `policy.yaml` plus source/target connection
   details, producing the clone and surfacing the DPIA report (JSON / HTML / Markdown). The policy
   declares the salt **mode**; the salt **bytes** for fixed-salt modes come from out-of-band input.

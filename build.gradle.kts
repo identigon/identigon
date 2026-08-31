@@ -163,28 +163,21 @@ subprojects {
         }
     }
 
-    // Javadoc/doclint: identical wherever a subproject publishes a javadoc jar (alterego and
-    // incognito both call withJavadocJar(); effigies has a `maven-publish` block too now - ADR
-    // 28 - but deliberately no withJavadocJar()/withSourcesJar(), being a CLI rather than a
-    // published library, so this must key on withJavadocJar() actually having been called, not
-    // merely on maven-publish being applied, or it would newly demand full doclint compliance
-    // across effigies' whole public API as an unplanned side effect of an unrelated packaging
-    // decision. Deferred to afterEvaluate so the subproject's own script (where withJavadocJar()
-    // is called, if at all) has already run by the time this checks for the javadocJar task it
-    // creates.
-    afterEvaluate {
-        if (tasks.findByName("javadocJar") != null) {
-            tasks.withType<Javadoc>().configureEach {
-                options.encoding = "UTF-8"
-                (options as StandardJavadocDocletOptions).apply {
-                    // The full `all` group (javadoc's own default doclint level -- stated
-                    // explicitly rather than relied upon) including `missing`: a doc comment /
-                    // @param / @return / @throws is required on every public element.
-                    addBooleanOption("Xdoclint:all", true)
-                    // A doclint warning fails the build instead of a backlog quietly accumulating.
-                    addBooleanOption("Xwerror", true)
-                }
-            }
+    // Javadoc/doclint: unconditional, every subproject, whether or not it ships a javadoc jar.
+    // Javadoc completeness on a public API is a code-quality question independent of whether that
+    // API's docs are ever packaged and published - effigies has no withJavadocJar()/
+    // withSourcesJar() (a CLI, not a published library) but still has a public API surface
+    // (EffigiesCli.main, SimpleDataSource, PolicyInferrer) worth holding to the same standard.
+    // `./gradlew javadoc` at the root is the one command that exercises this everywhere.
+    tasks.withType<Javadoc>().configureEach {
+        options.encoding = "UTF-8"
+        (options as StandardJavadocDocletOptions).apply {
+            // The full `all` group (javadoc's own default doclint level -- stated explicitly
+            // rather than relied upon) including `missing`: a doc comment / @param / @return /
+            // @throws is required on every public element.
+            addBooleanOption("Xdoclint:all", true)
+            // A doclint warning fails the build instead of a backlog quietly accumulating.
+            addBooleanOption("Xwerror", true)
         }
     }
 

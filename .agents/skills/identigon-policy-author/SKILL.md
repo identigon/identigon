@@ -49,4 +49,7 @@ interview the user to assign roles (e.g., `DIRECT_ID`, `QUASI_ID`, `SENSITIVE`,
 4. Wait for the user's response.
 5. Update `policy.yaml` with the confirmed roles.
 6. Repeat steps 2-5 for the next batch until all columns are classified or the user chooses to stop.
-7. Remind the user they can run `effigies run --policy policy.yaml` when ready.
+7. Remind the user they can check the result with `effigies validate --policy policy.yaml
+   --source-url ... --source-user ...` - the same fail-closed diagnostics `run` would raise, without
+   a target connection or moving any data - before running `effigies run --policy policy.yaml`
+   for real.

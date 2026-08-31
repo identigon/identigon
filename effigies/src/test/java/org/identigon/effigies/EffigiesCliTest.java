@@ -38,7 +38,7 @@ class EffigiesCliTest {
 
     @Test
     void commandsRequireUsage() {
-        for (String cmd : new String[] {"discover", "scaffold", "run"}) {
+        for (String cmd : new String[] {"discover", "scaffold", "validate", "run"}) {
             Result r = invoke(cmd);
             assertEquals(EffigiesCli.EXIT_USAGE, r.code(), cmd + " exit code");
             assertTrue(r.err().contains("Usage: " + cmd), cmd + " usage message");
@@ -51,7 +51,7 @@ class EffigiesCliTest {
         // only ever printed its usage line as a side effect of missing --source-url/--source-user
         // (exit EXIT_USAGE, not a deliberate help request). Each subcommand must recognise --help
         // itself now, and succeed.
-        for (String cmd : new String[] {"discover", "scaffold", "run"}) {
+        for (String cmd : new String[] {"discover", "scaffold", "validate", "run"}) {
             Result r = invoke(cmd, "--help");
             assertEquals(0, r.code(), cmd + " --help exit code");
             assertTrue(r.out().contains("Usage: " + cmd), cmd + " --help usage message");

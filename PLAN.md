@@ -9,14 +9,6 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Project:** effigies - **A `validate` command: check a policy against a schema with no
-  target database or data movement.** `SchemaDiscoveryStage.validateTablePolicy`'s fail-closed
-  messages are the best diagnostics in the tool but are only reachable by committing to a full
-  `run`. A `identigon validate --policy ./policy.yaml --source-url ... --source-user ...`
-  subcommand - schema inspection plus policy validation only, no target connection, no load - would
-  make every fail-closed error much cheaper to iterate against while authoring, and gives CI a
-  pre-flight check for a policy going stale after a schema migration (pairs with the existing
-  `dpia-report.json`-based CI gate).
 - [ ] **A new `workflow_dispatch` release workflow, tagging + publishing `alterego.jar`,
   `incognito.jar` and `identigon.jar` to GitHub Packages and as attested GitHub Release assets
   (ADR-0028).** Split effigies' own `jar` task back to

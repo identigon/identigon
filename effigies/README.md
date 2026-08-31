@@ -54,7 +54,7 @@ report working end to end before pointing Identigon at a real database.
 
 ## Usage Workflow
 
-The typical workflow uses three CLI commands and an AI Agent Skill.
+The typical workflow uses four CLI commands and an AI Agent Skill.
 
 ### 1. Discover & Scaffold
 
@@ -81,7 +81,19 @@ Activate the skill in your agent (located at
 - Batch related columns (e.g., all audit timestamps) to prevent fatigue.
 - Ask for your explicit confirmation before applying roles (maintaining the fail-closed guarantee).
 
-### 3. Orchestration (`run`)
+### 3. Validate (optional pre-flight)
+
+Once the policy is authored (or after a source schema migration), check it against the schema
+without touching a target or moving any data - cheaper to iterate against than a full `run`, and
+usable as a CI gate:
+
+```bash
+export IDENTIGON_SOURCE_PASSWORD="secret"
+java -jar build/libs/identigon.jar validate --policy ./policy.yaml \
+  --source-url "jdbc:postgresql://..." --source-user "admin"
+```
+
+### 4. Orchestration (`run`)
 
 Once the policy is authored, drive the `incognito` engine to produce the clone:
 
