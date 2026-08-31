@@ -1,0 +1,94 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: >-
+          Existing, already-pushed release tag to publish (e.g. v1.2.0). Tag creation stays a
+          manual, local, signed step - every release tag is SSH-signed with the maintainer's own
+          key, which CI cannot and should not hold - so create and push it yourself first:
+          bump baseVersion in build.gradle.kts and CHANGELOG.md, push that commit to main, let the
+          ordinary build finish (so it publishes that commit as a SNAPSHOT, not this release
+          version), then `git tag -s vX.Y.Z && git push origin vX.Y.Z` before dispatching this.
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag }}
+          # Full history + tags: the root build.gradle.kts's SNAPSHOT-vs-release check (shared by
+          # every build) needs tags present to find this one.
+          fetch-depth: 0
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Derive the release version and cross-check it against build.gradle.kts
+        id: version
+        run: |
+          tag="${{ inputs.tag }}"
+          version="${tag#v}"
+          base_version=$(grep -oP 'val baseVersion = "\K[^"]+' build.gradle.kts)
+          if [ "$version" != "$base_version" ]; then
+            echo "::error::Tag $tag (version $version) doesn't match baseVersion" \
+              "\"$base_version\" in build.gradle.kts at this commit - wrong tag, or baseVersion" \
+              "wasn't bumped before tagging."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Publish to GitHub Packages
+        run: ./gradlew publish
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Collect and rename release assets
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          mkdir -p release-assets
+          cp "alterego/build/libs/alterego-$version.jar" release-assets/alterego.jar
+          cp "incognito/build/libs/incognito-$version.jar" release-assets/incognito.jar
+          cp "build/libs/identigon.jar" release-assets/identigon.jar
+          ( cd release-assets && sha256sum -- *.jar > SHA256SUMS )
+
+      - name: Attest build provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: release-assets/*.jar
+
+      - name: Extract this version's CHANGELOG section as release notes
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          awk -v ver="$version" '
+            $0 ~ ("^## \\[" ver "\\]") { found=1; print; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "::error::No '## [$version]' section found in CHANGELOG.md - add one before releasing."
+            exit 1
+          fi
+
+      - name: Create the GitHub Release
+        run: |
+          tag="${{ inputs.tag }}"
+          gh release create "$tag" release-assets/*.jar release-assets/SHA256SUMS \
+            --title "$tag" \
+            --notes-file release-notes.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

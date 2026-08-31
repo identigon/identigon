@@ -1,5 +1,6 @@
 plugins {
     application
+    `maven-publish`
     // Code hygiene, kept in step with the sibling subprojects (incognito, alterego) -- see the
     // root build.gradle.kts's `subprojects { }` block for the shared Spotless/SpotBugs/PMD config.
     alias(libs.plugins.spotless) // version pinned at the root
@@ -72,51 +73,69 @@ tasks.test {
     }
 }
 
-// A single runnable ("fat") jar so the tool runs with a bare `java -jar build/libs/identigon.jar`
-// - the runtime classpath (incognito, alterego, snakeyaml, JDBC drivers) is bundled in. No
-// shadow plugin needed; plain Gradle assembles it. Signature files from signed dependency jars are
-// dropped, as they would otherwise invalidate the merged jar.
-//
-// Named "identigon.jar", not "effigies.jar": consumers run this one artifact and never touch
-// incognito/alterego directly, so the jar (and the CLI's own --version/--help banner, see
-// EffigiesCli) present the project's public name. "effigies" stays as the internal module/package
-// name only -- see the module's own Javadoc and ADR 23 for why the three-subproject split exists.
-tasks.jar {
-    // A stable, unversioned filename so `java -jar build/libs/identigon.jar` always works; the
-    // version travels in the manifest (Implementation-Version) instead.
-    archiveFileName = "identigon.jar"
-    manifest {
-        attributes["Main-Class"] = application.mainClass.get()
-        attributes["Implementation-Title"] = "Identigon"
-        attributes["Implementation-Version"] = project.version.toString()
+// effigies' own `jar` task is deliberately left at its plain default here (no override): it
+// produces a normal thin jar containing only effigies' own classes, which is what gets published
+// below as the real Maven artifact `org.identigon:effigies`. The standalone-runnable *fat* jar
+// (`identigon.jar` - incognito, alterego, SnakeYAML, the Postgres driver and effigies' own classes
+// all merged) is assembled at the monorepo root instead, not here - see the `identigonJar` task in
+// the root build.gradle.kts and docs/adr/0028-publish-effigies-runnable-jar.md for why. Publishing
+// the fat jar under this project's own plain Maven coordinate would be wrong: a consumer resolving
+// `org.identigon:effigies` transitively would get incognito/alterego/SnakeYAML/the Postgres driver
+// twice - once embedded in the jar, once again from this POM's own resolved dependencies.
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            artifactId = "effigies"
+            // The standalone-runnable fat jar, also published here under this same coordinate
+            // (a `-standalone` classifier, not the primary artifact) rather than as its own
+            // separate GAV - the usual way to offer a shaded jar alongside a real one without a
+            // dependency resolver ever selecting it by accident, since a classified artifact is
+            // never chosen unless asked for by name. Built at the root, not here - see the
+            // `identigonJar` task in the root build.gradle.kts.
+            artifact(rootProject.tasks.named("identigonJar")) {
+                classifier = "standalone"
+            }
+
+            pom {
+                name = "Effigies"
+                description = "A Java CLI that discovers database schemas, scaffolds declarative " +
+                    "policy.yaml files, and drives Incognito to anonymise databases."
+                url = "https://github.com/identigon/identigon/tree/main/effigies"
+                licenses {
+                    license {
+                        name = "MIT License"
+                        url = "https://github.com/identigon/identigon/blob/main/LICENCE"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "identigon"
+                        name = "Identigon"
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://github.com/identigon/identigon.git"
+                    developerConnection = "scm:git:https://github.com/identigon/identigon.git"
+                    url = "https://github.com/identigon/identigon/tree/main/effigies"
+                }
+            }
+        }
     }
-    // Now that incognito/alterego are sibling project() dependencies rather than external Maven
-    // coordinates, Gradle can't infer from the `from({ ... })` closure alone that this task's output
-    // depends on their jar tasks -- declare it explicitly so build ordering/up-to-date checks are correct.
-    dependsOn(configurations.runtimeClasspath)
-    from({
-        configurations.runtimeClasspath.get()
-            .filter { it.name.endsWith(".jar") }
-            .map { zipTree(it) }
-    })
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "META-INF/*.kotlin_module")
-    // Both alterego's and incognito's own jars carry a META-INF/LICENCE of their own (different
-    // content -- see below), zipTree'd in above along with everything else on the runtime
-    // classpath. Drop whichever one the merge would otherwise pick (order/precedence between a
-    // zipTree'd entry and an explicit from() is not something to rely on) and add our own
-    // deliberately, so which LICENCE/NOTICE end up in this jar is unambiguous.
-    exclude("META-INF/LICENCE", "META-INF/NOTICE")
-    // This is alterego's LICENCE, not the root's, deliberately: this fat jar physically bundles
-    // alterego's classes and its OGL-derived dictionary data (zipTree'd in above from the runtime
-    // classpath), so the plain root LICENCE alone would omit the OGL attribution clause that data
-    // requires. alterego's LICENCE is a superset -- the same plain MIT text, plus that clause -- so
-    // it correctly covers effigies' and incognito's own MIT-only code too.
-    from(rootProject.file("alterego/LICENCE")) {
-        into("META-INF")
-    }
-    from(rootProject.file("alterego/NOTICE")) {
-        into("META-INF")
+    // Publish to this repository's GitHub Packages Maven registry. `./gradlew publish` pushes here;
+    // credentials come from the environment only (GITHUB_ACTOR/GITHUB_TOKEN), never committed - so
+    // locally `publish` has nowhere authenticated to push unless those are set. Mirrors
+    // alterego/incognito. Unlike them, no `withSourcesJar()`/`withJavadocJar()`: effigies is a CLI,
+    // not a library anyone is meant to browse the source/API docs of via a dependency manager.
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/identigon/identigon")
+            credentials {
+                username = providers.environmentVariable("GITHUB_ACTOR").orNull
+                password = providers.environmentVariable("GITHUB_TOKEN").orNull
+            }
+        }
     }
 }
 

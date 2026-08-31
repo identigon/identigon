@@ -20,6 +20,32 @@ too would be the same fact in two places.
 
 ## [Unreleased]
 
+### alterego
+
+- **Now also published as a `GitHubPackages`-mirrored jar attached to the GitHub Release, once a
+  release is cut via the new `.github/workflows/release.yml`.** No change to the Maven artifact
+  itself (`org.identigon:alterego`); this only adds a second, token-free way to fetch the plain
+  jar directly (see effigies below for why one was needed).
+
+### incognito
+
+- Same GitHub Release mirroring as alterego, above - no change to `org.identigon:incognito` itself.
+
+### effigies
+
+- **`effigies` is now published to GitHub Packages too** (`org.identigon:effigies`), the same way
+  alterego/incognito already are - a normal thin jar with an accurate POM (no javadoc/sources jar).
+  Previously effigies had no `publishing {}` block at all.
+- **The standalone-runnable fat jar moved from `effigies/build/libs/identigon.jar` to
+  `build/libs/identigon.jar` (the monorepo root), and is now a dedicated `identigonJar` task
+  there instead of an override of effigies' own `jar` task.** `effigies/build.gradle.kts`'s `jar`
+  task now produces a normal thin jar (just effigies' own classes) - anyone invoking `:effigies
+  :jar` directly for the old fat-jar behaviour needs the root-level `identigonJar` task instead.
+  A plain top-level `./gradlew build` still produces `identigon.jar` without any extra step. The
+  fat jar is unchanged in content and filename otherwise, and is also published to GitHub Packages
+  under the `org.identigon:effigies` coordinate with a `standalone` classifier, alongside the GitHub
+  Release copy above. See `docs/adr/0028-publish-effigies-runnable-jar.md`.
+
 ## [1.1.0] - 2026-08-26
 
 ### alterego
