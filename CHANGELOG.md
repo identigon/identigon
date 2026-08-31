@@ -76,15 +76,17 @@ too would be the same fact in two places.
 - **`effigies` is now published to GitHub Packages too** (`org.identigon:effigies`), the same way
   alterego/incognito already are - a normal thin jar with an accurate POM (no javadoc/sources jar).
   Previously effigies had no `publishing {}` block at all.
-- **The standalone-runnable fat jar moved from `effigies/build/libs/identigon.jar` to
-  `build/libs/identigon.jar` (the monorepo root), and is now a dedicated `identigonJar` task
-  there instead of an override of effigies' own `jar` task.** `effigies/build.gradle.kts`'s `jar`
-  task now produces a normal thin jar (just effigies' own classes) - anyone invoking `:effigies
-  :jar` directly for the old fat-jar behaviour needs the root-level `identigonJar` task instead.
-  A plain top-level `./gradlew build` still produces `identigon.jar` without any extra step. The
-  fat jar is unchanged in content and filename otherwise, and is also published to GitHub Packages
-  under the `org.identigon:effigies` coordinate with a `standalone` classifier, alongside the GitHub
-  Release copy above. See `docs/adr/0028-publish-effigies-runnable-jar.md`.
+- **`effigies`' own `jar` task now produces a normal thin jar (just effigies' own classes); the
+  standalone-runnable fat jar is a separate `identigonJar` task, not an override of `jar`.**
+  Anyone invoking `:effigies:jar` directly for the old fat-jar behaviour needs
+  `:effigies:identigonJar` instead. A plain top-level `./gradlew build` still produces
+  `effigies/build/libs/identigon.jar` without any extra step. The fat jar is unchanged in content
+  and filename otherwise, and is also published to GitHub Packages under the
+  `org.identigon:effigies` coordinate with a `standalone` classifier (not its own separate GAV,
+  which would duplicate incognito/alterego/SnakeYAML/the Postgres driver for anyone resolving it
+  normally), alongside the GitHub Release copy above. See
+  `docs/adr/0028-publish-effigies-runnable-jar.md` and
+  `docs/adr/0030-standalone-jar-assembly-back-in-effigies.md`.
 - **`scaffold` now suggests `directIdStrategy`, `distinguishing`, `references` and
   `surrogateStrategy`, not just `role`.** Previously only `role:` carried a suggestion comment,
   leaving every other decision that determines output quality to be hand-written from scratch. Now:

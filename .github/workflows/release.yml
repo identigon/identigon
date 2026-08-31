@@ -63,7 +63,7 @@ jobs:
           mkdir -p release-assets
           cp "alterego/build/libs/alterego-$version.jar" release-assets/alterego.jar
           cp "incognito/build/libs/incognito-$version.jar" release-assets/incognito.jar
-          cp "build/libs/identigon.jar" release-assets/identigon.jar
+          cp "effigies/build/libs/identigon.jar" release-assets/identigon.jar
           ( cd release-assets && sha256sum -- *.jar > SHA256SUMS )
 
       - name: Attest build provenance
