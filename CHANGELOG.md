@@ -20,6 +20,8 @@ too would be the same fact in two places.
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-09-01
+
 ### alterego
 
 - **Now also published as a `GitHubPackages`-mirrored jar attached to the GitHub Release, once a
