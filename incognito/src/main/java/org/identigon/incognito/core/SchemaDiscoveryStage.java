@@ -67,12 +67,23 @@ public final class SchemaDiscoveryStage implements PipelineStage {
 
         java.util.Map<String, java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion>> suggestions = new java.util.HashMap<>();
 
-        // 2. Validate policy: every discovered column in policy-declared tables must have a role.
+        // 2. Validate policy: every discovered column in policy-declared tables must have a role,
+        //    plus the role-specific requirements below (SENSITIVE/distinguishing, DIRECT_ID/
+        //    directIdStrategy, QUASI_ID/SYNTHESISE-by-type). Accumulated across every table and
+        //    every check, not thrown on the first hit, so one run reports everything wrong at once
+        //    instead of the author fixing issues one table (or one column) at a time across
+        //    repeated runs.
+        List<String> failures = new java.util.ArrayList<>();
         AnonymisationPolicy policy = context.policy();
         for (SchemaInspector.TableMetadata table : metadata) {
             policy.table(table.tableName()).ifPresent(tablePolicy ->
-                validateTablePolicy(table, tablePolicy, suggestions)
+                validateTablePolicy(table, tablePolicy, suggestions, failures)
             );
+        }
+        if (!failures.isEmpty()) {
+            throw new IncognitoException.ConfigException(
+                "Fail-closed: " + failures.size() + " issue(s) found - fix all at once, not one run"
+                    + " at a time:\n  - " + String.join("\n  - ", failures));
         }
 
         // 3. Build the topological execution plan.
@@ -93,13 +104,16 @@ public final class SchemaDiscoveryStage implements PipelineStage {
     }
 
     /**
-     * Validates that every column in the discovered table has a declared role in the policy.
-     * Fail-closed: an unclassified column aborts the run with ConfigException (SPEC §7.2).
+     * Validates that every column in the discovered table has a declared role in the policy, and
+     * that role-specific requirements are met. Fail-closed: every issue found is appended to
+     * {@code failures} rather than thrown immediately (SPEC §7.2) - the caller throws once, after
+     * every table has been checked.
      */
     private void validateTablePolicy(
             SchemaInspector.TableMetadata table,
             TablePolicy tablePolicy,
-            java.util.Map<String, java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion>> allSuggestions) {
+            java.util.Map<String, java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion>> allSuggestions,
+            List<String> failures) {
 
         java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion> tableSuggestions = new java.util.ArrayList<>();
         // Collected across the WHOLE table rather than thrown on the first hit, so one run reports
@@ -141,14 +155,11 @@ public final class SchemaDiscoveryStage implements PipelineStage {
                 ColumnPolicy colPol = declared.get();
                 if (colPol.role() == ColumnRole.SENSITIVE) {
                     if (colPol.distinguishing() == null) {
-                        throw new IncognitoException.ConfigException(
-                            "Fail-closed: SENSITIVE column '" + column + "' in table '" + table.tableName()
-                                + "' does not declare the 'distinguishing' flag. It must explicitly be distinguishing: true or false (SPEC §4.1).");
-                    }
-                    if (colPol.distinguishing() && colPol.quasiIdStrategy() == null && colPol.redactionStrategy() == null) {
-                        throw new IncognitoException.ConfigException(
-                            "Fail-closed: SENSITIVE column '" + column + "' in table '" + table.tableName()
-                                + "' is distinguishing: true, but declares no RedactionStrategy or QuasiIdStrategy (SPEC §4.1).");
+                        failures.add("SENSITIVE column '" + column + "' in table '" + table.tableName()
+                            + "' does not declare the 'distinguishing' flag. It must explicitly be distinguishing: true or false (SPEC §4.1).");
+                    } else if (colPol.distinguishing() && colPol.quasiIdStrategy() == null && colPol.redactionStrategy() == null) {
+                        failures.add("SENSITIVE column '" + column + "' in table '" + table.tableName()
+                            + "' is distinguishing: true, but declares no RedactionStrategy or QuasiIdStrategy (SPEC §4.1).");
                     }
                 } else if (colPol.role() == ColumnRole.DIRECT_ID) {
                     // No implicit ALTEREGO_GENERIC default (ADR 29): a DIRECT_ID with no declared
@@ -158,24 +169,22 @@ public final class SchemaDiscoveryStage implements PipelineStage {
                     // claimed to carry a fictionality guarantee, so its silent ALTEREGO_GENERIC
                     // default is unaffected.
                     if (colPol.directIdStrategy() == null) {
-                        throw new IncognitoException.ConfigException(
-                            "Fail-closed: DIRECT_ID column '" + column + "' in table '" + table.tableName()
-                                + "' does not declare a directIdStrategy. It must be explicit - "
-                                + "ALTEREGO_GENERIC is a valid choice, but not a silent one (SPEC §4.1).");
+                        failures.add("DIRECT_ID column '" + column + "' in table '" + table.tableName()
+                            + "' does not declare a directIdStrategy. It must be explicit - "
+                            + "ALTEREGO_GENERIC is a valid choice, but not a silent one (SPEC §4.1).");
                     }
                 } else if (colPol.role() == ColumnRole.QUASI_ID) {
-                    validateSynthesiseType(table, column, colPol);
+                    validateSynthesiseType(table, column, colPol, failures);
                 }
             }
         }
         allSuggestions.put(table.tableName(), tableSuggestions);
 
         if (!unclassifiedMessages.isEmpty()) {
-            throw new IncognitoException.ConfigException(
-                "Fail-closed: table '" + table.tableName() + "' has " + unclassifiedMessages.size()
-                    + " unclassified column(s) with no declared ColumnRole in the policy: "
-                    + String.join(", ", unclassifiedMessages)
-                    + ". Classify each explicitly - auto-infer only suggests, never assigns.");
+            failures.add("table '" + table.tableName() + "' has " + unclassifiedMessages.size()
+                + " unclassified column(s) with no declared ColumnRole in the policy: "
+                + String.join(", ", unclassifiedMessages)
+                + ". Classify each explicitly - auto-infer only suggests, never assigns.");
         }
     }
 
@@ -183,11 +192,12 @@ public final class SchemaDiscoveryStage implements PipelineStage {
      * Fail-closed guard for {@code SYNTHESISE}-by-type (SPEC Appendix B): a {@code QUASI_ID} that is
      * synthesised (its strategy is {@code SYNTHESISE}, or absent - the default) from a source type
      * with no built-in generator, and with no typed {@code directIdStrategy} hint, would silently
-     * shape-fabricate. That is forbidden; abort with a clear message directing the author to the fix.
-     * Temporal and character types have a mapping ({@link #isSynthesisableType}) and pass.
+     * shape-fabricate. That is forbidden; the issue is appended to {@code failures} rather than
+     * thrown immediately - see {@link #validateTablePolicy}. Temporal and character types have a
+     * mapping ({@link #isSynthesisableType}) and pass.
      */
     private void validateSynthesiseType(
-            SchemaInspector.TableMetadata table, String column, ColumnPolicy colPol) {
+            SchemaInspector.TableMetadata table, String column, ColumnPolicy colPol, List<String> failures) {
         QuasiIdStrategy strategy = colPol.quasiIdStrategy();
         boolean synthesise = strategy == null || strategy == QuasiIdStrategy.SYNTHESISE;
         if (!synthesise || colPol.directIdStrategy() != null) {
@@ -195,11 +205,10 @@ public final class SchemaDiscoveryStage implements PipelineStage {
         }
         Integer sqlType = table.columnTypes() == null ? null : table.columnTypes().get(column);
         if (sqlType != null && !isSynthesisableType(sqlType)) {
-            throw new IncognitoException.ConfigException(
-                "Fail-closed: QUASI_ID column '" + column + "' in table '" + table.tableName()
-                    + "' uses SYNTHESISE but its type (" + jdbcTypeName(sqlType) + ") has no built-in"
-                    + " generator. Declare a directIdStrategy hint (e.g. ALTEREGO_POSTCODE) or a custom"
-                    + " strategy - SYNTHESISE never shape-fabricates an unmapped type (SPEC Appendix B).");
+            failures.add("QUASI_ID column '" + column + "' in table '" + table.tableName()
+                + "' uses SYNTHESISE but its type (" + jdbcTypeName(sqlType) + ") has no built-in"
+                + " generator. Declare a directIdStrategy hint (e.g. ALTEREGO_POSTCODE) or a custom"
+                + " strategy - SYNTHESISE never shape-fabricates an unmapped type (SPEC Appendix B).");
         }
     }
 

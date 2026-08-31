@@ -36,6 +36,11 @@ too would be the same fact in two places.
   time instead, the same way an undeclared `SENSITIVE` `distinguishing` flag already does (ADR
   16). `ALTEREGO_GENERIC` remains fully valid as an explicit choice; `UNIQUE_CANDIDATE_KEY` is
   unaffected. See `docs/adr/0029-declared-direct-id-strategy.md`.
+- **Fail-closed schema validation now reports every issue across the whole schema in one run,
+  not one table (or one issue) at a time.** `SchemaDiscoveryStage` previously threw on the first
+  table with a problem, and even within one table stopped at the first `SENSITIVE`/`DIRECT_ID`/
+  `QUASI_ID` issue hit (only unclassified columns were already collected per-table). Every check
+  is now accumulated across every table before a single `ConfigException` lists them all.
 
 ### effigies
 
@@ -51,6 +56,18 @@ too would be the same fact in two places.
   fat jar is unchanged in content and filename otherwise, and is also published to GitHub Packages
   under the `org.identigon:effigies` coordinate with a `standalone` classifier, alongside the GitHub
   Release copy above. See `docs/adr/0028-publish-effigies-runnable-jar.md`.
+- **`scaffold` now suggests `directIdStrategy`, `distinguishing`, `references` and
+  `surrogateStrategy`, not just `role`.** Previously only `role:` carried a suggestion comment,
+  leaving every other decision that determines output quality to be hand-written from scratch. Now:
+  a `DIRECT_ID` suggestion with an unambiguous heuristic also suggests the matching
+  `directIdStrategy`; a `SENSITIVE` suggestion suggests filling in `distinguishing`; a column
+  `SchemaInspector` already knows is structurally a primary or foreign key is suggested as such
+  (a fact, not a heuristic guess) with `surrogateStrategy`/a pre-filled
+  `references: {table, column}` respectively. Still "suggest, never assign" throughout - every
+  suggestion is a comment, nothing is written into a real key. Also fixes `PolicyInferrer`'s
+  `CREDIT_CARD_PATTERN`: it suggested
+  `DIRECT_ID`, but a card number has no typed fictional-generator and is conventionally redacted -
+  it now suggests `SENSITIVE`, matching how `incognito` actually treats one.
 
 ## [1.1.0] - 2026-08-26
 

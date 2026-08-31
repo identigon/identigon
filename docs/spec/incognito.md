@@ -759,6 +759,12 @@ accepted inferred role **fails the run** with `IncognitoException.ConfigExceptio
 copies an unclassified column assuming it is harmless. This is the mechanism that stops an unspotted
 identifier leaking through as `PAYLOAD`.
 
+**Every issue is found before any is thrown.** `SchemaDiscoveryStage` checks every table and every
+role-specific requirement (this section; `distinguishing` for `SENSITIVE`, §4.1; `directIdStrategy`
+for `DIRECT_ID`, §4.1; `SYNTHESISE`-by-type for `QUASI_ID`, Appendix B) before raising anything, so
+one run reports every problem across the whole schema at once - not one table, or one column, per
+run.
+
 **`autoInfer` / `PolicyInferrer` are deprecated (`forRemoval = true`).** Inference is authoring, not
 execution - fail-closed classification means it never affected engine output - and it now lives in
 `effigies`' own `PolicyInferrer`, which is what actually interviews users during authoring. This

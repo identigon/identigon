@@ -9,21 +9,6 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Project:** effigies - **`scaffold` should emit strategy stubs, not just `role:`.**
-  `ScaffoldCommand.writeScaffold` writes only a `role:` TODO per column; the decisions that
-  determine output quality (`directIdStrategy` for `DIRECT_ID`, `distinguishing` for `SENSITIVE`,
-  `references` for `FOREIGN_KEY`) are left for the author to hand-write from scratch even though
-  `PolicyInferrer` and `SchemaInspector` already know enough to suggest them (the matched
-  heuristic, the resolved FK target). Emit a commented TODO stub with the suggestion inline for
-  each, the same "suggest, never assign" pattern already used for `role:`. More pressing now that
-  `directIdStrategy` fails closed (ADR 29): an un-stubbed scaffold is a hard stop, not a silent
-  gap.
-- [ ] **Project:** incognito - **Fail-closed policy validation should accumulate across all
-  tables, not stop at the first.** `SchemaDiscoveryStage.validateTablePolicy` already collects
-  every unclassified column *within* one table before throwing, specifically so the author fixes
-  them in one pass - but `process`'s outer loop over tables throws on the first table with a
-  problem, so a schema with unclassified columns in several tables still takes one run per table to
-  discover them all. Collect across every table and throw once, listing all of them.
 - [ ] **Project:** effigies - **A `validate` command: check a policy against a schema with no
   target database or data movement.** `SchemaDiscoveryStage.validateTablePolicy`'s fail-closed
   messages are the best diagnostics in the tool but are only reachable by committing to a full
