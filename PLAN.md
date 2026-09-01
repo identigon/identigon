@@ -9,6 +9,23 @@ shipped.
 
 ## Outstanding
 
+- [ ] **Project:** effigies - **Revisit excluding `effigies.jar` from the GitHub Release assets.**
+  ADR-0028 deliberately left the thin `effigies.jar` out of the Release asset set (`alterego.jar`,
+  `incognito.jar`, `identigon.jar` only) on the reasoning that it can't run standalone - anyone
+  wanting effigies as a library uses GPR (`org.identigon:effigies`), and anyone wanting to run it
+  uses the fat `identigon.jar`. Revisit this decision before treating it as settled.
+- [ ] **Project:** effigies - **JaCoCo.** Optional, consistency-only with `alterego`/`incognito`'s
+  coverage reporting.
+- [ ] **Project:** effigies - **A non-interactive "authoring session" mode.** Runs discover ->
+  scaffold -> (agent) -> run in one invocation, with the DPIA report fed back for iteration.
+- [ ] **Project:** effigies - **Support for engines `incognito` adds beyond PostgreSQL.** No change
+  needed here when it lands.
+- [ ] **Project:** effigies - **Revisit `quickstart/` and the Agent Skill once
+  `incognito`'s policy-API backlog lands.** Several `alterego` capabilities `incognito` doesn't
+  expose yet (remaining identifier generators, a bank-account generator, `RecordScope` cross-field
+  coherence, jitter/clamp knobs, a `pattern(String)` strategy - see the matching
+  `incognito`-tagged entries above) are candidates to fold into the quickstart policy and teach the
+  `identigon-policy-author` skill to suggest, as each lands.
 - [ ] **Project:** incognito - **Composite PK + cyclic FK together.** Currently fails closed with a
   clear message rather than corrupting data; not exercised by any benchmark. Bigger than "widen the
   pass-2 `UPDATE` to key on every PK column" - the real gap is deferred *composite-FK* resolution
