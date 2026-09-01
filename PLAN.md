@@ -9,18 +9,10 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Project:** incognito - **`YamlPolicyParser` accepts unrecognised keys within a
-  table/column block instead of rejecting them.** Every field is read via
-  `colNode.get("exactName")` with no validation against a known key set, so a typo on an optional
-  key (e.g. `jitterdays` for `jitterDays`) is silently dropped, an internal default applies, and
-  `validate` reports success even though the run's behaviour now diverges from the declared
-  policy. Fix: reject unrecognised keys, naming the offending key and column; carve out an
-  explicit allow-list for intentionally-retired keys (`autoInfer` today) so back-compat tolerance
-  stays deliberate rather than blanket. Found by external tutorial feedback.
 - [ ] **Project:** incognito - **`fictionalityVerified` in the DPIA report reads `true` for
   columns no fictionality check actually covers.** It's computed in `VerificationStage` as "table
   policy present and no specific check failed" - so `ALTEREGO_GENERIC` (declared deliberately,
-  e.g. `bank_account`) and hint-less `QUASI_ID` shape-fabrication (see the entry above) both report
+  e.g. `bank_account`) and a hint-less character-type `QUASI_ID`'s shape-fabrication both report
   `Fictionality Verified: true` with no supporting check having run for that column. Scope the flag
   per column, or rename it to reflect that it covers survival/misdeclaration checks rather than a
   fictionality guarantee. Found by external tutorial feedback.

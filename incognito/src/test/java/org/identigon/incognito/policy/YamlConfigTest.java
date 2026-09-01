@@ -149,6 +149,75 @@ class YamlConfigTest {
     }
 
     @Test
+    void mistypedOptionalColumnKeyFailsRatherThanSilentlyDropping() {
+        // A typo on an optional key (jitterdays for jitterDays) must not vanish silently: the run
+        // would otherwise use JITTER_DAYS's internal default window instead of the declared one,
+        // diverging from what the policy says with no signal (the bug the new check closes).
+        String yamlString = """
+            tables:
+              orders:
+                columns:
+                  ordered_on:
+                    role: QUASI_ID
+                    quasiIdStrategy: JITTER_DAYS
+                    jitterdays: 10
+            """;
+
+        InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
+        YamlPolicyParser parser = new YamlPolicyParser();
+
+        IncognitoException.ConfigException ex = assertThrows(
+            IncognitoException.ConfigException.class, () -> parser.parse(inputStream));
+        assertTrue(ex.getMessage().contains("'jitterdays'"), ex.getMessage());
+        assertTrue(ex.getMessage().contains("'ordered_on'"), ex.getMessage());
+        assertTrue(ex.getMessage().contains("'orders'"), ex.getMessage());
+    }
+
+    @Test
+    void everyUnrecognisedKeyIsReportedInOneRunNotOnePerRetry() {
+        // Matches SchemaDiscoveryStage's "fix all at once" convention: three typos, at three
+        // different nesting levels, all in one exception rather than one per re-run.
+        String yamlString = """
+            maxCategoricalCardinalty: 64
+            tables:
+              customers:
+                extraTableKey: nonsense
+                columns:
+                  email:
+                    role: DIRECT_ID
+                    directIdStrategey: ALTEREGO_EMAIL
+            """;
+
+        InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
+        YamlPolicyParser parser = new YamlPolicyParser();
+
+        IncognitoException.ConfigException ex = assertThrows(
+            IncognitoException.ConfigException.class, () -> parser.parse(inputStream));
+        assertTrue(ex.getMessage().contains("'maxCategoricalCardinalty'"), ex.getMessage());
+        assertTrue(ex.getMessage().contains("'extraTableKey'"), ex.getMessage());
+        assertTrue(ex.getMessage().contains("'directIdStrategey'"), ex.getMessage());
+    }
+
+    @Test
+    void retiredAutoInferKeyIsToleratedNotJustAnyUnrecognisedKey() {
+        // The one deliberate exception (RETIRED_ROOT_KEYS): a pre-v2.0.0 policy.yaml carrying
+        // autoInfer must keep parsing, unlike every other unrecognised key.
+        String yamlString = """
+            autoInfer: true
+            tables:
+              customers:
+                columns:
+                  status:
+                    role: PAYLOAD
+            """;
+
+        InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
+        AnonymisationPolicy policy = new YamlPolicyParser().parse(inputStream);
+
+        assertEquals(1, policy.tables().size());
+    }
+
+    @Test
     void structuralUniquenessKeysParseFromYaml() {
         String yamlString = """
             structuralUniqueness: REPORT

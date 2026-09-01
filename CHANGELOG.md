@@ -30,6 +30,13 @@ too would be the same fact in two places.
   temporal `SYNTHESISE` columns (`DATE`/`TIMESTAMP`) are unaffected - they keep their type-matched
   shift primitive and need no hint. See
   `docs/adr/0031-declared-direct-id-strategy-for-quasi-id-synthesise.md`.
+- **`YamlPolicyParser` now rejects unrecognised keys** at the policy root, inside a table block, or
+  inside a column block, instead of silently ignoring them. Previously a typo on an optional key
+  (e.g. `jitterdays` for `jitterDays`) was dropped with no signal, an internal default applied, and
+  the run diverged from what the policy declared; `validate` reported success regardless. Every
+  issue across the whole file is now collected into one `ConfigException`, matching
+  `SchemaDiscoveryStage`'s "fix all at once" convention. `autoInfer` remains the one tolerated
+  exception, for back-compat with a pre-v2.0.0 `policy.yaml`.
 
 ### effigies
 

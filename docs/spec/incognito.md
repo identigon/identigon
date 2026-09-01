@@ -510,6 +510,15 @@ tables:
       end_date: { role: QUASI_ID, quasiIdStrategy: JITTER_WITHIN_MONTH, coherenceGroup: contract }
 ```
 
+**Unrecognised keys fail closed.** `YamlPolicyParser` rejects any key at the policy root, inside a
+table block, or inside a column block that it does not read - every issue across the whole file is
+collected before one `ConfigException` lists them all, the same "fix all at once" convention as
+`SchemaDiscoveryStage` (§7.2). A typo on an optional key (e.g. `jitterdays` for `jitterDays`) would
+otherwise be silently dropped and an internal default applied, changing the run's behaviour without
+changing what the policy says. The one deliberate exception is a fixed, explicit allow-list of
+retired keys - `autoInfer` today, meaningless since `incognito`'s own inference was removed at
+v2.0.0 (§7.2) - kept for back-compat with a pre-v2.0.0 `policy.yaml` rather than failing it.
+
 ### 6.1 Root Ancestor Cascade Resolution
 
 An `INHERITED_ATTRIBUTE` column declares its source with `derived_from: <table>.<column>` (e.g.
