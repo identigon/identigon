@@ -9,13 +9,6 @@ shipped.
 
 ## Outstanding
 
-- [ ] **`pg_dump` guidance for creating the target database is documented on the site, not in this
-  repo.** Getting Started's `pg_dump --schema-only --no-owner --no-privileges` never made it into
-  any `.md` here, so a reader arriving via GitHub - where the "schema-identical target database"
-  prerequisite is stated with no method - doesn't see it. Getting this wrong (omitting
-  `--schema-only`) is silently destructive, since `run` loads into the target rather than replacing
-  it. A line in `README.md` pointing at the site would cover it. Found by external tutorial
-  feedback.
 - [ ] **Project:** effigies - **`discover`/`scaffold` report JDBC's type names, not PostgreSQL's**
   (a `BOOLEAN` column shows as `type: BIT`, `TEXT` as `type: VARCHAR`). Not a defect - both are
   correct at the JDBC layer - but the type is an input to choosing a strategy, so an author

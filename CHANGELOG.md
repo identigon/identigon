@@ -61,6 +61,12 @@ too would be the same fact in two places.
   `quickstart/README.md` gained a matching "Validate the policy" step between authoring and
   running. `validate` existed already (v2.0.0) but the quickstart never demonstrated the
   no-target-connection, no-data-movement feedback loop it exists to provide.
+- **`effigies/README.md`'s `run` section now explains how to create the target database.**
+  `pg_dump --schema-only --no-owner --no-privileges`, loaded into a fresh database, with a note
+  that omitting `--schema-only` is destructive (it dumps real rows into what's meant to become the
+  anonymised target) - the guidance already existed on the project site's Getting Started page but
+  never made it into this repo, so a reader arriving via GitHub had the prerequisite named with no
+  method.
 
 ## [2.0.0] - 2026-09-01
 

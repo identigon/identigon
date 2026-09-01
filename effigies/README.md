@@ -95,7 +95,22 @@ java -jar effigies/build/libs/identigon.jar validate --policy ./policy.yaml \
 
 ### 4. Orchestration (`run`)
 
-Once the policy is authored, drive the `incognito` engine to produce the clone:
+`run` needs a **schema-identical, empty** target database - `incognito` loads *into* it, it does
+not create or replace it for you. The simplest way to get one is `pg_dump --schema-only` from the
+source, loaded into a fresh database:
+
+```bash
+pg_dump --schema-only --no-owner --no-privileges -h ... -U ... -d source_db > schema.sql
+psql -h ... -U ... -d target_db -f schema.sql
+```
+
+`--schema-only` is not optional here: omitting it dumps the data too, and loading real rows into
+what's supposed to become the target defeats the entire point of anonymising into it. See
+[Getting Started](https://identigon.org/getting-started) on the project site for the fuller
+walkthrough.
+
+Once the policy is authored and the target exists, drive the `incognito` engine to produce the
+clone:
 
 ```bash
 export IDENTIGON_SOURCE_PASSWORD="secret"
