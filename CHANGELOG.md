@@ -54,6 +54,13 @@ too would be the same fact in two places.
   one** (`postcode` via `POSTCODE_PATTERN` today), mirroring the existing `DIRECT_ID` stub - closes
   the gap where a scaffolded policy could land on incognito's new QUASI_ID fail-closed guard above
   with no suggestion of how to fix it.
+- **`quickstart/`'s driver scripts and README now run `validate` between authoring and `run`.**
+  `run-quickstart.sh`/`.ps1`'s one-shot demo is `discover -> scaffold -> validate -> run`
+  (previously skipped `validate`), and `./run-quickstart.sh run` (the real authoring workflow's
+  second half) validates the finished policy before anonymising with it. The manual walkthrough in
+  `quickstart/README.md` gained a matching "Validate the policy" step between authoring and
+  running. `validate` existed already (v2.0.0) but the quickstart never demonstrated the
+  no-target-connection, no-data-movement feedback loop it exists to provide.
 
 ## [2.0.0] - 2026-09-01
 

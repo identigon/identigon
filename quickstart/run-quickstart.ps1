@@ -9,15 +9,17 @@
 
       .\run-quickstart.ps1
           One-shot demo: starts a throwaway PostgreSQL container, loads schema.sql + seed-data.sql,
-          builds the CLI jar if needed, runs discover -> scaffold -> run against the finished
-          policy.yaml already checked into this directory, and prints the fabricated rows. Nothing
-          to decide, nothing to author -- just to see the tool work.
+          builds the CLI jar if needed, runs discover -> scaffold -> validate -> run against the
+          finished policy.yaml already checked into this directory, and prints the fabricated
+          rows. Nothing to decide, nothing to author -- just to see the tool work.
 
       .\run-quickstart.ps1 setup
       .\run-quickstart.ps1 run
           The real authoring workflow: 'setup' gets you a scaffolded draft and stops there --
           classify it yourself with the identigon-policy-author Agent Skill (or by hand), then
-          'run' anonymises against whatever you ended up with and shows the DPIA report.
+          'run' validates the finished policy against the source schema first (no target
+          connection, no data movement -- the cheap feedback loop), then anonymises against it and
+          shows the DPIA report.
 
       .\run-quickstart.ps1 clean
           Stops and removes the throwaway container and any generated draft/report files.
@@ -197,16 +199,19 @@ function Invoke-Demo {
         $env:IDENTIGON_SOURCE_PASSWORD = $PgPassword
         $env:IDENTIGON_TARGET_PASSWORD = $PgPassword
 
-        Write-Step "Step 1/3 - discover: reading the source schema (metadata only, no row values)"
+        Write-Step "Step 1/4 - discover: reading the source schema (metadata only, no row values)"
         Invoke-Checked java -jar $Jar discover --source-url $SourceUrl --source-user postgres
 
-        Write-Step "Step 2/3 - scaffold: what Identigon can classify on its own"
+        Write-Step "Step 2/4 - scaffold: what Identigon can classify on its own"
         Invoke-Checked java -jar $Jar scaffold --source-url $SourceUrl --source-user postgres --out (Join-Path $demoDir 'policy.draft.yaml')
         Write-Host "(Written to $demoDir\policy.draft.yaml - open it to see the suggestions and TODOs."
         Write-Host " This one-shot demo uses the finished policy.yaml in this directory instead of the draft;"
         Write-Host " run '.\run-quickstart.ps1 setup' if you want to author the draft yourself.)"
 
-        Write-Step "Step 3/3 - run: anonymising the clone"
+        Write-Step "Step 3/4 - validate: checking the finished policy.yaml against the source schema (no target connection, no data movement)"
+        Invoke-Checked java -jar $Jar validate --policy (Join-Path $ScriptDir 'policy.yaml') --source-url $SourceUrl --source-user postgres
+
+        Write-Step "Step 4/4 - run: anonymising the clone"
         Push-Location $demoDir
         try {
             Invoke-Checked java -jar $Jar run --policy (Join-Path $ScriptDir 'policy.yaml') `
@@ -304,6 +309,9 @@ function Invoke-Run([string]$PolicyArg) {
 
         $env:IDENTIGON_SOURCE_PASSWORD = $PgPassword
         $env:IDENTIGON_TARGET_PASSWORD = $PgPassword
+
+        Write-Step "validate: checking $resolvedPolicy against the source schema (no target connection, no data movement)"
+        Invoke-Checked java -jar $Jar validate --policy $resolvedPolicy --source-url $SourceUrl --source-user postgres
 
         Write-Step "run: anonymising against $resolvedPolicy"
         Push-Location $reportDir

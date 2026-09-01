@@ -38,10 +38,10 @@ Requires Docker and Java 25 - nothing else to install:
 (Windows without a POSIX shell: `.\run-quickstart.ps1` instead - same commands throughout.)
 
 One command: starts a throwaway Postgres container, loads the schema and sample data, builds the
-CLI jar if it isn't already built, runs `discover` -> `scaffold` -> `run` against the finished
-`policy.yaml` already in this directory, and prints the fabricated rows for you to look at, with a
-short explanation of what to check. Nothing to author, nothing to decide - just to see the tool
-work. Safe to re-run - it always starts from a clean slate. When you're done:
+CLI jar if it isn't already built, runs `discover` -> `scaffold` -> `validate` -> `run` against the
+finished `policy.yaml` already in this directory, and prints the fabricated rows for you to look
+at, with a short explanation of what to check. Nothing to author, nothing to decide - just to see
+the tool work. Safe to re-run - it always starts from a clean slate. When you're done:
 `./run-quickstart.sh clean` removes the container and any generated files.
 
 ## Evaluate the actual authoring workflow
@@ -66,9 +66,11 @@ never assigns anything without your confirmation. Once every column is classifie
 ./run-quickstart.sh run
 ```
 
-Anonymises using whatever policy you ended up with and prints the same results/DPIA summary as the
-one-shot demo. If a column is still unclassified, this fails closed with a clear error instead of
-guessing - go back and finish the draft, then run it again.
+First validates your finished policy against the source schema - no target connection, no data
+movement, so a mistake surfaces in seconds rather than after a full clone - then anonymises using
+whatever policy you ended up with and prints the same results/DPIA summary as the one-shot demo.
+If a column is still unclassified, this fails closed with a clear error instead of guessing - go
+back and finish the draft, then run it again.
 
 `./run-quickstart.sh clean` tears down the container and removes `.quickstart-work/` either way.
 
@@ -124,7 +126,22 @@ bare prompt to classify manually. Either way, you fill in every `role:` yourself
 where you'd hand the draft to the [Agent Skill](../.agents/skills/identigon-policy-author/) to
 finish interactively; this example skips straight to the finished result in `policy.yaml`.
 
-## 3. Run the anonymisation pipeline
+## 3. Validate the policy
+
+A cheap pre-flight check before committing to a full `run`: re-checks the policy against the
+source schema using the same fail-closed diagnostics `run` would raise, but with no target
+connection and no data movement. Worth running every time you change `policy.yaml` (or the source
+schema drifts), since it costs nothing but the schema read.
+
+```sh
+export IDENTIGON_SOURCE_PASSWORD=postgres
+
+java -jar ../effigies/build/libs/identigon.jar validate \
+  --policy ./policy.yaml \
+  --source-url "jdbc:postgresql://localhost:5432/quickstart_source" --source-user postgres
+```
+
+## 4. Run the anonymisation pipeline
 
 ```sh
 export IDENTIGON_SOURCE_PASSWORD=postgres
@@ -136,7 +153,7 @@ java -jar ../effigies/build/libs/identigon.jar run \
   --target-url "jdbc:postgresql://localhost:5432/quickstart_target" --target-user postgres
 ```
 
-## 4. Look at the results
+## 5. Look at the results
 
 ```sh
 psql -h localhost -U postgres -d quickstart_target -c "SELECT full_name, email, nino, bank_account, date_of_birth FROM customers;"

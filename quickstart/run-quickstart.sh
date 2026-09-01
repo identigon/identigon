@@ -7,17 +7,18 @@
 #
 #   ./run-quickstart.sh
 #       One-shot demo: starts a throwaway PostgreSQL container, loads schema.sql + seed-data.sql,
-#       builds the CLI jar if needed, runs discover -> scaffold -> run against the finished
-#       policy.yaml already checked into this directory, and prints the fabricated rows. Nothing to
-#       decide, nothing to author -- just to see the tool work.
+#       builds the CLI jar if needed, runs discover -> scaffold -> validate -> run against the
+#       finished policy.yaml already checked into this directory, and prints the fabricated rows.
+#       Nothing to decide, nothing to author -- just to see the tool work.
 #
 #   ./run-quickstart.sh setup
 #   ./run-quickstart.sh run
 #       The real authoring workflow: `setup` gets you a scaffolded draft and stops there --
 #       classify it yourself with the identigon-policy-author Agent Skill (or by hand), then `run`
-#       anonymises against whatever you ended up with and shows the DPIA report. This is the
-#       workflow effigies is actually built around; the one-shot demo above skips it by using the
-#       finished policy.yaml directly.
+#       validates the finished policy against the source schema first (no target connection, no
+#       data movement -- the cheap feedback loop), then anonymises against it and shows the DPIA
+#       report. This is the workflow effigies is actually built around; the one-shot demo above
+#       skips it by using the finished policy.yaml directly.
 #
 #   ./run-quickstart.sh clean
 #       Stops and removes the throwaway container and any generated draft/report files.
@@ -151,10 +152,10 @@ cmd_demo() {
     export IDENTIGON_SOURCE_PASSWORD="$PG_PASSWORD"
     export IDENTIGON_TARGET_PASSWORD="$PG_PASSWORD"
 
-    log "Step 1/3 - discover: reading the source schema (metadata only, no row values)"
+    log "Step 1/4 - discover: reading the source schema (metadata only, no row values)"
     java -jar "$JAR" discover --source-url "$SOURCE_URL" --source-user postgres
 
-    log "Step 2/3 - scaffold: what Identigon can classify on its own"
+    log "Step 2/4 - scaffold: what Identigon can classify on its own"
     java -jar "$JAR" scaffold --source-url "$SOURCE_URL" --source-user postgres \
         --out "$demo_dir/policy.draft.yaml"
     # printf %s, not echo: POSIX `echo` is free to interpret backslashes as escapes (dash's does,
@@ -163,7 +164,11 @@ cmd_demo() {
     printf '%s\n' " This one-shot demo uses the finished policy.yaml in this directory instead of the draft;"
     printf '%s\n' " run './run-quickstart.sh setup' if you want to author the draft yourself.)"
 
-    log "Step 3/3 - run: anonymising the clone"
+    log "Step 3/4 - validate: checking the finished policy.yaml against the source schema (no target connection, no data movement)"
+    java -jar "$JAR" validate --policy "$SCRIPT_DIR/policy.yaml" \
+        --source-url "$SOURCE_URL" --source-user postgres
+
+    log "Step 4/4 - run: anonymising the clone"
     ( cd "$demo_dir" && java -jar "$JAR" run \
         --policy "$SCRIPT_DIR/policy.yaml" \
         --source-url "$SOURCE_URL" --source-user postgres \
@@ -252,6 +257,10 @@ cmd_run() {
 
     export IDENTIGON_SOURCE_PASSWORD="$PG_PASSWORD"
     export IDENTIGON_TARGET_PASSWORD="$PG_PASSWORD"
+
+    log "validate: checking $policy against the source schema (no target connection, no data movement)"
+    java -jar "$JAR" validate --policy "$policy" \
+        --source-url "$SOURCE_URL" --source-user postgres
 
     log "run: anonymising against $policy"
     ( cd "$report_dir" && java -jar "$JAR" run \

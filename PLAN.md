@@ -9,10 +9,6 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Project:** effigies - **`quickstart/README.md` never mentions `validate`.** Both driver
-  scripts run `discover -> scaffold -> run`; the README pitches its `setup`/`run` split as "the
-  real authoring workflow", which is exactly where the cheap no-target-connection feedback loop
-  belongs. Found by external tutorial feedback.
 - [ ] **`pg_dump` guidance for creating the target database is documented on the site, not in this
   repo.** Getting Started's `pg_dump --schema-only --no-owner --no-privileges` never made it into
   any `.md` here, so a reader arriving via GitHub - where the "schema-identical target database"
