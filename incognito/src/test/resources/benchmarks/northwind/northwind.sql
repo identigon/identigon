@@ -1,6 +1,13 @@
 --
 -- PostgreSQL database dump
 --
+--  Incognito benchmark fixture note: the four VARCHAR(15) city columns (customers.city,
+--  employees.city, orders.ship_city, suppliers.city) below have been widened to VARCHAR(20) -
+--  upstream's width doesn't fit alterego's real GB town-name generator output ("Newcastle upon
+--  Tyne" is 19 characters, the dictionary's longest entry), which this benchmark's policy.yaml
+--  routes those columns through. No other table, column, or data row was altered. Upstream +
+--  licence: see ../SOURCES.md.
+--
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -78,7 +85,7 @@ CREATE TABLE customers (
     contact_name character varying(30),
     contact_title character varying(30),
     address character varying(60),
-    city character varying(15),
+    city character varying(20),
     region character varying(15),
     postal_code character varying(10),
     country character varying(15),
@@ -100,7 +107,7 @@ CREATE TABLE employees (
     birth_date date,
     hire_date date,
     address character varying(60),
-    city character varying(15),
+    city character varying(20),
     region character varying(15),
     postal_code character varying(10),
     country character varying(15),
@@ -153,7 +160,7 @@ CREATE TABLE orders (
     freight real,
     ship_name character varying(40),
     ship_address character varying(60),
-    ship_city character varying(15),
+    ship_city character varying(20),
     ship_region character varying(15),
     ship_postal_code character varying(10),
     ship_country character varying(15)
@@ -210,7 +217,7 @@ CREATE TABLE suppliers (
     contact_name character varying(30),
     contact_title character varying(30),
     address character varying(60),
-    city character varying(15),
+    city character varying(20),
     region character varying(15),
     postal_code character varying(10),
     country character varying(15),

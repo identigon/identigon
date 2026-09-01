@@ -15,7 +15,7 @@ All URLs retrieved **2026-07-31**.
 | --- | --- | --- | --- | --- | --- |
 | PetClinic | [spring-projects/spring-petclinic](https://github.com/spring-projects/spring-petclinic) (`main`) | `petclinic/schema.sql`, `petclinic/data.sql` | `.../src/main/resources/db/postgres/{schema,data}.sql` | Apache-2.0 | `LICENCES/Apache-2.0.txt` |
 | Pagila | [devrimgunduz/pagila](https://github.com/devrimgunduz/pagila) (`pagila-v3.0.0`) | `pagila/schema.sql`, `pagila/pagila-insert-data.sql` | `.../refs/tags/pagila-v3.0.0/pagila-{schema,insert-data}.sql` | PostgreSQL License | `LICENCES/PostgreSQL-License.txt` |
-| Northwind | [pthom/northwind_psql](https://github.com/pthom/northwind_psql) (`master`) | `northwind/northwind.sql` | `.../northwind.sql` | Ms-PL | `LICENCES/Ms-PL.txt` |
+| Northwind | [pthom/northwind_psql](https://github.com/pthom/northwind_psql) (`master`) | `northwind/northwind.sql` (4 city columns widened) | `.../northwind.sql` | Ms-PL | `LICENCES/Ms-PL.txt` |
 | Employees | [bytebase/employee-sample-database](https://github.com/bytebase/employee-sample-database) (`main`) | `employees/employees.sql` (assembled) | `.../postgres/dataset_small/{employee,load_*}.sql` | CC BY-SA 3.0 | `LICENCES/CC-BY-SA-3.0.txt` |
 | Chinook | [lerocha/chinook-database](https://github.com/lerocha/chinook-database) (`master`) | `chinook/chinook.sql` (preamble stripped) | `.../ChinookDatabase/DataSources/Chinook_PostgreSql.sql` | MIT | `LICENCES/MIT-Chinook.txt` |
 
@@ -57,6 +57,12 @@ All URLs retrieved **2026-07-31**.
 - **Download:** `https://raw.githubusercontent.com/pthom/northwind_psql/master/northwind.sql`
 - **Licence:** Ms-PL - <https://opensource.org/license/ms-pl-html> (copy: `LICENCES/Ms-PL.txt`).
 - Wired to a test (`NorthwindBenchmarkE2ETest`).
+- **Widened, not otherwise upstream-verbatim.** Four `VARCHAR(15)` city columns (`customers.city`,
+  `employees.city`, `orders.ship_city`, `suppliers.city`) were widened to `VARCHAR(20)` -
+  upstream's width doesn't fit `ae.city()`'s real GB town-name output (`"Newcastle upon Tyne"` is
+  19 characters, the dictionary's longest entry), which `northwind/policy.yaml` routes those
+  columns through. No other table, column, or data row was altered; the change is stated in the
+  file's own header.
 
 ## Employees - Creative Commons Attribution-Share Alike 3.0 (CC BY-SA 3.0) - **USED** (`EmployeesBenchmarkE2ETest`)
 
