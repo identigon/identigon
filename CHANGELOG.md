@@ -20,6 +20,13 @@ too would be the same fact in two places.
 
 ## [Unreleased]
 
+### incognito
+
+- **Fixed:** `YamlPolicyParser.parse(Path)` no longer swallows the unrecognised-key diagnostic
+  behind a generic "Failed to read YAML from path" message. It now rethrows a `ConfigException`
+  from `parse(InputStream)` unchanged, so the CLI (`validate`/`run`) shows the actual mistyped
+  key(s) instead of a message indistinguishable from a truly unreadable file.
+
 ## [3.0.0] - 2026-09-01
 
 ### incognito

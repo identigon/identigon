@@ -55,6 +55,11 @@ public class YamlPolicyParser {
     public AnonymisationPolicy parse(Path yamlPath) throws IncognitoException.ConfigException {
         try (InputStream is = Files.newInputStream(yamlPath)) {
             return parse(is);
+        } catch (IncognitoException.ConfigException e) {
+            // parse(InputStream) already reports a precise, actionable diagnostic (e.g. every
+            // unrecognised key, in one pass) - rethrow it unchanged rather than burying it behind
+            // a generic "Failed to read YAML" message the CLI would print instead of this one.
+            throw e;
         } catch (Exception e) {
             throw new IncognitoException.ConfigException("Failed to read YAML from path: " + yamlPath, e);
         }

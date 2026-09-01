@@ -5,13 +5,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.identigon.incognito.api.ColumnRole;
 import org.identigon.incognito.api.DirectIdStrategy;
 import org.identigon.incognito.api.IncognitoException;
 import org.identigon.incognito.api.StructuralUniquenessMode;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class YamlConfigTest {
+
+    @TempDir Path tempDir;
 
     @Test
     void testParseValidConfig() {
@@ -215,6 +220,28 @@ class YamlConfigTest {
         AnonymisationPolicy policy = new YamlPolicyParser().parse(inputStream);
 
         assertEquals(1, policy.tables().size());
+    }
+
+    @Test
+    void unrecognisedKeyDiagnosticSurvivesParsingFromAPathNotJustAnInputStream() throws Exception {
+        // parse(Path) delegates to parse(InputStream) then closes the file - it must rethrow that
+        // ConfigException unchanged, not catch-and-rewrap it behind a generic "Failed to read YAML"
+        // message that discards exactly the detail (which key, where) the user needs to fix it.
+        String yamlString = """
+            tables:
+              customers:
+                columns:
+                  email:
+                    role: DIRECT_ID
+                    directIdStrategey: ALTEREGO_EMAIL
+            """;
+        Path policyFile = tempDir.resolve("policy.yaml");
+        Files.writeString(policyFile, yamlString);
+
+        IncognitoException.ConfigException ex = assertThrows(
+            IncognitoException.ConfigException.class, () -> new YamlPolicyParser().parse(policyFile));
+        assertTrue(ex.getMessage().contains("'directIdStrategey'"), ex.getMessage());
+        assertFalse(ex.getMessage().contains("Failed to read YAML"), ex.getMessage());
     }
 
     @Test
