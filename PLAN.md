@@ -9,6 +9,47 @@ shipped.
 
 ## Outstanding
 
+- [ ] **Project:** incognito - **`QUASI_ID` synthesis on a character type carries no fictionality
+  guarantee without an explicit `directIdStrategy` hint, and nothing warns for it.**
+  `isSynthesisableType` treats `VARCHAR`/`CHAR` as synthesisable because they shape-preserve, not
+  because a fictional generator exists - so a hint-less `QUASI_ID` (e.g. `postcode`) passes the
+  fail-closed guard and silently shape-fabricates, exactly the gap ADR-0029 closed for `DIRECT_ID`.
+  `effigies scaffold` compounds it: `writeRoleStub` has no `QUASI_ID` branch, so no
+  `directIdStrategy:` TODO stub is ever suggested, even for a column its own heuristics identified
+  as a postcode. Cheapest fix: add the scaffold stub. Stricter fix, mirroring ADR-0029: require an
+  explicit strategy on a `QUASI_ID` whose type has no fictional generator, so shape-fabrication
+  becomes a declared choice rather than a default. Found by external tutorial feedback.
+- [ ] **Project:** incognito - **`YamlPolicyParser` accepts unrecognised keys within a
+  table/column block instead of rejecting them.** Every field is read via
+  `colNode.get("exactName")` with no validation against a known key set, so a typo on an optional
+  key (e.g. `jitterdays` for `jitterDays`) is silently dropped, an internal default applies, and
+  `validate` reports success even though the run's behaviour now diverges from the declared
+  policy. Fix: reject unrecognised keys, naming the offending key and column; carve out an
+  explicit allow-list for intentionally-retired keys (`autoInfer` today) so back-compat tolerance
+  stays deliberate rather than blanket. Found by external tutorial feedback.
+- [ ] **Project:** incognito - **`fictionalityVerified` in the DPIA report reads `true` for
+  columns no fictionality check actually covers.** It's computed in `VerificationStage` as "table
+  policy present and no specific check failed" - so `ALTEREGO_GENERIC` (declared deliberately,
+  e.g. `bank_account`) and hint-less `QUASI_ID` shape-fabrication (see the entry above) both report
+  `Fictionality Verified: true` with no supporting check having run for that column. Scope the flag
+  per column, or rename it to reflect that it covers survival/misdeclaration checks rather than a
+  fictionality guarantee. Found by external tutorial feedback.
+- [ ] **Project:** effigies - **`quickstart/README.md` never mentions `validate`.** Both driver
+  scripts run `discover -> scaffold -> run`; the README pitches its `setup`/`run` split as "the
+  real authoring workflow", which is exactly where the cheap no-target-connection feedback loop
+  belongs. Found by external tutorial feedback.
+- [ ] **`pg_dump` guidance for creating the target database is documented on the site, not in this
+  repo.** Getting Started's `pg_dump --schema-only --no-owner --no-privileges` never made it into
+  any `.md` here, so a reader arriving via GitHub - where the "schema-identical target database"
+  prerequisite is stated with no method - doesn't see it. Getting this wrong (omitting
+  `--schema-only`) is silently destructive, since `run` loads into the target rather than replacing
+  it. A line in `README.md` pointing at the site would cover it. Found by external tutorial
+  feedback.
+- [ ] **Project:** effigies - **`discover`/`scaffold` report JDBC's type names, not PostgreSQL's**
+  (a `BOOLEAN` column shows as `type: BIT`, `TEXT` as `type: VARCHAR`). Not a defect - both are
+  correct at the JDBC layer - but the type is an input to choosing a strategy, so an author
+  classifying a column sees a name that doesn't match the DDL. Worth a sentence somewhere noting
+  whose type names these are. Found by external tutorial feedback.
 - [ ] **Project:** effigies - **Revisit excluding `effigies.jar` from the GitHub Release assets.**
   ADR-0028 deliberately left the thin `effigies.jar` out of the Release asset set (`alterego.jar`,
   `incognito.jar`, `identigon.jar` only) on the reasoning that it can't run standalone - anyone
