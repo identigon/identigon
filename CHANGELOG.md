@@ -20,6 +20,8 @@ too would be the same fact in two places.
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-09-01
+
 ### incognito
 
 - **Fixed:** `YamlPolicyParser.parse(Path)` no longer swallows the unrecognised-key diagnostic
