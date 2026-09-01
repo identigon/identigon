@@ -18,13 +18,14 @@ class DpiaArtefactEmitterTest {
 
     private static AnonymisationReport sampleReport() {
         var columns = List.of(
+            // A genuine typed fictionality check ran and passed for this one.
             new AnonymisationReport.ColumnAction("email", ColumnRole.DIRECT_ID, "ALTEREGO_EMAIL",
-                List.of("a@example.com", "b@example.com", "c@example.com")),
+                List.of("a@example.com", "b@example.com", "c@example.com"), true),
             new AnonymisationReport.ColumnAction("flag", ColumnRole.SENSITIVE, "KEEP",
-                List.of("‹kept›", "‹kept›", "‹kept›")),
+                List.of("‹kept›", "‹kept›", "‹kept›"), false),
             // A value with characters that must be escaped in JSON/HTML (also as a sample value).
             new AnonymisationReport.ColumnAction("notes", ColumnRole.SENSITIVE, "say \"hi\" <b> & go",
-                List.of("say \"hi\" <b> & go", "x", "y")));
+                List.of("say \"hi\" <b> & go", "x", "y"), false));
         var passthrough = List.of(
             new AnonymisationReport.PassthroughFlag("payload", "OTHER",
                 "untransformed potentially-identifying type kept as-is (SPEC §7.2)"));
@@ -71,6 +72,8 @@ class DpiaArtefactEmitterTest {
         assertTrue(json.contains("\"suggestedRole\": \"DIRECT_ID\""), "inference suggestion rendered");
         assertTrue(json.contains("\"examples\": [\"a@example.com\", \"b@example.com\", \"c@example.com\"]"),
             "per-column illustrative examples rendered");
+        assertTrue(json.contains("\"fictionalityVerified\": true"), "checked column's flag rendered true");
+        assertTrue(json.contains("\"fictionalityVerified\": false"), "unchecked column's flag rendered false");
         assertEquals(count(json, '{'), count(json, '}'), "braces balanced");
     }
 
@@ -95,6 +98,9 @@ class DpiaArtefactEmitterTest {
         assertTrue(html.contains("Inference suggestions"), "inference-suggestions section rendered");
         assertTrue(html.contains("Sample rows (illustrative"), "sample-rows table rendered");
         assertTrue(html.contains("<td>a@example.com</td>"), "sample value cell rendered");
+        assertTrue(html.contains("Fictionality verified"), "per-column fictionality-verified header rendered");
+        assertTrue(html.contains("class=\"ok\">yes"), "checked column rendered as verified");
+        assertTrue(html.contains("class=\"\">&mdash;"), "unchecked column rendered with no claim");
     }
 
     @Test
@@ -114,6 +120,9 @@ class DpiaArtefactEmitterTest {
         assertTrue(md.contains("Inference Suggestions"), "inference-suggestions section rendered");
         assertTrue(md.contains("Sample Rows (Illustrative)"), "sample-rows section rendered");
         assertTrue(md.contains("| a@example.com |"), "sample value row rendered");
+        assertTrue(md.contains("Fictionality Verified |"), "per-column fictionality-verified header rendered");
+        assertTrue(md.contains("| ALTEREGO_EMAIL | yes |"), "checked column rendered as verified");
+        assertTrue(md.contains("| KEEP | — |"), "unchecked column rendered with no claim");
     }
 
     private static long count(String s, char c) {

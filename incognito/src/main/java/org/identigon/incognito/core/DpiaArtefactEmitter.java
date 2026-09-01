@@ -109,7 +109,8 @@ public final class DpiaArtefactEmitter {
                 jw.beginObject()
                     .field("column", ca.column())
                     .field("role", ca.role().name())
-                    .field("transformation", ca.transformation());
+                    .field("transformation", ca.transformation())
+                    .field("fictionalityVerified", ca.fictionalityVerified());
                 jw.name("examples").beginArray();
                 for (String e : ca.examples()) jw.value(e);
                 jw.endArray();
@@ -218,13 +219,16 @@ public final class DpiaArtefactEmitter {
 
             for (AnonymisationReport.TableReport tr : report.tables()) {
                 w.write("<h3><code>" + htmlEscape(tr.table()) + "</code></h3>\n"
-                    + "<p>Rows processed: " + tr.rowsProcessed() + " &middot; Fictionality verified: "
-                    + tr.fictionalityVerified() + "</p>\n");
+                    + "<p>Rows processed: " + tr.rowsProcessed() + " &middot; Fictionality verified"
+                    + " (table-level - no verification failure found): " + tr.fictionalityVerified()
+                    + " &mdash; see each column's own Fictionality verified below for which columns"
+                    + " actually carry a checked guarantee.</p>\n");
                 w.write("<table><caption>Column actions</caption><tr><th>Column</th><th>Role</th>"
-                    + "<th>Transformation</th></tr>\n");
+                    + "<th>Transformation</th><th>Fictionality verified</th></tr>\n");
                 for (AnonymisationReport.ColumnAction ca : tr.columns()) {
                     w.write("<tr><td>" + htmlEscape(ca.column()) + "</td><td>" + ca.role()
-                        + "</td><td>" + htmlEscape(ca.transformation()) + "</td></tr>\n");
+                        + "</td><td>" + htmlEscape(ca.transformation()) + "</td><td class=\""
+                        + (ca.fictionalityVerified() ? "ok\">yes" : "\">&mdash;") + "</td></tr>\n");
                 }
                 w.write("</table>\n");
                 if (!tr.columns().isEmpty() && !tr.columns().get(0).examples().isEmpty()) {
@@ -365,16 +369,20 @@ public final class DpiaArtefactEmitter {
             for (AnonymisationReport.TableReport tr : report.tables()) {
                 writer.write(String.format("### Table: `%s`\n\n", tr.table()));
                 writer.write(String.format("- Rows Processed: %d\n", tr.rowsProcessed()));
-                writer.write(String.format("- Fictionality Verified: %b\n\n", tr.fictionalityVerified()));
+                writer.write(String.format(
+                    "- Fictionality Verified: %b (table-level - no verification failure found; see"
+                    + " each column's own Fictionality Verified below for which columns actually"
+                    + " carry a checked guarantee)\n\n", tr.fictionalityVerified()));
 
                 writer.write("""
                     #### Column Actions
 
-                    | Column | Role | Transformation |
-                    |---|---|---|
+                    | Column | Role | Transformation | Fictionality Verified |
+                    |---|---|---|---|
                     """);
                 for (AnonymisationReport.ColumnAction ca : tr.columns()) {
-                    writer.write(String.format("| %s | %s | %s |\n", ca.column(), ca.role(), ca.transformation()));
+                    writer.write(String.format("| %s | %s | %s | %s |\n", ca.column(), ca.role(),
+                        ca.transformation(), ca.fictionalityVerified() ? "yes" : "—"));
                 }
                 writer.write("\n");
 

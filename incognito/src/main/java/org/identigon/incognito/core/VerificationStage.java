@@ -26,12 +26,15 @@ import org.identigon.incognito.policy.TablePolicy;
  * Stage 4: Verifies the target database after loading.
  * <ul>
  *   <li>Referential integrity: no dangling FK references.</li>
- *   <li>Fictionality: DIRECT_ID email columns use RFC 2606 reserved domains; postcode columns use
- *       the guaranteed-fictional inward-code letter; domain/URL columns use RFC 2606 reserved
- *       domains/TLDs; National Insurance number (NINO) columns use the guaranteed-fictional QQ
- *       prefix; NHS number columns use the reserved 999 test-range prefix; passport number columns
- *       use the structurally-impossible ZZ prefix; driving licence number columns use the
- *       zero-letter-surname 99999 block.</li>
+ *   <li>Fictionality: a DIRECT_ID (or QUASI_ID SYNTHESISE carrying the same {@code directIdStrategy}
+ *       hint, ADR 31) column is checked per its typed strategy - email columns use RFC 2606
+ *       reserved domains; postcode columns use the guaranteed-fictional inward-code letter;
+ *       domain/URL columns use RFC 2606 reserved domains/TLDs; National Insurance number (NINO)
+ *       columns use the guaranteed-fictional QQ prefix; NHS number columns use the reserved 999
+ *       test-range prefix; passport number columns use the structurally-impossible ZZ prefix;
+ *       driving licence number columns use the zero-letter-surname 99999 block. A column with no
+ *       typed check (e.g. {@code ALTEREGO_GENERIC}) is never marked fictionality-verified - see
+ *       {@link org.identigon.incognito.api.AnonymisationReport.ColumnAction#fictionalityVerified()}.</li>
  *   <li>Misdeclaration lint (SPEC §4.1): cross-checks every {@code SENSITIVE distinguishing: false}
  *       column's real {@code COUNT(DISTINCT)} against {@code maxCategoricalCardinality}.</li>
  *   <li>Per-period volume tolerance (SPEC §4.2, Appendix D): for temporal QUASI_ID columns,
@@ -148,8 +151,13 @@ public final class VerificationStage implements PipelineStage {
         List<org.identigon.incognito.api.AnonymisationReport.SurvivalFinding> survivalFindings = new ArrayList<>();
         List<org.identigon.incognito.api.AnonymisationReport.LintFinding> lintFindings = new ArrayList<>();
         // Tables that contributed at least one hard failure - the complement (in-policy, no failure)
-        // are reported as fictionality-verified in the DPIA report.
+        // are reported as verified in the DPIA report.
         java.util.Set<String> failedTables = new java.util.HashSet<>();
+        // "table.column" keys where an actual typed SPEC §4.3 fictionality check (§2 below) ran and
+        // passed for that specific column - the precise, per-column complement to failedTables above:
+        // a column using ALTEREGO_GENERIC, or any strategy with no typed check, is simply never added
+        // here, rather than being counted as verified merely by the absence of a failure.
+        java.util.Set<String> fictionalityVerifiedColumns = new java.util.HashSet<>();
 
         try (Connection targetConn = context.target().getConnection()) {
             // 1. Verify referential integrity on the target.
@@ -186,7 +194,10 @@ public final class VerificationStage implements PipelineStage {
                 }
             }
 
-            // 2. Verify fictionality of email DIRECT_ID columns on the target.
+            // 2. Verify fictionality of every column routed through a typed generator on the target -
+            //    a DIRECT_ID with that directIdStrategy, or a QUASI_ID SYNTHESISE column carrying the
+            //    same hint (SPEC Appendix B, ADR 31): TableTransformLoadStage routes both through the
+            //    identical buildDirectIdTransformer, so both get the identical guarantee to verify.
             for (String tableName : plan.sequentialTableOrder()) {
                 Optional<TablePolicy> tablePolicyOpt = policy.table(tableName);
                 if (tablePolicyOpt.isEmpty()) continue;
@@ -194,28 +205,41 @@ public final class VerificationStage implements PipelineStage {
                 TablePolicy tablePolicy = tablePolicyOpt.get();
                 for (Map.Entry<String, ColumnPolicy> entry : getColumnPolicies(tablePolicy)) {
                     ColumnPolicy colPolicy = entry.getValue();
-                    if (colPolicy.role() != ColumnRole.DIRECT_ID) continue;
+                    boolean isDirectId = colPolicy.role() == ColumnRole.DIRECT_ID;
+                    boolean isTypedQuasiId = colPolicy.role() == ColumnRole.QUASI_ID
+                        && colPolicy.directIdStrategy() != null
+                        && (colPolicy.quasiIdStrategy() == null
+                            || colPolicy.quasiIdStrategy() == org.identigon.incognito.api.QuasiIdStrategy.SYNTHESISE);
+                    if (!isDirectId && !isTypedQuasiId) continue;
+
+                    String columnName = colPolicy.columnName();
+                    String columnKey = tableName + "." + columnName;
                     DirectIdStrategy strategy = colPolicy.directIdStrategy();
+                    int failuresBefore = failures.size();
                     if (strategy == DirectIdStrategy.ALTEREGO_EMAIL) {
-                        verifyEmailFictionality(targetConn, tableName, colPolicy.columnName(), failures, failedTables);
+                        verifyEmailFictionality(targetConn, tableName, columnName, failures, failedTables);
                     } else if (strategy == DirectIdStrategy.ALTEREGO_POSTCODE) {
-                        verifyPostcodeFictionality(targetConn, tableName, colPolicy.columnName(), failures, failedTables);
+                        verifyPostcodeFictionality(targetConn, tableName, columnName, failures, failedTables);
                     } else if (strategy == DirectIdStrategy.ALTEREGO_DOMAIN) {
-                        verifyDomainFictionality(targetConn, tableName, colPolicy.columnName(), failures, failedTables);
+                        verifyDomainFictionality(targetConn, tableName, columnName, failures, failedTables);
                     } else if (strategy == DirectIdStrategy.ALTEREGO_URL) {
-                        verifyUrlFictionality(targetConn, tableName, colPolicy.columnName(), failures, failedTables);
+                        verifyUrlFictionality(targetConn, tableName, columnName, failures, failedTables);
                     } else if (strategy == DirectIdStrategy.ALTEREGO_NINO) {
-                        verifyNinoFictionality(
-                            targetConn, tableName, colPolicy.columnName(), failures, failedTables);
+                        verifyNinoFictionality(targetConn, tableName, columnName, failures, failedTables);
                     } else if (strategy == DirectIdStrategy.ALTEREGO_NHS_NUMBER) {
-                        verifyNhsNumberFictionality(
-                            targetConn, tableName, colPolicy.columnName(), failures, failedTables);
+                        verifyNhsNumberFictionality(targetConn, tableName, columnName, failures, failedTables);
                     } else if (strategy == DirectIdStrategy.ALTEREGO_PASSPORT_NUMBER) {
-                        verifyPassportNumberFictionality(
-                            targetConn, tableName, colPolicy.columnName(), failures, failedTables);
+                        verifyPassportNumberFictionality(targetConn, tableName, columnName, failures, failedTables);
                     } else if (strategy == DirectIdStrategy.ALTEREGO_DRIVING_LICENCE_NUMBER) {
-                        verifyDrivingLicenceNumberFictionality(
-                            targetConn, tableName, colPolicy.columnName(), failures, failedTables);
+                        verifyDrivingLicenceNumberFictionality(targetConn, tableName, columnName, failures, failedTables);
+                    } else {
+                        // ALTEREGO_GENERIC (or any strategy with no typed check): no fictionality
+                        // guarantee to verify - deliberately NOT added to fictionalityVerifiedColumns,
+                        // the fix for the DPIA report overstating this column's guarantee (SPEC §4.3).
+                        continue;
+                    }
+                    if (failures.size() == failuresBefore) {
+                        fictionalityVerifiedColumns.add(columnKey);
                     }
                 }
             }
@@ -402,8 +426,13 @@ public final class VerificationStage implements PipelineStage {
             }
         }
 
-        // Record which in-policy tables passed all verification checks, so the DPIA report can
-        // mark them fictionality-verified (AnonymisationReportBuilder reads this attribute).
+        // Record which in-policy tables hit no verification failure (dangling FK, a fictionality
+        // check, or a hard survival failure) - the table-level "no problem found" signal the DPIA
+        // report reads as TableReport.fictionalityVerified. It is coarser than the name suggests: a
+        // table with every check passing still reports true even if it also has an ALTEREGO_GENERIC
+        // column no check ever covers - fictionalityVerifiedColumns below is the precise, per-column
+        // answer to "was THIS column's fictionality actually verified" (AnonymisationReportBuilder
+        // reads both attributes).
         List<String> verifiedTables = new ArrayList<>();
         for (String tableName : plan.sequentialTableOrder()) {
             if (policy.table(tableName).isPresent() && !failedTables.contains(tableName)) {
@@ -411,6 +440,8 @@ public final class VerificationStage implements PipelineStage {
             }
         }
         context.attributes().put("incognito.verification.verifiedTables", verifiedTables);
+        context.attributes().put(
+            AnonymisationReportBuilder.ATTR_FICTIONALITY_VERIFIED_COLUMNS, fictionalityVerifiedColumns);
         context.attributes().put(AnonymisationReportBuilder.ATTR_SURVIVAL_FINDINGS, survivalFindings);
         context.attributes().put(AnonymisationReportBuilder.ATTR_LINT_FINDINGS, lintFindings);
         context.attributes().put(AnonymisationReportBuilder.ATTR_STRUCTURAL_FINDINGS, structuralFindings);

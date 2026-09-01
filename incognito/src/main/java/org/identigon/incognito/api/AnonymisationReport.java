@@ -37,7 +37,12 @@ public record AnonymisationReport(
      * @param rowsProcessed how many rows were transformed and loaded
      * @param passthroughFlags kept columns of an opaque JDBC type, surfaced for the DPIA (SPEC §7.2)
      * @param inferSuggestions auto-inference suggestions surfaced for this table (never auto-applied)
-     * @param fictionalityVerified whether the SPEC §4.3 fictionality checks passed for this table
+     * @param fictionalityVerified whether verification found no failure for this table (dangling FK,
+     *     a fictionality check, or a hard source-value-survival failure). A coarse "no problem found"
+     *     signal, not a claim that every column's transformation carries a fictionality guarantee - a
+     *     table can report {@code true} while containing a column whose strategy has no typed check
+     *     (e.g. {@code ALTEREGO_GENERIC}), since nothing failed for it either. Each {@link ColumnAction}'s
+     *     own {@link ColumnAction#fictionalityVerified()} is the precise, per-column answer (SPEC §4.3)
      */
     public record TableReport(
         String table,
@@ -57,8 +62,16 @@ public record AnonymisationReport(
      * @param examples illustrative sample values (one per report sample row) showing what this
      *     column's transformation produces - synthetic, generated from a fixed non-secret salt, so
      *     they correspond to no real subject and are not this run's actual data
+     * @param fictionalityVerified {@code true} only if this specific column's transformation has a
+     *     typed SPEC §4.3 fictionality check (a DIRECT_ID, or a QUASI_ID SYNTHESISE carrying the same
+     *     {@code directIdStrategy} hint, ADR 31) and that check ran and passed against the target.
+     *     {@code false} for every other column, including a deliberately-chosen {@code ALTEREGO_GENERIC}
+     *     strategy - that fabrication is legitimate (ADR 21/29) but carries no fictionality guarantee
+     *     to verify, so it is never reported as one
      */
-    public record ColumnAction(String column, ColumnRole role, String transformation, List<String> examples) {}
+    public record ColumnAction(
+        String column, ColumnRole role, String transformation, List<String> examples,
+        boolean fictionalityVerified) {}
 
     /**
      * A kept column of a complex/opaque JDBC type that v1.0 could not transform (SPEC §7.2 audit).

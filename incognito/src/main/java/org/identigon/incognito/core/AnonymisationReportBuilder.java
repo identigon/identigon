@@ -38,6 +38,14 @@ public final class AnonymisationReportBuilder {
     public static final String ATTR_STRUCTURAL_FINDINGS = "incognito.verification.structuralFindings";
 
     /**
+     * Context attribute key: the {@code Set<String>} of {@code "table.column"} keys where a typed
+     * SPEC §4.3 fictionality check actually ran and passed - the source for each
+     * {@link AnonymisationReport.ColumnAction#fictionalityVerified()}.
+     */
+    public static final String ATTR_FICTIONALITY_VERIFIED_COLUMNS =
+        "incognito.verification.fictionalityVerifiedColumns";
+
+    /**
      * Builds the anonymisation report from the run's context and stage results.
      *
      * @param context      the pipeline context (holds the plan, table metadata, and inference suggestions)
@@ -51,6 +59,9 @@ public final class AnonymisationReportBuilder {
         Object inferObj = context.attributes().get("incognito.schema.inferSuggestions");
         Object rowsObj = context.attributes().get("incognito.metrics.rowsPerTable");
         Object verifiedTablesObj = context.attributes().get("incognito.verification.verifiedTables"); // Optional
+        java.util.Set<String> fictionalityVerifiedColumns =
+            (java.util.Set<String>) context.attributes().getOrDefault(
+                ATTR_FICTIONALITY_VERIFIED_COLUMNS, Collections.emptySet());
 
         org.identigon.incognito.api.SaltMode saltMode =
             (org.identigon.incognito.api.SaltMode) context.attributes().get(ATTR_SALT_MODE);
@@ -138,8 +149,10 @@ public final class AnonymisationReportBuilder {
                     for (int i = 0; i < SEEDS.size(); i++) {
                         examples.add(exampleCell(exampleAlterEgo, colPol, columnSqlType, SEEDS.get(i), i));
                     }
+                    boolean colFictionalityVerified =
+                        fictionalityVerifiedColumns.contains(tableName + "." + colName);
                     columnActions.add(new AnonymisationReport.ColumnAction(
-                        colName, colPol.role(), transformation, examples));
+                        colName, colPol.role(), transformation, examples, colFictionalityVerified));
 
                     // Opaque-type audit (SPEC §7.2): a KEPT column of a complex/untransformable JDBC
                     // type is surfaced in the DPIA report so a retained potentially-identifying value

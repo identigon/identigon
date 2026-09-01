@@ -400,13 +400,25 @@ sources so they cannot be mistaken for real data:
 - GB driving licence numbers with the zero-letter-surname `99999` block - never occurs on a real
   licence.
 
-`VerificationStage` asserts these on the target, skipping `NULL` cells during verification. It also
-runs a **source-value survival** net over every non-reserved `DIRECT_ID` column: any real source
-value that reappears in the target is captured as a structured `AnonymisationReport.SurvivalFinding`
-(sampled distinct count, survived count, and a `hardFailure` verdict). A high survival ratio is an
-un-fabricated passthrough that fails the run; a handful of coincidental shape-preserving collisions
-on a low-entropy value is recorded but passes - quantified singling-out evidence (Art. 29 WP
-05/2014) for the DPIA, not just a log line.
+`VerificationStage` asserts these on the target, skipping `NULL` cells during verification, for
+every `DIRECT_ID` column and every `QUASI_ID SYNTHESISE` column carrying the same
+`directIdStrategy` hint (Appendix B, ADR 31) - both route through the identical typed generator, so
+both get the identical check. It also runs a **source-value survival** net over every non-reserved
+`DIRECT_ID` column: any real source value that reappears in the target is captured as a structured
+`AnonymisationReport.SurvivalFinding` (sampled distinct count, survived count, and a `hardFailure`
+verdict). A high survival ratio is an un-fabricated passthrough that fails the run; a handful of
+coincidental shape-preserving collisions on a low-entropy value is recorded but passes - quantified
+singling-out evidence (Art. 29 WP 05/2014) for the DPIA, not just a log line.
+
+**What "verified" means in the report.** `AnonymisationReport.ColumnAction.fictionalityVerified()`
+is `true` only for a column with a typed check above that actually ran and passed - `false` for
+every other column, including a deliberately-chosen `ALTEREGO_GENERIC` strategy (a legitimate
+choice, ADR 21/29, but one with no fictionality guarantee to verify).
+`TableReport.fictionalityVerified()` is coarser: it means no verification failure was found
+anywhere in the table (referential integrity, a fictionality check, or a hard survival failure),
+not that every column's transformation carries a guarantee - a table can report `true` while
+holding an `ALTEREGO_GENERIC` column, since nothing failed for it either. Read the per-column field
+for the precise answer.
 
 ### 4.4 Determinism & referential consistency
 

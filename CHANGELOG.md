@@ -37,6 +37,16 @@ too would be the same fact in two places.
   issue across the whole file is now collected into one `ConfigException`, matching
   `SchemaDiscoveryStage`'s "fix all at once" convention. `autoInfer` remains the one tolerated
   exception, for back-compat with a pre-v2.0.0 `policy.yaml`.
+- **`AnonymisationReport.ColumnAction` gains a `fictionalityVerified` field** - `true` only when a
+  typed SPEC §4.3 fictionality check actually ran and passed for that specific column; `false` for
+  every other column, including a deliberately-chosen `ALTEREGO_GENERIC` strategy, which is a
+  legitimate choice (ADR 21/29) but carries no guarantee to verify. Previously only
+  `TableReport.fictionalityVerified` existed, a table-level "no verification failure found" signal
+  that could read `true` for a table holding an unguaranteed column. `VerificationStage`'s
+  fictionality checks also now cover a `QUASI_ID SYNTHESISE` column carrying a `directIdStrategy`
+  hint, not just `DIRECT_ID` - both route through the same typed generator (ADR 31), so both get
+  the same check. All three DPIA formats (JSON/HTML/Markdown) surface the new per-column field, and
+  the table-level one is now labelled to make clear what it does and doesn't cover.
 
 ### effigies
 

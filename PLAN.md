@@ -9,13 +9,6 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Project:** incognito - **`fictionalityVerified` in the DPIA report reads `true` for
-  columns no fictionality check actually covers.** It's computed in `VerificationStage` as "table
-  policy present and no specific check failed" - so `ALTEREGO_GENERIC` (declared deliberately,
-  e.g. `bank_account`) and a hint-less character-type `QUASI_ID`'s shape-fabrication both report
-  `Fictionality Verified: true` with no supporting check having run for that column. Scope the flag
-  per column, or rename it to reflect that it covers survival/misdeclaration checks rather than a
-  fictionality guarantee. Found by external tutorial feedback.
 - [ ] **Project:** effigies - **`quickstart/README.md` never mentions `validate`.** Both driver
   scripts run `discover -> scaffold -> run`; the README pitches its `setup`/`run` split as "the
   real authoring workflow", which is exactly where the cheap no-target-connection feedback loop
