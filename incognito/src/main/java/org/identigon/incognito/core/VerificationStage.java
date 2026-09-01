@@ -107,6 +107,19 @@ public final class VerificationStage implements PipelineStage {
     private static final String DRIVING_LICENCE_NUMBER_RESERVED_PREFIX = "99999";
 
     /**
+     * {@code PhoneNumberStrategy}'s guarantee under its default (non-{@code realistic}) options
+     * (alterego, {@code GB/phone-ranges.txt}, sourced from Ofcom's drama-number table): every
+     * digit-only output starts with one of these 8-digit area-coded prefixes, followed by exactly
+     * 3 free digits - never a connectable number. Unlike QQ/999/ZZ/99999 above (fixed by the
+     * algorithm itself), this list mirrors a loaded dictionary file rather than an algorithmic
+     * constant, so it must be kept in sync with that file by hand if it ever changes.
+     */
+    private static final List<String> PHONE_RESERVED_PREFIXES = List.of(
+        "01134960", "01144960", "01154960", "01164960", "01174960", "01184960", "01214960",
+        "01314960", "01414960", "01514960", "01614960", "01632960", "01914980", "02079460",
+        "02896496", "02920180", "03069990", "07700900", "08081570", "09098790");
+
+    /**
      * Margin above the threshold at which we skip the pg_stats pre-filter and run the exact count
      * directly. If pg_stats reports n_distinct within this factor of the threshold we fall through
      * to the exact query to avoid false negatives from stale statistics.
@@ -224,6 +237,8 @@ public final class VerificationStage implements PipelineStage {
                         verifyDomainFictionality(targetConn, tableName, columnName, failures, failedTables);
                     } else if (strategy == DirectIdStrategy.ALTEREGO_URL) {
                         verifyUrlFictionality(targetConn, tableName, columnName, failures, failedTables);
+                    } else if (strategy == DirectIdStrategy.ALTEREGO_PHONE) {
+                        verifyPhoneFictionality(targetConn, tableName, columnName, failures, failedTables);
                     } else if (strategy == DirectIdStrategy.ALTEREGO_NINO) {
                         verifyNinoFictionality(targetConn, tableName, columnName, failures, failedTables);
                     } else if (strategy == DirectIdStrategy.ALTEREGO_NHS_NUMBER) {
@@ -367,7 +382,7 @@ public final class VerificationStage implements PipelineStage {
                 for (Map.Entry<String, ColumnPolicy> entry : getColumnPolicies(tablePolicy)) {
                     ColumnPolicy colPolicy = entry.getValue();
                     if (colPolicy.role() != ColumnRole.DIRECT_ID) continue;
-                    // Email/postcode/domain/URL/NINO/NHS-number/passport-number/driving-licence
+                    // Email/postcode/domain/URL/phone/NINO/NHS-number/passport-number/driving-licence
                     // fictionality is already checked in section 2 against an absolute
                     // reserved-value guarantee; this survival net is for other strategies.
                     DirectIdStrategy strategy = colPolicy.directIdStrategy();
@@ -375,6 +390,7 @@ public final class VerificationStage implements PipelineStage {
                             || strategy == DirectIdStrategy.ALTEREGO_POSTCODE
                             || strategy == DirectIdStrategy.ALTEREGO_DOMAIN
                             || strategy == DirectIdStrategy.ALTEREGO_URL
+                            || strategy == DirectIdStrategy.ALTEREGO_PHONE
                             || strategy == DirectIdStrategy.ALTEREGO_NINO
                             || strategy == DirectIdStrategy.ALTEREGO_NHS_NUMBER
                             || strategy == DirectIdStrategy.ALTEREGO_PASSPORT_NUMBER
@@ -583,6 +599,31 @@ public final class VerificationStage implements PipelineStage {
             if (rs.next() && rs.getLong(1) > 0) {
                 failures.add("Fictionality violation: " + tableName + "." + columnName
                     + " has " + rs.getLong(1) + " URL(s) not using a reserved scheme/domain");
+                failedTables.add(tableName);
+            }
+        }
+    }
+
+    private void verifyPhoneFictionality(
+            Connection conn, String tableName, String columnName,
+            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
+
+        // Strip every non-digit character (spaces, the leading +44, etc.) before matching, so
+        // formatting differences never cause a false failure - only the digit sequence matters.
+        String digitsExpr = "REGEXP_REPLACE(" + columnName + ", '[^0-9]', '', 'g')";
+        String prefixCondition = PHONE_RESERVED_PREFIXES.stream()
+            .map(prefix -> digitsExpr + " LIKE '" + prefix + "___'")
+            .collect(Collectors.joining(" OR "));
+
+        String sql = "SELECT COUNT(*) FROM " + tableName
+            + " WHERE " + columnName + " IS NOT NULL"
+            + " AND NOT (" + prefixCondition + ")";
+
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next() && rs.getLong(1) > 0) {
+                failures.add("Fictionality violation: " + tableName + "." + columnName
+                    + " has " + rs.getLong(1) + " phone number(s) not using a reserved Ofcom drama-number range");
                 failedTables.add(tableName);
             }
         }

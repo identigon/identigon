@@ -26,6 +26,12 @@ too would be the same fact in two places.
   behind a generic "Failed to read YAML from path" message. It now rethrows a `ConfigException`
   from `parse(InputStream)` unchanged, so the CLI (`validate`/`run`) shows the actual mistyped
   key(s) instead of a message indistinguishable from a truly unreadable file.
+- **Fixed:** `VerificationStage` now asserts fictionality for `ALTEREGO_PHONE`, the one
+  `DirectIdStrategy` with a typed generator that had no corresponding check (email, postcode,
+  domain, URL, NINO, NHS number, passport number, and driving licence number were already
+  covered). A fabricated value must land in one of GB's reserved Ofcom drama-number ranges
+  (`GB/phone-ranges.txt`); `docs/spec/incognito.md` §4.3 corrected to describe this precisely
+  (GB-specific, multi-range, and conditional on `PhoneNumberStrategy`'s default options).
 
 ## [3.0.0] - 2026-09-01
 

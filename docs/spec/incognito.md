@@ -403,12 +403,16 @@ sources so they cannot be mistaken for real data:
 `VerificationStage` asserts these on the target, skipping `NULL` cells during verification, for
 every `DIRECT_ID` column and every `QUASI_ID SYNTHESISE` column carrying the same
 `directIdStrategy` hint (Appendix B, ADR 31) - both route through the identical typed generator, so
-both get the identical check. It also runs a **source-value survival** net over every non-reserved
-`DIRECT_ID` column: any real source value that reappears in the target is captured as a structured
-`AnonymisationReport.SurvivalFinding` (sampled distinct count, survived count, and a `hardFailure`
-verdict). A high survival ratio is an un-fabricated passthrough that fails the run; a handful of
-coincidental shape-preserving collisions on a low-entropy value is recorded but passes - quantified
-singling-out evidence (Art. 29 WP 05/2014) for the DPIA, not just a log line.
+both get the identical check. The phone check is GB-specific and multi-valued rather than a single
+fixed prefix: it accepts any of the reserved Ofcom drama-number ranges (`GB/phone-ranges.txt`),
+matching `PhoneNumberStrategy`'s own default-options guarantee (ADR 0005, alterego) - it does not
+hold under `PhoneOptions.realistic()`, which `incognito` never uses. It also runs a
+**source-value survival** net over every non-reserved `DIRECT_ID` column: any real source value
+that reappears in the target is captured as a structured `AnonymisationReport.SurvivalFinding`
+(sampled distinct count, survived count, and a `hardFailure` verdict). A high survival ratio is an
+un-fabricated passthrough that fails the run; a handful of coincidental shape-preserving collisions
+on a low-entropy value is recorded but passes - quantified singling-out evidence (Art. 29 WP
+05/2014) for the DPIA, not just a log line.
 
 **What "verified" means in the report.** `AnonymisationReport.ColumnAction.fictionalityVerified()`
 is `true` only for a column with a typed check above that actually ran and passed - `false` for
