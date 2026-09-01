@@ -30,11 +30,13 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * SYNTHESISE-by-type routing (SPEC Appendix B). A {@code QUASI_ID SYNTHESISE} column may carry an
- * author-declared {@code directIdStrategy} hint to synthesise a guaranteed-fictional typed value
- * (here {@code ALTEREGO_CITY}); a SYNTHESISE column whose source type has no built-in mapping and no
- * hint (here an {@code INTEGER}) must fail closed at discovery rather than silently shape-fabricate.
- * Requires Docker; skips gracefully otherwise.
+ * SYNTHESISE-by-type routing (SPEC Appendix B, ADR 31). A {@code QUASI_ID SYNTHESISE} column may
+ * carry an author-declared {@code directIdStrategy} hint to synthesise a guaranteed-fictional typed
+ * value (here {@code ALTEREGO_CITY}); a SYNTHESISE column whose source type has no built-in
+ * fictional mapping and no hint - an entirely unmapped type (here an {@code INTEGER}), or a
+ * character type that would otherwise silently shape-preserve (here a {@code VARCHAR} postcode) -
+ * must fail closed at discovery rather than silently shape-fabricate. Requires Docker; skips
+ * gracefully otherwise.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SynthesiseByTypeE2ETest {
@@ -119,6 +121,33 @@ class SynthesiseByTypeE2ETest {
         IncognitoException.ConfigException ex = assertThrows(IncognitoException.ConfigException.class,
             () -> run(ds, policy), "SYNTHESISE on an unmapped (numeric) type must fail closed");
         assertTrue(ex.getMessage().contains("SYNTHESISE"), "message names the offending strategy");
+    }
+
+    @Test
+    void characterTypeSynthesiseWithNoHintFailsClosed() throws Exception {
+        Assumptions.assumeTrue(pg != null, "Docker/PostgreSQL not available");
+        String ddl = """
+            CREATE TABLE addresses (
+                id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                postcode VARCHAR(10) NOT NULL
+            );
+            """;
+        DataSource[] ds = freshDatabases("postcode", ddl, "INSERT INTO addresses (postcode) VALUES ('SW1A 1AA')");
+
+        // A character-type QUASI_ID SYNTHESISE with no directIdStrategy hint would otherwise fall
+        // back to shape-preserving fabrication, which carries no fictionality guarantee (ADR 31) -
+        // abort, the same way the DIRECT_ID equivalent (ADR 29) already does.
+        AnonymisationPolicy policy = AnonymisationPolicy.builder()
+            .table("addresses", t -> t
+                .column("id", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
+                .column(ColumnPolicy.builder("postcode").role(ColumnRole.QUASI_ID)
+                    .quasiIdStrategy(QuasiIdStrategy.SYNTHESISE).build()))
+            .build();
+
+        IncognitoException.ConfigException ex = assertThrows(IncognitoException.ConfigException.class,
+            () -> run(ds, policy), "SYNTHESISE on a hint-less character type must fail closed");
+        assertTrue(ex.getMessage().contains("SYNTHESISE"), "message names the offending strategy");
+        assertTrue(ex.getMessage().contains("directIdStrategy"), "message names the missing hint");
     }
 
     // --- helpers ---

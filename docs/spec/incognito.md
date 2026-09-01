@@ -495,7 +495,7 @@ tables:
       full_name: { role: DIRECT_ID, directIdStrategy: ALTEREGO_NAME }
       email: { role: DIRECT_ID, directIdStrategy: ALTEREGO_EMAIL }
       dob: { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
-      postcode: { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
+      postcode: { role: QUASI_ID, quasiIdStrategy: SYNTHESISE, directIdStrategy: ALTEREGO_POSTCODE }
       last_seen: { role: QUASI_ID, quasiIdStrategy: JITTER_DAYS, jitterDays: 14 }
       debt_recovery_flag: { role: SENSITIVE, distinguishing: false } # flag shared by many -> kept real
       case_notes: { role: SENSITIVE, distinguishing: true, redactionStrategy: CLEAR }  # free text -> redacted
@@ -982,23 +982,25 @@ unaffected either way.
 
 ## Appendix B - `SYNTHESISE` by source type
 
-`SYNTHESISE` has no single generator - it depends on the column's type. **A `QUASI_ID` whose
-type has no built-in mapping below and no typed hint fails fail-closed with `ConfigException`
-at discovery - never a silent passthrough or shape-fabrication.** The type-specific `VARCHAR`
-rows (postcode/city/street/organisation) are **author-declared**, not auto-detected (ADR 17):
-the author adds a `directIdStrategy` hint to the `QUASI_ID` column (e.g. `ALTEREGO_POSTCODE`),
-and Incognito routes the value through that typed, guaranteed-fictional generator. Absent a
-hint, a temporal type shifts and a character type shape-preserves ("other `VARCHAR`"); anything
-else fails closed.
+`SYNTHESISE` has no single generator - it depends on the column's type. **A `QUASI_ID` whose type
+has no built-in *fictional* mapping below and no typed hint fails fail-closed with
+`ConfigException` at discovery - never a silent passthrough or shape-fabrication (ADR 31).** The
+type-specific `VARCHAR` rows (postcode/city/street/organisation) are **author-declared**, not
+auto-detected (ADR 17): the author adds a `directIdStrategy` hint to the `QUASI_ID` column (e.g.
+`ALTEREGO_POSTCODE`), and Incognito routes the value through that typed, guaranteed-fictional
+generator. A temporal type has a type-matched shift primitive and needs no hint; a character type
+only shape-preserves absent one, which carries no fictionality guarantee, so it - like every other
+type - always needs one: `ALTEREGO_GENERIC` remains available as an explicit, declared choice when
+no typed generator fits (ADR 31, mirroring ADR 29's treatment of `DIRECT_ID`).
 
-| Source SQL/Java type                   | `SYNTHESISE` generator                                                                                                                                                                                                 |
-|:---------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `DATE` / `LocalDate` (e.g. `dob`)      | `ae.shiftDate(wideWindowDays)` with a window wide enough to destroy the identifying part (e.g. ±1825 days =~ ±5 y for `dob`, so the year no longer pins age). *Not* `shiftDate(YEAR)` for `dob` (keeps the real year). |
-| `VARCHAR` + `directIdStrategy` hint    | the hinted typed generator - `ae.postcode()` / `ae.city()` / `ae.streetAddress()` / `ae.organisationName()` / ... (guaranteed-fictional; author-declared, never auto-detected).                                        |
-| other `VARCHAR` (no hint)              | shape-preserving fabrication (format-preserving).                                                                                                                                                                      |
-| numeric (`INT`/`DECIMAL`, e.g. salary) | **no built-in** -> require a `directIdStrategy` hint or an explicit custom `Strategy` via `bind(...)`, else `ConfigException`. Do not passthrough or shape-fabricate a real number.                                    |
-| `TIMESTAMP` / `LocalDateTime`          | `ae.shiftDateTime(...)` (day + time components)                                                                                                                                                                        |
-| `boolean` / tiny enum                  | no built-in -> needs a hint or custom strategy, else `ConfigException` (usually operational, not a QI)                                                                                                                 |
+| Source SQL/Java type                   | `SYNTHESISE` generator                                                                                                                                                                                                                                                       |
+|:---------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `DATE` / `LocalDate` (e.g. `dob`)      | `ae.shiftDate(wideWindowDays)` with a window wide enough to destroy the identifying part (e.g. ±1825 days =~ ±5 y for `dob`, so the year no longer pins age). *Not* `shiftDate(YEAR)` for `dob` (keeps the real year). No hint needed.                                       |
+| `TIMESTAMP` / `LocalDateTime`          | `ae.shiftDateTime(...)` (day + time components). No hint needed.                                                                                                                                                                                                             |
+| `VARCHAR` + `directIdStrategy` hint    | the hinted typed generator - `ae.postcode()` / `ae.city()` / `ae.streetAddress()` / `ae.organisationName()` / ... (guaranteed-fictional; author-declared, never auto-detected), or `ae.fabricateShapePreserving()` for the explicit, no-guarantee `ALTEREGO_GENERIC` choice. |
+| `VARCHAR` with no hint                 | **no built-in fictional generator** -> `ConfigException` (ADR 31). Shape-preserving fabrication is never chosen silently; declare a `directIdStrategy` hint, even `ALTEREGO_GENERIC`, to make the guarantee level explicit.                                                  |
+| numeric (`INT`/`DECIMAL`, e.g. salary) | **no built-in** -> require a `directIdStrategy` hint or an explicit custom `Strategy` via `bind(...)`, else `ConfigException`. Do not passthrough or shape-fabricate a real number.                                                                                          |
+| `boolean` / tiny enum                  | no built-in -> needs a hint or custom strategy, else `ConfigException` (usually operational, not a QI)                                                                                                                                                                       |
 
 ---
 

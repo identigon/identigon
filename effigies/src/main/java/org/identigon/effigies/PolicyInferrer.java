@@ -33,12 +33,17 @@ class PolicyInferrer {
     // directIdStrategy stub. NATIONAL_ID_PATTERN is deliberately absent: it matches ssn/tax_id (no
     // typed generator exists for either) alongside nino/nhs_number (two *different* generators), so
     // no single strategy is a safe suggestion -- the stub still appears, just with no guessed value.
+    // POSTCODE_PATTERN infers QUASI_ID, not DIRECT_ID, but is included here too: incognito routes a
+    // QUASI_ID SYNTHESISE column through a directIdStrategy hint exactly like a DIRECT_ID column does
+    // (SPEC Appendix B), and a hint-less character-type QUASI_ID now fails closed (ADR 31) - so the
+    // suggestion belongs here just as much.
     private static final Map<String, DirectIdStrategy> STRATEGY_BY_HEURISTIC = Map.of(
         "EMAIL_PATTERN", DirectIdStrategy.ALTEREGO_EMAIL,
         "PHONE_PATTERN", DirectIdStrategy.ALTEREGO_PHONE,
         "NAME_PATTERN", DirectIdStrategy.ALTEREGO_NAME,
         "PASSPORT_PATTERN", DirectIdStrategy.ALTEREGO_PASSPORT_NUMBER,
-        "DRIVING_LICENCE_PATTERN", DirectIdStrategy.ALTEREGO_DRIVING_LICENCE_NUMBER
+        "DRIVING_LICENCE_PATTERN", DirectIdStrategy.ALTEREGO_DRIVING_LICENCE_NUMBER,
+        "POSTCODE_PATTERN", DirectIdStrategy.ALTEREGO_POSTCODE
     );
 
     Optional<InferredRole> inferRole(String columnName) {

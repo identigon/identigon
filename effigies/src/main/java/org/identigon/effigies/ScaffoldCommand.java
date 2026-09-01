@@ -159,6 +159,15 @@ class ScaffoldCommand {
             }
         } else if (role.role() == ColumnRole.SENSITIVE) {
             writer.write("        distinguishing:    # TODO if SENSITIVE (true|false - does this alone identify someone?)\n");
+        } else if (role.role() == ColumnRole.QUASI_ID) {
+            // Only heuristics with a known typed generator (POSTCODE_PATTERN today) get a stub - a
+            // QUASI_ID inferred from a temporal heuristic (DOB_PATTERN) needs no hint (SPEC Appendix
+            // B): the default SYNTHESISE shift is already type-matched, unlike a character type's
+            // default shape-preserving fallback, which carries no fictionality guarantee (ADR 31).
+            Optional<DirectIdStrategy> strategy = inferrer.suggestedDirectIdStrategy(role.heuristic());
+            if (strategy.isPresent()) {
+                writer.write("        directIdStrategy:  # TODO if QUASI_ID (Suggestion: " + strategy.get() + ")\n");
+            }
         }
     }
 }

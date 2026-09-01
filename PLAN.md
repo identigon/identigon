@@ -9,16 +9,6 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Project:** incognito - **`QUASI_ID` synthesis on a character type carries no fictionality
-  guarantee without an explicit `directIdStrategy` hint, and nothing warns for it.**
-  `isSynthesisableType` treats `VARCHAR`/`CHAR` as synthesisable because they shape-preserve, not
-  because a fictional generator exists - so a hint-less `QUASI_ID` (e.g. `postcode`) passes the
-  fail-closed guard and silently shape-fabricates, exactly the gap ADR-0029 closed for `DIRECT_ID`.
-  `effigies scaffold` compounds it: `writeRoleStub` has no `QUASI_ID` branch, so no
-  `directIdStrategy:` TODO stub is ever suggested, even for a column its own heuristics identified
-  as a postcode. Cheapest fix: add the scaffold stub. Stricter fix, mirroring ADR-0029: require an
-  explicit strategy on a `QUASI_ID` whose type has no fictional generator, so shape-fabrication
-  becomes a declared choice rather than a default. Found by external tutorial feedback.
 - [ ] **Project:** incognito - **`YamlPolicyParser` accepts unrecognised keys within a
   table/column block instead of rejecting them.** Every field is read via
   `colNode.get("exactName")` with no validation against a known key set, so a typo on an optional

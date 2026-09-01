@@ -168,6 +168,38 @@ class ScaffoldCommandTest {
     }
 
     @Test
+    void quasiIdSuggestionIncludesADirectIdStrategyHintStub(@TempDir File tempDir) throws Exception {
+        File file = new File(tempDir, "policy.scaffold.yaml");
+
+        SchemaInspector.TableMetadata customers = new SchemaInspector.TableMetadata(
+            "customers", List.of(), Map.of(), List.of(), List.of("postcode"), List.of(), List.of(),
+            Map.of("postcode", Types.VARCHAR), List.of());
+
+        ScaffoldCommand.writeScaffold(file, List.of(customers));
+        String content = Files.readString(file.toPath());
+
+        assertTrue(content.contains("Suggestion: QUASI_ID based on POSTCODE_PATTERN"));
+        assertTrue(content.contains("directIdStrategy:  # TODO if QUASI_ID (Suggestion: ALTEREGO_POSTCODE)"));
+    }
+
+    @Test
+    void quasiIdSuggestionWithNoTypedGeneratorGetsNoStub(@TempDir File tempDir) throws Exception {
+        File file = new File(tempDir, "policy.scaffold.yaml");
+
+        SchemaInspector.TableMetadata employees = new SchemaInspector.TableMetadata(
+            "employees", List.of(), Map.of(), List.of(), List.of("date_of_birth"), List.of(), List.of(),
+            Map.of("date_of_birth", Types.DATE), List.of());
+
+        ScaffoldCommand.writeScaffold(file, List.of(employees));
+        String content = Files.readString(file.toPath());
+
+        // DOB_PATTERN infers QUASI_ID, but a temporal SYNTHESISE needs no hint (SPEC Appendix B) -
+        // no directIdStrategy stub should be suggested.
+        assertTrue(content.contains("Suggestion: QUASI_ID based on DOB_PATTERN"));
+        assertFalse(content.contains("directIdStrategy"));
+    }
+
+    @Test
     void sensitiveSuggestionIncludesADistinguishingStub(@TempDir File tempDir) throws Exception {
         File file = new File(tempDir, "policy.scaffold.yaml");
 

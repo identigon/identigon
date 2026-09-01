@@ -25,8 +25,10 @@ tables:
       contact_name:  { role: DIRECT_ID,   directIdStrategy: ALTEREGO_GENERIC }
       contact_title: { role: PAYLOAD }
       address:       { role: DIRECT_ID,   directIdStrategy: ALTEREGO_STREET_ADDRESS }
-      city:          { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
-      region:        { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
+      city:          { role: QUASI_ID, quasiIdStrategy: SYNTHESISE, directIdStrategy: ALTEREGO_CITY }
+      # No typed region generator exists; ALTEREGO_GENERIC is the declared, no-guarantee choice a
+      # hint-less character-type SYNTHESISE would otherwise make silently (ADR 31).
+      region:        { role: QUASI_ID, quasiIdStrategy: SYNTHESISE, directIdStrategy: ALTEREGO_GENERIC }
       postal_code:   { role: DIRECT_ID,   directIdStrategy: ALTEREGO_POSTCODE }
       country:       { role: PAYLOAD }
       phone:         { role: DIRECT_ID,   directIdStrategy: ALTEREGO_PHONE }
@@ -41,8 +43,8 @@ tables:
       birth_date:        { role: QUASI_ID,    quasiIdStrategy: SYNTHESISE }
       hire_date:         { role: PAYLOAD }
       address:           { role: DIRECT_ID,   directIdStrategy: ALTEREGO_STREET_ADDRESS }
-      city:              { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
-      region:            { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
+      city:              { role: QUASI_ID, quasiIdStrategy: SYNTHESISE, directIdStrategy: ALTEREGO_CITY }
+      region:            { role: QUASI_ID, quasiIdStrategy: SYNTHESISE, directIdStrategy: ALTEREGO_GENERIC }
       postal_code:       { role: DIRECT_ID,   directIdStrategy: ALTEREGO_POSTCODE }
       country:           { role: PAYLOAD }
       home_phone:        { role: DIRECT_ID,   directIdStrategy: ALTEREGO_PHONE }
@@ -74,8 +76,8 @@ tables:
       freight:          { role: PAYLOAD }
       ship_name:        { role: DIRECT_ID,   directIdStrategy: ALTEREGO_GENERIC }
       ship_address:     { role: DIRECT_ID,   directIdStrategy: ALTEREGO_STREET_ADDRESS }
-      ship_city:        { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
-      ship_region:      { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
+      ship_city:        { role: QUASI_ID, quasiIdStrategy: SYNTHESISE, directIdStrategy: ALTEREGO_CITY }
+      ship_region:      { role: QUASI_ID, quasiIdStrategy: SYNTHESISE, directIdStrategy: ALTEREGO_GENERIC }
       ship_postal_code: { role: DIRECT_ID,   directIdStrategy: ALTEREGO_POSTCODE }
       ship_country:     { role: PAYLOAD }
   products:
@@ -106,8 +108,8 @@ tables:
       contact_name:  { role: DIRECT_ID,   directIdStrategy: ALTEREGO_GENERIC }
       contact_title: { role: PAYLOAD }
       address:       { role: DIRECT_ID,   directIdStrategy: ALTEREGO_STREET_ADDRESS }
-      city:          { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
-      region:        { role: QUASI_ID, quasiIdStrategy: SYNTHESISE }
+      city:          { role: QUASI_ID, quasiIdStrategy: SYNTHESISE, directIdStrategy: ALTEREGO_CITY }
+      region:        { role: QUASI_ID, quasiIdStrategy: SYNTHESISE, directIdStrategy: ALTEREGO_GENERIC }
       postal_code:   { role: DIRECT_ID,   directIdStrategy: ALTEREGO_POSTCODE }
       country:       { role: PAYLOAD }
       phone:         { role: DIRECT_ID,   directIdStrategy: ALTEREGO_PHONE }

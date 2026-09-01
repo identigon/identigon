@@ -191,12 +191,15 @@ public final class SchemaDiscoveryStage implements PipelineStage {
     }
 
     /**
-     * Fail-closed guard for {@code SYNTHESISE}-by-type (SPEC Appendix B): a {@code QUASI_ID} that is
-     * synthesised (its strategy is {@code SYNTHESISE}, or absent - the default) from a source type
-     * with no built-in generator, and with no typed {@code directIdStrategy} hint, would silently
-     * shape-fabricate. That is forbidden; the issue is appended to {@code failures} rather than
-     * thrown immediately - see {@link #validateTablePolicy}. Temporal and character types have a
-     * mapping ({@link #isSynthesisableType}) and pass.
+     * Fail-closed guard for {@code SYNTHESISE}-by-type (SPEC Appendix B, ADR 31): a {@code QUASI_ID}
+     * that is synthesised (its strategy is {@code SYNTHESISE}, or absent - the default) from a source
+     * type with no built-in <em>fictional</em> generator, and with no typed {@code directIdStrategy}
+     * hint, would silently fall back to shape-preserving fabrication with no fictionality guarantee -
+     * the same unmade-decision problem ADR 29 already closed for {@code DIRECT_ID}. That is
+     * forbidden; the issue is appended to {@code failures} rather than thrown immediately - see
+     * {@link #validateTablePolicy}. A temporal type ({@link #isTemporalType}) has a type-matched shift
+     * primitive and needs no hint; a character type ({@link #isCharacterType}) shape-preserves only,
+     * so it always needs one; anything else has no mapping at all and always needs one.
      */
     private void validateSynthesiseType(
             SchemaInspector.TableMetadata table, String column, ColumnPolicy colPol, List<String> failures) {
@@ -206,7 +209,17 @@ public final class SchemaDiscoveryStage implements PipelineStage {
             return; // jitter modes, or an explicit typed hint, are always fine
         }
         Integer sqlType = table.columnTypes() == null ? null : table.columnTypes().get(column);
-        if (sqlType != null && !isSynthesisableType(sqlType)) {
+        if (sqlType == null || isTemporalType(sqlType)) {
+            return;
+        }
+        if (isCharacterType(sqlType)) {
+            failures.add("QUASI_ID column '" + column + "' in table '" + table.tableName()
+                + "' uses SYNTHESISE on a character type (" + jdbcTypeName(sqlType) + ") with no"
+                + " directIdStrategy hint. Shape-preserving fabrication carries no fictionality"
+                + " guarantee (SPEC Appendix B, ADR 31) - declare a directIdStrategy hint (e.g."
+                + " ALTEREGO_POSTCODE), or ALTEREGO_GENERIC if that lack of guarantee is a"
+                + " deliberate choice.");
+        } else {
             failures.add("QUASI_ID column '" + column + "' in table '" + table.tableName()
                 + "' uses SYNTHESISE but its type (" + jdbcTypeName(sqlType) + ") has no built-in"
                 + " generator. Declare a directIdStrategy hint (e.g. ALTEREGO_POSTCODE) or a custom"
@@ -215,13 +228,24 @@ public final class SchemaDiscoveryStage implements PipelineStage {
     }
 
     /**
-     * Whether a source SQL type has a built-in {@code SYNTHESISE} mapping (SPEC Appendix B): temporal
-     * types shift; character types shape-preserve. Everything else needs a typed hint or fails closed.
+     * Whether a source SQL type has a type-matched {@code SYNTHESISE} shift primitive (SPEC
+     * Appendix B) that needs no {@code directIdStrategy} hint.
      */
-    private static boolean isSynthesisableType(int sqlType) {
+    private static boolean isTemporalType(int sqlType) {
         return switch (sqlType) {
-            case java.sql.Types.DATE, java.sql.Types.TIMESTAMP, java.sql.Types.TIMESTAMP_WITH_TIMEZONE,
-                 java.sql.Types.VARCHAR, java.sql.Types.CHAR, java.sql.Types.LONGVARCHAR,
+            case java.sql.Types.DATE, java.sql.Types.TIMESTAMP, java.sql.Types.TIMESTAMP_WITH_TIMEZONE -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * Whether a source SQL type only has shape-preserving (format-preserving, not fictional)
+     * {@code SYNTHESISE} fabrication (SPEC Appendix B) absent a {@code directIdStrategy} hint - so a
+     * hint is always required (ADR 31).
+     */
+    private static boolean isCharacterType(int sqlType) {
+        return switch (sqlType) {
+            case java.sql.Types.VARCHAR, java.sql.Types.CHAR, java.sql.Types.LONGVARCHAR,
                  java.sql.Types.NVARCHAR, java.sql.Types.NCHAR, java.sql.Types.LONGNVARCHAR -> true;
             default -> false;
         };

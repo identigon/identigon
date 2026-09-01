@@ -20,6 +20,24 @@ too would be the same fact in two places.
 
 ## [Unreleased]
 
+### incognito
+
+- **A character-type `QUASI_ID` using `SYNTHESISE` now requires an explicit `directIdStrategy`
+  hint.** Previously a `QUASI_ID` on a `VARCHAR`-family column with no hint silently fell back to
+  shape-preserving fabrication (no fictionality guarantee, ADR 21) even with the default
+  `SYNTHESISE` strategy; it now fails closed at schema-discovery time instead, the same treatment
+  ADR 29 already gave `DIRECT_ID`. `ALTEREGO_GENERIC` remains fully valid as an explicit choice;
+  temporal `SYNTHESISE` columns (`DATE`/`TIMESTAMP`) are unaffected - they keep their type-matched
+  shift primitive and need no hint. See
+  `docs/adr/0031-declared-direct-id-strategy-for-quasi-id-synthesise.md`.
+
+### effigies
+
+- **`scaffold` now suggests a `directIdStrategy` hint for an inferred `QUASI_ID` column that has
+  one** (`postcode` via `POSTCODE_PATTERN` today), mirroring the existing `DIRECT_ID` stub - closes
+  the gap where a scaffolded policy could land on incognito's new QUASI_ID fail-closed guard above
+  with no suggestion of how to fix it.
+
 ## [2.0.0] - 2026-09-01
 
 ### alterego
