@@ -20,6 +20,8 @@ too would be the same fact in two places.
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-09-01
+
 ### incognito
 
 - **A character-type `QUASI_ID` using `SYNTHESISE` now requires an explicit `directIdStrategy`
