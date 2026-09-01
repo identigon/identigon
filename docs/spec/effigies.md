@@ -53,10 +53,14 @@ exiting `0`.
 
 - **`discover`** - inspect a source database and describe its schema (metadata only). Produces a
   human-readable summary and a machine-readable form for the later phases. Requires read access to
-  the source's catalog; reads no row data.
+  the source's catalog; reads no row data. Reported column types are JDBC's own names
+  (`java.sql.JDBCType`), not necessarily the database's own - e.g. PostgreSQL's `BOOLEAN` reports
+  as `BIT`, and `TEXT` as `VARCHAR` - still a reliable input for choosing a strategy, just not
+  identical to what the DDL says.
 - **`scaffold`** - emit a starter `policy.yaml`: every discovered column listed, discovered metadata
-  as comments, **every column left unclassified** (fail-closed). A draft, not a runnable config.
-  Refuses to overwrite an existing output file unless `--force` is given.
+  as comments (including the same JDBC type names `discover` reports), **every column left
+  unclassified** (fail-closed). A draft, not a runnable config. Refuses to overwrite an existing
+  output file unless `--force` is given.
 - **`validate`** - check a `policy.yaml` against a source schema: the same fail-closed diagnostics
   `run` would raise, without a target connection or any data movement. Requires only source
   connection details (`--source-url`, `--source-user`, `IDENTIGON_SOURCE_PASSWORD`) - cheaper to

@@ -62,6 +62,8 @@ class DiscoverCommandTest {
         assertTrue(output.contains("Table: CUSTOMER") || output.contains("Table: customer"), output);
         assertTrue(output.contains("pk"), "the primary key must be annotated: " + output);
         assertTrue(output.contains("fk -> "), "the foreign key must be annotated: " + output);
+        assertTrue(output.contains("JDBC's own names"),
+            "must disclose that reported types are JDBC's, not the database's own: " + output);
     }
 
     @Test

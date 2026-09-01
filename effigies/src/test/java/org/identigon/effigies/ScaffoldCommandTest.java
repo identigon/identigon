@@ -117,6 +117,8 @@ class ScaffoldCommandTest {
         String content = Files.readString(file.toPath());
 
         assertTrue(content.contains("tables:"));
+        assertTrue(content.contains("JDBC's own name"),
+            "must disclose that reported types are JDBC's, not the database's own: " + content);
         assertTrue(content.contains("  users:"));
         assertTrue(content.contains("      id:            # type: INTEGER, pk"));
         assertTrue(content.contains("        role:              #"));

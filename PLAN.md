@@ -9,11 +9,6 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Project:** effigies - **`discover`/`scaffold` report JDBC's type names, not PostgreSQL's**
-  (a `BOOLEAN` column shows as `type: BIT`, `TEXT` as `type: VARCHAR`). Not a defect - both are
-  correct at the JDBC layer - but the type is an input to choosing a strategy, so an author
-  classifying a column sees a name that doesn't match the DDL. Worth a sentence somewhere noting
-  whose type names these are. Found by external tutorial feedback.
 - [ ] **Project:** effigies - **Revisit excluding `effigies.jar` from the GitHub Release assets.**
   ADR-0028 deliberately left the thin `effigies.jar` out of the Release asset set (`alterego.jar`,
   `incognito.jar`, `identigon.jar` only) on the reasoning that it can't run standalone - anyone

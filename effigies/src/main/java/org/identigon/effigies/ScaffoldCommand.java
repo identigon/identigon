@@ -88,6 +88,9 @@ class ScaffoldCommand {
                 tablesByName.put(t.tableName(), t);
             }
 
+            writer.write("# The `type:` shown against each column below is JDBC's own name, not necessarily the\n");
+            writer.write("# database's - e.g. PostgreSQL's BOOLEAN reports here as JDBC's BIT, and TEXT as VARCHAR.\n");
+            writer.write("# Still a reliable input for choosing a strategy, just not identical to what the DDL says.\n");
             writer.write("tables:\n");
             for (SchemaInspector.TableMetadata table : tables) {
                 writer.write("  " + table.tableName() + ":\n");

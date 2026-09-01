@@ -67,6 +67,11 @@ too would be the same fact in two places.
   anonymised target) - the guidance already existed on the project site's Getting Started page but
   never made it into this repo, so a reader arriving via GitHub had the prerequisite named with no
   method.
+- **`discover` and `scaffold` now disclose that reported column types are JDBC's own names, not
+  necessarily the database's.** A `BOOLEAN` column was reported as `type: BIT`, `TEXT` as
+  `type: VARCHAR` - correct at the JDBC layer, but an author classifying a column saw a name that
+  didn't match the DDL, with nothing explaining why. `discover`'s console output and `scaffold`'s
+  generated `policy.yaml` both gained a one-line note; `docs/spec/effigies.md` documents it too.
 
 ## [2.0.0] - 2026-09-01
 

@@ -46,6 +46,9 @@ class DiscoverCommand {
         SchemaInspector inspector = new SchemaInspector();
         try {
             List<SchemaInspector.TableMetadata> tables = inspector.inspect(dataSource);
+            out.println("(Types shown are JDBC's own names, not necessarily the database's - e.g."
+                + " PostgreSQL's BOOLEAN reports here as BIT, and TEXT as VARCHAR.)");
+            out.println();
             for (SchemaInspector.TableMetadata table : tables) {
                 out.println("Table: " + table.tableName());
                 for (String col : table.columns()) {
