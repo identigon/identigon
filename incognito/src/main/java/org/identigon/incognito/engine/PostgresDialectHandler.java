@@ -1,9 +1,11 @@
 package org.identigon.incognito.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +65,18 @@ public final class PostgresDialectHandler implements DialectHandler {
         return "INSERT INTO " + quoteIdent(tableName) + " (" + cols + ") "
             + (hasIdentityPk ? "OVERRIDING SYSTEM VALUE " : "")
             + "VALUES (" + placeholders + ")";
+    }
+
+    @Override
+    public void bindValue(PreparedStatement stmt, int index, Object value) throws SQLException {
+        // Bind String values as 'unknown' (Types.OTHER) so PostgreSQL casts them to the column's
+        // actual type - the way a string literal does. This lets a kept enum / user-type value
+        // (e.g. an mpaa_rating) round-trip, where a plain varchar bind fails with a type mismatch.
+        if (value instanceof String) {
+            stmt.setObject(index, value, Types.OTHER);
+        } else {
+            stmt.setObject(index, value);
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.identigon.incognito.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -28,6 +29,23 @@ public interface DialectHandler {
      * @return the dialect-specific {@code INSERT} statement
      */
     String buildInsertSql(String tableName, List<String> columns, boolean hasIdentityPk);
+
+    /**
+     * Binds one column value onto a prepared {@code INSERT} statement, applying whatever
+     * dialect-specific type coercion the bind itself needs. The default here is a plain
+     * {@code setObject(index, value)} - correct ANSI SQL behaviour for any engine with no coercion
+     * quirk of its own; a dialect that needs one (e.g. PostgreSQL binding a {@code String} as
+     * {@code Types.OTHER} so it casts to the column's real type) overrides this instead of
+     * {@code BulkDatabaseLoadStage} hardcoding one engine's rule for every engine.
+     *
+     * @param stmt  the prepared {@code INSERT} statement being populated
+     * @param index the 1-based JDBC parameter index
+     * @param value the column value to bind, of any JDBC-representable type, including {@code null}
+     * @throws SQLException if the bind itself fails
+     */
+    default void bindValue(PreparedStatement stmt, int index, Object value) throws SQLException {
+        stmt.setObject(index, value);
+    }
 
     /**
      * Called after loading a table. Used to restore foreign key enforcement and triggers.

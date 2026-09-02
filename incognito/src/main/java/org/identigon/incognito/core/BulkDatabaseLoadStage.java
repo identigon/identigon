@@ -53,16 +53,11 @@ public final class BulkDatabaseLoadStage implements AutoCloseable {
      * @throws SQLException if a batch flush fails
      */
     public void insertRow(Object[] row) throws SQLException {
+        // Delegate the bind itself to the dialect (DialectHandler.bindValue) - PostgreSQL's
+        // Types.OTHER coercion for String values is a Postgres-specific rule, not a general one; a
+        // future non-Postgres dialect binds however it needs to without this class knowing about it.
         for (int i = 0; i < row.length; i++) {
-            Object value = row[i];
-            // Bind String values as 'unknown' (Types.OTHER) so PostgreSQL casts them to the column's
-            // actual type - the way a string literal does. This lets a kept enum / user-type value
-            // (e.g. an mpaa_rating) round-trip, where a plain varchar bind fails with a type mismatch.
-            if (value instanceof String) {
-                insertStmt.setObject(i + 1, value, java.sql.Types.OTHER);
-            } else {
-                insertStmt.setObject(i + 1, value);
-            }
+            dialect.bindValue(insertStmt, i + 1, row[i]);
         }
         insertStmt.addBatch();
         batchCount++;

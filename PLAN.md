@@ -9,25 +9,11 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Project:** incognito - **Missing-`references` NPE guard as defence in depth (low
-  priority).** `SchemaDiscoveryStage.validateTablePolicy` now fails closed on a single-column
-  `FOREIGN_KEY` with no `references:` block, and `run` always calls it first (`process()` runs
-  `validate` internally before any table is loaded) - so
-  `TableTransformLoadStage.buildFkTransformer` passing a null `referencedTable` into
-  `InMemoryKeyTranslationStore.get` (an unguarded `ConcurrentHashMap.get(null)` NPE) should no
-  longer be reachable in practice. Worth a guarded null check there anyway, only as a named
-  diagnostic in place of a raw stack trace should some other path ever reach it (e.g. a hand-built
-  `AnonymisationPolicy` that skips `SchemaDiscoveryStage` entirely).
 - [ ] **Project:** incognito - **Batch deferred cyclic FK updates.**
   `BulkDatabaseLoadStage.resolveDeferredCyclicFKs` currently prepares and executes a new `UPDATE`
   statement for every single deferred row, causing an N+1 performance bottleneck. It should group
   updates by table/column structure (`tableName`/`pkColumn`/`fkColumn` fully determine the
   statement's SQL text, so those triples group cleanly) and use `executeBatch()`.
-- [ ] **Project:** incognito - **Push `Types.OTHER` string binding to `DialectHandler`.**
-  `BulkDatabaseLoadStage.insertRow` hardcodes `Types.OTHER` for all `String` values to coerce
-  Postgres types. This will break other engines; the binding logic belongs in `DialectHandler`,
-  which has no per-value binding hook today (only table/statement-level methods) - closing this
-  needs a new method there, not a tweak to an existing one.
 - [ ] **Project:** effigies - **Revisit excluding `effigies.jar` from the GitHub Release assets.**
   ADR-0028 deliberately left the thin `effigies.jar` out of the Release asset set (`alterego.jar`,
   `incognito.jar`, `identigon.jar` only) on the reasoning that it can't run standalone - anyone

@@ -55,6 +55,45 @@ class BulkDatabaseLoadStageTest {
             "the statement-close failure must be kept as a suppressed exception, not discarded");
     }
 
+    /**
+     * {@code insertRow} must delegate every value bind to {@code DialectHandler.bindValue} rather
+     * than hardcoding one engine's coercion rule itself (the {@code Types.OTHER}-for-{@code String}
+     * fix) - proven here with a dialect whose {@code bindValue} never touches the statement at all,
+     * so a passing test can only mean {@code insertRow} called it, not that it happened to produce
+     * the same JDBC calls by coincidence.
+     */
+    @Test
+    void insertRowDelegatesEveryBindToTheDialectHandler() throws Exception {
+        List<String> calls = new java.util.ArrayList<>();
+        DialectHandler recordingDialect = new DialectHandler() {
+            @Override public void preLoadTable(Connection c, String t) {}
+            @Override public String buildInsertSql(String t, List<String> cols, boolean identity) { return "INSERT"; }
+            @Override public void postLoadTable(Connection c, String t) {}
+            @Override public void resyncSequence(Connection c, String t, String pk) {}
+            @Override public void bindValue(PreparedStatement stmt, int index, Object value) {
+                calls.add(index + "=" + value);
+            }
+        };
+        PreparedStatement fakeStmt = fakePreparedStatement();
+        Connection fakeConn = fakeConnection(fakeStmt);
+
+        BulkDatabaseLoadStage stage = new BulkDatabaseLoadStage(
+            recordingDialect, fakeConn, "t", List.of("a", "b"), false, null);
+        try {
+            stage.insertRow(new Object[] {"x", 42});
+            assertEquals(List.of("1=x", "2=42"), calls);
+        } finally {
+            // fakePreparedStatement()'s executeBatch always throws BATCH_FAILURE (for the other
+            // test above) - irrelevant here, this test only cares that bindValue was delegated to
+            // before that point, so swallow it purely to release the resource cleanly.
+            try {
+                stage.close();
+            } catch (SQLException expected) {
+                // ignored - see above
+            }
+        }
+    }
+
     // == is the correct implementation of Object.equals() semantics for a proxy with no identity
     // of its own; and the test's own classloader is the right (and simplest) choice to resolve the
     // JDK interfaces below -- both PMD.CompareObjectsWithEquals and PMD.UseProperClassLoader are

@@ -418,8 +418,18 @@ public final class TableTransformLoadStage implements PipelineStage {
         }
 
         if (composite == null) {
-            // Single-column FK: look up the parent's surrogate directly.
+            // Single-column FK: look up the parent's surrogate directly. A null referencedTable is
+            // normally already caught by SchemaDiscoveryStage.validateTablePolicy, fail-closed,
+            // before any row is touched - this is a defence-in-depth guard for the rare caller that
+            // builds an AnonymisationPolicy by hand and skips that stage, so a missing reference
+            // still fails with a named diagnostic instead of an NPE inside the key-translation store
+            // (ConcurrentHashMap.get(null) calling key.hashCode()).
             String referencedTable = colPolicy.referencedTable();
+            if (referencedTable == null) {
+                throw new IncognitoException.ConstraintException(
+                    "FOREIGN_KEY column '" + columnName + "' in table '" + tableMeta.tableName()
+                        + "' has no references declared - cannot resolve its parent surrogate.");
+            }
             return (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
                 if (value == null) return null;
                 Optional<Object> mapped = ctx.keyStore().get(referencedTable, value);

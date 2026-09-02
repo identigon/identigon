@@ -37,6 +37,16 @@ too would be the same fact in two places.
   `UNIQUE` constraint) slipped past the old narrower-only check and crashed with an
   `ArrayIndexOutOfBoundsException` mid-load instead. A composite FK that targets the PK precisely,
   possibly in a different column order than declared, is unaffected.
+- **Fixed:** a single-column `FOREIGN_KEY` with no `references` declared now fails closed
+  (`ConstraintException`) inside `TableTransformLoadStage.buildFkTransformer` itself, not just in
+  `SchemaDiscoveryStage.validateTablePolicy`. Defence in depth only - `run`/`validate` already catch
+  this earlier - for a caller that builds an `AnonymisationPolicy` and skips `SchemaDiscoveryStage`
+  entirely.
+- **Changed:** `DialectHandler` gained a `bindValue(PreparedStatement, int, Object)` method
+  (default: plain `setObject`). `BulkDatabaseLoadStage.insertRow` no longer hardcodes PostgreSQL's
+  `Types.OTHER` coercion for `String` values (needed so a kept enum/user-type column round-trips) -
+  that rule now lives in `PostgresDialectHandler.bindValue`, where a future non-Postgres dialect can
+  supply its own instead of inheriting Postgres's.
 
 ### effigies
 
