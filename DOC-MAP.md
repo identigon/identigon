@@ -37,18 +37,29 @@ docs/spec/
 CHANGELOG.md                what shipped, across the whole monorepo
 PLAN.md                     single ranked backlog, entries optionally tagged with a Project
 .agents/skills/identigon-policy-author/SKILL.md  one agent tool skill, not project docs
-docs/adr/*.md                decisions about any subproject's design, numbered monorepo-wide
+docs/adr/*.md                decisions about any subproject's design, or about the separate
+                              identigon.github.io repository, numbered monorepo-wide
 docs/research/*.md            sourced findings with confidence levels, numbered monorepo-wide
 docs/testing.md               test strategy for all three subprojects, and what isn't covered
 docs/tasks/*.md               optional: per-item working notes, disposable
 alterego/tools/data-cache/SOURCES.md   provenance of cached upstream dictionary source data
 quickstart/README.md         walkthrough for the quickstart worked example
 incognito/src/test/resources/benchmarks/SOURCES.md  provenance/licensing of vendored benchmarks
+identigon.github.io/README.md   separate repository - orientation, an Alias pointing back here
+identigon.github.io/AGENTS.md   separate repository - site-specific hazards only, routes here for
+                                 decisions and backlog
 ```
 
 This repository has three Gradle modules, each independently usable, but documentation is
 consolidated at the repository root rather than split per module (doc-kit's usual monorepo
 default) - see `docs/adr/0032-consolidate-documentation-at-repository-root.md`.
+
+**This map also covers `identigon.github.io`**, the separate repository holding the project's
+public site - its decisions live in `docs/adr/` here and its backlog in `PLAN.md` here (tagged
+`identigon.github.io`), rather than in a second, separate doc-kit instance of its own. See
+`docs/adr/0033-extend-documentation-coverage-to-identigon-github-io.md`. That repository keeps only
+its own `README.md` (orientation) and `AGENTS.md` (site-specific operational hazards - custom
+domain, build/deploy); both route here for everything else.
 
 **The specification is a set, not a file.** `SPECIFICATION.md` is an index over `docs/spec/` - the
 one place in `docs/` you can glob (`docs/spec/*.md`) to find every specification member without
@@ -72,7 +83,7 @@ its own contract, even though the three release together.
 | `docs/spec/effigies.md` | `effigies`'s full behavioural contract | present | rewritten in place | CLI users |
 | `CHANGELOG.md` | What shipped, user-visible, across the whole monorepo. **Real standard:** Keep a Changelog, unmodified - entries tagged by subproject, not grouped by one | past | append-only | users |
 | `PLAN.md` | Single ranked backlog. No standard; entries may carry a `Project` tag | future | volatile | the team |
-| `docs/adr/*.md` | Why a decision was made, for any subproject. **Real convention:** MADR minimal template | past | immutable | future maintainers |
+| `docs/adr/*.md` | Why a decision was made, for any subproject or for `identigon.github.io`. **Real convention:** MADR minimal template | past | immutable | future maintainers |
 | `docs/research/*.md` | Sourced findings behind a spec guarantee, with an explicit confidence level. **No standard** | past | append-only | implementers |
 | `docs/testing.md` | Test strategy for all three subprojects, and what is deliberately not covered | present | rewritten in place | contributors |
 | `docs/tasks/*.md` | Working notes for one backlog item, prefixed with the subproject name when subproject-specific. No standard | future | disposable | whoever picks it up |
@@ -80,6 +91,8 @@ its own contract, even though the three release together.
 | `quickstart/README.md` | **Alias** of `README.md` - step-by-step walkthrough for the quickstart worked example | present | rewritten in place | anyone trying Identigon |
 | `incognito/src/test/resources/benchmarks/SOURCES.md` | Provenance and licensing of the vendored benchmark-fixture schemas/datasets | past | append-only | `incognito` contributors |
 | `.agents/skills/identigon-policy-author/SKILL.md` | Step-by-step procedure for one agent tool skill | imperative | rewritten in place | coding agents |
+| `identigon.github.io/README.md` | **Alias** of `README.md` - same purpose, for the separate site repository | present | rewritten in place | anyone |
+| `identigon.github.io/AGENTS.md` | Agent hazards specific to that repository (custom domain, build/deploy, Action pinning); routes here for decisions and backlog | present | rewritten in place | coding agents |
 
 ## Lifecycle
 
@@ -106,6 +119,8 @@ its own contract, even though the three release together.
 | `quickstart/README.md` | the example is created | never |
 | `incognito/src/test/resources/benchmarks/SOURCES.md` | a benchmark fixture is vendored | never |
 | `.agents/skills/identigon-policy-author/SKILL.md` | the skill is written | the skill is retired |
+| `identigon.github.io/README.md` | the site repository is created | never |
+| `identigon.github.io/AGENTS.md` | the site repository is created | never |
 
 ## Flow
 
@@ -155,8 +170,9 @@ One paragraph on what and why. If it needs more than that, it needs an ADR.
   debt-versus-feature trade-off can only be made inside one ordered list.
 - **Importance** - `low`, `medium`, `high`: what it costs to keep not doing this.
 - **Effort** - `low` under a day, `medium` under a week, `high` larger or not yet known.
-- **Project** - `alterego`, `incognito` or `effigies`, only when the entry is scoped to one
-  subproject; a cross-cutting or unscoped entry carries no `Project` line.
+- **Project** - `alterego`, `incognito`, `effigies` or `identigon.github.io`, only when the entry
+  is scoped to one subproject or repository; a cross-cutting or unscoped entry carries no
+  `Project` line.
 
 No design; anything longer needs an ADR. Entries are deleted when done, never annotated.
 
@@ -173,6 +189,8 @@ the ADR only needs to point at.
 
 - **Per-subproject `DOC-MAP.md`, `SPECIFICATION.md`, `PLAN.md`, `docs/adr/`, or `CHANGELOG.md`.**
   See `docs/adr/0032-consolidate-documentation-at-repository-root.md`.
+- **A separate `DOC-MAP.md`/`PLAN.md`/`docs/adr/` instance inside `identigon.github.io`.** See
+  `docs/adr/0033-extend-documentation-coverage-to-identigon-github-io.md`.
 - **`docs/adr/README.md`.** An index-by-title table was tried during the consolidation migration
   and dropped: `docs/adr/*.md` is swept as ADR content, so an index file there fails the MADR-shape
   check rather than being recognised as an exception. `docs/adr/` is small enough to browse

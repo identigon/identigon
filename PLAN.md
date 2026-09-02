@@ -1,11 +1,13 @@
 # Identigon - Implementation Plan
 
-Single ranked backlog for the whole monorepo, most important first. Entries are **deleted** when
-done, never annotated - a plan that accumulates completed items stops being read. **One paragraph
-each** - see [DOC-MAP.md](DOC-MAP.md). Each entry carries a `**Type:**`/`**Importance:**`/
-`**Effort:**` line, and optionally a `**Project:**` tag (`alterego` / `incognito` / `effigies`) for
-work scoped to one subproject; an untagged entry is cross-cutting or applies to no single
-subproject. See the root `CHANGELOG.md` for what's already shipped.
+Single ranked backlog, most important first - covers this monorepo and, per
+`docs/adr/0033-extend-documentation-coverage-to-identigon-github-io.md`, the separate
+`identigon.github.io` site repository too. Entries are **deleted** when done, never annotated - a
+plan that accumulates completed items stops being read. **One paragraph each** - see
+[DOC-MAP.md](DOC-MAP.md). Each entry carries a `**Type:**`/`**Importance:**`/`**Effort:**` line,
+and optionally a `**Project:**` tag (`alterego` / `incognito` / `effigies` / `identigon.github.io`)
+for work scoped to one subproject or repository; an untagged entry is cross-cutting or applies to
+no single one. See the root `CHANGELOG.md` for what's already shipped.
 
 ## Batch deferred cyclic FK updates
 
@@ -216,3 +218,45 @@ though richer syntax there should be revisited here if it lands.
 Its practical gap was closed instead via `ColumnPolicy.redactionConstant` (a fixed placeholder,
 arguably a better privacy story than per-row fabrication for a `SENSITIVE` field). Wiring the typed
 generator itself remains possible but is no longer blocking anything.
+
+## Publish generated Javadoc and link it in from the site
+
+**Type:** feature - **Importance:** low - **Effort:** medium
+**Project:** identigon.github.io
+
+`alterego`/`incognito`'s Javadoc is built here but not published anywhere yet. Deliberately not
+copied into `identigon.github.io` - exactly one source of truth for anything derived from the code
+(`docs/adr/0034-identigon-github-io-as-a-separate-repository.md`) - needs a publishing step in
+this repo's own CI, then a link added on the site once that exists.
+
+## Per-subproject pages on the site
+
+**Type:** docs - **Importance:** low - **Effort:** medium
+**Project:** identigon.github.io
+
+`alterego` / `incognito` / `effigies` each get only a one-line feature-grid blurb on the landing
+page today. Worth a page each once there's more to say than that summary.
+
+## Site search
+
+**Type:** feature - **Importance:** low - **Effort:** low
+**Project:** identigon.github.io
+
+VitePress has built-in local search support; not worth turning on until there's enough content on
+the site to search.
+
+## Adopt Prettier alongside markdownlint-cli2 for `.md` files
+
+**Type:** debt - **Importance:** low - **Effort:** medium
+
+`markdownlint-cli2`'s MD013 (line length) has no auto-fix in any implementation - every rewrap
+today is manual: edit, lint, find the violation, count columns, rewrap by hand, re-lint. Prettier's
+`proseWrap: "always"` would automate that; it complements `markdownlint-cli2` rather than
+replacing it (formatter vs linter - Prettier doesn't catch MD024/MD032/MD060 and friends).
+`identigon.github.io` already runs it this way, scoped to `*.md` only. Could wire in the same
+lightweight way `markdownlint-cli2` already is (a `pre-commit` hook - no `package.json`/
+`node_modules` needed in this repo, matching today). Real cost before landing it: review the
+one-time bulk-reformat diff across every existing `.md` file rather than rubber-stamp it, pin
+whatever this repo's actual emphasis-marker convention (`*text*` vs `_text_`) already is into the
+config rather than let Prettier silently change it, and write the ADR this kind of tooling
+decision earns.

@@ -15,12 +15,18 @@ the others (`effigies` -> `incognito` -> `alterego`, via `project(...)` dependen
   discovers schemas, scaffolds declarative `policy.yaml` files, and drives the engine to anonymise
   databases.
 
-The root `PLAN.md` tracks the whole monorepo's backlog (optionally tagged `**Project:**`); root
-`CHANGELOG.md` covers every release, pre-1.0.0 history included (project-prefixed version tags for
-each subproject's own past releases, then every shared release from `1.0.0` onward, grouped by
-subproject per release). Each subproject's specification now lives under root `docs/spec/` - read
-the relevant one(s) before
+The root `PLAN.md` tracks the whole monorepo's backlog (each entry optionally tagged
+`**Project:**`); root `CHANGELOG.md` covers every release, pre-1.0.0 history included
+(project-prefixed version tags for each subproject's own past releases, then every shared release
+from `1.0.0` onward, entries tagged by subproject under Keep a Changelog's own categories). Each
+subproject's specification now lives under root `docs/spec/` - read the relevant one(s) before
 writing any code, for whichever subproject(s) you're touching:
+
+**This also covers `identigon.github.io`**, the separate repository holding the project's public
+site: its decisions live in this repo's `docs/adr/`, and its backlog in this `PLAN.md` (tagged
+`identigon.github.io`), rather than in a documentation structure of its own - see
+`docs/adr/0033-extend-documentation-coverage-to-identigon-github-io.md`. Working in that repo?
+Its own `AGENTS.md` there covers site-specific hazards only and routes back here for the rest.
 
 ## alterego/
 
