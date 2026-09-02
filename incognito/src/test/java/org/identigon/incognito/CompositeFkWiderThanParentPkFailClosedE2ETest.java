@@ -24,39 +24,43 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * Regression test: a composite FK that references a {@code UNIQUE} constraint narrower than the
- * parent's actual (wider) primary key must fail closed at transform-time, not silently return each
- * row's real, untranslated FK value forever (SPEC §7.2).
+ * Regression test: a composite FK that references a {@code UNIQUE} constraint WIDER than the
+ * parent's actual (narrower) primary key must fail closed at transform-time, the mirror image of
+ * {@link PartialCompositeFkFailClosedE2ETest}'s narrower case.
  *
- * <p>{@code authorship}'s real PK is {@code (author_id, book_id, edition)} (3 columns); {@code
- * chapter}'s composite FK references only {@code UNIQUE (author_id, book_id)} (2 columns) - the FK
- * cannot resolve via the key store, which only tracks PK-based surrogate mappings. See
- * {@code CompositeFkWiderThanParentPkFailClosedE2ETest} for the mirror-image case (a composite FK
- * that covers MORE columns than the parent's PK), which the same check must also catch.
+ * <p>{@code region}'s real PK is {@code (country, code)} (2 columns), with a separate, wider
+ * {@code UNIQUE (country, code, variant)} (3 columns); {@code district}'s composite FK references
+ * that 3-column constraint, not the PK. Before this fix, {@code buildFkTransformer} iterated only
+ * over the (fewer) PK columns to build the lookup key, silently dropping the FK's extra
+ * {@code variant} column instead of detecting the mismatch - the old
+ * {@code orderedChildCols.contains(null)} check only ever saw entries for the columns it *did*
+ * iterate, so a composite FK that fully covered the PK (as this one does, plus one column more)
+ * slipped through with no null anywhere.
  *
  * <p>Requires Docker; skips gracefully otherwise.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class PartialCompositeFkFailClosedE2ETest {
+class CompositeFkWiderThanParentPkFailClosedE2ETest {
 
     private PostgreSQLContainer pg;
     private DataSource sourceDs;
     private DataSource targetDs;
 
     private static final String DDL = """
-        CREATE TABLE authorship (
-            author_id  BIGINT NOT NULL,
-            book_id    BIGINT NOT NULL,
-            edition    INT NOT NULL DEFAULT 1,
-            PRIMARY KEY (author_id, book_id, edition),
-            UNIQUE (author_id, book_id)
+        CREATE TABLE region (
+            country  VARCHAR(2) NOT NULL,
+            code     INT NOT NULL,
+            variant  INT NOT NULL DEFAULT 0,
+            PRIMARY KEY (country, code),
+            UNIQUE (country, code, variant)
         );
-        CREATE TABLE chapter (
-            author_id   BIGINT NOT NULL,
-            book_id     BIGINT NOT NULL,
-            chapter_no  INT NOT NULL,
-            PRIMARY KEY (author_id, book_id, chapter_no),
-            FOREIGN KEY (author_id, book_id) REFERENCES authorship(author_id, book_id)
+        CREATE TABLE district (
+            country     VARCHAR(2) NOT NULL,
+            code        INT NOT NULL,
+            variant     INT NOT NULL,
+            district_no INT NOT NULL,
+            PRIMARY KEY (country, code, district_no),
+            FOREIGN KEY (country, code, variant) REFERENCES region(country, code, variant)
         );
         """;
 
@@ -72,15 +76,15 @@ class PartialCompositeFkFailClosedE2ETest {
 
         try {
             pg = new PostgreSQLContainer(TestPostgres.IMAGE)
-                .withDatabaseName("partial_fk_source").withUsername("test").withPassword("test");
+                .withDatabaseName("wider_fk_source").withUsername("test").withPassword("test");
             pg.start();
 
             try (Connection conn = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword())) {
                 conn.setAutoCommit(true);
                 try (Statement stmt = conn.createStatement()) {
                     stmt.execute(DDL);
-                    stmt.execute("INSERT INTO authorship (author_id, book_id, edition) VALUES (1, 1, 1)");
-                    stmt.execute("INSERT INTO chapter (author_id, book_id, chapter_no) VALUES (1, 1, 1)");
+                    stmt.execute("INSERT INTO region (country, code, variant) VALUES ('GB', 1, 0)");
+                    stmt.execute("INSERT INTO district (country, code, variant, district_no) VALUES ('GB', 1, 0, 1)");
                 }
             }
 
@@ -88,10 +92,10 @@ class PartialCompositeFkFailClosedE2ETest {
             try (Connection admin = DriverManager.getConnection(jdbcBase + "postgres", pg.getUsername(), pg.getPassword())) {
                 admin.setAutoCommit(true);
                 try (Statement stmt = admin.createStatement()) {
-                    stmt.execute("CREATE DATABASE partial_fk_target");
+                    stmt.execute("CREATE DATABASE wider_fk_target");
                 }
             }
-            String targetUrl = jdbcBase + "partial_fk_target";
+            String targetUrl = jdbcBase + "wider_fk_target";
             try (Connection conn = DriverManager.getConnection(targetUrl, pg.getUsername(), pg.getPassword())) {
                 conn.setAutoCommit(true);
                 try (Statement stmt = conn.createStatement()) {
@@ -102,7 +106,7 @@ class PartialCompositeFkFailClosedE2ETest {
             sourceDs = new SimpleDataSource(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
             targetDs = new SimpleDataSource(targetUrl, pg.getUsername(), pg.getPassword());
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to set up partial-composite-FK E2E databases", e);
+            throw new RuntimeException("Failed to set up wider-composite-FK E2E databases", e);
         }
     }
 
@@ -113,19 +117,20 @@ class PartialCompositeFkFailClosedE2ETest {
 
     private AnonymisationPolicy policy() {
         return AnonymisationPolicy.builder()
-            .table("authorship", t -> t
-                .column(ColumnPolicy.builder("author_id").role(ColumnRole.PRIMARY_KEY).surrogateStrategy(SurrogateStrategy.PASSTHROUGH_SURROGATE).build())
-                .column(ColumnPolicy.builder("book_id").role(ColumnRole.PRIMARY_KEY).surrogateStrategy(SurrogateStrategy.PASSTHROUGH_SURROGATE).build())
-                .column(ColumnPolicy.builder("edition").role(ColumnRole.PRIMARY_KEY).surrogateStrategy(SurrogateStrategy.PASSTHROUGH_SURROGATE).build()))
-            .table("chapter", t -> t
-                .column(ColumnPolicy.builder("author_id").role(ColumnRole.FOREIGN_KEY).references("authorship", "author_id").build())
-                .column(ColumnPolicy.builder("book_id").role(ColumnRole.FOREIGN_KEY).references("authorship", "book_id").build())
-                .column("chapter_no", ColumnRole.PAYLOAD))
+            .table("region", t -> t
+                .column(ColumnPolicy.builder("country").role(ColumnRole.PRIMARY_KEY).surrogateStrategy(SurrogateStrategy.PASSTHROUGH_SURROGATE).build())
+                .column(ColumnPolicy.builder("code").role(ColumnRole.PRIMARY_KEY).surrogateStrategy(SurrogateStrategy.PASSTHROUGH_SURROGATE).build())
+                .column("variant", ColumnRole.PAYLOAD))
+            .table("district", t -> t
+                .column(ColumnPolicy.builder("country").role(ColumnRole.FOREIGN_KEY).references("region", "country").build())
+                .column(ColumnPolicy.builder("code").role(ColumnRole.FOREIGN_KEY).references("region", "code").build())
+                .column(ColumnPolicy.builder("variant").role(ColumnRole.FOREIGN_KEY).references("region", "variant").build())
+                .column("district_no", ColumnRole.PRIMARY_KEY, SurrogateStrategy.PASSTHROUGH_SURROGATE))
             .build();
     }
 
     @Test
-    void partialCompositeFkFailsClosedInsteadOfPassingRealValueThrough() {
+    void widerCompositeFkFailsClosedInsteadOfDroppingTheExtraColumn() {
         Assumptions.assumeTrue(sourceDs != null, "Docker/PostgreSQL not available");
 
         IncognitoException.ConstraintException ex = assertThrows(IncognitoException.ConstraintException.class, () ->
@@ -135,10 +140,10 @@ class PartialCompositeFkFailClosedE2ETest {
                 .stage(new TableTransformLoadStage())
                 .build()
                 .execute(),
-            "a composite FK not covering the full parent PK must fail closed");
+            "a composite FK wider than the parent PK must fail closed, not silently drop the extra column");
 
         assertTrue(ex.getMessage().contains("is not exactly that table's primary key"),
-            "message should explain the partial-composite-FK problem: " + ex.getMessage());
+            "message should explain the wider-than-PK problem: " + ex.getMessage());
     }
 
     private record SimpleDataSource(String url, String user, String password) implements DataSource {

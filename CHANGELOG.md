@@ -30,6 +30,13 @@ too would be the same fact in two places.
   structural discovery to suggest the correct block, the same way `scaffold` already does, and
   exempts composite FKs (resolved structurally, not from the policy). `docs/spec/incognito.md`
   §4.1/§7.2 updated to describe the requirement.
+- **Fixed:** `TableTransformLoadStage.buildFkTransformer` no longer assumes a composite FK targets
+  the parent's primary key just because the parent has one. It now fails closed
+  (`ConstraintException`) whenever the FK's declared columns aren't exactly the parent's PK as a
+  set - previously an FK *wider* than the PK (covering the PK plus an extra column from some other
+  `UNIQUE` constraint) slipped past the old narrower-only check and crashed with an
+  `ArrayIndexOutOfBoundsException` mid-load instead. A composite FK that targets the PK precisely,
+  possibly in a different column order than declared, is unaffected.
 
 ### effigies
 

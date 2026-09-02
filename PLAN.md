@@ -28,11 +28,6 @@ shipped.
   Postgres types. This will break other engines; the binding logic belongs in `DialectHandler`,
   which has no per-value binding hook today (only table/statement-level methods) - closing this
   needs a new method there, not a tweak to an existing one.
-- [ ] **Project:** incognito - **Respect non-PK unique constraint targets in composite FKs.**
-  `TableTransformLoadStage.buildFkTransformer` wrongly assumes a composite FK always targets the
-  parent's primary key if one exists, breaking references to alternate unique constraints. The
-  `composite.parentColumns()` fallback already exists but only fires when the parent has no PK at
-  all; the precedence needs reversing to prefer it whenever it differs from the parent's actual PK.
 - [ ] **Project:** effigies - **Revisit excluding `effigies.jar` from the GitHub Release assets.**
   ADR-0028 deliberately left the thin `effigies.jar` out of the Release asset set (`alterego.jar`,
   `incognito.jar`, `identigon.jar` only) on the reasoning that it can't run standalone - anyone

@@ -431,28 +431,42 @@ public final class TableTransformLoadStage implements PipelineStage {
         }
 
         // Composite FK: order the child columns to match the parent's PK column order, so the lookup
-        // CompositeKey aligns with how the parent recorded its CompositeKey -> CompositeKey mapping.
+        // CompositeKey aligns with how the parent recorded its CompositeKey -> CompositeKey mapping
+        // (the key-translation store only ever records a PK -> surrogate-PK mapping, Appendix C).
         String parentTable = composite.parentTable();
         SchemaInspector.TableMetadata parentMeta = metadataByName.get(parentTable);
-        List<String> parentPk = (parentMeta != null && !parentMeta.primaryKeyColumns().isEmpty())
-            ? parentMeta.primaryKeyColumns() : composite.parentColumns();
+        if (parentMeta == null) {
+            throw new IncognitoException.ConstraintException(
+                "Composite FK on '" + tableMeta.tableName() + "' references table '" + parentTable
+                    + "', which was not found in the discovered schema.");
+        }
+        List<String> parentPk = parentMeta.primaryKeyColumns();
+
+        // The composite FK is only resolvable via the key-translation store if it targets the
+        // parent's PRIMARY KEY exactly - as a set; declaration ORDER may still differ, reconciled
+        // below. A composite FK that instead references some other UNIQUE constraint (narrower than
+        // the PK, wider than it, or simply a different column set) has no stored mapping to look up
+        // at all: resolving only the columns that happen to overlap would silently drop or misindex
+        // the rest, rather than the previous check's narrower "does it cover every PK column", which
+        // missed exactly that wider-than-PK case. Fail loud here, once, rather than per row -
+        // SPEC §7.2 fail-closed.
+        if (!new java.util.HashSet<>(parentPk).equals(new java.util.HashSet<>(composite.parentColumns()))) {
+            throw new IncognitoException.ConstraintException(
+                "Composite FK on '" + tableMeta.tableName() + "' references " + composite.parentColumns()
+                    + " on table '" + parentTable + "', which is not exactly that table's primary key "
+                    + parentPk + " - a composite FK must reference the parent's primary key precisely;"
+                    + " an alternate UNIQUE constraint cannot be resolved via the key-translation store"
+                    + " (SPEC §5.2).");
+        }
+
         List<String> orderedChildCols = new ArrayList<>();
         for (String pcol : parentPk) {
+            // Every pcol is guaranteed present in composite.parentColumns() by the set-equality check
+            // above, so indexOf is always >= 0 here.
             int idx = composite.parentColumns().indexOf(pcol);
-            orderedChildCols.add(idx >= 0 ? composite.childColumns().get(idx) : null);
+            orderedChildCols.add(composite.childColumns().get(idx));
         }
         int thisIdx = orderedChildCols.indexOf(columnName);
-
-        // A composite FK that doesn't cover every column of the parent's actual PK is a schema/config
-        // problem, not a per-row data condition - `orderedChildCols` would carry a permanent `null`
-        // at the uncovered position for every row of this table. Fail loud here, once, rather than
-        // silently returning each row's real, untranslated FK value forever (SPEC §7.2 fail-closed).
-        if (orderedChildCols.contains(null)) {
-            throw new IncognitoException.ConstraintException(
-                "Composite FK on '" + tableMeta.tableName() + "' referencing table '" + parentTable
-                    + "' does not cover every column of the parent's primary key " + parentPk
-                    + " - composite + partial FKs are not supported (SPEC §5.2).");
-        }
 
         return (value, rs, pk, sqlType, counter, ctx, meta, recordScope) -> {
             if (value == null) return null;
