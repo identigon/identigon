@@ -19,13 +19,6 @@ ADR-0028 deliberately left the thin `effigies.jar` out of the Release asset set 
 wanting effigies as a library uses GPR (`org.identigon:effigies`), and anyone wanting to run it
 uses the fat `identigon.jar`. Revisit this decision before treating it as settled.
 
-## JaCoCo for effigies
-
-**Type:** debt - **Importance:** low - **Effort:** low
-**Project:** effigies
-
-Optional, consistency-only with `alterego`/`incognito`'s coverage reporting.
-
 ## A non-interactive "authoring session" mode
 
 **Type:** feature - **Importance:** medium - **Effort:** high

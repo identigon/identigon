@@ -96,8 +96,15 @@ subprojects {
 
     // JaCoCo: report shape and the check-task wiring are identical wherever the plugin is applied
     // (only alterego, historically -- adding it to incognito/effigies too is a separate, per-
-    // subproject decision, not this block's job). toolVersion is left at the plugin's own default.
+    // subproject decision, not this block's job).
     plugins.withId("jacoco") {
+        configure<org.gradle.testing.jacoco.plugins.JacocoPluginExtension> {
+            // Pinned to what was already the plugin's own default at the time of pinning (0.8.14) --
+            // this changes nothing about today's behaviour, it just moves the version into the same
+            // shared catalog spotbugsTool/pmdTool already use, instead of trusting an unpinned
+            // plugin default that could silently change on a Gradle upgrade.
+            toolVersion = libs.versions.jacocoTool.get()
+        }
         // jacocoTestReport isn't wired into `check` by default; every other quality plugin here
         // (SpotBugs, PMD) already is.
         tasks.named("check") {
