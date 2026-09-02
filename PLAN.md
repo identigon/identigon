@@ -9,16 +9,6 @@ and optionally a `**Project:**` tag (`alterego` / `incognito` / `effigies` / `id
 for work scoped to one subproject or repository; an untagged entry is cross-cutting or applies to
 no single one. See the root `CHANGELOG.md` for what's already shipped.
 
-## Batch deferred cyclic FK updates
-
-**Type:** debt - **Importance:** medium - **Effort:** medium
-**Project:** incognito
-
-`BulkDatabaseLoadStage.resolveDeferredCyclicFKs` currently prepares and executes a new `UPDATE`
-statement for every single deferred row, causing an N+1 performance bottleneck. It should group
-updates by table/column structure (`tableName`/`pkColumn`/`fkColumn` fully determine the
-statement's SQL text, so those triples group cleanly) and use `executeBatch()`.
-
 ## Revisit excluding `effigies.jar` from the GitHub Release assets
 
 **Type:** feature - **Importance:** low - **Effort:** low

@@ -75,6 +75,12 @@ instead - restating them here too would be the same fact in two places.
   `Types.OTHER` coercion for `String` values (needed so a kept enum/user-type column round-trips)
   - that rule now lives in `PostgresDialectHandler.bindValue`, where a future non-Postgres dialect
   can supply its own instead of inheriting Postgres's.
+- **incognito:** `BulkDatabaseLoadStage.resolveDeferredCyclicFKs` (the pass-2 `UPDATE` that
+  resolves cyclic-FK placeholders) now batches instead of preparing and executing a new statement
+  per deferred row. Updates are grouped by `tableName`/`pkColumn`/`fkColumn` - the parts that
+  determine the `UPDATE`'s SQL text - so each distinct shape shares one `PreparedStatement` and
+  batches of up to 1,000, matching `insertRow`'s own batch size. No behaviour change; a cyclic-FK
+  benchmark or clone with many deferred rows previously paid one round-trip per row here.
 
 ## [3.1.0] - 2026-09-01
 

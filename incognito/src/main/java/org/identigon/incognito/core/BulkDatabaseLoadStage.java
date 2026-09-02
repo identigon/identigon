@@ -123,7 +123,22 @@ public final class BulkDatabaseLoadStage implements AutoCloseable {
     public record DeferredUpdate(String tableName, String pkColumn, Object pkValue, String fkColumn, String referencedTable, Object sourceFkValue) {}
 
     /**
-     * Applies all deferred pass-2 {@code UPDATE}s, resolving cyclic-FK placeholders to real surrogates.
+     * The parts of a {@link DeferredUpdate} that determine its {@code UPDATE}'s SQL text - grouping
+     * key for batching {@link #resolveDeferredCyclicFKs}: every update sharing one of these can
+     * share one {@link PreparedStatement} and one {@code executeBatch()}.
+     *
+     * @param tableName the table to update
+     * @param pkColumn  the PK column identifying the row to update
+     * @param fkColumn  the FK column to set
+     */
+    private record UpdateShape(String tableName, String pkColumn, String fkColumn) {}
+
+    /**
+     * Applies all deferred pass-2 {@code UPDATE}s, resolving cyclic-FK placeholders to real
+     * surrogates. Groups updates by {@link UpdateShape} - {@code tableName}/{@code pkColumn}/
+     * {@code fkColumn} fully determine an update's SQL text - so each distinct shape uses one
+     * {@link PreparedStatement} and batches of up to {@link #BATCH_SIZE}, rather than a fresh
+     * prepare-and-execute per deferred row.
      *
      * @param context         the pipeline context (for the target connection and key store)
      * @param deferredUpdates the pending updates (may be {@code null} or empty)
@@ -132,21 +147,45 @@ public final class BulkDatabaseLoadStage implements AutoCloseable {
     public static void resolveDeferredCyclicFKs(org.identigon.incognito.api.PipelineContext context, List<DeferredUpdate> deferredUpdates) throws org.identigon.incognito.api.IncognitoException {
         if (deferredUpdates == null || deferredUpdates.isEmpty()) return;
 
-        try (Connection targetConn = context.target().getConnection()) {
-            for (DeferredUpdate update : deferredUpdates) {
-                // Get the final fabricated FK value
-                java.util.Optional<Object> mapped = context.keyStore().get(update.referencedTable(), update.sourceFkValue());
-                if (mapped.isEmpty()) {
-                    throw new org.identigon.incognito.api.IncognitoException.ConstraintException(
-                        "Deferred cyclic FK: no key translation found for FK value '" + update.sourceFkValue()
-                        + "' referencing table '" + update.referencedTable() + "'");
-                }
+        // LinkedHashMap: groups are visited in first-occurrence order, keeping behaviour as close as
+        // reasonable to the original row-by-row order this replaces.
+        java.util.Map<UpdateShape, List<DeferredUpdate>> grouped = new java.util.LinkedHashMap<>();
+        for (DeferredUpdate update : deferredUpdates) {
+            grouped.computeIfAbsent(
+                new UpdateShape(update.tableName(), update.pkColumn(), update.fkColumn()),
+                k -> new java.util.ArrayList<>()
+            ).add(update);
+        }
 
-                String updateSql = "UPDATE " + update.tableName() + " SET " + update.fkColumn() + " = ? WHERE " + update.pkColumn() + " = ?";
+        try (Connection targetConn = context.target().getConnection()) {
+            for (var entry : grouped.entrySet()) {
+                UpdateShape shape = entry.getKey();
+                String updateSql = "UPDATE " + shape.tableName() + " SET " + shape.fkColumn()
+                    + " = ? WHERE " + shape.pkColumn() + " = ?";
+
                 try (PreparedStatement stmt = targetConn.prepareStatement(updateSql)) {
-                    stmt.setObject(1, mapped.get());
-                    stmt.setObject(2, update.pkValue());
-                    stmt.executeUpdate();
+                    int batched = 0;
+                    for (DeferredUpdate update : entry.getValue()) {
+                        // Get the final fabricated FK value
+                        java.util.Optional<Object> mapped =
+                            context.keyStore().get(update.referencedTable(), update.sourceFkValue());
+                        if (mapped.isEmpty()) {
+                            throw new org.identigon.incognito.api.IncognitoException.ConstraintException(
+                                "Deferred cyclic FK: no key translation found for FK value '" + update.sourceFkValue()
+                                + "' referencing table '" + update.referencedTable() + "'");
+                        }
+
+                        stmt.setObject(1, mapped.get());
+                        stmt.setObject(2, update.pkValue());
+                        stmt.addBatch();
+                        if (++batched >= BATCH_SIZE) {
+                            stmt.executeBatch();
+                            batched = 0;
+                        }
+                    }
+                    if (batched > 0) {
+                        stmt.executeBatch();
+                    }
                 }
             }
         } catch (SQLException e) {
