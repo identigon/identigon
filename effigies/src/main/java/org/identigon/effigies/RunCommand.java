@@ -16,7 +16,7 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 class RunCommand {
     private static final String USAGE = "Usage: run --source-url <url> --source-user <user> "
-        + "--target-url <url> --target-user <user> [--policy <file>]";
+        + "--target-url <url> --target-user <user> [--policy <file>] [--force]";
 
     static int execute(String[] args, PrintStream out, PrintStream err) {
         if (CliArgs.hasHelpFlag(args)) {
@@ -29,6 +29,7 @@ class RunCommand {
         String srcUser = null;
         String tgtUrl = null;
         String tgtUser = null;
+        boolean force = false;
 
         for (int i = 0; i < args.length; i++) {
             if ("--policy".equals(args[i]) && i + 1 < args.length) {
@@ -41,6 +42,8 @@ class RunCommand {
                 tgtUrl = args[++i];
             } else if ("--target-user".equals(args[i]) && i + 1 < args.length) {
                 tgtUser = args[++i];
+            } else if ("--force".equals(args[i])) {
+                force = true;
             }
         }
 
@@ -105,7 +108,7 @@ class RunCommand {
 
         SimpleDataSource sourceDs = new SimpleDataSource(srcUrl, srcUser, srcPass);
         SimpleDataSource targetDs = new SimpleDataSource(tgtUrl, tgtUser, tgtPass);
-        return run(sourceDs, targetDs, policyPath, saltMode, salt, seed, out, err);
+        return run(sourceDs, targetDs, policyPath, saltMode, salt, seed, force, out, err);
     }
 
     /**
@@ -115,7 +118,7 @@ class RunCommand {
      * fake environment variables.
      */
     static int run(DataSource sourceDs, DataSource targetDs, Path policyPath, String saltMode,
-            byte[] salt, Long seed, PrintStream out, PrintStream err) {
+            byte[] salt, Long seed, boolean force, PrintStream out, PrintStream err) {
         // AlterEgo's builder enforces this same minimum, but only once construction reaches it -
         // deep inside IncognitoPipeline.Builder#build(), after both connections have already been
         // opened. Catching a too-short salt here, before either DataSource is touched, gives the
@@ -132,6 +135,10 @@ class RunCommand {
                 .source(sourceDs)
                 .target(targetDs)
                 .policy(new YamlPolicyParser().parse(policyPath));
+
+            if (force) {
+                builder.allowNonEmptyTarget();
+            }
 
             if ("persistent".equals(saltMode)) {
                 builder.persistentSalt(salt);

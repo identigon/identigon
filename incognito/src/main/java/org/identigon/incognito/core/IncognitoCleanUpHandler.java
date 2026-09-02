@@ -59,6 +59,15 @@ public final class IncognitoCleanUpHandler {
 
     @SuppressWarnings("unchecked")
     private static void doCompensate(PipelineContext context) {
+        // Nothing to undo if TableTransformLoadStage never genuinely began - a failure any earlier
+        // (schema discovery, the non-empty-target guard, SPEC §7.2's fail-closed checks) never wrote
+        // or dropped anything. Skipping in that case matters beyond avoiding wasted work: the delete
+        // loop below is unconditional per table, so running it against a target that was never
+        // touched would destroy any pre-existing data that was never Incognito's to delete.
+        if (!Boolean.TRUE.equals(context.attributes().get(TableTransformLoadStage.ATTR_LOAD_STARTED))) {
+            return;
+        }
+
         Object planObj = context.attributes().get("incognito.schema.executionPlan");
         if (planObj == null) return;
         TableDependencyGraph.TopologicalExecutionPlan plan =

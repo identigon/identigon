@@ -117,6 +117,18 @@ public interface IncognitoPipeline {
         Builder stage(PipelineStage stage);
 
         /**
+         * Skips the non-empty-target guard - by default, {@link #build()}'s default stage list
+         * refuses to run against a target where any policy-covered table already has rows, since a
+         * failed run's compensation deletes existing rows during clean-up. Opt in only once that
+         * risk is understood and accepted (the CLI's {@code --force}). Has no effect if the caller
+         * supplies their own stage list via {@link #stage(PipelineStage)} - the guard is only ever
+         * added to the default one.
+         *
+         * @return this builder
+         */
+        Builder allowNonEmptyTarget();
+
+        /**
          * Builds the configured pipeline.
          *
          * @return the assembled pipeline

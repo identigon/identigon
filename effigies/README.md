@@ -109,6 +109,10 @@ what's supposed to become the target defeats the entire point of anonymising int
 [Getting Started](https://identigon.org/getting-started) on the project site for the fuller
 walkthrough.
 
+`run` refuses to start if any table it would load into already has rows, since a failed run's
+compensation deletes existing rows during clean-up - not only the ones this run itself inserted.
+Pass `--force` only once you've confirmed the target is genuinely meant to be emptied.
+
 Once the policy is authored and the target exists, drive the `incognito` engine to produce the
 clone:
 

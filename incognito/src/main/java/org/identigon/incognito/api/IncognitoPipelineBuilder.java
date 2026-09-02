@@ -23,6 +23,7 @@ final class IncognitoPipelineBuilder implements IncognitoPipeline.Builder {
     private SaltMode saltMode;
     private byte[] salt;
     private long seed;
+    private boolean allowNonEmptyTarget;
 
     @Override
     public IncognitoPipeline.Builder source(DataSource source) {
@@ -82,6 +83,12 @@ final class IncognitoPipelineBuilder implements IncognitoPipeline.Builder {
     }
 
     @Override
+    public IncognitoPipeline.Builder allowNonEmptyTarget() {
+        this.allowNonEmptyTarget = true;
+        return this;
+    }
+
+    @Override
     public IncognitoPipeline build() {
         if (source == null || target == null) {
             throw new IncognitoException.ConfigException("source and target DataSources are required");
@@ -136,10 +143,17 @@ final class IncognitoPipelineBuilder implements IncognitoPipeline.Builder {
         context.attributes().put(
             org.identigon.incognito.core.AnonymisationReportBuilder.ATTR_SALT_MODE, resolvedSaltMode);
 
+        if (allowNonEmptyTarget) {
+            context.attributes().put(
+                org.identigon.incognito.core.NonEmptyTargetGuardStage.ATTR_ALLOW_NON_EMPTY_TARGET,
+                Boolean.TRUE);
+        }
+
         // If the caller supplied no stages, assemble the standard v1.0 pipeline so the
         // documented `builder()...build().execute()` form actually anonymises.
         List<PipelineStage> resolvedStages = stages.isEmpty()
             ? List.of(new org.identigon.incognito.core.SchemaDiscoveryStage(),
+                      new org.identigon.incognito.core.NonEmptyTargetGuardStage(),
                       new org.identigon.incognito.core.TableTransformLoadStage(),
                       new org.identigon.incognito.core.VerificationStage())
             : stages;

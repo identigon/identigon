@@ -69,6 +69,9 @@ exiting `0`.
 - **`run`** - execute incognito against a finished `policy.yaml` plus source/target connection
   details, producing the clone and surfacing the DPIA report (JSON / HTML / Markdown). The policy
   declares the salt **mode**; the salt **bytes** for fixed-salt modes come from out-of-band input.
+  Refuses to start if any target table it would load into already has rows - a failed run's
+  compensation deletes existing rows during clean-up, not only the ones this run itself inserted -
+  unless `--force` is given.
 - **`version`**, **`help`** - self-explanatory.
 
 Exit codes: `0` success; `2` unknown command / bad usage; `3` a declared-but-unimplemented command.

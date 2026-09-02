@@ -256,7 +256,11 @@ strict topological DAG order (parents before children).
    - Builds the table dependency DAG (Tarjan SCC for cyclic FKs)
                                      │
                                      ▼
-2. TableTransformStage (iterates the DAG in topological order)
+2. NonEmptyTargetGuardStage
+   - Fails closed if any policy-covered target table already has rows (skippable, --force; §8.1)
+                                     │
+                                     ▼
+3. TableTransformStage (iterates the DAG in topological order)
    - Fabricates DIRECT_ID via AlterEgo (.unique() with sequence-fallback for high cardinality - §4.1)
    - Fabricates QUASI_ID (synthesise, or coherent jitter for temporal - §4.2)
    - Keeps OPERATIONAL / PAYLOAD real; applies each SENSITIVE column's declared distinguishing flag (§4.1)
@@ -266,7 +270,7 @@ strict topological DAG order (parents before children).
    - Rewrites FOREIGN_KEY to mapped parent surrogates; placeholders for cyclic FKs
                                      │
                                      ▼
-3. TargetDatabaseLoadStage
+4. TargetDatabaseLoadStage
    - Suppresses target FK checks & user triggers (session_replication_role='replica')
    - JDBC batch inserts (OVERRIDING SYSTEM VALUE for identity columns)
    - 2-pass batch UPDATE for deferred cyclic / NOT NULL FKs
@@ -274,7 +278,7 @@ strict topological DAG order (parents before children).
    - Per-table transactions; compensating clean-up on error (IncognitoCleanUpHandler)
                                      │
                                      ▼
-4. VerificationStage
+5. VerificationStage
    - Referential integrity holds on the target (no dangling FKs)
    - Fictionality checks: no real PII survived (e.g. all non-null e-mails in reserved domains)
    - Per-period volume checks within tolerance (§4.2)
@@ -872,9 +876,19 @@ IncognitoException (unchecked)
 
 ### 8.1 Failure Clean-Up Handler
 
-On failure `IncognitoCleanUpHandler` re-enables triggers + FK enforcement, resynchronises sequences,
-truncates partially loaded target tables, and zeroes Incognito's salt copy + releases the `AlterEgo`
-instance (§5.1).
+`run` fails closed before loading any row if any policy-covered target table already has data
+(`NonEmptyTargetGuardStage`, part of the default pipeline) - a failed run's compensation would
+otherwise delete that pre-existing data along with anything this run itself inserted.
+`IncognitoPipeline.Builder.allowNonEmptyTarget()` (the CLI's `--force`) opts out for a caller who
+has weighed that risk.
+
+On failure once loading has genuinely begun, `IncognitoCleanUpHandler` re-enables triggers + FK
+enforcement, resynchronises sequences, truncates partially loaded target tables, and zeroes
+Incognito's salt copy + releases the `AlterEgo` instance (§5.1). It is a complete no-op for a
+failure any earlier than that (schema discovery, the non-empty-target guard itself) - nothing was
+written or dropped yet, so there is nothing to compensate, and running its unconditional
+`DELETE FROM` regardless would destroy exactly the pre-existing data the guard above exists to
+protect.
 
 ---
 
@@ -1064,6 +1078,7 @@ salt = generate/zero-managed (§5.1); ae = buildAlterEgo(salt)
 ctx  = new PipelineContext(source, target, policy, keyStore, cascadeStore, ae, dependencyGraph)
 try {
     report = SchemaDiscoveryStage.run(ctx)          // metadata, roles(fail-closed), DAG, declared-cardinality validation
+    guardNonEmptyTarget(ctx)                        // fail closed unless every target table is empty, or --force (§8.1)
     for table in ctx.dag.topologicalOrder():         // parents before children
         rows = TableTransformStage.transform(table, ctx)   // per-row dispatch, streamed
         TargetDatabaseLoadStage.load(table, rows, ctx)     // batch insert; defer cyclic FKs

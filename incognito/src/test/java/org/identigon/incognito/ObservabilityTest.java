@@ -19,6 +19,7 @@ import javax.sql.DataSource;
 import org.identigon.incognito.api.PipelineContext;
 import org.identigon.incognito.core.DefaultPipelineContext;
 import org.identigon.incognito.core.IncognitoCleanUpHandler;
+import org.identigon.incognito.core.TableTransformLoadStage;
 import org.identigon.incognito.engine.TableDependencyGraph;
 import org.junit.jupiter.api.Test;
 
@@ -50,6 +51,10 @@ class ObservabilityTest {
         var plan = new TableDependencyGraph.TopologicalExecutionPlan(List.of("some_table"), List.of());
         Map<String, Object> attrs = new HashMap<>();
         attrs.put("incognito.schema.executionPlan", plan);
+        // Compensation is a no-op unless loading genuinely began (protects any pre-existing target
+        // data from a failure that never touched it) - this test is specifically about compensation
+        // ITSELF failing once under way, so it must simulate that loading did start.
+        attrs.put(TableTransformLoadStage.ATTR_LOAD_STARTED, Boolean.TRUE);
         PipelineContext ctx = new DefaultPipelineContext(
             null, new FailingDataSource(secret, sqlState), null, null, null, null, attrs);
 
@@ -90,6 +95,7 @@ class ObservabilityTest {
         // ORIGINAL pipeline failure that triggered this compensation call in the first place.
         Map<String, Object> attrs = new HashMap<>();
         attrs.put("incognito.schema.executionPlan", "not a TopologicalExecutionPlan");
+        attrs.put(TableTransformLoadStage.ATTR_LOAD_STARTED, Boolean.TRUE);
         PipelineContext ctx = new DefaultPipelineContext(null, null, null, null, null, null, attrs);
 
         Logger jul = Logger.getLogger(IncognitoCleanUpHandler.class.getName());
@@ -113,5 +119,45 @@ class ObservabilityTest {
         boolean warningLogged = captured.stream()
             .anyMatch(r -> r.getLevel().intValue() >= Level.WARNING.intValue());
         assertTrue(warningLogged, "an unexpected compensation failure must still be logged as a WARNING");
+    }
+
+    /**
+     * The other half of {@link #compensationConnectFailureIsLoggedCoarsely} (which asserts
+     * compensation DOES run once loading started): a failure before {@code TableTransformLoadStage}
+     * ever began - schema discovery, the non-empty-target guard - must leave compensation a
+     * complete no-op, not just harmless. It never wrote or dropped anything, so the blind
+     * {@code DELETE FROM} every table in the plan would otherwise destroy any pre-existing target
+     * data that was never Incognito's to touch. Proven here by a {@link DataSource} that would
+     * itself log a WARNING if compensation so much as attempted to connect -
+     * {@code ATTR_LOAD_STARTED} absent from the attributes means it never gets the chance.
+     */
+    @Test
+    void compensationIsANoOpWhenLoadingNeverStarted() {
+        var plan = new TableDependencyGraph.TopologicalExecutionPlan(List.of("some_table"), List.of());
+        Map<String, Object> attrs = new HashMap<>();
+        attrs.put("incognito.schema.executionPlan", plan);
+        // Deliberately NOT setting TableTransformLoadStage.ATTR_LOAD_STARTED.
+        PipelineContext ctx = new DefaultPipelineContext(
+            null, new FailingDataSource("should never be read", "08001"), null, null, null, null, attrs);
+
+        Logger jul = Logger.getLogger(IncognitoCleanUpHandler.class.getName());
+        List<LogRecord> captured = new ArrayList<>();
+        Handler handler = new Handler() {
+            @Override public void publish(LogRecord r) { captured.add(r); }
+            @Override public void flush() {}
+            @Override public void close() {}
+        };
+        Level previous = jul.getLevel();
+        jul.setLevel(Level.ALL);
+        jul.addHandler(handler);
+        try {
+            assertDoesNotThrow(() -> IncognitoCleanUpHandler.compensate(ctx));
+        } finally {
+            jul.removeHandler(handler);
+            jul.setLevel(previous);
+        }
+
+        assertTrue(captured.isEmpty(),
+            "compensation must never even attempt to connect when loading never started: " + captured);
     }
 }

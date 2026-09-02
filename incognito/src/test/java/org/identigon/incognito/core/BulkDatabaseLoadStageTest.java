@@ -79,18 +79,17 @@ class BulkDatabaseLoadStageTest {
 
         BulkDatabaseLoadStage stage = new BulkDatabaseLoadStage(
             recordingDialect, fakeConn, "t", List.of("a", "b"), false, null);
+        stage.insertRow(new Object[] {"x", 42});
+        assertEquals(List.of("1=x", "2=42"), calls);
+
+        // fakePreparedStatement()'s executeBatch always throws BATCH_FAILURE (for the other test
+        // above) - irrelevant here, this test only cares that bindValue was delegated to before
+        // that point, so swallow it purely to release the resource cleanly. Not try-with-resources:
+        // that would let this expected close() failure propagate and fail the test.
         try {
-            stage.insertRow(new Object[] {"x", 42});
-            assertEquals(List.of("1=x", "2=42"), calls);
-        } finally {
-            // fakePreparedStatement()'s executeBatch always throws BATCH_FAILURE (for the other
-            // test above) - irrelevant here, this test only cares that bindValue was delegated to
-            // before that point, so swallow it purely to release the resource cleanly.
-            try {
-                stage.close();
-            } catch (SQLException expected) {
-                // ignored - see above
-            }
+            stage.close();
+        } catch (SQLException expected) {
+            // ignored - see above
         }
     }
 

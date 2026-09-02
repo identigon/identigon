@@ -23,8 +23,24 @@ instead - restating them here too would be the same fact in two places.
 
 ## [Unreleased]
 
+### Added
+
+- **incognito:** `run` now fails closed before loading any row if any policy-covered target table
+  already has data (`NonEmptyTargetGuardStage`, part of the default pipeline) - a failed run's
+  compensation previously deleted such pre-existing data along with anything the run itself
+  inserted (tutorial-feedback finding). `IncognitoPipeline.Builder.allowNonEmptyTarget()` opts out
+  for a caller who has weighed that risk. `docs/spec/incognito.md` §8.1 updated.
+- **effigies:** `run` gained `--force`, threading through to the new `allowNonEmptyTarget()`
+  above. `docs/spec/effigies.md` §3 updated.
+
 ### Fixed
 
+- **incognito:** `IncognitoCleanUpHandler.compensate` no longer runs its unconditional
+  `DELETE FROM` on every table when a failure happens before `TableTransformLoadStage` ever begins
+  writing (schema discovery, the non-empty-target guard above, or any other pre-flight fail-closed
+  check) - previously it ran regardless, so even a failure that touched no data could destroy real
+  pre-existing target data. Compensation is now a complete no-op until loading has genuinely
+  started (`TableTransformLoadStage.ATTR_LOAD_STARTED`).
 - **incognito:** `validate`/`run` now fail closed when a single-column `FOREIGN_KEY` declares no
   `references: { table, column }`. Previously this validated cleanly and then hit a raw
   `NullPointerException` at `run` time (`ConcurrentHashMap.get(null)` inside the key-translation

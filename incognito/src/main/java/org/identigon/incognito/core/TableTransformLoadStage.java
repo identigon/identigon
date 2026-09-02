@@ -40,6 +40,13 @@ public final class TableTransformLoadStage implements PipelineStage {
     /** Creates a transform-and-load stage. */
     public TableTransformLoadStage() {}
 
+    /**
+     * Context attribute: set once this stage genuinely begins (schema metadata/plan present).
+     * {@link IncognitoCleanUpHandler} checks this - a failure any earlier (schema discovery, the
+     * non-empty-target guard) never wrote or dropped anything, so compensation has nothing to undo.
+     */
+    public static final String ATTR_LOAD_STARTED = "incognito.load.started";
+
     private static final int FETCH_SIZE = 5000;
     /** Cascade-store attribute-name prefix under which a row's source FK ids are published for ancestor walking. */
     private static final String LINK_PREFIX = "@fk:";
@@ -59,6 +66,14 @@ public final class TableTransformLoadStage implements PipelineStage {
             throw new IncognitoException.ConfigException(
                 "SchemaDiscoveryStage must run before TableTransformLoadStage");
         }
+
+        // Marks that loading genuinely began, for IncognitoCleanUpHandler: a failure any earlier
+        // than this (schema discovery, the non-empty-target guard) never wrote or dropped anything,
+        // so compensation has nothing to undo - and, critically, nothing pre-existing in the target
+        // to destroy either. Set before the cyclic-FK-suppression probe below, which can itself drop
+        // FK constraints (owner mode, SPEC §9) that compensation must still know to recreate on a
+        // later failure.
+        context.attributes().put(ATTR_LOAD_STARTED, Boolean.TRUE);
 
         // Build a lookup map: tableName -> TableMetadata
         Map<String, SchemaInspector.TableMetadata> metadataByName = allMetadata.stream()
