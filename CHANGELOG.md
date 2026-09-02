@@ -23,6 +23,8 @@ instead - restating them here too would be the same fact in two places.
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-09-03
+
 ### Added
 
 - **incognito:** `run` now fails closed before loading any row if any policy-covered target table
