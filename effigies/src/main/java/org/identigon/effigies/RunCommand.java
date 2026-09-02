@@ -165,7 +165,7 @@ class RunCommand {
 
             return 0;
         } catch (Exception e) {
-            err.println("Error executing pipeline: " + e);
+            err.println("Error executing pipeline: " + CliErrors.causeChain(e));
             return 1;
         }
     }

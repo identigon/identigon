@@ -31,6 +31,14 @@ too would be the same fact in two places.
   exempts composite FKs (resolved structurally, not from the policy). `docs/spec/incognito.md`
   §4.1/§7.2 updated to describe the requirement.
 
+### effigies
+
+- **Fixed:** every CLI subcommand (`discover`, `scaffold`, `validate`, `run`) now prints the full
+  cause chain on failure instead of just the outermost exception. `DefaultIncognitoPipeline` wraps
+  a genuinely unexpected failure as `IncognitoException("Pipeline execution failed", e)` - the real
+  diagnostic was in `e`, but the CLI only ever printed the wrapper's own message. New `CliErrors`
+  utility renders `Throwable.toString()` plus one `Caused by:` line per cause beneath it.
+
 ## [3.1.0] - 2026-09-01
 
 ### incognito

@@ -58,7 +58,7 @@ class DiscoverCommand {
             }
             return 0;
         } catch (Exception e) {
-            err.println("Error: " + e);
+            err.println("Error: " + CliErrors.causeChain(e));
             return 1;
         }
     }

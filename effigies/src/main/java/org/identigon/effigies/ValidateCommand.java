@@ -78,10 +78,10 @@ class ValidateCommand {
             out.println("Policy is valid against " + tables.size() + " discovered table(s).");
             return 0;
         } catch (IncognitoException.ConfigException e) {
-            err.println("Error: " + e.getMessage());
+            err.println("Error: " + e.getMessage() + CliErrors.causesOnly(e));
             return 1;
         } catch (Exception e) {
-            err.println("Error: " + e);
+            err.println("Error: " + CliErrors.causeChain(e));
             return 1;
         }
     }

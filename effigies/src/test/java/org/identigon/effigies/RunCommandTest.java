@@ -155,6 +155,11 @@ class RunCommandTest {
         String errStr = err.toString(StandardCharsets.UTF_8);
         assertTrue(errStr.contains("Error executing pipeline: "), errStr);
         assertTrue(errStr.length() > "Error executing pipeline: ".length(), "must not swallow the exception detail: " + errStr);
+        // The bogus JDBC URL fails inside SchemaInspector.inspect() as a SQLException, wrapped as
+        // IncognitoException.SchemaException("Failed to inspect schema", cause) - the actual detail
+        // (e.g. "No suitable driver found") is in the cause, not the wrapper's own message, so the
+        // CLI must surface it too (v3.1.0 tutorial-feedback finding: a cause chain silently dropped).
+        assertTrue(errStr.contains("Caused by: "), "must surface the wrapped cause, not just the outer message: " + errStr);
     }
 
     private static long countRows(String url) throws SQLException {

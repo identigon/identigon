@@ -18,13 +18,6 @@ shipped.
   longer be reachable in practice. Worth a guarded null check there anyway, only as a named
   diagnostic in place of a raw stack trace should some other path ever reach it (e.g. a hand-built
   `AnonymisationPolicy` that skips `SchemaDiscoveryStage` entirely).
-- [ ] **Project:** incognito - **`IncognitoException` cause chain invisible to CLI users.**
-  `DefaultIncognitoPipeline` wraps any failure as `IncognitoException("Pipeline execution failed",
-  e)`, and `effigies`' `RunCommand` prints only the top exception, never `getCause()` - the same
-  masking pattern just fixed in `YamlPolicyParser.parse(Path)` for v3.1.0, not yet applied to the
-  pipeline's own wrapper. Narrow the wrapper where a lower layer already gives a precise diagnostic
-  (as done there), or have the CLI print the full cause chain; worth auditing for other instances
-  of the pattern while it's fresh.
 - [ ] **Project:** incognito - **Batch deferred cyclic FK updates.**
   `BulkDatabaseLoadStage.resolveDeferredCyclicFKs` currently prepares and executes a new `UPDATE`
   statement for every single deferred row, causing an N+1 performance bottleneck. It should group
