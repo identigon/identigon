@@ -18,9 +18,9 @@ ADR 21.
 
 ## Considered Options
 
-* One combined library covering both single-value fabrication and whole-database relational
+- One combined library covering both single-value fabrication and whole-database relational
   coherence.
-* Two libraries, split by responsibility rather than by batch size.
+- Two libraries, split by responsibility rather than by batch size.
 
 ## Decision Outcome
 
@@ -30,10 +30,10 @@ value transformer.
 
 Split by **responsibility**, not batch size:
 
-* **`alterego`** transforms a single value or the fields of one record - deterministic in
+- **`alterego`** transforms a single value or the fields of one record - deterministic in
   `(salt, domain, value)`, stateless with respect to the dataset, and DB-agnostic (reusable on a
   CSV, an API payload, or a message).
-* **Incognito** owns everything relational: schema discovery and role classification, topological
+- **Incognito** owns everything relational: schema discovery and role classification, topological
   load order, key translation (PK -> surrogate, FK rewritten to the same mapping), coherent
   cross-entity temporal deltas, root-ancestor attribute cascade, bulk loading with trigger
   isolation, and DPIA reporting.
@@ -44,10 +44,10 @@ Alterego - never to hand-roll it in Incognito.
 
 ### Consequences
 
-* Good, because Alterego stays reusable as a standalone value transformer; folding relational
+- Good, because Alterego stays reusable as a standalone value transformer; folding relational
   concerns in would couple it to JDBC and destroy that.
-* Neutral: the boundary is a one-line test: *Alterego fabricates fields; Incognito preserves
-  relationships.*
-* Bad, because any value logic that leaks into Incognito must be tracked as debt, not sanctioned by
+- Neutral: the boundary is a one-line test: _Alterego fabricates fields; Incognito preserves
+  relationships._
+- Bad, because any value logic that leaks into Incognito must be tracked as debt, not sanctioned by
   default - see ADR 21 for the one case where that characterisation was later revisited and
   reversed.

@@ -14,8 +14,8 @@ realistic need, and an open SPI invites non-injective or unstable encodings from
 
 ## Considered Options
 
-* An open-ended public `Codec<T>` SPI for caller-supplied types.
-* A fixed set of supported types with pinned canonical encodings.
+- An open-ended public `Codec<T>` SPI for caller-supplied types.
+- A fixed set of supported types with pinned canonical encodings.
 
 ## Decision Outcome
 
@@ -35,9 +35,9 @@ two inputs share a pseudonym and `unique()` breaks silently.
 
 ### Consequences
 
-* Good, because there is no public codec SPI in v1 - one less abstraction to document, test, and
+- Good, because there is no public codec SPI in v1 - one less abstraction to document, test, and
   freeze.
-* Good, because adding further types (`LocalTime`, `YearMonth`, ...) later is a non-breaking
+- Good, because adding further types (`LocalTime`, `YearMonth`, ...) later is a non-breaking
   change; a codec mechanism can still be added if a real need appears.
-* Neutral: the encodings are part of the persistent store format and the derivation contract,
+- Neutral: the encodings are part of the persistent store format and the derivation contract,
   frozen for the major version.

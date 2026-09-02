@@ -14,8 +14,8 @@ lives (inside this monorepo, or a repository of its own) determines the URL it c
 
 ## Considered Options
 
-* A subdirectory of this repository (e.g. a `site/` folder), built and deployed from the monorepo.
-* A dedicated `identigon.github.io` repository - GitHub Pages' special naming convention for an
+- A subdirectory of this repository (e.g. a `site/` folder), built and deployed from the monorepo.
+- A dedicated `identigon.github.io` repository - GitHub Pages' special naming convention for an
   organisation's root site.
 
 ## Decision Outcome
@@ -29,15 +29,15 @@ derived from the code.
 
 ### Consequences
 
-* Good, because the site serves from the clean root URL (`identigon.org`), the deciding
+- Good, because the site serves from the clean root URL (`identigon.org`), the deciding
   requirement for a public front door.
-* Good, because generated reference material stays a link, not a copy - built once, in this
+- Good, because generated reference material stays a link, not a copy - built once, in this
   repository's own CI, with no risk of a stale duplicate drifting out of sync on the site.
-* Bad, because it is a second repository to maintain - its own `.gitattributes`, pre-commit
+- Bad, because it is a second repository to maintain - its own `.gitattributes`, pre-commit
   config, branch protection - on a deploy cadence fully decoupled from the monorepo's release
   cadence, in a different toolchain (Node/VitePress) that the monorepo's Gradle CI has no reason
   to know about.
-* Neutral: `identigon.github.io`'s own documentation - its decisions, its backlog - now lives in
+- Neutral: `identigon.github.io`'s own documentation - its decisions, its backlog - now lives in
   this repository instead (see ADR 33), so "separate repository" describes code/deploy separation,
   not documentation separation.
 

@@ -4,14 +4,14 @@ Incognito is a Java 25 library that clones a production database into a **schema
 database with every piece of PII replaced by **clearly fictional** data. It preserves what makes a
 clone useful for testing - data volumes (including per-period volumes), referential integrity, the
 foreign-key topology, and cardinalities - while severing the link to any real person. Direct
-identifiers and quasi-identifiers are *fabricated*, not generalised or suppressed: Incognito is a
+identifiers and quasi-identifiers are _fabricated_, not generalised or suppressed: Incognito is a
 fabrication engine, **not** a k-anonymity / l-diversity / t-closeness implementation (those are
 explicit non-goals - see [ADR 14](../docs/adr/0014-fabrication-not-k-anonymity.md)).
 
-> **In one sentence:** *"I have a great production database and I want a test environment with
+> **In one sentence:** _"I have a great production database and I want a test environment with
 > similar data volumes and similar relationships between entities, but with no danger of leaking
 > PII - a cloned database where the PII has been anonymised, and obviously anonymised, using
-> clearly fictional data."*
+> clearly fictional data."_
 
 See [`docs/spec/incognito.md`](../docs/spec/incognito.md) for the full behavioural contract, the
 root [`PLAN.md`](../PLAN.md) (`**Project:** incognito` entries) for the backlog,
@@ -25,7 +25,7 @@ Incognito delegates all **field-value** transformation to its sibling library
 [`alterego`](../alterego) and owns everything relational on top:
 
 |                 | `alterego`                                                                                              | Incognito                                                                               |
-|:----------------|:--------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|
+| :-------------- | :------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------- |
 | **Scope**       | one value, or the fields of one record                                                                  | a whole relational database                                                             |
 | **Job**         | fabricate a replacement value (name, e-mail, date shift, ...), deterministic in `(salt, domain, value)` | clone a schema and load it while keeping every cross-row / cross-table invariant intact |
 | **Knows about** | values and formats                                                                                      | tables, primary/foreign keys, load order, triggers, sequences, DPIA reporting           |
@@ -123,7 +123,7 @@ plus a second-pass update ([cyclic FKs][adr6]).
 
 An unclassified column **aborts the run** - Incognito never copies a column it was not told how to
 handle, because an unspotted identifier is the one mistake that leaks real data
-([ADR 17](../docs/adr/0017-fail-closed-classification.md)). Auto-inference only *suggests* roles; it
+([ADR 17](../docs/adr/0017-fail-closed-classification.md)). Auto-inference only _suggests_ roles; it
 never silently assigns one. Whether a `SENSITIVE` column is kept real or fabricated is a one-word
 **declaration** (`distinguishing: true | false`), checked before any row is read, not guessed from
 the data ([ADR 16](../docs/adr/0016-declared-distinguishing-flag.md)).

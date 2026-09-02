@@ -16,8 +16,8 @@ releaser can also crash).
 
 ## Considered Options
 
-* A two-step reserve-then-put protocol, plus a release operation for the failure case.
-* A single atomic store operation covering both the uniqueness check and the write.
+- A two-step reserve-then-put protocol, plus a release operation for the failure case.
+- A single atomic store operation covering both the uniqueness check and the write.
 
 ## Decision Outcome
 
@@ -34,10 +34,10 @@ namespace, atomically as a whole (specification section 5.1).
 
 ### Consequences
 
-* Good, because no reservation state exists outside the mapping itself, so nothing can leak.
-* Good, because a JDBC implementation is one transaction; the in-memory implementation is one lock
+- Good, because no reservation state exists outside the mapping itself, so nothing can leak.
+- Good, because a JDBC implementation is one transaction; the in-memory implementation is one lock
   or compute.
-* Neutral: the `unique()` retry loop is simple: `ValueTaken` -> bump the derivation counter and try
+- Neutral: the `unique()` retry loop is simple: `ValueTaken` -> bump the derivation counter and try
   again.
-* Neutral: a reusable store contract test enforces the atomicity requirement on all
+- Neutral: a reusable store contract test enforces the atomicity requirement on all
   implementations.

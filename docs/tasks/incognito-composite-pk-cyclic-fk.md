@@ -16,11 +16,11 @@ all PK columns instead of one (the guard in `TableTransformLoadStage` that rejec
 || compositePk`). **That is necessary but not sufficient, and on its own is unreachable.** The
 reason is structural:
 
-- A single-column FK is only *deferred* when its target row is **not yet mapped** at apply time - a
+- A single-column FK is only _deferred_ when its target row is **not yet mapped** at apply time - a
   genuine forward reference, which only happens **inside a cycle** (`buildFkTransformer`,
   single-column branch: `keyStore.get(...)` misses, then `cyclicTables.contains(...)` ->
   `CyclicFkException`).
-- For a **composite-PK** table's FK to defer, that table must therefore be *in* the cycle - which
+- For a **composite-PK** table's FK to defer, that table must therefore be _in_ the cycle - which
   means something references it. Because its PK is composite, that back-reference is a **composite
   FK**.
 - When that composite FK's parent isn't yet mapped (exactly the forward-reference that defines a

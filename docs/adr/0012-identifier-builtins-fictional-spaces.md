@@ -16,8 +16,8 @@ pattern-language extension.
 
 ## Considered Options
 
-* A generic checksum token (e.g. Luhn-aware) added to the `pattern(...)` mini-language.
-* Five dedicated, identifier-specific built-ins, each with its own pinned fictional value space.
+- A generic checksum token (e.g. Luhn-aware) added to the `pattern(...)` mini-language.
+- Five dedicated, identifier-specific built-ins, each with its own pinned fictional value space.
 
 ## Decision Outcome
 
@@ -32,13 +32,13 @@ outputs never correlate across identifier types - the same reason every other bu
 
 Fictionality mechanism per identifier (full statements in spec 4.8):
 
-| Built-in | Space | Resting on |
-| --- | --- | --- |
-| `nhsNumber()` | `999` prefix | NHS reserved test range (documented, never issued), valid mod-11 check digit |
-| `nationalInsuranceNumber()` | `QQ` prefix | HMRC prefix rules: first letter `Q` never allocated; HMRC's own example prefix |
-| `drivingLicenceNumber()` | surname block `99999` | structurally impossible: a real surname always contributes at least one letter |
-| `passportNumber()` | `ZZ` + 7 digits | structurally impossible for UK: real UK passport numbers are wholly numeric |
-| `creditCardNumber()` | leading digit `0` | ISO/IEC 7812 MII 0 is reserved for ISO/TC 68 / future assignment; no scheme issues from it; valid Luhn check digit |
+| Built-in                    | Space                 | Resting on                                                                                                         |
+| --------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `nhsNumber()`               | `999` prefix          | NHS reserved test range (documented, never issued), valid mod-11 check digit                                       |
+| `nationalInsuranceNumber()` | `QQ` prefix           | HMRC prefix rules: first letter `Q` never allocated; HMRC's own example prefix                                     |
+| `drivingLicenceNumber()`    | surname block `99999` | structurally impossible: a real surname always contributes at least one letter                                     |
+| `passportNumber()`          | `ZZ` + 7 digits       | structurally impossible for UK: real UK passport numbers are wholly numeric                                        |
+| `creditCardNumber()`        | leading digit `0`     | ISO/IEC 7812 MII 0 is reserved for ISO/TC 68 / future assignment; no scheme issues from it; valid Luhn check digit |
 
 Scoping: the four UK-document built-ins require locale country `GB` (fail-fast otherwise);
 `creditCardNumber()` is locale-independent. The driving licence output is the DVLA (Great Britain)
@@ -54,17 +54,17 @@ rejected outright, for the reason above.
 
 ### Consequences
 
-* Good, because five new frozen domains and five new pinned output formats join the golden-output
+- Good, because five new frozen domains and five new pinned output formats join the golden-output
   suite; the A.5-A.9 algorithms are pinned by golden tests, not new vector files (they compose the
   already-vectored A.3 primitives).
-* Good, because the fictional-by-default table gains five rows across the two existing guarantee
+- Good, because the fictional-by-default table gains five rows across the two existing guarantee
   families: one documented reserved range (NHS), four structural impossibilities.
-* Neutral: `passportNumber()`'s guarantee is country-scoped (never a valid *UK* passport number),
+- Neutral: `passportNumber()`'s guarantee is country-scoped (never a valid _UK_ passport number),
   the same scoping as `postcode()`'s; the output's generic alphanumeric shape means passport-field
   validators that accept multiple nationalities still accept it.
-* Neutral: the README's extensibility example, which generates NHS numbers via a custom strategy,
+- Neutral: the README's extensibility example, which generates NHS numbers via a custom strategy,
   must switch to a non-built-in identifier to avoid teaching users to hand-roll what is now
   shipped.
-* Bad, because none of the five participates in record coherence: none encodes a place, and
+- Bad, because none of the five participates in record coherence: none encodes a place, and
   coherence between an identifier's embedded date-of-birth block and jittered date fields is a
   non-goal for this version.

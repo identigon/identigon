@@ -9,15 +9,15 @@ decision-makers: David Conneely
 ## Context and Problem Statement
 
 Transformations are used in Java streams, including parallel streams. A shared sequential PRNG
-(seeded once from the salt) would make each output depend on the input's *position* in the
+(seeded once from the salt) would make each output depend on the input's _position_ in the
 stream: reordering, filtering, deduplicating, or parallelising the data would change individual
 mappings, and the same value appearing in two datasets would map to two different pseudonyms.
 That breaks the core promise of deterministic pseudonymisation.
 
 ## Considered Options
 
-* A shared, sequential PRNG seeded once from the salt.
-* A fresh key derived per input value.
+- A shared, sequential PRNG seeded once from the salt.
+- A fresh key derived per input value.
 
 ## Decision Outcome
 
@@ -37,11 +37,11 @@ mapping-store keys, and keyed record-attribute resolution - so they never share 
 
 ### Consequences
 
-* Good, because outputs are independent of stream order and parallelism; referential integrity
+- Good, because outputs are independent of stream order and parallelism; referential integrity
   across datasets holds with no shared state.
-* Bad, because the salt is a secret: anyone holding it can confirm guesses about input->output
+- Bad, because the salt is a secret: anyone holding it can confirm guesses about input->output
   pairs.
-* Neutral: each element costs one HMAC computation plus a few HMAC blocks of stream output -
+- Neutral: each element costs one HMAC computation plus a few HMAC blocks of stream output -
   negligible next to the surrounding I/O.
-* Neutral: the derivation message layout is frozen for the major version and enforced by
+- Neutral: the derivation message layout is frozen for the major version and enforced by
   conformance vectors.

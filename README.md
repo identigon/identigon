@@ -5,11 +5,11 @@ every piece of personal data replaced by clearly fictional data, and gives you t
 that anonymisation without hand-writing code. Three Java 25 subprojects form a pipeline, each
 independently usable, sharing one repository-wide documentation set:
 
-| Subproject | What it is | Depends on |
-| :--- | :--- | :--- |
-| [`alterego/`](alterego) | A zero-dependency library for deterministic pseudonymisation - replaces individual values (names, dates, identifiers) with realistic fictional substitutes. | - |
-| [`incognito/`](incognito) | A library that clones a database and orchestrates the anonymisation: schema discovery, load ordering, key translation, coherent cross-entity relationships. Delegates all field-value fabrication to `alterego`. | `alterego` |
-| [`effigies/`](effigies) | A CLI that discovers a schema, authors (and helps infer) the declarative policy `incognito` runs from, and drives the engine to produce the clone. | `incognito` |
+| Subproject                | What it is                                                                                                                                                                                                       | Depends on  |
+| :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------- |
+| [`alterego/`](alterego)   | A zero-dependency library for deterministic pseudonymisation - replaces individual values (names, dates, identifiers) with realistic fictional substitutes.                                                      | -           |
+| [`incognito/`](incognito) | A library that clones a database and orchestrates the anonymisation: schema discovery, load ordering, key translation, coherent cross-entity relationships. Delegates all field-value fabrication to `alterego`. | `alterego`  |
+| [`effigies/`](effigies)   | A CLI that discovers a schema, authors (and helps infer) the declarative policy `incognito` runs from, and drives the engine to produce the clone.                                                               | `incognito` |
 
 Each subproject's behavioural contract lives under root [`docs/spec/`](docs/spec/); design
 decisions for all three are in root [`docs/adr/`](docs/adr/), numbered across the whole monorepo;

@@ -85,7 +85,7 @@ Rules with self-contained provenance, not repeated here:
 ## drivingLicenceNumber() - `99999` surname block impossible
 
 - **Guarantee**: in the DVLA (Great Britain) 16-character format, characters 1-5 encode the
-  surname, `9`-padded only *after* the surname's own letters; a real surname always contributes
+  surname, `9`-padded only _after_ the surname's own letters; a real surname always contributes
   at least one letter, so `99999` (a zero-letter surname) can never occur on a real licence.
 - **Source**: DVLA driving-licence-number format, widely documented (secondary sources:
   LegalClarity, Confused.com). Statement relied on: "The first 5 characters are your surname; if

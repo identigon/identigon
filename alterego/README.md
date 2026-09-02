@@ -78,7 +78,7 @@ built-in generates inside it by default, so pseudonymised data can never acciden
 real mailbox, phone number, or deliverable address:
 
 | Transformation              | Guarantee                                                 | Mechanism                                                                                        |
-|-----------------------------|-----------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| --------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `emailAddress()`            | never a working mailbox                                   | RFC 2606 reserved domains (`example.com`, `.net`, `.org`)                                        |
 | `phoneNumber()`             | never a connectable number                                | Ofcom drama ranges (e.g. `020 7946 0xxx`, `07700 900xxx`, `01632 960xxx`)                        |
 | `postcode()`                | never a deliverable postcode                              | a plausible outward code, but an inward code letter Royal Mail never uses                        |
@@ -120,7 +120,7 @@ Transformation<String> uniqueCustomerId =
 (configure one via `AlterEgo.builder().mappingStore(...)`). Every undecorated transformation is
 fully order-independent - reordering, filtering, or deduplicating a stream never changes an
 individual mapping. `unique()` is the one deliberate exception: when two inputs' natural candidates
-would collide, whichever one is processed *first* keeps that natural candidate, and the other is
+would collide, whichever one is processed _first_ keeps that natural candidate, and the other is
 re-derived. Absent an actual collision - the overwhelming majority of real data -
 `unique()` output is identical regardless of processing order; when a collision does happen, only
 those specific inputs are affected, and the resolution is recorded in the mapping store, so it stays

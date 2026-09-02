@@ -63,7 +63,7 @@ grown one.
   verify) against a real container, proving the whole pipeline before feature work.
 - **Fail-closed** is tested directly: an unclassified column, or a `SENSITIVE` column with no
   `distinguishing` declaration, aborts the run with `ConfigException`.
-- **De-risk pattern:** each hard-to-reason feature gets a focused Testcontainers test *before* it is
+- **De-risk pattern:** each hard-to-reason feature gets a focused Testcontainers test _before_ it is
   relied on - composite PK/FK, cyclic/self-referential FKs, the inheritance diamond (convergent +
   forked), coherent group jitter, `SERIAL` vs `IDENTITY` PKs, VIEW/materialised-view exclusion,
   per-period volume preservation, and the opaque-type passthrough audit. Several real defects (a

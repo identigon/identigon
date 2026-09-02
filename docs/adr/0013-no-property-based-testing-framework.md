@@ -23,10 +23,10 @@ ints, strings, string lists) and no reliance on shrinking to find rare defects.
 
 ## Considered Options
 
-* Keep jqwik, pinned to the clean 1.9.1 release, and manually gate any future version bump.
-* Replace jqwik with QuickTheories (Apache-2.0), a like-for-like property-testing framework that
+- Keep jqwik, pinned to the clean 1.9.1 release, and manually gate any future version bump.
+- Replace jqwik with QuickTheories (Apache-2.0), a like-for-like property-testing framework that
   keeps shrinking.
-* Remove jqwik entirely; adopt no property-based-testing framework, converting the six tests to
+- Remove jqwik entirely; adopt no property-based-testing framework, converting the six tests to
   plain JUnit loops over deterministically enumerated inputs.
 
 ## Decision Outcome
@@ -39,12 +39,12 @@ Property-style tests are plain JUnit Jupiter tests that loop over a deterministi
 set of inputs (a fixed, varied list, or a generated `"input-" + i` range), asserting the invariant
 for each.
 
-* **Deterministic enumeration, not a seeded PRNG.** A fixed input set reproduces identically on
+- **Deterministic enumeration, not a seeded PRNG.** A fixed input set reproduces identically on
   every run with no seed to capture or report, and matches the style already used elsewhere in the
   suite (e.g. `FictionalityTest`, the parallel-stream tests). The curated lists deliberately
   include edge cases jqwik's default string generation covered - empty string, whitespace,
   punctuation, mixed case, non-ASCII, emoji.
-* Allowed test dependencies are now JUnit Jupiter, plus AssertJ if fluent assertions are ever
+- Allowed test dependencies are now JUnit Jupiter, plus AssertJ if fluent assertions are ever
   wanted. Any property-based-testing framework (jqwik, QuickTheories, or another) is out -
   re-adding one needs a new ADR superseding this.
 
@@ -53,12 +53,12 @@ new dependency, and dropping the framework aligns with the project's zero-depend
 
 ### Consequences
 
-* Good, because no dependency change reaches the published artifact: jqwik was test-scope only and
+- Good, because no dependency change reaches the published artifact: jqwik was test-scope only and
   never in the POM, so consumers are unaffected. No CHANGELOG entry.
-* Bad, because automatic input shrinking to a minimal failing case is lost. Accepted - the
+- Bad, because automatic input shrinking to a minimal failing case is lost. Accepted - the
   converted tests assert shape/range/stability invariants where the failing input is already
   obvious from the assertion message, not deep search properties where shrinking earns its keep.
-* Neutral: the agent instructions' hard invariant on allowed test dependencies is updated to permit
+- Neutral: the agent instructions' hard invariant on allowed test dependencies is updated to permit
   JUnit Jupiter (and AssertJ), and to forbid a property-based-testing framework, pointing here.
-* Neutral: future feature milestones add property-style coverage as JUnit loops, not `@Property`
+- Neutral: future feature milestones add property-style coverage as JUnit loops, not `@Property`
   methods.

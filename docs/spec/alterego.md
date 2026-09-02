@@ -208,7 +208,7 @@ AlterEgo alterego = AlterEgo.builder()
   (it does **not** silently derive from the zeroed salt). Close an instance only once every
   transformation built from it is done being used.
 - **Locale**: defaults to the fixed constant `Locale.UK` (`en-GB`) - this library's primary
-  deployment. A *fixed* default is deterministic on every machine; what remains banned is
+  deployment. A _fixed_ default is deterministic on every machine; what remains banned is
   `Locale.getDefault()`, which would tie output to machine configuration (ADR 0006). Non-UK users
   configure explicitly; an unshipped country fails fast (section 4). v1 built-ins consult only the
   locale's **country**; the language component steers nothing yet.
@@ -245,7 +245,7 @@ form would give two distinct inputs the same pseudonym and silently break
 encodings:
 
 | Type              | Canonical form                                                      |
-|-------------------|---------------------------------------------------------------------|
+| ----------------- | ------------------------------------------------------------------- |
 | `String`          | the value itself                                                    |
 | `Integer`, `Long` | `Integer.toString` / `Long.toString` (decimal, `-` sign)            |
 | `Boolean`         | `toString()` - `true` / `false`                                     |
@@ -355,7 +355,7 @@ right but are guaranteed never to identify a real person, deliver mail, connect 
 message. Where such a region exists, the built-in generates inside it **by default**:
 
 | Transformation              | Guarantee                     | Mechanism                              |
-|-----------------------------|-------------------------------|----------------------------------------|
+| --------------------------- | ----------------------------- | -------------------------------------- |
 | `emailAddress()`            | never a working mailbox       | RFC 2606 reserved domains              |
 |                             |                               | (`example.com`, `.org`, `.net`)        |
 | `domainName()`              | never a routable domain       | RFC 2606 reserved domains and TLDs     |
@@ -427,7 +427,7 @@ synthetic. Candidate future additions in the same spirit: TEST-NET IP addresses 
 ### 4.2 People and organisations
 
 | Method               | Behaviour                                                       |
-|----------------------|-----------------------------------------------------------------|
+| -------------------- | --------------------------------------------------------------- |
 | `firstName()`        | Replacement drawn from the country's first-name dictionary.     |
 | `lastName()`         | Replacement drawn from the country's surname dictionary -       |
 |                      | authored to read as obviously fictional (section 4.1), not real |
@@ -470,7 +470,7 @@ Options (per-transformation, e.g. `firstName(NameOptions.preserveInitial())`):
 ### 4.3 Addresses
 
 | Method            | Behaviour                                                            |
-|-------------------|----------------------------------------------------------------------|
+| ----------------- | -------------------------------------------------------------------- |
 | `streetAddress()` | House number drawn deterministically from 1-299, plus a complete     |
 |                   | street name composed from the country's dictionary (an authored,     |
 |                   | obviously-fictional theme word plus a real structural type word,     |
@@ -486,7 +486,7 @@ Inside a record scope, `city()`, `postcode()`, and `phoneNumber()` cohere via re
 ### 4.4 Contact details
 
 | Method           | Behaviour                                                                  |
-|------------------|----------------------------------------------------------------------------|
+| ---------------- | -------------------------------------------------------------------------- |
 | `emailAddress()` | In the local part, each ASCII letter/digit is replaced class-wise (case    |
 |                  | preserved) and other characters are kept; the domain is drawn from the     |
 |                  | RFC 2606 reserved set by default (guaranteed non-working, section 4.1), or |
@@ -515,7 +515,7 @@ total.
 **Date strategies** - `LocalDate`, and the date part of every `shiftDateTime(...)` call:
 
 | Call                                  | Behaviour                                             |
-|---------------------------------------|-------------------------------------------------------|
+| ------------------------------------- | ----------------------------------------------------- |
 | `shiftDate(int days)`                 | Whole-day shift, uniform over `[-days, +days]`        |
 |                                       | (Appendix A.3).                                       |
 | `shiftDate(AlterEgo.DateField field)` | `MONTH`: uniform random day within the input's own    |
@@ -527,7 +527,7 @@ total.
 **Time strategies** - the time part of `shiftDateTime(...)` only, as the trailing argument(s):
 
 | Call                             | Behaviour                                                  |
-|----------------------------------|------------------------------------------------------------|
+| -------------------------------- | ---------------------------------------------------------- |
 | `int seconds`                    | Whole-second shift, uniform over `[-seconds, +seconds]`.   |
 | `LocalTime start, LocalTime end` | Uniform random point in `[start, end]` inclusive, to the   |
 |                                  | second (`nextInt(endSecondOfDay - startSecondOfDay + 1)`); |
@@ -578,7 +578,7 @@ alterego.pattern("LLDD DLL")   // e.g. "GU12 4XY"
 Pattern language (v1, deliberately small):
 
 | Token | Meaning                                   |
-|-------|-------------------------------------------|
+| ----- | ----------------------------------------- |
 | `D`   | random digit `0-9`                        |
 | `L`   | random uppercase letter `A-Z`             |
 | `l`   | random lowercase letter `a-z`             |
@@ -602,7 +602,7 @@ phone digits) do so as documented per-transformation behaviour, not via a public
 ### 4.7 Utility
 
 | Method                       | Behaviour                                                |
-|------------------------------|----------------------------------------------------------|
+| ---------------------------- | -------------------------------------------------------- |
 | `constant(T value)`          | Replace everything with a fixed value.                   |
 | `redact(Class<T> type)`      | Replace everything with a fixed type-appropriate default |
 |                              | (see below), for schema-preserving redaction without     |
@@ -632,7 +632,7 @@ identifier's shape (and checksum, where one exists) while landing in the fiction
 Appendix A.5-A.9.
 
 | Method                      | Output format (fixed)               | Domain                               |
-|-----------------------------|-------------------------------------|--------------------------------------|
+| --------------------------- | ----------------------------------- | ------------------------------------ |
 | `nhsNumber()`               | `999 ddd dddc` - 10 digits, 3-3-4   | `alterego:nhs-number`                |
 |                             | spacing, `c` = valid mod-11 check   |                                      |
 |                             | digit (A.5)                         |                                      |
@@ -731,11 +731,11 @@ public interface MappingStore {
   The library also ships `FileMappingStore` (section 5.4), a single-process persistent store backed
   by one local file. JDBC- or Redis-backed stores are left to clients or future modules; the SPI
   plus the contract test (`docs/testing.md`) are the contract.
-- **Privacy**: by default the *key* written to the store is the purpose-separated
+- **Privacy**: by default the _key_ written to the store is the purpose-separated
   `HMAC(salt, input)` from Appendix A.4, encoded as 64 lowercase hex characters - the store never
   contains raw input data, and store contents cannot be used to reconstruct randomness keys. Storing
   raw keys is opt-in for debugging (`AlterEgo.Builder.rawMappingKeys(true)`, section 2.6). Keys are
-  never decoded; stored *values* are decoded via the canonical forms of section 2.6, and a value
+  never decoded; stored _values_ are decoded via the canonical forms of section 2.6, and a value
   that fails to decode (corrupted store, renamed enum constant) throws `AlterEgoStoreException`.
 
 ### 5.2 `stored()`
@@ -752,10 +752,10 @@ input:
 1. `get(key)`; if a mapping exists, return it.
 2. Run the underlying strategy to get a candidate (retry counter `0`).
 3. `putIfAbsentUnique(key, candidate)`:
-    - `Stored` - return the candidate.
-    - `ExistingMapping(v)` - another thread mapped this same input concurrently; return `v`.
-    - `ValueTaken` - increment the retry counter, re-derive the context (Appendix A.1), generate a
-      new candidate, and repeat step 3.
+   - `Stored` - return the candidate.
+   - `ExistingMapping(v)` - another thread mapped this same input concurrently; return `v`.
+   - `ValueTaken` - increment the retry counter, re-derive the context (Appendix A.1), generate a
+     new candidate, and repeat step 3.
 4. After `AlterEgo.Builder.uniqueMaxAttempts` attempts (default 64, section 2.6), throw
    `AlterEgoCollisionException` - with a message pointing out the likely cause (output space too
    small for the input volume).
@@ -765,7 +765,7 @@ shares one store, and no further. This is documented rather than hidden.
 
 **Order-independence caveat.** Undecorated transformations are fully order-independent (section
 3.1). `unique()` is the one necessary exception: when two inputs' natural candidates collide,
-whichever input is processed *first* keeps the natural candidate and the other is re-derived. Absent
+whichever input is processed _first_ keeps the natural candidate and the other is re-derived. Absent
 collisions - the overwhelmingly common case - `unique()` outputs are identical regardless of
 processing order; on collision, only the colliding inputs are affected, and the resolution is
 captured in the mapping store so it remains stable on every later run. This is inherent to any
@@ -831,7 +831,7 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
 ## 6. Record coherence
 
 Transforming the fields of a record independently can produce incoherent combinations: a record
-reading *Manchester, E4 0VV, 020 4966 3211* mixes a northern town, a London postcode, and a London
+reading _Manchester, E4 0VV, 020 4966 3211_ mixes a northern town, a London postcode, and a London
 phone number. Similarly a Companies House number prefix implies a UK country (`SC...` is Scotland,
 `NI...` is Northern Ireland). Record coherence lets related fields agree.
 
@@ -840,7 +840,7 @@ phone number. Similarly a Companies House number prefix implies a UK country (`S
 A `RecordScope` bounds one record's transformation. It is created per record, used from a single
 thread, and closed when the record is done (its attributes are then discarded). A single thread is
 not an arbitrary restriction: first-touch-wins (section 6.2) only has one deterministic winner if
-"first" is well-defined, and it is not across threads, which race. A parallel *stream of records*
+"first" is well-defined, and it is not across threads, which race. A parallel _stream of records_
 is fine - each element gets its own scope, and each scope still sees only one thread - but never
 share one `RecordScope` instance across threads:
 
@@ -866,7 +866,7 @@ public interface RecordScope extends AutoCloseable {
 ```
 
 Scopes are cheap; in a stream of records, create one per element (safe under parallel streams - each
-element has its own scope). Transformations applied *outside* any scope behave exactly as before:
+element has its own scope). Transformations applied _outside_ any scope behave exactly as before:
 every field independent.
 
 ### 6.2 Record attributes
@@ -934,7 +934,7 @@ The built-ins share two published attribute keys (constants on `AlterEgoAttribut
 Behaviour inside a scope: `city()` picks a town consistent with an already-fixed area, otherwise
 picks freely and sets the area and nation from the town's tags. `postcode()` and `phoneNumber()`
 build from the fixed area if one exists; if neither `city()` nor a caller-supplied `with(...)` has
-fixed one yet, whichever of them runs first *establishes* it via `computeIfAbsent`, picking a real
+fixed one yet, whichever of them runs first _establishes_ it via `computeIfAbsent`, picking a real
 town from the country's own dictionary (ignoring the town's name - only its area/nation tags) so a
 later `city()` call is guaranteed a match, not an arbitrary or fabricated area. `isActive()` is what
 lets `postcode()`/`phoneNumber()` tell "nothing fixed, but inside a real scope" (worth establishing)
@@ -950,7 +950,7 @@ Custom strategies join in the same way - e.g. a Companies House number strategy 
 `UK_NATION` and picks its prefix (`SC`, `NI`, none) accordingly, and conversely a strategy that
 knows the country can `set` it for later fields.
 
-**Interaction with `stored()`/`unique()`**: attributes steer *newly generated* candidates only. A
+**Interaction with `stored()`/`unique()`**: attributes steer _newly generated_ candidates only. A
 previously stored mapping is returned as-is and may predate the current record's attributes; if
 strict coherence and stored mappings are both required, the caller must scope the store accordingly.
 Documented caveat.

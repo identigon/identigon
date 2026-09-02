@@ -9,13 +9,13 @@ Start here when you have something to write down and are not sure which file it 
 
 The tense of the sentence you are writing usually settles it:
 
-| If you are writing... | It belongs in |
-| --- | --- |
+| If you are writing...                      | It belongs in                                   |
+| ------------------------------------------ | ----------------------------------------------- |
 | "`alterego`/`incognito`/`effigies` does X" | the specification (`docs/spec/<subproject>.md`) |
-| "we chose X because Y" | an ADR |
-| "X used to be Y, now it is Z" | the changelog |
-| "we should do X" | the plan |
-| "this is how each document is used" | this file |
+| "we chose X because Y"                     | an ADR                                          |
+| "X used to be Y, now it is Z"              | the changelog                                   |
+| "we should do X"                           | the plan                                        |
+| "this is how each document is used"        | this file                                       |
 
 If a sentence seems to fit two places, it is usually two sentences. Split it and file each half.
 
@@ -68,59 +68,59 @@ its own contract, even though the three release together.
 
 ## Artifacts
 
-| Artifact | Purpose | Tense | Durability | Audience |
-| --- | --- | --- | --- | --- |
-| `DOC-MAP.md` | This map: what each document is for, and where a fact belongs | present | rewritten in place | anyone adding documentation |
-| `AGENTS.md` | Behavioural rules for coding agents, including the pointer into this map | present | rewritten in place | coding agents |
-| `CLAUDE.md` | **Alias** of `AGENTS.md` - some tools look for this filename specifically; the file itself is just a pointer | present | rewritten in place | coding agents |
-| `README.md` | Orient a newcomer fast at the repository root | present | rewritten in place | anyone |
-| `alterego/README.md` | **Alias** of `README.md` - same purpose, scoped to this subproject | present | rewritten in place | anyone |
-| `incognito/README.md` | **Alias** of `README.md` - same purpose, scoped to this subproject | present | rewritten in place | anyone |
-| `effigies/README.md` | **Alias** of `README.md` - same purpose, scoped to this subproject | present | rewritten in place | anyone |
-| `SPECIFICATION.md` | Index over the `docs/spec/` tree beside it. No standard for the file | present | rewritten in place | anyone adding a behaviour fact |
-| `docs/spec/alterego.md` | `alterego`'s full behavioural contract | present | rewritten in place | consumers of `alterego`; `incognito` implementers |
-| `docs/spec/incognito.md` | `incognito`'s full behavioural contract | present | rewritten in place | consumers of `incognito`; `effigies` implementers |
-| `docs/spec/effigies.md` | `effigies`'s full behavioural contract | present | rewritten in place | CLI users |
-| `CHANGELOG.md` | What shipped, user-visible, across the whole monorepo. **Real standard:** Keep a Changelog, unmodified - entries tagged by subproject, not grouped by one | past | append-only | users |
-| `PLAN.md` | Single ranked backlog. No standard; entries may carry a `Project` tag | future | volatile | the team |
-| `docs/adr/*.md` | Why a decision was made, for any subproject or for `identigon.github.io`. **Real convention:** MADR minimal template | past | immutable | future maintainers |
-| `docs/research/*.md` | Sourced findings behind a spec guarantee, with an explicit confidence level. **No standard** | past | append-only | implementers |
-| `docs/testing.md` | Test strategy for all three subprojects, and what is deliberately not covered | present | rewritten in place | contributors |
-| `docs/tasks/*.md` | Working notes for one backlog item, prefixed with the subproject name when subproject-specific. No standard | future | disposable | whoever picks it up |
-| `alterego/tools/data-cache/SOURCES.md` | Provenance of cached upstream data used by the dictionary-curation tooling | past | append-only | `alterego` contributors |
-| `quickstart/README.md` | **Alias** of `README.md` - step-by-step walkthrough for the quickstart worked example | present | rewritten in place | anyone trying Identigon |
-| `incognito/src/test/resources/benchmarks/SOURCES.md` | Provenance and licensing of the vendored benchmark-fixture schemas/datasets | past | append-only | `incognito` contributors |
-| `.agents/skills/identigon-policy-author/SKILL.md` | Step-by-step procedure for one agent tool skill | imperative | rewritten in place | coding agents |
-| `identigon.github.io/README.md` | **Alias** of `README.md` - same purpose, for the separate site repository | present | rewritten in place | anyone |
-| `identigon.github.io/AGENTS.md` | Agent hazards specific to that repository (custom domain, build/deploy, Action pinning); routes here for decisions and backlog | present | rewritten in place | coding agents |
+| Artifact                                             | Purpose                                                                                                                                                   | Tense      | Durability         | Audience                                          |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------ | ------------------------------------------------- |
+| `DOC-MAP.md`                                         | This map: what each document is for, and where a fact belongs                                                                                             | present    | rewritten in place | anyone adding documentation                       |
+| `AGENTS.md`                                          | Behavioural rules for coding agents, including the pointer into this map                                                                                  | present    | rewritten in place | coding agents                                     |
+| `CLAUDE.md`                                          | **Alias** of `AGENTS.md` - some tools look for this filename specifically; the file itself is just a pointer                                              | present    | rewritten in place | coding agents                                     |
+| `README.md`                                          | Orient a newcomer fast at the repository root                                                                                                             | present    | rewritten in place | anyone                                            |
+| `alterego/README.md`                                 | **Alias** of `README.md` - same purpose, scoped to this subproject                                                                                        | present    | rewritten in place | anyone                                            |
+| `incognito/README.md`                                | **Alias** of `README.md` - same purpose, scoped to this subproject                                                                                        | present    | rewritten in place | anyone                                            |
+| `effigies/README.md`                                 | **Alias** of `README.md` - same purpose, scoped to this subproject                                                                                        | present    | rewritten in place | anyone                                            |
+| `SPECIFICATION.md`                                   | Index over the `docs/spec/` tree beside it. No standard for the file                                                                                      | present    | rewritten in place | anyone adding a behaviour fact                    |
+| `docs/spec/alterego.md`                              | `alterego`'s full behavioural contract                                                                                                                    | present    | rewritten in place | consumers of `alterego`; `incognito` implementers |
+| `docs/spec/incognito.md`                             | `incognito`'s full behavioural contract                                                                                                                   | present    | rewritten in place | consumers of `incognito`; `effigies` implementers |
+| `docs/spec/effigies.md`                              | `effigies`'s full behavioural contract                                                                                                                    | present    | rewritten in place | CLI users                                         |
+| `CHANGELOG.md`                                       | What shipped, user-visible, across the whole monorepo. **Real standard:** Keep a Changelog, unmodified - entries tagged by subproject, not grouped by one | past       | append-only        | users                                             |
+| `PLAN.md`                                            | Single ranked backlog. No standard; entries may carry a `Project` tag                                                                                     | future     | volatile           | the team                                          |
+| `docs/adr/*.md`                                      | Why a decision was made, for any subproject or for `identigon.github.io`. **Real convention:** MADR minimal template                                      | past       | immutable          | future maintainers                                |
+| `docs/research/*.md`                                 | Sourced findings behind a spec guarantee, with an explicit confidence level. **No standard**                                                              | past       | append-only        | implementers                                      |
+| `docs/testing.md`                                    | Test strategy for all three subprojects, and what is deliberately not covered                                                                             | present    | rewritten in place | contributors                                      |
+| `docs/tasks/*.md`                                    | Working notes for one backlog item, prefixed with the subproject name when subproject-specific. No standard                                               | future     | disposable         | whoever picks it up                               |
+| `alterego/tools/data-cache/SOURCES.md`               | Provenance of cached upstream data used by the dictionary-curation tooling                                                                                | past       | append-only        | `alterego` contributors                           |
+| `quickstart/README.md`                               | **Alias** of `README.md` - step-by-step walkthrough for the quickstart worked example                                                                     | present    | rewritten in place | anyone trying Identigon                           |
+| `incognito/src/test/resources/benchmarks/SOURCES.md` | Provenance and licensing of the vendored benchmark-fixture schemas/datasets                                                                               | past       | append-only        | `incognito` contributors                          |
+| `.agents/skills/identigon-policy-author/SKILL.md`    | Step-by-step procedure for one agent tool skill                                                                                                           | imperative | rewritten in place | coding agents                                     |
+| `identigon.github.io/README.md`                      | **Alias** of `README.md` - same purpose, for the separate site repository                                                                                 | present    | rewritten in place | anyone                                            |
+| `identigon.github.io/AGENTS.md`                      | Agent hazards specific to that repository (custom domain, build/deploy, Action pinning); routes here for decisions and backlog                            | present    | rewritten in place | coding agents                                     |
 
 ## Lifecycle
 
-| Artifact | Created when | Removed / closed when |
-| --- | --- | --- |
-| `DOC-MAP.md` | the structure is first agreed | never - revised when an artifact is added, removed or repurposed |
-| `AGENTS.md` | agents first work in this repository | never |
-| `CLAUDE.md` | agents first work in this repository | never |
-| `README.md` | project starts | never |
-| `alterego/README.md` | the module is created | never |
-| `incognito/README.md` | the module is created | never |
-| `effigies/README.md` | the module is created | never |
-| `SPECIFICATION.md` | behaviour is decided | never - edited forever |
-| `docs/spec/alterego.md` | behaviour is decided | never - edited forever |
-| `docs/spec/incognito.md` | behaviour is decided | never - edited forever |
-| `docs/spec/effigies.md` | behaviour is decided | never - edited forever |
-| `CHANGELOG.md` entry | at release, if user-visible | never |
-| `PLAN.md` entry | idea occurs - one paragraph, no design | **deleted** when done, not struck through |
-| `docs/adr/*.md` | a choice a newcomer would question | never - status flips to `superseded by ADR-NNNN` |
-| `docs/research/*.md` | a question is investigated | never - confidence is revised in place as evidence changes |
-| `docs/testing.md` | the second test approach appears (already true) | never |
-| `docs/tasks/*.md` | work begins on an item | work completes |
-| `alterego/tools/data-cache/SOURCES.md` | the data cache is populated | never |
-| `quickstart/README.md` | the example is created | never |
-| `incognito/src/test/resources/benchmarks/SOURCES.md` | a benchmark fixture is vendored | never |
-| `.agents/skills/identigon-policy-author/SKILL.md` | the skill is written | the skill is retired |
-| `identigon.github.io/README.md` | the site repository is created | never |
-| `identigon.github.io/AGENTS.md` | the site repository is created | never |
+| Artifact                                             | Created when                                    | Removed / closed when                                            |
+| ---------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| `DOC-MAP.md`                                         | the structure is first agreed                   | never - revised when an artifact is added, removed or repurposed |
+| `AGENTS.md`                                          | agents first work in this repository            | never                                                            |
+| `CLAUDE.md`                                          | agents first work in this repository            | never                                                            |
+| `README.md`                                          | project starts                                  | never                                                            |
+| `alterego/README.md`                                 | the module is created                           | never                                                            |
+| `incognito/README.md`                                | the module is created                           | never                                                            |
+| `effigies/README.md`                                 | the module is created                           | never                                                            |
+| `SPECIFICATION.md`                                   | behaviour is decided                            | never - edited forever                                           |
+| `docs/spec/alterego.md`                              | behaviour is decided                            | never - edited forever                                           |
+| `docs/spec/incognito.md`                             | behaviour is decided                            | never - edited forever                                           |
+| `docs/spec/effigies.md`                              | behaviour is decided                            | never - edited forever                                           |
+| `CHANGELOG.md` entry                                 | at release, if user-visible                     | never                                                            |
+| `PLAN.md` entry                                      | idea occurs - one paragraph, no design          | **deleted** when done, not struck through                        |
+| `docs/adr/*.md`                                      | a choice a newcomer would question              | never - status flips to `superseded by ADR-NNNN`                 |
+| `docs/research/*.md`                                 | a question is investigated                      | never - confidence is revised in place as evidence changes       |
+| `docs/testing.md`                                    | the second test approach appears (already true) | never                                                            |
+| `docs/tasks/*.md`                                    | work begins on an item                          | work completes                                                   |
+| `alterego/tools/data-cache/SOURCES.md`               | the data cache is populated                     | never                                                            |
+| `quickstart/README.md`                               | the example is created                          | never                                                            |
+| `incognito/src/test/resources/benchmarks/SOURCES.md` | a benchmark fixture is vendored                 | never                                                            |
+| `.agents/skills/identigon-policy-author/SKILL.md`    | the skill is written                            | the skill is retired                                             |
+| `identigon.github.io/README.md`                      | the site repository is created                  | never                                                            |
+| `identigon.github.io/AGENTS.md`                      | the site repository is created                  | never                                                            |
 
 ## Flow
 
@@ -197,7 +197,7 @@ the ADR only needs to point at.
   directly; revisit if it grows past roughly 30 records.
 - **`docs/quirks.md`, `docs/glossary.md`.** Not yet adopted; each subproject's own `docs/spec/`
   member currently states known limitations and non-goals inline. Revisit if that stops being
-  enough. (`docs/testing.md` *is* adopted - see the Artifacts table.)
+  enough. (`docs/testing.md` _is_ adopted - see the Artifacts table.)
 - **`docs/archive/`.** Nothing has yet had its currency called into question strongly enough to
   archive rather than fix or delete.
 

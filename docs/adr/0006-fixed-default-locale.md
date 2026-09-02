@@ -17,8 +17,8 @@ Accepted 2026-07-12, revised 2026-07-13 (accepted date reflects the revision).
 
 ## Considered Options
 
-* Default to `Locale.getDefault()` (the JDK/platform default).
-* Default to a fixed constant locale.
+- Default to `Locale.getDefault()` (the JDK/platform default).
+- Default to a fixed constant locale.
 
 ## Decision Outcome
 
@@ -37,10 +37,10 @@ Abertawe).
 
 ### Consequences
 
-* Good, because zero-configuration UK usage works, and output remains machine-independent because
+- Good, because zero-configuration UK usage works, and output remains machine-independent because
   the default is a constant, not ambient state.
-* Neutral: `en-GB` and `cy-GB` are configuration synonyms for the v1 built-ins (enforced by an
+- Neutral: `en-GB` and `cy-GB` are configuration synonyms for the v1 built-ins (enforced by an
   equivalence test); `en-AU` fails fast (no AU resources) rather than silently borrowing another
   country's data.
-* Bad, because a non-UK adopter who forgets to set a locale gets UK output - obvious on first
+- Bad, because a non-UK adopter who forgets to set a locale gets UK output - obvious on first
   look, and documented in the README.

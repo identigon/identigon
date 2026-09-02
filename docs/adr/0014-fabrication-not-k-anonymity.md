@@ -10,19 +10,19 @@ decision-makers: David Conneely
 
 The goal is a schema-identical test clone that preserves data volumes and inter-entity
 relationships while removing all PII. The classic statistical-disclosure models -
-k-anonymity, l-diversity, t-closeness - achieve privacy by *generalising* and *suppressing*
+k-anonymity, l-diversity, t-closeness - achieve privacy by _generalising_ and _suppressing_
 quasi-identifiers into equivalence classes. That requires a global pass over each table to form
 the classes, degrades data utility (ages become ranges, dates become buckets), and still leaves
-*real* values in place, just coarsened. None of that fits "runs the same application code, with
+_real_ values in place, just coarsened. None of that fits "runs the same application code, with
 realistic-looking data".
 
 Backfilled 2026-07-30, documenting a decision made earlier in the project's development.
 
 ## Considered Options
 
-* Statistical disclosure control (k-anonymity / l-diversity / t-closeness): generalise and
+- Statistical disclosure control (k-anonymity / l-diversity / t-closeness): generalise and
   suppress quasi-identifiers into equivalence classes.
-* Fabrication: replace direct identifiers and quasi-identifiers with deterministic, obviously
+- Fabrication: replace direct identifiers and quasi-identifiers with deterministic, obviously
   fictional substitutes.
 
 ## Decision Outcome
@@ -38,13 +38,13 @@ analysis of the clone. k-anonymity, l-diversity, and t-closeness are **explicit 
 
 ### Consequences
 
-* Good, because no global statistical pass is needed, so Incognito streams row-by-row and never
+- Good, because no global statistical pass is needed, so Incognito streams row-by-row and never
   holds a dataset in memory.
-* Good, because identifiers are fabricated (not merely coarsened), so **operational data can be
+- Good, because identifiers are fabricated (not merely coarsened), so **operational data can be
   kept real**, and a **low-cardinality sensitive flag can be kept real** once linkage is severed
   (ADR 16).
-* Neutral: there is no privacy knob to tune; correctness is about severing linkage and guaranteeing
+- Neutral: there is no privacy knob to tune; correctness is about severing linkage and guaranteeing
   fictionality, not about reaching a k.
-* Bad, because frequency is preserved (equal inputs map to equal outputs) - an inherent property
+- Bad, because frequency is preserved (equal inputs map to equal outputs) - an inherent property
   of deterministic fabrication, mitigated only by aggregation/suppression outside this library's
   scope.

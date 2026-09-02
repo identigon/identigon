@@ -2,39 +2,39 @@
 
 Effigies is a Java 25 command-line application that sits **above** the
 [incognito](../incognito) anonymisation engine. It is the
-*authoring and orchestration* layer: it inspects a source database's schema, helps you author (and,
+_authoring and orchestration_ layer: it inspects a source database's schema, helps you author (and,
 later, infer) the declarative anonymisation policy, and then drives incognito to produce the
 schema-identical, PII-free clone.
 
-The name: an *effigy* is a deliberately fake likeness. Effigies makes the likeness; incognito
+The name: an _effigy_ is a deliberately fake likeness. Effigies makes the likeness; incognito
 carries out the substitution.
 
-> **In one sentence:** *"Point me at a production database and help me produce a reviewable
+> **In one sentence:** _"Point me at a production database and help me produce a reviewable
 > configuration that incognito can run to make an anonymised copy - without me
-> hand-writing Java, and without ever showing a real data value to anything that doesn't need it."*
+> hand-writing Java, and without ever showing a real data value to anything that doesn't need it."_
 
 ## Where it sits (and what stays out)
 
 Three layers, each with one job:
 
-| Layer | Responsibility | Deterministic? | Judgment / LLM? |
-| :------ | :--------------- | :--------------- | :---------------- |
-| [alterego](../alterego) | fabricate one field value | yes | no |
-| [incognito](../incognito) | clone the schema + orchestrate the load from a policy | yes | no |
+| Layer                         | Responsibility                                        | Deterministic?                                                      | Judgment / LLM?     |
+| :---------------------------- | :---------------------------------------------------- | :------------------------------------------------------------------ | :------------------ |
+| [alterego](../alterego)       | fabricate one field value                             | yes                                                                 | no                  |
+| [incognito](../incognito)     | clone the schema + orchestrate the load from a policy | yes                                                                 | no                  |
 | **Effigies (this directory)** | discover schema, author/infer the policy, drive a run | authoring is advisory; the produced config + runs are deterministic | **yes - here only** |
 
 Two boundaries are deliberate and load-bearing:
 
-- **No model in the engine path.** Any inference - heuristic or agent-driven - is *authoring*. The
+- **No model in the engine path.** Any inference - heuristic or agent-driven - is _authoring_. The
   anonymisation itself stays a deterministic, reproducible, model-free incognito run. The policy
   YAML is the durable, checked-in, reviewable artifact; Effigies helps you write it, then gets out
   of the way.
-- **Fail-closed survives.** Effigies never assigns a column role behind your back. It *suggests*; an
+- **Fail-closed survives.** Effigies never assigns a column role behind your back. It _suggests_; an
   unclassified column still aborts the run (incognito's fail-closed contract, ADR 17).
   The DPIA report incognito emits - source-value survival, misdeclaration lint, structural
   findings, and the illustrative sample rows - is the safety net that catches a bad classification.
 - **Metadata only.** Schema discovery and any artifact Effigies produces for a human or an agent
-  carry schema *metadata* (names, types, the FK graph) - never sampled real values. Authoring works
+  carry schema _metadata_ (names, types, the FK graph) - never sampled real values. Authoring works
   from the schema, not the data.
 
 See [ADR 23](../docs/adr/0023-authoring-above-the-engine.md) for
@@ -95,7 +95,7 @@ java -jar effigies/build/libs/identigon.jar validate --policy ./policy.yaml \
 
 ### 4. Orchestration (`run`)
 
-`run` needs a **schema-identical, empty** target database - `incognito` loads *into* it, it does
+`run` needs a **schema-identical, empty** target database - `incognito` loads _into_ it, it does
 not create or replace it for you. The simplest way to get one is `pg_dump --schema-only` from the
 source, loaded into a fresh database:
 

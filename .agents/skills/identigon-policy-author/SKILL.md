@@ -22,7 +22,7 @@ interview the user to assign roles (e.g., `DIRECT_ID`, `QUASI_ID`, `SENSITIVE`,
 1. **Topological / Paginated Workflow (Context Limit Mitigation):**
    - DO NOT try to process or print the entire schema at once if it is large.
    - Work table-by-table (or in small batches of tables).
-   - Once a batch is complete, edit the `policy.yaml` file to apply the roles *before*
+   - Once a batch is complete, edit the `policy.yaml` file to apply the roles _before_
      moving to the next batch.
 
 2. **Aggressive Batching (User Fatigue Mitigation):**
@@ -50,6 +50,6 @@ interview the user to assign roles (e.g., `DIRECT_ID`, `QUASI_ID`, `SENSITIVE`,
 5. Update `policy.yaml` with the confirmed roles.
 6. Repeat steps 2-5 for the next batch until all columns are classified or the user chooses to stop.
 7. Remind the user they can check the result with `effigies validate --policy policy.yaml
-   --source-url ... --source-user ...` - the same fail-closed diagnostics `run` would raise, without
+--source-url ... --source-user ...` - the same fail-closed diagnostics `run` would raise, without
    a target connection or moving any data - before running `effigies run --policy policy.yaml`
    for real.

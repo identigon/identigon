@@ -65,7 +65,7 @@ and `XXX` stripped, reconstruct the value exactly.
 **Full table as published** (all 20 ranges; see "v1 scope" above for which are shipped):
 
 | Geographic area            | Area code | Range                |
-|----------------------------|-----------|----------------------|
+| -------------------------- | --------- | -------------------- |
 | Leeds                      | 0113      | 496 0000-496 0999    |
 | Sheffield                  | 0114      | 496 0000-496 0999    |
 | Nottingham                 | 0115      | 496 0000-496 0999    |

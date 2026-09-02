@@ -15,8 +15,8 @@ field is essentially never a freephone, premium-rate, or UK-wide non-geographic 
 
 ## Considered Options
 
-* Ship all 20 published Ofcom ranges in the default pool.
-* Ship only the 17 ranges that read as a realistic personal contact number (geographic + no-area +
+- Ship all 20 published Ofcom ranges in the default pool.
+- Ship only the 17 ranges that read as a realistic personal contact number (geographic + no-area +
   mobile), keeping the other 3 documented but unshipped.
 
 ## Decision Outcome
@@ -33,11 +33,11 @@ without re-doing the sourcing work.
 
 ### Consequences
 
-* Good, because default output never surprises a reviewer with an implausible number type for a
+- Good, because default output never surprises a reviewer with an implausible number type for a
   personal contact field.
-* Neutral: the unconstrained ("no area fixed") pool is exactly 17 distinct choices, not 20 - a
+- Neutral: the unconstrained ("no area fixed") pool is exactly 17 distinct choices, not 20 - a
   future opt-in for the excluded three is additive, not a breaking change to today's pool.
-* Bad, because a caller who specifically wants a fictional freephone/premium-rate/UK-wide number
+- Bad, because a caller who specifically wants a fictional freephone/premium-rate/UK-wide number
   has no built-in option for it yet - deferred, not solved.
 
 <!-- Extracted from alterego/docs/phone-ranges.md's "v1 scope" section during the docs/research/

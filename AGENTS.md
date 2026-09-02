@@ -138,7 +138,7 @@ Before you edit:
 ### incognito
 
 1. **Fail-closed classification.** An unclassified column aborts the run; auto-inference only
-   *suggests* roles, never assigns them. A `SENSITIVE` column with no `distinguishing` declaration
+   _suggests_ roles, never assigns them. A `SENSITIVE` column with no `distinguishing` declaration
    fails. Never copy a column you were not told how to handle (SPEC §7.2, and the matching ADR).
 2. **No `hashCode()`-derived fabricated values or jitter deltas.** Every fabricated value and
    every jitter delta derives from `alterego`'s salt-keyed HMAC stream (SPEC §5.1, and the matching

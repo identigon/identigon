@@ -30,10 +30,10 @@ not pick a guarantee-less fabrication tool silently just because the author didn
 
 ## Considered Options
 
-* Leave the character-type shape-preserving fallback as Appendix B specified it (status quo) -
+- Leave the character-type shape-preserving fallback as Appendix B specified it (status quo) -
   `effigies scaffold` gains the missing stub, but incognito keeps accepting a hint-less
   character-type `QUASI_ID` `SYNTHESISE` column.
-* Require an explicit `directIdStrategy` hint on a character-type `QUASI_ID` using `SYNTHESISE`,
+- Require an explicit `directIdStrategy` hint on a character-type `QUASI_ID` using `SYNTHESISE`,
   fail-closed at discovery when absent - extends ADR 29's `DIRECT_ID` treatment to `QUASI_ID`,
   scoped to character types only (temporal types keep their existing, type-matched shift
   primitive with no hint required).
@@ -55,17 +55,17 @@ a known typed generator (`POSTCODE_PATTERN` today), mirroring the existing `DIRE
 
 ### Consequences
 
-* Good, because it closes the gap that let a `QUASI_ID` postcode column report success while
+- Good, because it closes the gap that let a `QUASI_ID` postcode column report success while
   producing a structurally-valid, potentially-real postcode - the DPIA report's fictionality
   labelling and a `QUASI_ID` column's actual guarantee level can no longer diverge silently.
-* Good, because it brings `QUASI_ID` in line with the `DIRECT_ID` treatment ADR 29 already
+- Good, because it brings `QUASI_ID` in line with the `DIRECT_ID` treatment ADR 29 already
   established, rather than leaving the two roles inconsistent.
-* Bad, because it is a breaking change: any existing policy with a character-type `QUASI_ID`
+- Bad, because it is a breaking change: any existing policy with a character-type `QUASI_ID`
   `SYNTHESISE` column and no `directIdStrategy` hint now fails closed until a hint - even
   `ALTEREGO_GENERIC` - is added. This repo's own benchmark fixtures (chinook, northwind) and the
   SPEC's own Appendix B example needed exactly this fix.
-* Neutral: temporal `SYNTHESISE` columns (`DATE`/`TIMESTAMP`) are unaffected - the type-matched
+- Neutral: temporal `SYNTHESISE` columns (`DATE`/`TIMESTAMP`) are unaffected - the type-matched
   shift primitive remains the default, no hint required.
-* Neutral: does not touch `VerificationStage`'s fictionality checks or the source-value survival
+- Neutral: does not touch `VerificationStage`'s fictionality checks or the source-value survival
   net - an explicitly-chosen `ALTEREGO_GENERIC` hint is exactly as unguaranteed as before, and
   exactly as ADR 21 already accepted for `DIRECT_ID`.

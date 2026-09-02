@@ -19,6 +19,27 @@ repos:
 
       # SpotBugs and the test suite are intentionally omitted - too slow for a commit hook; run in CI.
 
+      # Formatter, not linter - complements markdownlint-cli2 below rather than replacing it
+      # (Prettier doesn't catch MD024/MD032/MD060 and friends; markdownlint-cli2's MD013 has no
+      # auto-fix in any implementation - see the comment on that hook). `local`, not the
+      # `pre-commit/mirrors-prettier` repo: that mirror is stale (its newest stable tag is v3.1.0,
+      # several minor versions behind), so pinning the exact version via npx here instead - same
+      # pattern as `npx --yes markdownlint-cli2@<version>` used throughout this repo's own tooling
+      # invocations. `*emphasis*` becomes `_emphasis_` on first run and forever after - Prettier's
+      # markdown printer has no config option for this, confirmed empirically; see
+      # docs/adr/0036-adopt-prettier-for-markdown-alongside-markdownlint-cli2.md.
+      # --embedded-language-formatting=off is load-bearing, not cosmetic: Prettier's default
+      # ("auto") tries to reformat recognised-language content INSIDE fenced code blocks too, and
+      # on this repo's YAML policy examples that corrupted them - dropped keys, emptied `{ }`
+      # blocks - found and reverted during the initial bulk reformat, confirmed fixed by diffing
+      # every fenced code block's content byte-for-byte before/after with this flag set.
+      - id: prettier-markdown
+        name: Prettier (auto-format Markdown)
+        language: system
+        entry: npx --yes prettier@3.9.6 --embedded-language-formatting=off --write
+        pass_filenames: true
+        types: [markdown]
+
   # Secret scanning - apt for a privacy pipeline (alterego/incognito) and its authoring CLI
   # (effigies), where a salt or connection string must never be committed.
   - repo: https://github.com/gitleaks/gitleaks

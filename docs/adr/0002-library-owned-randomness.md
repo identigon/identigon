@@ -13,9 +13,9 @@ contract forever, because every pseudonym depends on its exact bit stream.
 
 ## Considered Options
 
-* Expose `java.util.random.RandomGenerator` directly.
-* Use an off-the-shelf PRNG (e.g. Mersenne Twister) internally.
-* A small library-owned `Randomness` interface over an HMAC-SHA256 counter-mode stream.
+- Expose `java.util.random.RandomGenerator` directly.
+- Use an off-the-shelf PRNG (e.g. Mersenne Twister) internally.
+- A small library-owned `Randomness` interface over an HMAC-SHA256 counter-mode stream.
 
 ## Decision Outcome
 
@@ -38,10 +38,10 @@ Appendix A.2-A.3 and enforced by conformance vectors.
 
 ### Consequences
 
-* Good, because the frozen compatibility surface is seven methods this library controls and
+- Good, because the frozen compatibility surface is seven methods this library controls and
   vector-tests - no JDK or third-party algorithm is part of the output-stability contract.
-* Good, because the security argument stays a one-liner: everything observable is HMAC-SHA256
+- Good, because the security argument stays a one-liner: everything observable is HMAC-SHA256
   (PRF) output.
-* Bad, because strategy authors cannot reach un-freezable conveniences like `nextGaussian()`.
-* Neutral: clients wanting a `RandomGenerator` can adapt `nextLong` themselves; the library does
+- Bad, because strategy authors cannot reach un-freezable conveniences like `nextGaussian()`.
+- Neutral: clients wanting a `RandomGenerator` can adapt `nextLong` themselves; the library does
   not ship or bless an adapter.

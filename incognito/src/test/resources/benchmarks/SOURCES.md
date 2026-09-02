@@ -2,7 +2,7 @@
 
 The SQL files under this directory are third-party sample databases used **only** as Phase-7
 integration-test fixtures. They live in `src/test/resources`, so they are **not** bundled into the
-published library JAR - but they *are* redistributed as part of this git repository, so their
+published library JAR - but they _are_ redistributed as part of this git repository, so their
 provenance and licences are recorded here, the required attribution is in [`NOTICE`](NOTICE), and a
 verbatim copy of each licence is under [`LICENCES/`](LICENCES). Every licence here allows
 redistribution with attribution; the employees fixture additionally carries a **share-alike**
@@ -11,13 +11,13 @@ authors, and marking the changes made (see below).
 
 All URLs retrieved **2026-07-31**.
 
-| Dataset | Upstream | Vendored here | Download URL | Licence | Licence text |
-| --- | --- | --- | --- | --- | --- |
-| PetClinic | [spring-projects/spring-petclinic](https://github.com/spring-projects/spring-petclinic) (`main`) | `petclinic/schema.sql`, `petclinic/data.sql` | `.../src/main/resources/db/postgres/{schema,data}.sql` | Apache-2.0 | `LICENCES/Apache-2.0.txt` |
-| Pagila | [devrimgunduz/pagila](https://github.com/devrimgunduz/pagila) (`pagila-v3.0.0`) | `pagila/schema.sql`, `pagila/pagila-insert-data.sql` | `.../refs/tags/pagila-v3.0.0/pagila-{schema,insert-data}.sql` | PostgreSQL License | `LICENCES/PostgreSQL-License.txt` |
-| Northwind | [pthom/northwind_psql](https://github.com/pthom/northwind_psql) (`master`) | `northwind/northwind.sql` (4 city columns widened) | `.../northwind.sql` | Ms-PL | `LICENCES/Ms-PL.txt` |
-| Employees | [bytebase/employee-sample-database](https://github.com/bytebase/employee-sample-database) (`main`) | `employees/employees.sql` (assembled) | `.../postgres/dataset_small/{employee,load_*}.sql` | CC BY-SA 3.0 | `LICENCES/CC-BY-SA-3.0.txt` |
-| Chinook | [lerocha/chinook-database](https://github.com/lerocha/chinook-database) (`master`) | `chinook/chinook.sql` (preamble stripped) | `.../ChinookDatabase/DataSources/Chinook_PostgreSql.sql` | MIT | `LICENCES/MIT-Chinook.txt` |
+| Dataset   | Upstream                                                                                           | Vendored here                                        | Download URL                                                  | Licence            | Licence text                      |
+| --------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------- | ------------------ | --------------------------------- |
+| PetClinic | [spring-projects/spring-petclinic](https://github.com/spring-projects/spring-petclinic) (`main`)   | `petclinic/schema.sql`, `petclinic/data.sql`         | `.../src/main/resources/db/postgres/{schema,data}.sql`        | Apache-2.0         | `LICENCES/Apache-2.0.txt`         |
+| Pagila    | [devrimgunduz/pagila](https://github.com/devrimgunduz/pagila) (`pagila-v3.0.0`)                    | `pagila/schema.sql`, `pagila/pagila-insert-data.sql` | `.../refs/tags/pagila-v3.0.0/pagila-{schema,insert-data}.sql` | PostgreSQL License | `LICENCES/PostgreSQL-License.txt` |
+| Northwind | [pthom/northwind_psql](https://github.com/pthom/northwind_psql) (`master`)                         | `northwind/northwind.sql` (4 city columns widened)   | `.../northwind.sql`                                           | Ms-PL              | `LICENCES/Ms-PL.txt`              |
+| Employees | [bytebase/employee-sample-database](https://github.com/bytebase/employee-sample-database) (`main`) | `employees/employees.sql` (assembled)                | `.../postgres/dataset_small/{employee,load_*}.sql`            | CC BY-SA 3.0       | `LICENCES/CC-BY-SA-3.0.txt`       |
+| Chinook   | [lerocha/chinook-database](https://github.com/lerocha/chinook-database) (`master`)                 | `chinook/chinook.sql` (preamble stripped)            | `.../ChinookDatabase/DataSources/Chinook_PostgreSql.sql`      | MIT                | `LICENCES/MIT-Chinook.txt`        |
 
 ## PetClinic - Apache License 2.0 - **USED** (`PetClinicBenchmarkE2ETest`)
 
@@ -33,7 +33,7 @@ All URLs retrieved **2026-07-31**.
 
 - A PostgreSQL port of MySQL's **Sakila** example DB (originally by Mike Hillyer, MySQL AB
   docs team).
-- **Pinned to tag `pagila-v3.0.0`** - deliberately *not* `master`. Master requires the **pgvector**
+- **Pinned to tag `pagila-v3.0.0`** - deliberately _not_ `master`. Master requires the **pgvector**
   extension (a `film_embedding vector(20)` table) which stock `postgres:18-alpine` lacks, and has 55
   `payment` partitions. `pagila-v3.0.0` predates pgvector: 22 tables (15 Sakila core + 7 `payment`
   partitions), no extension needed.
@@ -75,7 +75,7 @@ carries the original licence header inline.
   conversion by Patrick Crews; © 2007, 2008 MySQL AB. Licensed **CC BY-SA 3.0 Unported**.
 - **Vendored bytes:**
   [bytebase/employee-sample-database](https://github.com/bytebase/employee-sample-database),
-  `postgres/dataset_small`. Bytebase's *repository* `LICENSE` is MIT (© 2022 tianzhou) and covers
+  `postgres/dataset_small`. Bytebase's _repository_ `LICENSE` is MIT (© 2022 tianzhou) and covers
   their packaging/tooling only; the **data file itself is CC BY-SA 3.0** (header preserved verbatim
   in our copy), so that is the licence recorded and complied with here.
 - **Assembled, not upstream-verbatim.** Our `employees/employees.sql` is a mechanical
@@ -112,7 +112,7 @@ fictionality net), a self-referential `employee.reports_to` FK, and a `TIMESTAMP
 
 ## Notes on the model (improvements over `alterego`'s)
 
-`alterego` vendors small curated dictionaries that ship *inside the JAR*, so its `NOTICE` is
+`alterego` vendors small curated dictionaries that ship _inside the JAR_, so its `NOTICE` is
 top-level and packaged into `META-INF`. These fixtures are **test-only**, so the whole set is
 scoped under `benchmarks/` and kept out of the artifact. One addition beyond that model: the
 **licence URL** is recorded next to the data URL (not just the data provenance). Every

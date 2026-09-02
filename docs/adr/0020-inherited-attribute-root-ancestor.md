@@ -17,9 +17,9 @@ Backfilled 2026-07-30, documenting a decision made earlier in the project's deve
 
 ## Considered Options
 
-* Fail-open: if the ancestor's fabricated value can't be resolved, return the descendant row's own
+- Fail-open: if the ancestor's fabricated value can't be resolved, return the descendant row's own
   (real) value.
-* Fail-closed: resolve strictly by walking the FK chain to the declared root ancestor; error rather
+- Fail-closed: resolve strictly by walking the FK chain to the declared root ancestor; error rather
   than fall back to a real value.
 
 ## Decision Outcome
@@ -33,17 +33,17 @@ to the cascade store. A descendant resolves its value by **walking the FK chain*
 linkage) up to the declared root-ancestor table and reading the ancestor's published value.
 Resolution is **fail-closed**:
 
-* a null ancestor (nullable FK is null) yields `null` - nothing to leak;
-* two *distinct* ancestor rows reached (a genuine fork) throws `ConstraintException`;
-* an ancestor reached but with no published value (an ordering/config error) throws.
+- a null ancestor (nullable FK is null) yields `null` - nothing to leak;
+- two _distinct_ ancestor rows reached (a genuine fork) throws `ConstraintException`;
+- an ancestor reached but with no published value (an ordering/config error) throws.
 
 It never returns the child's own real value.
 
 ### Consequences
 
-* Good, because denormalised copies remain consistent with the fabricated ancestor across arbitrary
+- Good, because denormalised copies remain consistent with the fabricated ancestor across arbitrary
   FK depth (parent, grandparent, ...), not just one hop.
-* Neutral: requires the ancestor to load before its descendants - guaranteed by topological order.
-* Good, because the publish/linkage machinery is gated on inheritance being in use, so schemas
+- Neutral: requires the ancestor to load before its descendants - guaranteed by topological order.
+- Good, because the publish/linkage machinery is gated on inheritance being in use, so schemas
   without `INHERITED_ATTRIBUTE` pay nothing. Verified end-to-end by `CoherenceE2ETest`
   (`firm -> contract -> schedule`, including the grandparent hop).

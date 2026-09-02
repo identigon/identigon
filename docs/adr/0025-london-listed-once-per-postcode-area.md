@@ -15,10 +15,10 @@ city and cannot be dropped from a population-ranked list.
 
 ## Considered Options
 
-* Pick one postcode area to represent London (e.g. `EC` for the City) and treat the rest as
+- Pick one postcode area to represent London (e.g. `EC` for the City) and treat the rest as
   uncovered.
-* Exclude London from the dictionary entirely, since no single area represents it.
-* List London once per major postcode area it spans (eight rows, all tagged `ENGLAND`).
+- Exclude London from the dictionary entirely, since no single area represents it.
+- List London once per major postcode area it spans (eight rows, all tagged `ENGLAND`).
 
 ## Decision Outcome
 
@@ -32,11 +32,11 @@ precedent for its own single London range.
 
 ### Consequences
 
-* Good, because `city()`/`postcode()`/`phoneNumber()` record coherence (ADR 8) can resolve to any
+- Good, because `city()`/`postcode()`/`phoneNumber()` record coherence (ADR 8) can resolve to any
   of London's real postcode areas, not just one arbitrarily chosen one.
-* Neutral: the towns dictionary has 27 rows for 20 distinct places, not a 1:1 count - documented so
+- Neutral: the towns dictionary has 27 rows for 20 distinct places, not a 1:1 count - documented so
   it isn't mistaken for a duplication bug.
-* Neutral: this is not a duplicate-row well-formedness violation, since the tag (postcode area)
+- Neutral: this is not a duplicate-row well-formedness violation, since the tag (postcode area)
   differs per row - the same "list once per area" rule `phoneNumber()`'s own range table later
   reused for its single London range.
 

@@ -2,7 +2,7 @@
 
 Identigon's behaviour contract: what each of the three subprojects does, and what a caller or
 operator may rely on. **This file holds none of that contract directly** - it is an index, stating
-only scope and which member covers what. If you're about to write a behaviour fact *here*, it
+only scope and which member covers what. If you're about to write a behaviour fact _here_, it
 belongs in one of the three members below instead; this file only ever names them, never
 substitutes for them. The specification is a small tree, not one document, because `alterego`,
 `incognito`, and `effigies` are three separately usable artifacts with three separate contracts -
@@ -19,7 +19,7 @@ and each module's own `build.gradle.kts`, not a behavioural contract.
 
 ## 2. Members
 
-Three, one per subproject - each is the *only* place its subproject's behaviour belongs. All three
+Three, one per subproject - each is the _only_ place its subproject's behaviour belongs. All three
 live under `docs/spec/`, the one place in `docs/` you can glob for "is this part of the contract"
 (`docs/spec/*.md`) without reading this file at all:
 
@@ -41,11 +41,11 @@ Pick by **which subproject the behaviour belongs to** - a fact about what `alter
 a single value is not a fact about what `incognito` guarantees for a whole database, even where one
 depends on the other:
 
-| The fact you're writing... | Goes in |
-| --- | --- |
-| "a `Transformation`/built-in strategy does/returns X" - a single-value guarantee | `alterego.md` |
-| "the pipeline/policy/column role does X" - a whole-database guarantee | `incognito.md` |
-| "the CLI command/discovery/authoring flow does X" | `effigies.md` |
+| The fact you're writing...                                                       | Goes in        |
+| -------------------------------------------------------------------------------- | -------------- |
+| "a `Transformation`/built-in strategy does/returns X" - a single-value guarantee | `alterego.md`  |
+| "the pipeline/policy/column role does X" - a whole-database guarantee            | `incognito.md` |
+| "the CLI command/discovery/authoring flow does X"                                | `effigies.md`  |
 
 A fact that seems to need two of these is usually two sentences, not one: state each subproject's
 own guarantee where it belongs, and let the dependent subproject's document link back rather than

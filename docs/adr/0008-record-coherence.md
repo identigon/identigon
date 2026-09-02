@@ -14,9 +14,9 @@ Related fields need shared state with a defined scope.
 
 ## Considered Options
 
-* Route coherence through the `MappingStore` SPI.
-* A new pluggable SPI dedicated to intra-record state.
-* A plain, non-pluggable `RecordScope` object with the scope's own lifetime.
+- Route coherence through the `MappingStore` SPI.
+- A new pluggable SPI dedicated to intra-record state.
+- A plain, non-pluggable `RecordScope` object with the scope's own lifetime.
 
 ## Decision Outcome
 
@@ -43,14 +43,14 @@ Outside any scope, the same strategy code runs unchanged: `get` is empty, `set` 
 
 ### Consequences
 
-* Good, because coherence is opt-in per record and invisible to strategies that do not need it.
-* Good, because fictionality guarantees are unaffected: coherence steers *which* fictional value is
+- Good, because coherence is opt-in per record and invisible to strategies that do not need it.
+- Good, because fictionality guarantees are unaffected: coherence steers _which_ fictional value is
   chosen (e.g. a London drama range), never whether it is fictional.
-* Bad, because within a scope, reproducibility requires a stable field order (or a keyed scope for
+- Bad, because within a scope, reproducibility requires a stable field order (or a keyed scope for
   purely resolved attributes); documented.
-* Bad, because stored/unique mappings predate record attributes and are returned as-is; strict
+- Bad, because stored/unique mappings predate record attributes and are returned as-is; strict
   coherence plus persistent mappings requires the caller to scope the store deliberately.
   Documented caveat.
-* Neutral: a `RecordScope` instance must be used from one thread only - first-touch-wins has
+- Neutral: a `RecordScope` instance must be used from one thread only - first-touch-wins has
   exactly one deterministic winner only if "first" is well-defined, which requires a single thread.
   This is cheap to satisfy: a parallel stream of records just gives each element its own scope.

@@ -29,7 +29,7 @@ These are the properties that make Effigies safe to point at a production databa
 respect incognito's own contract.
 
 1. **Metadata only, never data.** Discovery and every artifact Effigies emits carry schema
-   *metadata* - table/column names, SQL types, the primary-/foreign-key graph, unique constraints.
+   _metadata_ - table/column names, SQL types, the primary-/foreign-key graph, unique constraints.
    Effigies must **never** `SELECT` row values into a file, a log, or an artifact handed to a human
    or an agent. Authoring reasons about the schema, not the data.
 2. **Fail-closed is preserved.** Effigies **suggests** roles; it never assigns one. A scaffolded
@@ -37,7 +37,7 @@ respect incognito's own contract.
    incognito run (that engine's fail-closed contract). Effigies must not emit a "runnable"
    policy that silently defaults a column to a pass-through role.
 3. **No model in the engine path.** Inference (heuristic or agent-driven) is authoring and produces
-   a *draft*. The anonymisation run is a plain, reproducible incognito execution with no model
+   a _draft_. The anonymisation run is a plain, reproducible incognito execution with no model
    call in it. The `policy.yaml` is the durable, reviewable artifact.
 4. **Secrets stay out of the config.** A `policy.yaml` is meant to be reviewed and checked in.
    Database credentials and any fixed/`persistent` salt bytes are **secret material** and are

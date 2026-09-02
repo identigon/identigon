@@ -21,7 +21,7 @@ itself already calls "a probabilistic net, not a guarantee."
 This is not a reason to revisit ADR 21: `ALTEREGO_GENERIC` existing, and being guarantee-less, is
 still correct - some `DIRECT_ID` columns (a bank account number, say) have no typed generator to
 route to, and shape-preserving fabrication is the right tool for them. The question here is
-narrower: should the system pick that tool *silently*, or should the author *say so*.
+narrower: should the system pick that tool _silently_, or should the author _say so_.
 
 `SENSITIVE` already answers the equivalent question for its own decision (`distinguishing`, ADR
 16): declared, validated at config time, never inferred from data or defaulted silently.
@@ -29,8 +29,8 @@ narrower: should the system pick that tool *silently*, or should the author *say
 
 ## Considered Options
 
-* Leave `directIdStrategy` optional, defaulting to `ALTEREGO_GENERIC` (status quo).
-* Require `directIdStrategy` on every `DIRECT_ID` column, validated at config time alongside the
+- Leave `directIdStrategy` optional, defaulting to `ALTEREGO_GENERIC` (status quo).
+- Require `directIdStrategy` on every `DIRECT_ID` column, validated at config time alongside the
   existing `SENSITIVE`/`distinguishing` check - `IncognitoException.ConfigException`, fail-closed,
   before any row is read.
 
@@ -51,13 +51,13 @@ only "fabricate via `AlterEgo.unique()`"), so its silent `ALTEREGO_GENERIC` defa
 
 ### Consequences
 
-* Good, because every existing policy in the repo (all four benchmark fixtures, the quickstart
+- Good, because every existing policy in the repo (all four benchmark fixtures, the quickstart
   example, every test) already declares `directIdStrategy` explicitly, including the ones that
   choose `ALTEREGO_GENERIC` - this closes the one path none of them take, rather than breaking a
   path any of them relied on.
-* Good, because the DPIA report's fictionality-verified label and a `DIRECT_ID` column's actual
+- Good, because the DPIA report's fictionality-verified label and a `DIRECT_ID` column's actual
   guarantee level can no longer diverge silently: `ALTEREGO_GENERIC` still carries none, but now
   only by an author's explicit, visible choice, not by omission.
-* Neutral: does not touch `VerificationStage`'s checks or the source-value survival net - an
+- Neutral: does not touch `VerificationStage`'s checks or the source-value survival net - an
   explicitly-chosen `ALTEREGO_GENERIC` column is exactly as unguaranteed as it was before, and
   exactly as ADR 21 already accepted.

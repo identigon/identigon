@@ -14,7 +14,7 @@ other repository infrastructure, not any one subproject's own behaviour).
 Every release before 1.0.0 (when the three subprojects joined lockstep) is folded in below with a
 project-prefixed version tag (`alterego-0.1.0`, `incognito-1.0.0`, `effigies-1.0.0`, ...) instead
 of a bare number, since each subproject's own pre-lockstep numbering restarted independently and
-would otherwise collide with this file's own `1.0.0` (the first *shared* release) - most visibly,
+would otherwise collide with this file's own `1.0.0` (the first _shared_ release) - most visibly,
 `incognito` and `effigies` each had their own unrelated `1.0.0` before joining lockstep. Those
 entries carry no per-item project tag - the version itself already scopes the whole release to one
 subproject. Each subproject's standing output-stability guarantees / hard invariants, previously
@@ -32,6 +32,17 @@ instead - restating them here too would be the same fact in two places.
   for a caller who has weighed that risk. `docs/spec/incognito.md` §8.1 updated.
 - **effigies:** `run` gained `--force`, threading through to the new `allowNonEmptyTarget()`
   above. `docs/spec/effigies.md` §3 updated.
+- Prettier added as a pre-commit hook for `*.md` files, complementing `markdownlint-cli2` (a
+  formatter, not a linter - it doesn't replace any of markdownlint-cli2's structural rules).
+  Automates the line-wrapping `markdownlint-cli2`'s `MD013` has no auto-fix for. Every `*emphasis*`
+  in the repo became `_emphasis_` in the one-time bulk reformat that came with adopting it -
+  Prettier's markdown printer has no config option to keep asterisks, confirmed empirically; see
+  `docs/adr/0036-adopt-prettier-for-markdown-alongside-markdownlint-cli2.md`. Pinned via `npx`
+  (`prettier@3.9.6`), not the `pre-commit/mirrors-prettier` repo, which is stale. Every fenced code
+  block's content was verified byte-identical before/after the reformat -
+  `--embedded-language-formatting=off` is load-bearing: Prettier's default tried to reformat
+  embedded YAML too, and corrupted this repo's policy examples (dropped keys, emptied `{ }`
+  blocks) before that flag was found and applied.
 
 ### Fixed
 
@@ -52,7 +63,7 @@ instead - restating them here too would be the same fact in two places.
 - **incognito:** `TableTransformLoadStage.buildFkTransformer` no longer assumes a composite FK
   targets the parent's primary key just because the parent has one. It now fails closed
   (`ConstraintException`) whenever the FK's declared columns aren't exactly the parent's PK as a
-  set - previously an FK *wider* than the PK (covering the PK plus an extra column from some other
+  set - previously an FK _wider_ than the PK (covering the PK plus an extra column from some other
   `UNIQUE` constraint) slipped past the old narrower-only check and crashed with an
   `ArrayIndexOutOfBoundsException` mid-load instead. A composite FK that targets the PK precisely,
   possibly in a different column order than declared, is unaffected.
@@ -74,7 +85,7 @@ instead - restating them here too would be the same fact in two places.
   (default: plain `setObject`). `BulkDatabaseLoadStage.insertRow` no longer hardcodes PostgreSQL's
   `Types.OTHER` coercion for `String` values (needed so a kept enum/user-type column round-trips)
   - that rule now lives in `PostgresDialectHandler.bindValue`, where a future non-Postgres dialect
-  can supply its own instead of inheriting Postgres's.
+    can supply its own instead of inheriting Postgres's.
 - **incognito:** `BulkDatabaseLoadStage.resolveDeferredCyclicFKs` (the pass-2 `UPDATE` that
   resolves cyclic-FK placeholders) now batches instead of preparing and executing a new statement
   per deferred row. Updates are grouped by `tableName`/`pkColumn`/`fkColumn` - the parts that
@@ -190,7 +201,7 @@ instead - restating them here too would be the same fact in two places.
   always refused, so re-scaffolding after a schema change needed a manual `rm` first).
 - **effigies:** new `validate` command. `SchemaDiscoveryStage`'s fail-closed messages were the
   tool's best diagnostics but only reachable by committing to a full `run`. `validate --policy
-  ./policy.yaml --source-url ... --source-user ...` checks a policy against the source schema with
+./policy.yaml --source-url ... --source-user ...` checks a policy against the source schema with
   no target connection and no data movement - the same errors `run` would raise, cheaper to
   iterate against while authoring, and usable as a CI pre-flight check for a policy going stale
   after a schema migration. The `identigon-policy-author` Agent Skill now points at it as a
@@ -302,7 +313,7 @@ instead - restating them here too would be the same fact in two places.
   `YamlPolicyParser` and the DPIA report's illustrative samples too. This is the closure for the
   credit-card-number gap above - redact to one obviously-fake constant, rather than fabricating a
   typed per-row value - and is general-purpose beyond credit cards (any `SENSITIVE
-  distinguishing: true` text column wanting a specific placeholder).
+distinguishing: true` text column wanting a specific placeholder).
 - **incognito:** `TableTransformLoadStage` now opens one `alterego` `RecordScope` per source row,
   keyed on the row's own source PK (deterministic, reproducible-mode-safe), and routes every
   `DIRECT_ID`/`UNIQUE_CANDIDATE_KEY` typed generator through it instead of calling the
@@ -360,9 +371,9 @@ instead - restating them here too would be the same fact in two places.
   violations fixed in the same change. Every other default rule was then audited and turned on:
   `MD013` gained `stern` mode (forgives a bare long token alone on its own line - typically a URL
   - but not one sharing a line with prose); `MD024` (no-duplicate-heading) uses `siblings_only` so
-  Keep a Changelog's repeated `### Added`/`### Fixed` headings per version stay legal; the rest
-  (`MD004`, `MD007`, `MD012`, `MD022`, `MD031`, `MD032`, `MD034`, `MD036`, `MD038`, `MD040`,
-  `MD060`, ...) needed no config, just fixing the content across the repo's markdown files.
+    Keep a Changelog's repeated `### Added`/`### Fixed` headings per version stay legal; the rest
+    (`MD004`, `MD007`, `MD012`, `MD022`, `MD031`, `MD032`, `MD034`, `MD036`, `MD038`, `MD040`,
+    `MD060`, ...) needed no config, just fixing the content across the repo's markdown files.
 - Dependabot added (`gradle` + `github-actions`, weekly) to keep dependency versions current
   across the monorepo.
 - CI reports made downloadable. `_build.yml` uploads each matrix leg's (`ubuntu-latest`/
@@ -454,7 +465,7 @@ instead - restating them here too would be the same fact in two places.
   graph ever put `org.postgresql.Driver` on the CLI's own runtime classpath, despite the
   jar-merging task's own comment claiming "JDBC drivers" were bundled. `SimpleDataSource`'s
   `DriverManager.getConnection(...)` therefore always threw `SQLException: No suitable driver
-  found`, surfaced to the user as an opaque `Failed to inspect schema` with the real cause
+found`, surfaced to the user as an opaque `Failed to inspect schema` with the real cause
   swallowed. Every documented `java -jar build/libs/identigon.jar discover/scaffold/run` example -
   in this repo's own READMEs and the public Getting Started guide - was unusable exactly as
   written. Found running the effigies quickstart's `run-quickstart.sh`/`.ps1` (see above) against a
@@ -464,7 +475,7 @@ instead - restating them here too would be the same fact in two places.
   above) end to end - all four commands, both fresh-container and container-reuse paths, and the
   fail-closed path - against a real Docker Desktop + PostgreSQL, neither Bash/PowerShell
   version-specific: the readiness check could pass against the official Postgres image's brief
-  *temporary* startup instance (for `initdb`) moments before it restarts for the real listener, a
+  _temporary_ startup instance (for `initdb`) moments before it restarts for the real listener, a
   narrow window where a query could hit the socket mid-restart - now requires two consecutive
   successful `pg_isready` checks, not one. Windows-only wrinkles, one per script: the `sh` version
   now avoids `docker inspect -f '{{...}}'` (MSYS2/Git-Bash mangles `{{ }}` template arguments to
@@ -563,7 +574,7 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
   best-effort compensation failures now log a `WARNING`, and benign fallbacks (owner-mode trigger
   handling, pg_stats-unavailable) log at `DEBUG`. Each record carries only the operation, table and
   SQLState - never the salt, a field value, or the raw exception message (§7.3/§5.1).
-- **Owner-mode cyclic-FK load** (SPEC §9): a non-superuser target that *owns* its tables now clones
+- **Owner-mode cyclic-FK load** (SPEC §9): a non-superuser target that _owns_ its tables now clones
   cyclic/self-referential FKs by dropping the cyclic FK constraints for the load and recreating them
   verbatim (`pg_get_constraintdef`) after the pass-2 `UPDATE` - where a superuser uses
   `session_replication_role`. The drop/recreate is atomic (transactional DDL) and is recreated on
@@ -576,7 +587,7 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
   with an enum column (e.g. Pagila's `film.rating`) could not be cloned. `String` values now bind as
   `Types.OTHER` so PostgreSQL casts them to the column's actual type (enum, `tsvector`, `uuid`,
   ...).
-- `JITTER_DAYS` no longer raises spurious per-period volume-drift *warnings*: because a ±N-day
+- `JITTER_DAYS` no longer raises spurious per-period volume-drift _warnings_: because a ±N-day
   jitter crosses month boundaries, the verification volume check now buckets it **yearly** (not
   monthly), where a day-window barely leaks. Cosmetic - it never failed the run.
 

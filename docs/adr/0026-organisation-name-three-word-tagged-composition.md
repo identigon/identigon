@@ -17,9 +17,9 @@ grammatical plausibility.
 
 ## Considered Options
 
-* A flat, untagged word pool, words picked freely.
-* A two-word composition (`MODIFIER` + `NOUN`, mirroring `streetAddress()`'s theme+type shape).
-* A three-word tagged composition: position 1 is `MODIFIER` or `NOUN`, positions 2 and 3 are
+- A flat, untagged word pool, words picked freely.
+- A two-word composition (`MODIFIER` + `NOUN`, mirroring `streetAddress()`'s theme+type shape).
+- A three-word tagged composition: position 1 is `MODIFIER` or `NOUN`, positions 2 and 3 are
   `NOUN` and distinct from every word already chosen.
 
 ## Decision Outcome
@@ -39,11 +39,11 @@ comfortably past a 50,000-combination floor.
 
 ### Consequences
 
-* Good, because MODIFIER+MODIFIER and same-word-repeat combinations are structurally impossible,
+- Good, because MODIFIER+MODIFIER and same-word-repeat combinations are structurally impossible,
   not merely unlikely - no runtime check is needed to prevent them.
-* Good, because the combination count (138,116) comfortably clears the collision-rarity floor this
+- Good, because the combination count (138,116) comfortably clears the collision-rarity floor this
   built-in specifically needs, unlike a two-word design.
-* Neutral: `organisation-components.txt` needs the tagged-dictionary file format and its own
+- Neutral: `organisation-components.txt` needs the tagged-dictionary file format and its own
   well-formedness validator, the same mechanism the towns dictionary already established - not a
   new mechanism.
 

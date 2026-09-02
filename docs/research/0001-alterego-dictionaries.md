@@ -30,8 +30,8 @@ having each piece present somewhere else in the project:**
 - **Public domain is not automatically the same tier.** A bare "public domain" claim is a
   statement about copyright status, not a licence, and can be legally shaky depending on
   jurisdiction - CC0 exists specifically because unilateral public-domain dedications don't
-  work reliably worldwide. Genuine public domain via *expired copyright* (e.g. old census data
-  where the term has actually run out) is solid and acceptable; an *asserted* dedication with no
+  work reliably worldwide. Genuine public domain via _expired copyright_ (e.g. old census data
+  where the term has actually run out) is solid and acceptable; an _asserted_ dedication with no
   CC0 or equivalent instrument behind it is flagged for an independent decision, same as the
   informal "no restrictions, free to use" cases below.
 - Licences requiring share-alike on the derived work (e.g. ODbL, CC-BY-SA) or restricting
@@ -116,11 +116,11 @@ each nation's naming rather than token it, without creating a distortion in the 
   Research Agency (NISRA). 2025 column only. This specific table (rather than NISRA's raw
   per-district dashboard export) was used because it's a clean, already-computed national top 10
   - the raw dashboard file's per-district pivot didn't produce a sane national ranking when
-  queried directly, and re-deriving one from it wasn't worth chasing for a "close enough" target.
-  Data: <https://www.nisra.gov.uk/publications/baby-names-2025>
-  Licence: Open Government Licence v3.0, confirmed via NISRA's own Crown Copyright page
-  (<https://www.nisra.gov.uk/crown-copyright>).
-  Retrieved: 2026-07-14
+    queried directly, and re-deriving one from it wasn't worth chasing for a "close enough" target.
+    Data: <https://www.nisra.gov.uk/publications/baby-names-2025>
+    Licence: Open Government Licence v3.0, confirmed via NISRA's own Crown Copyright page
+    (<https://www.nisra.gov.uk/crown-copyright>).
+    Retrieved: 2026-07-14
 
 **Deduplication detail**: 2025+1996 England & Wales (80 raw) + Scotland top-10*2 (20 raw) +
 Northern Ireland top-10*2 (20 raw) = 120 raw entries, reducing to **89 unique first names**.
@@ -131,7 +131,7 @@ entry in its source.
 **Dead end: a second Scotland/NI cohort year was investigated and dropped.** England & Wales
 gets two cohort years (2025 and 1996); Scotland and Northern Ireland are single-cohort (2025
 only) - not for lack of trying. NRS's own historical-rank column in the 2025 summary file only
-tracks names still in *today's* top 100, so it can't be used to build an accurate "Scotland
+tracks names still in _today's_ top 100, so it can't be used to build an accurate "Scotland
 top-10 for an older decade": a name popular in the 1990s that has since fallen out of the
 current top 100 would be silently missing. NISRA's dashboard file doesn't have this problem (its
 historical tables are genuine independent per-decade rankings), but for consistency both nations

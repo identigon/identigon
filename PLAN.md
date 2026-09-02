@@ -51,7 +51,7 @@ quickstart policy and teach the `identigon-policy-author` skill to suggest, as e
 
 Currently fails closed with a clear message rather than corrupting data; not exercised by any
 benchmark. Bigger than "widen the pass-2 `UPDATE` to key on every PK column" - the real gap is
-deferred *composite-FK* resolution into a cyclic table (a composite-PK table can only be in a cycle
+deferred _composite-FK_ resolution into a cyclic table (a composite-PK table can only be in a cycle
 if a composite FK references it, which hits a separate guard first). See
 `docs/tasks/incognito-composite-pk-cyclic-fk.md` for the full analysis and handoff.
 
@@ -227,19 +227,3 @@ page today. Worth a page each once there's more to say than that summary.
 
 VitePress has built-in local search support; not worth turning on until there's enough content on
 the site to search.
-
-## Adopt Prettier alongside markdownlint-cli2 for `.md` files
-
-**Type:** debt - **Importance:** low - **Effort:** medium
-
-`markdownlint-cli2`'s MD013 (line length) has no auto-fix in any implementation - every rewrap
-today is manual: edit, lint, find the violation, count columns, rewrap by hand, re-lint. Prettier's
-`proseWrap: "always"` would automate that; it complements `markdownlint-cli2` rather than
-replacing it (formatter vs linter - Prettier doesn't catch MD024/MD032/MD060 and friends).
-`identigon.github.io` already runs it this way, scoped to `*.md` only. Could wire in the same
-lightweight way `markdownlint-cli2` already is (a `pre-commit` hook - no `package.json`/
-`node_modules` needed in this repo, matching today). Real cost before landing it: review the
-one-time bulk-reformat diff across every existing `.md` file rather than rubber-stamp it, pin
-whatever this repo's actual emphasis-marker convention (`*text*` vs `_text_`) already is into the
-config rather than let Prettier silently change it, and write the ADR this kind of tooling
-decision earns.

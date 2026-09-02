@@ -19,8 +19,8 @@ Backfilled 2026-07-30, documenting a decision made earlier in the project's deve
 
 ## Considered Options
 
-* An automatic `COUNT(DISTINCT)` cardinality gate deciding keep-vs-fabricate.
-* A policy-author-declared boolean `distinguishing` flag, validated at config time, with an
+- An automatic `COUNT(DISTINCT)` cardinality gate deciding keep-vs-fabricate.
+- A policy-author-declared boolean `distinguishing` flag, validated at config time, with an
   advisory (non-gating) cardinality lint as a safety net.
 
 ## Decision Outcome
@@ -31,9 +31,9 @@ author choice instead of an emergent property of the data.
 
 The policy author **declares** per `SENSITIVE` column a boolean `distinguishing`:
 
-* `distinguishing: false` -> keep the real value.
-* `distinguishing: true` -> fabricate it (a `QuasiIdStrategy`) or redact it (a `RedactionStrategy`).
-* absent -> the run fails.
+- `distinguishing: false` -> keep the real value.
+- `distinguishing: true` -> fabricate it (a `QuasiIdStrategy`) or redact it (a `RedactionStrategy`).
+- absent -> the run fails.
 
 The declaration is validated at **config time**, before any row is read. The distinct-count
 survives only as a **default-on, advisory misdeclaration lint** (`distinguishingLint`: `WARN` |
@@ -43,10 +43,10 @@ a pre-filter for the lint).
 
 ### Consequences
 
-* Good, because the privacy decision no longer reads any source value - it acts purely on the flag
+- Good, because the privacy decision no longer reads any source value - it acts purely on the flag
   and the presence of a strategy, checked before load.
-* Good, because keep-vs-fabricate is an explicit, reviewable, one-word author decision rather than
+- Good, because keep-vs-fabricate is an explicit, reviewable, one-word author decision rather than
   an emergent property of the data.
-* Neutral: a mislabelled column is caught by the lint (or fails, in `ERROR` mode) without the lint
+- Neutral: a mislabelled column is caught by the lint (or fails, in `ERROR` mode) without the lint
   ever becoming the privacy gate. The name `distinguishing` was chosen over `identifying` to avoid
   confusion with the "identifier" role vocabulary.

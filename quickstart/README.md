@@ -23,7 +23,7 @@ those are third-party sample databases used as integration-test fixtures and req
 one is authored for this repository specifically so there's nothing to install beyond Postgres
 itself.
 
-For the narrative walkthrough of *why* each step exists (fail-closed, salt modes, the DPIA report),
+For the narrative walkthrough of _why_ each step exists (fail-closed, salt modes, the DPIA report),
 see [Getting Started](https://identigon.org/getting-started) on the project site - this directory
 is the copy-pasteable version of the same steps.
 
@@ -119,7 +119,7 @@ java -jar ../effigies/build/libs/identigon.jar scaffold \
 
 Open `policy.draft.yaml`: `scaffold` never assigns a `role` itself - every column is left blank
 with a `# TODO classify` comment, because guessing wrong is exactly the mistake fail-closed exists
-to prevent (an unclassified column aborts `run` rather than being copied silently). What it *does*
+to prevent (an unclassified column aborts `run` rather than being copied silently). What it _does_
 do is suggest one from name-based heuristics where it recognises the column name (`email`, `phone`,
 `date_of_birth`, `nino`, ...); columns it doesn't recognise (`bank_account`, `notes`, ...) get a
 bare prompt to classify manually. Either way, you fill in every `role:` yourself. Normally this is

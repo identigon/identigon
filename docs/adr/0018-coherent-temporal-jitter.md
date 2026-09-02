@@ -16,10 +16,10 @@ Backfilled 2026-07-30, documenting a decision made earlier in the project's deve
 
 ## Considered Options
 
-* An independent per-field jitter delta (breaks coherence between related dates).
-* A delta derived from the source primary key's `hashCode()` (trivially reversible, since the
+- An independent per-field jitter delta (breaks coherence between related dates).
+- A delta derived from the source primary key's `hashCode()` (trivially reversible, since the
   source PK is known - a leak).
-* One shared day-delta per entity, derived from `alterego`'s salt-keyed HMAC stream, namespaced by
+- One shared day-delta per entity, derived from `alterego`'s salt-keyed HMAC stream, namespaced by
   a coherence group and inherited by descendants.
 
 ## Decision Outcome
@@ -34,13 +34,13 @@ under its own id, so a grandchild inherits the same shift through a single one-h
 
 ### Consequences
 
-* Good, because parent-child windows and event orderings are preserved exactly; interval
+- Good, because parent-child windows and event orderings are preserved exactly; interval
   `child - parent` is invariant under the shift.
-* Good, because scoping the delta by coherence group means a table with several foreign keys
-  inherits only the delta anchoring *its* group - an unrelated parent's delta can never contaminate
+- Good, because scoping the delta by coherence group means a table with several foreign keys
+  inherits only the delta anchoring _its_ group - an unrelated parent's delta can never contaminate
   it.
-* Neutral: bucket-preserving `JITTER_WITHIN_MONTH` / `_YEAR` remain available for **standalone**
+- Neutral: bucket-preserving `JITTER_WITHIN_MONTH` / `_YEAR` remain available for **standalone**
   dates (they preserve per-period volumes but not ordering); the shared delta is for
   ordered/related dates.
-* Neutral: deltas live in the `AttributeCascadeStore`, keyed on source ids - consistent with all
+- Neutral: deltas live in the `AttributeCascadeStore`, keyed on source ids - consistent with all
   other parent lookups.

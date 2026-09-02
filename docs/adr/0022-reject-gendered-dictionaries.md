@@ -31,8 +31,8 @@ doing so natively in the library presents three major complications:
 
 ## Considered Options
 
-* Add gender-partitioned name dictionaries and a parameterised `firstName(Gender)` API.
-* Reject the feature; keep a single, unified, gender-agnostic name pool.
+- Add gender-partitioned name dictionaries and a parameterised `firstName(Gender)` API.
+- Reject the feature; keep a single, unified, gender-agnostic name pool.
 
 ## Decision Outcome
 
@@ -45,11 +45,11 @@ pool of diverse fictional names.
 
 ### Consequences
 
-* Good, because name transformations (`firstName()`, `lastName()`, `fullName()`) remain
+- Good, because name transformations (`firstName()`, `lastName()`, `fullName()`) remain
   structurally simple `Transformation<String>` implementations with no secondary input
   dependencies.
-* Good, because secondary data leakage regarding gender is structurally prevented by design.
-* Good, because the library inherently handles all gender identities (including undisclosed and
+- Good, because secondary data leakage regarding gender is structurally prevented by design.
+- Good, because the library inherently handles all gender identities (including undisclosed and
   non-binary genders) gracefully without complex fallback configurations.
-* Neutral: the "tagged name dictionaries" item is permanently removed from consideration rather
+- Neutral: the "tagged name dictionaries" item is permanently removed from consideration rather
   than deferred.
