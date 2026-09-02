@@ -9,6 +9,40 @@ shipped.
 
 ## Outstanding
 
+- [ ] **Project:** incognito - **`validate` doesn't check that `FOREIGN_KEY` columns declare
+  `references`.** `SchemaDiscoveryStage.validateTablePolicy` branches on `SENSITIVE`, `DIRECT_ID`
+  and `QUASI_ID` only - a `FOREIGN_KEY` column with no `references:` block passes `validate`
+  cleanly and then NPEs at `run` time instead (see the next item). `discover` already resolves the
+  FK target (`fk -> customer`), so the check can suggest the correct block, exactly as `scaffold`
+  already does.
+- [ ] **Project:** incognito - **Missing `references` NPEs instead of failing closed at `run`
+  time.** `TableTransformLoadStage.buildFkTransformer` passes a null `referencedTable` straight to
+  `InMemoryKeyTranslationStore.get`, which NPEs inside `ConcurrentHashMap.get(null)`'s own
+  `key.hashCode()` call - a raw stack trace, not a named diagnostic (SPEC §7.2 fail-closed). Add a
+  guarded null check ahead of the lookup; the `validate` gap above should make this unreachable in
+  practice, but the guard is still worth it as defence in depth.
+- [ ] **Project:** incognito - **`IncognitoException` cause chain invisible to CLI users.**
+  `DefaultIncognitoPipeline` wraps any failure as `IncognitoException("Pipeline execution failed",
+  e)`, and `effigies`' `RunCommand` prints only the top exception, never `getCause()` - the same
+  masking pattern just fixed in `YamlPolicyParser.parse(Path)` for v3.1.0, not yet applied to the
+  pipeline's own wrapper. Narrow the wrapper where a lower layer already gives a precise diagnostic
+  (as done there), or have the CLI print the full cause chain; worth auditing for other instances
+  of the pattern while it's fresh.
+- [ ] **Project:** incognito - **Batch deferred cyclic FK updates.**
+  `BulkDatabaseLoadStage.resolveDeferredCyclicFKs` currently prepares and executes a new `UPDATE`
+  statement for every single deferred row, causing an N+1 performance bottleneck. It should group
+  updates by table/column structure (`tableName`/`pkColumn`/`fkColumn` fully determine the
+  statement's SQL text, so those triples group cleanly) and use `executeBatch()`.
+- [ ] **Project:** incognito - **Push `Types.OTHER` string binding to `DialectHandler`.**
+  `BulkDatabaseLoadStage.insertRow` hardcodes `Types.OTHER` for all `String` values to coerce
+  Postgres types. This will break other engines; the binding logic belongs in `DialectHandler`,
+  which has no per-value binding hook today (only table/statement-level methods) - closing this
+  needs a new method there, not a tweak to an existing one.
+- [ ] **Project:** incognito - **Respect non-PK unique constraint targets in composite FKs.**
+  `TableTransformLoadStage.buildFkTransformer` wrongly assumes a composite FK always targets the
+  parent's primary key if one exists, breaking references to alternate unique constraints. The
+  `composite.parentColumns()` fallback already exists but only fires when the parent has no PK at
+  all; the precedence needs reversing to prefer it whenever it differs from the parent's actual PK.
 - [ ] **Project:** effigies - **Revisit excluding `effigies.jar` from the GitHub Release assets.**
   ADR-0028 deliberately left the thin `effigies.jar` out of the Release asset set (`alterego.jar`,
   `incognito.jar`, `identigon.jar` only) on the reasoning that it can't run standalone - anyone
@@ -99,15 +133,3 @@ shipped.
   priority).** Its practical gap was closed instead via `ColumnPolicy.redactionConstant` (a fixed
   placeholder, arguably a better privacy story than per-row fabrication for a `SENSITIVE` field).
   Wiring the typed generator itself remains possible but is no longer blocking anything.
-- [ ] **Project:** effigies - **JaCoCo.** Optional, consistency-only with `alterego`/`incognito`'s
-  coverage reporting.
-- [ ] **Project:** effigies - **A non-interactive "authoring session" mode.** Runs discover ->
-  scaffold -> (agent) -> run in one invocation, with the DPIA report fed back for iteration.
-- [ ] **Project:** effigies - **Support for engines `incognito` adds beyond PostgreSQL.** No change
-  needed here when it lands.
-- [ ] **Project:** effigies - **Revisit `quickstart/` and the Agent Skill once
-  `incognito`'s policy-API backlog lands.** Several `alterego` capabilities `incognito` doesn't
-  expose yet (remaining identifier generators, a bank-account generator, `RecordScope` cross-field
-  coherence, jitter/clamp knobs, a `pattern(String)` strategy - see the matching
-  `incognito`-tagged entries above) are candidates to fold into the quickstart policy and teach the
-  `identigon-policy-author` skill to suggest, as each lands.
