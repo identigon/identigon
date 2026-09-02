@@ -103,9 +103,13 @@ public final class SchemaDiscoveryStage implements PipelineStage {
         // reports everything wrong at once instead of the author fixing issues one table (or one
         // column) at a time across repeated runs.
         List<String> failures = new java.util.ArrayList<>();
+        java.util.Map<String, SchemaInspector.TableMetadata> metadataByName = new java.util.HashMap<>();
+        for (SchemaInspector.TableMetadata table : metadata) {
+            metadataByName.put(table.tableName(), table);
+        }
         for (SchemaInspector.TableMetadata table : metadata) {
             policy.table(table.tableName()).ifPresent(tablePolicy ->
-                validateTablePolicy(table, tablePolicy, suggestions, failures)
+                validateTablePolicy(table, tablePolicy, metadataByName, suggestions, failures)
             );
         }
         if (!failures.isEmpty()) {
@@ -125,6 +129,7 @@ public final class SchemaDiscoveryStage implements PipelineStage {
     private void validateTablePolicy(
             SchemaInspector.TableMetadata table,
             TablePolicy tablePolicy,
+            java.util.Map<String, SchemaInspector.TableMetadata> metadataByName,
             java.util.Map<String, java.util.List<org.identigon.incognito.api.AnonymisationReport.InferSuggestion>> allSuggestions,
             List<String> failures) {
 
@@ -176,6 +181,8 @@ public final class SchemaDiscoveryStage implements PipelineStage {
                     }
                 } else if (colPol.role() == ColumnRole.QUASI_ID) {
                     validateSynthesiseType(table, column, colPol, failures);
+                } else if (colPol.role() == ColumnRole.FOREIGN_KEY) {
+                    validateForeignKeyReferences(table, column, colPol, metadataByName, failures);
                 }
             }
         }
@@ -188,6 +195,49 @@ public final class SchemaDiscoveryStage implements PipelineStage {
                 + ". Classify each explicitly - see effigies' scaffold/validate commands for"
                 + " suggested roles.");
         }
+    }
+
+    /**
+     * Fail-closed guard for a {@code FOREIGN_KEY} with no declared {@code references} (SPEC §7.2,
+     * §4.1). A <em>single-column</em> FK is resolved at load time via the policy-declared
+     * {@code referencedTable}/{@code referencedColumn} ({@code TableTransformLoadStage.buildFkTransformer}),
+     * not structurally - a missing block used to reach {@code run} as a raw {@code NullPointerException}
+     * from the key-translation store instead of failing here. A composite FK is resolved purely
+     * structurally from the discovered constraint and consults no policy field, so it is exempt -
+     * checking {@link SchemaInspector.ForeignKeyConstraint#isComposite} the same way
+     * {@code buildFkTransformer} does keeps this check and that resolution logic in lock-step.
+     */
+    private void validateForeignKeyReferences(
+            SchemaInspector.TableMetadata table, String column, ColumnPolicy colPol,
+            java.util.Map<String, SchemaInspector.TableMetadata> metadataByName, List<String> failures) {
+
+        boolean composite = table.foreignKeyConstraints().stream()
+            .anyMatch(fk -> fk.isComposite() && fk.childColumns().contains(column));
+        if (composite) {
+            return;
+        }
+        if (colPol.referencedTable() != null && colPol.referencedColumn() != null) {
+            return;
+        }
+
+        // Best-effort suggestion, exactly as ScaffoldCommand.writeRoleStub already offers: the
+        // parent table is structurally known either way; the parent column is only offered when
+        // the parent has a single-column PK to point at unambiguously.
+        String suggestion = "";
+        String parentTable = table.foreignKeys().get(column);
+        if (parentTable != null) {
+            SchemaInspector.TableMetadata parent = metadataByName.get(parentTable);
+            if (parent != null && parent.primaryKeyColumns().size() == 1) {
+                suggestion = " (Suggestion: references: { table: " + parentTable
+                    + ", column: " + parent.primaryKeyColumns().get(0) + " })";
+            } else {
+                suggestion = " (Suggestion: target table is " + parentTable
+                    + "; its column isn't determined here - composite or unknown PK)";
+            }
+        }
+        failures.add("FOREIGN_KEY column '" + column + "' in table '" + table.tableName()
+            + "' does not declare a references block. It must name the parent table and column"
+            + " explicitly, e.g. references: { table: ..., column: ... }" + suggestion + " (SPEC §4.1).");
     }
 
     /**

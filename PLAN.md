@@ -9,18 +9,15 @@ shipped.
 
 ## Outstanding
 
-- [ ] **Project:** incognito - **`validate` doesn't check that `FOREIGN_KEY` columns declare
-  `references`.** `SchemaDiscoveryStage.validateTablePolicy` branches on `SENSITIVE`, `DIRECT_ID`
-  and `QUASI_ID` only - a `FOREIGN_KEY` column with no `references:` block passes `validate`
-  cleanly and then NPEs at `run` time instead (see the next item). `discover` already resolves the
-  FK target (`fk -> customer`), so the check can suggest the correct block, exactly as `scaffold`
-  already does.
-- [ ] **Project:** incognito - **Missing `references` NPEs instead of failing closed at `run`
-  time.** `TableTransformLoadStage.buildFkTransformer` passes a null `referencedTable` straight to
-  `InMemoryKeyTranslationStore.get`, which NPEs inside `ConcurrentHashMap.get(null)`'s own
-  `key.hashCode()` call - a raw stack trace, not a named diagnostic (SPEC §7.2 fail-closed). Add a
-  guarded null check ahead of the lookup; the `validate` gap above should make this unreachable in
-  practice, but the guard is still worth it as defence in depth.
+- [ ] **Project:** incognito - **Missing-`references` NPE guard as defence in depth (low
+  priority).** `SchemaDiscoveryStage.validateTablePolicy` now fails closed on a single-column
+  `FOREIGN_KEY` with no `references:` block, and `run` always calls it first (`process()` runs
+  `validate` internally before any table is loaded) - so
+  `TableTransformLoadStage.buildFkTransformer` passing a null `referencedTable` into
+  `InMemoryKeyTranslationStore.get` (an unguarded `ConcurrentHashMap.get(null)` NPE) should no
+  longer be reachable in practice. Worth a guarded null check there anyway, only as a named
+  diagnostic in place of a raw stack trace should some other path ever reach it (e.g. a hand-built
+  `AnonymisationPolicy` that skips `SchemaDiscoveryStage` entirely).
 - [ ] **Project:** incognito - **`IncognitoException` cause chain invisible to CLI users.**
   `DefaultIncognitoPipeline` wraps any failure as `IncognitoException("Pipeline execution failed",
   e)`, and `effigies`' `RunCommand` prints only the top exception, never `getCause()` - the same

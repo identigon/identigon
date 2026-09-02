@@ -20,6 +20,17 @@ too would be the same fact in two places.
 
 ## [Unreleased]
 
+### incognito
+
+- **Fixed:** `validate`/`run` now fail closed when a single-column `FOREIGN_KEY` declares no
+  `references: { table, column }`. Previously this validated cleanly and then hit a raw
+  `NullPointerException` at `run` time (`ConcurrentHashMap.get(null)` inside the key-translation
+  store), since `TableTransformLoadStage.buildFkTransformer` reads the policy-declared reference
+  unchecked. The new check in `SchemaDiscoveryStage.validateTablePolicy` mirrors the parent's
+  structural discovery to suggest the correct block, the same way `scaffold` already does, and
+  exempts composite FKs (resolved structurally, not from the policy). `docs/spec/incognito.md`
+  §4.1/§7.2 updated to describe the requirement.
+
 ## [3.1.0] - 2026-09-01
 
 ### incognito

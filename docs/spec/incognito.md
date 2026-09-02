@@ -298,7 +298,7 @@ streams (`fetchSize = 5000`) in topological order.
 | `SENSITIVE` (Level-2 Sensitive)         | **Declared `distinguishing` flag** (§2.2, see below). `distinguishing: false` -> **kept real**. `distinguishing: true` -> must carry a `QuasiIdStrategy` (fabricated like a QI) **or** a `RedactionStrategy` (`CLEAR`/`MASK`/`CONSTANT`). Omitting `distinguishing`, or a `distinguishing: true` column with no strategy, is `IncognitoException.ConfigException` (fail-closed). |
 | `PAYLOAD` (Operational)                 | **Kept real** - the operational data that makes the clone useful for API testing.                                                                                                                                                                                                                                                                                                |
 | `PRIMARY_KEY`                           | Surrogate translation via `SurrogateStrategy`; recorded in `KeyTranslationStore`.                                                                                                                                                                                                                                                                                                |
-| `FOREIGN_KEY`                           | Rewritten to the mapped parent surrogate; placeholder + 2-pass UPDATE for cyclic FKs.                                                                                                                                                                                                                                                                                            |
+| `FOREIGN_KEY`                           | Rewritten to the mapped parent surrogate; placeholder + 2-pass UPDATE for cyclic FKs. A single-column FK resolves via the policy's own declared `references: { table, column }` - omitting it is `IncognitoException.ConfigException` (fail-closed). A composite FK resolves structurally instead (from the discovered constraint) and needs no `references` block.              |
 | `INHERITED_ATTRIBUTE`                   | Resolved from the **root ancestor** entity via `AttributeCascadeStore` (§6.1).                                                                                                                                                                                                                                                                                                   |
 | `GENERATED_COLUMN`                      | Excluded from `INSERT` (computed column; distinct from an identity PK, see note below).                                                                                                                                                                                                                                                                                          |
 
@@ -810,9 +810,9 @@ identifier leaking through as `PAYLOAD`.
 
 **Every issue is found before any is thrown.** `SchemaDiscoveryStage` checks every table and every
 role-specific requirement (this section; `distinguishing` for `SENSITIVE`, §4.1; `directIdStrategy`
-for `DIRECT_ID`, §4.1; `SYNTHESISE`-by-type for `QUASI_ID`, Appendix B) before raising anything, so
-one run reports every problem across the whole schema at once - not one table, or one column, per
-run.
+for `DIRECT_ID`, §4.1; `references` for a single-column `FOREIGN_KEY`, §4.1; `SYNTHESISE`-by-type
+for `QUASI_ID`, Appendix B) before raising anything, so one run reports every problem across the
+whole schema at once - not one table, or one column, per run.
 
 **Reachable without a full run.** `SchemaDiscoveryStage.validate(List<TableMetadata>,
 AnonymisationPolicy)` is this same check, public, and callable directly against an already-inspected
