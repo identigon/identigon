@@ -11,7 +11,7 @@
   // it does not flag those: it only stops forgiving a long token that shares a line with other
   // prose. Long links that aren't alone on their own line still needed a manual reflow to match.
   // MD024 (no-duplicate-heading) uses `siblings_only` because CHANGELOG.md legitimately repeats
-  // "Added"/"Fixed"/subproject-name headings once per version entry (Keep a Changelog convention);
+  // "Added"/"Fixed"/etc. headings once per version entry (Keep a Changelog convention);
   // `siblings_only` only flags duplicates within the same parent section, not document-wide.
   "config": {
     "MD013": {

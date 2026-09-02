@@ -46,11 +46,9 @@ quickstart/README.md         walkthrough for the quickstart worked example
 incognito/src/test/resources/benchmarks/SOURCES.md  provenance/licensing of vendored benchmarks
 ```
 
-This repository has three Gradle modules, each independently usable and documented, but they
-**version and release together** (lockstep - see the lockstep-versioning ADR). That single shared
-release history is why documentation is consolidated at the repository level rather than split per
-module (doc-kit's usual monorepo default): a module boundary that does not correspond to an
-independent release cadence is not a boundary the documentation needs to keep either.
+This repository has three Gradle modules, each independently usable, but documentation is
+consolidated at the repository root rather than split per module (doc-kit's usual monorepo
+default) - see `docs/adr/0032-consolidate-documentation-at-repository-root.md`.
 
 **The specification is a set, not a file.** `SPECIFICATION.md` is an index over `docs/spec/` - the
 one place in `docs/` you can glob (`docs/spec/*.md`) to find every specification member without
@@ -72,7 +70,7 @@ its own contract, even though the three release together.
 | `docs/spec/alterego.md` | `alterego`'s full behavioural contract | present | rewritten in place | consumers of `alterego`; `incognito` implementers |
 | `docs/spec/incognito.md` | `incognito`'s full behavioural contract | present | rewritten in place | consumers of `incognito`; `effigies` implementers |
 | `docs/spec/effigies.md` | `effigies`'s full behavioural contract | present | rewritten in place | CLI users |
-| `CHANGELOG.md` | What shipped, user-visible, across the whole monorepo. **Real standard:** Keep a Changelog, adapted: grouped by subproject per release, not by change-type category | past | append-only | users |
+| `CHANGELOG.md` | What shipped, user-visible, across the whole monorepo. **Real standard:** Keep a Changelog, unmodified - entries tagged by subproject, not grouped by one | past | append-only | users |
 | `PLAN.md` | Single ranked backlog. No standard; entries may carry a `Project` tag | future | volatile | the team |
 | `docs/adr/*.md` | Why a decision was made, for any subproject. **Real convention:** MADR minimal template | past | immutable | future maintainers |
 | `docs/research/*.md` | Sourced findings behind a spec guarantee, with an explicit confidence level. **No standard** | past | append-only | implementers |
@@ -133,16 +131,34 @@ concerns), following the [MADR](https://adr.github.io/madr/) minimal template - 
   formatting-only edit that changes no word.
 - **Changing a status is a human action.**
 
-**Changelog** - reverse-chronological, an `Unreleased` section at the top. Each version groups
-changes **by subproject** (a subsection per subproject that actually changed that release), not by
-change-type category - the monorepo adaptation of Keep a Changelog. Pre-lockstep history from each
-subproject's own former `CHANGELOG.md` is folded in with a project-prefixed version tag
-(`alterego-0.1.0`, `incognito-1.0.0`, `effigies-1.0.0`, ...) to avoid colliding with the shared
-lockstep version numbers, which start fresh at `1.0.0`.
+**Changelog** - reverse-chronological, an `Unreleased` section at the top, six fixed categories:
+`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security` - unmodified Keep a Changelog.
+Each entry is tagged `**alterego:**`/`**incognito:**`/`**effigies:**` for the subproject it
+concerns; an untagged entry is cross-cutting (build/CI/repository infrastructure). Pre-lockstep
+history from each subproject's own former `CHANGELOG.md` is folded in with a project-prefixed
+version tag (`alterego-0.1.0`, `incognito-1.0.0`, `effigies-1.0.0`, ...) to avoid colliding with
+the shared lockstep version numbers, which start fresh at `1.0.0` - those entries carry no
+per-item tag, since the version itself already scopes the release to one subproject.
 
-**Plan entry** - a checkbox, a bold title, then one paragraph. Optionally prefixed with a
-`**Project:** alterego|incognito|effigies` tag; cross-cutting or unknown-project entries carry no
-tag. No design; anything longer needs an ADR. Entries are deleted when done, never annotated.
+**Plan entry** - a heading, a `**Type:**`/`**Importance:**`/`**Effort:**` line, an optional
+`**Project:**` line, then one paragraph:
+
+```markdown
+## Short title, imperative
+**Type:** bug - **Importance:** high - **Effort:** medium
+**Project:** incognito
+
+One paragraph on what and why. If it needs more than that, it needs an ADR.
+```
+
+- **Type** - `bug`, `debt`, `feature` or `docs`. Debt is a tag here, not a separate file: the
+  debt-versus-feature trade-off can only be made inside one ordered list.
+- **Importance** - `low`, `medium`, `high`: what it costs to keep not doing this.
+- **Effort** - `low` under a day, `medium` under a week, `high` larger or not yet known.
+- **Project** - `alterego`, `incognito` or `effigies`, only when the entry is scoped to one
+  subproject; a cross-cutting or unscoped entry carries no `Project` line.
+
+No design; anything longer needs an ADR. Entries are deleted when done, never annotated.
 
 **Research note** - one file per topic, numbered across the whole monorepo the same way as
 `docs/adr/`. A confidence level of `high` (verified directly against a primary source), `medium`
@@ -156,8 +172,7 @@ the ADR only needs to point at.
 ## Deliberately not here
 
 - **Per-subproject `DOC-MAP.md`, `SPECIFICATION.md`, `PLAN.md`, `docs/adr/`, or `CHANGELOG.md`.**
-  Consolidated to the repository root because the subprojects release in lockstep - see "Layout"
-  above and the lockstep-versioning ADR.
+  See `docs/adr/0032-consolidate-documentation-at-repository-root.md`.
 - **`docs/adr/README.md`.** An index-by-title table was tried during the consolidation migration
   and dropped: `docs/adr/*.md` is swept as ADR content, so an index file there fails the MADR-shape
   check rather than being recognised as an exception. `docs/adr/` is small enough to browse
