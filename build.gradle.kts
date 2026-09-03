@@ -95,8 +95,8 @@ subprojects {
     }
 
     // JaCoCo: report shape and the check-task wiring are identical wherever the plugin is applied
-    // (only alterego, historically -- adding it to incognito/effigies too is a separate, per-
-    // subproject decision, not this block's job).
+    // -- alterego, incognito, and effigies all apply it (see each subproject's own
+    // build.gradle.kts), so this configures every module in the monorepo.
     plugins.withId("jacoco") {
         configure<org.gradle.testing.jacoco.plugins.JacocoPluginExtension> {
             // Pinned to what was already the plugin's own default at the time of pinning (0.8.14) --
@@ -117,6 +117,37 @@ subprojects {
                 html.required.set(true)
                 csv.required.set(true)
             }
+        }
+
+        // JaCoCo coverage verification - one minimum per module, so a real regression fails
+        // `check` instead of a report nobody is required to look at. Each threshold sits a few
+        // points below that module's actual instruction coverage when this was added (alterego
+        // ~94.9%, incognito ~90.4%, effigies ~77.9%, measured via `./gradlew jacocoTestReport` and
+        // summing INSTRUCTION_MISSED/INSTRUCTION_COVERED from each module's jacocoTestReport.csv),
+        // so normal fluctuation doesn't fail a build - the point is to catch a regression, not to
+        // ratchet coverage upward automatically. Same pattern as play-bazlang's own
+        // build.gradle.kts, which found this worth having per-module rather than repo-wide.
+        val minInstructionCoverage =
+            when (project.name) {
+                "alterego" -> 0.92
+                "incognito" -> 0.88
+                else -> 0.75 // effigies
+            }
+
+        tasks.withType<JacocoCoverageVerification>().configureEach {
+            dependsOn(tasks.withType<Test>())
+            violationRules {
+                rule {
+                    limit {
+                        counter = "INSTRUCTION"
+                        minimum = minInstructionCoverage.toBigDecimal()
+                    }
+                }
+            }
+        }
+
+        tasks.named("check") {
+            dependsOn(tasks.withType<JacocoCoverageVerification>())
         }
     }
 }

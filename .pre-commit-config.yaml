@@ -56,10 +56,20 @@ repos:
 
   # Secret scanning - apt for a privacy pipeline (alterego/incognito) and its authoring CLI
   # (effigies), where a salt or connection string must never be committed.
+  #
+  # gitleaks-system, not the default gitleaks, which builds the binary from source with Go on
+  # first run: that produces an unsigned, reputation-less executable in AppData, which Windows
+  # Smart App Control blocks outright (os error 4551). A packaged release carries enough download
+  # reputation to run even with Smart App Control enforced. Needs gitleaks on PATH (confirmed
+  # present via `scoop install gitleaks` in this environment) - same reasoning as doc-kit's and
+  # play-bazlang's own .pre-commit-config.yaml.
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.21.2
+    rev: v8.30.1
     hooks:
-      - id: gitleaks
+      - id: gitleaks-system
+        # `gitleaks git --staged` reads the staged diff itself and takes at most one path, so
+        # passing it the changed filenames makes it exit with "accepts at most 1 arg(s)".
+        pass_filenames: false
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -115,6 +125,22 @@ repos:
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
+
+  # Link rot, on demand only: `prek run --hook-stage manual lychee` (or `pre-commit run
+  # --hook-stage manual lychee`). Deliberately NOT on commit - external hosts fail for reasons
+  # unrelated to the change under review, and a hook that blocks a commit because someone else's
+  # server is down is a hook that gets bypassed. Worth having now that docs/research/*.md and
+  # docs/adr/ cite external references (17 URLs, checked). Ported from doc-kit's and
+  # play-bazlang's own .pre-commit-config.yaml.
+  # --method get, not the default HEAD: some hosts answer HEAD with an error and GET with 200, so
+  # a HEAD-based sweep can report false failures. Needs lychee on PATH (confirmed present via
+  # `scoop install lychee` in this environment).
+  - repo: https://github.com/lycheeverse/lychee
+    rev: lychee-v0.24.2
+    hooks:
+      - id: lychee-system
+        stages: [manual]
+        args: [--no-progress, --method, get, --max-concurrency, "4"]
 
   # Drift guards, not formatting - markdownlint-cli2 above catches structural rules, these catch a
   # narrower semantic one: an ADR's status casing/shape drifting from the MADR convention every
