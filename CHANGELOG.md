@@ -23,6 +23,15 @@ instead - restating them here too would be the same fact in two places.
 
 ## [Unreleased]
 
+### Fixed
+
+- `release.yml`'s "Publish to GitHub Packages" step now tolerates the publish-ordering race
+  `docs/adr/0028-publish-effigies-runnable-jar.md`'s Consequences already named as a known risk
+  (and which actually happened for v3.2.0): if `main.yml`'s own run for the version-bump commit
+  wins the race and publishes the release coordinate itself, this step now confirms all three
+  modules' jars are genuinely present at that version before treating the resulting
+  `409 Conflict` as a real failure, instead of always hard-failing the release.
+
 ## [3.2.0] - 2026-09-03
 
 ### Added

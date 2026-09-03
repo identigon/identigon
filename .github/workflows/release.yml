@@ -52,7 +52,35 @@ jobs:
         run: ./gradlew build
 
       - name: Publish to GitHub Packages
-        run: ./gradlew publish
+        run: |
+          if ./gradlew publish; then
+            exit 0
+          fi
+          # A 409 Conflict here can be the known race documented in
+          # docs/adr/0028-publish-effigies-runnable-jar.md's Consequences: if this tag was pushed
+          # while main.yml's own build for that same commit was still running, that run's publish
+          # job can see the tag, publish this exact version itself, and win the race - leaving
+          # nothing wrong to fix, just this job arriving second to an already-claimed, immutable
+          # coordinate. Tell the two apart by checking whether every module's jar for this version
+          # is actually present before deciding this is a real failure.
+          echo "::warning::'./gradlew publish' failed - checking whether every module's jar is" \
+            "already present at this exact version (the known tag/main.yml publish race) before" \
+            "treating this as a genuine failure."
+          version="${{ steps.version.outputs.version }}"
+          all_present=true
+          for artifact in alterego incognito effigies; do
+            url="https://maven.pkg.github.com/${{ github.repository }}/org/identigon/$artifact/$version/$artifact-$version.jar"
+            if ! curl -fsSL -o /dev/null -H "Authorization: Bearer ${GITHUB_TOKEN}" "$url"; then
+              echo "::error::$artifact-$version.jar is NOT present on GitHub Packages - this is a" \
+                "genuine publish failure, not the known race."
+              all_present=false
+            fi
+          done
+          if [ "$all_present" != true ]; then
+            exit 1
+          fi
+          echo "Every module's $version jar is already present on GitHub Packages - continuing" \
+            "(see docs/adr/0028-publish-effigies-runnable-jar.md)."
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
