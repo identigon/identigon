@@ -9,10 +9,10 @@ decision-makers: David Conneely
 ## Context and Problem Statement
 
 Transformations are used in Java streams, including parallel streams. A shared sequential PRNG
-(seeded once from the salt) would make each output depend on the input's _position_ in the
-stream: reordering, filtering, deduplicating, or parallelising the data would change individual
-mappings, and the same value appearing in two datasets would map to two different pseudonyms.
-That breaks the core promise of deterministic pseudonymisation.
+(seeded once from the salt) would make each output depend on the input's _position_ in the stream:
+reordering, filtering, deduplicating, or parallelising the data would change individual mappings,
+and the same value appearing in two datasets would map to two different pseudonyms. That breaks the
+core promise of deterministic pseudonymisation.
 
 ## Considered Options
 
@@ -21,8 +21,8 @@ That breaks the core promise of deterministic pseudonymisation.
 
 ## Decision Outcome
 
-Chosen option: "a fresh key derived per input value", because a shared PRNG's output depends on
-call order, which datasets and parallel streams do not guarantee.
+Chosen option: "a fresh key derived per input value", because a shared PRNG's output depends on call
+order, which datasets and parallel streams do not guarantee.
 
 Derive a fresh 256-bit key for every input value:
 
@@ -32,8 +32,8 @@ key = HMAC-SHA256(salt, purpose || 0x00 || domain || 0x00 || canonical(input) ||
 
 as specified byte-exactly in the specification's Appendix A.1. All randomness a strategy sees flows
 from this key. The `purpose` tag separates the three uses of a derivation - randomness keys,
-mapping-store keys, and keyed record-attribute resolution - so they never share a key; the
-`counter` is 0 except for `unique()` collision retries.
+mapping-store keys, and keyed record-attribute resolution - so they never share a key; the `counter`
+is 0 except for `unique()` collision retries.
 
 ### Consequences
 
@@ -43,5 +43,5 @@ mapping-store keys, and keyed record-attribute resolution - so they never share 
   pairs.
 - Neutral: each element costs one HMAC computation plus a few HMAC blocks of stream output -
   negligible next to the surrounding I/O.
-- Neutral: the derivation message layout is frozen for the major version and enforced by
-  conformance vectors.
+- Neutral: the derivation message layout is frozen for the major version and enforced by conformance
+  vectors.

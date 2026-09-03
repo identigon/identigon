@@ -11,7 +11,9 @@ the copy.
 
 ## Finding
 
-What is true, stated plainly. Lead with the answer.
+What is true, stated plainly. Lead with the answer. Write it as the current answer, not a narrative
+of how it was reached - no pass counts, no "originally claimed X, now corrected". If new evidence
+changes it, rewrite the finding and its confidence in place.
 
 ## Evidence
 
@@ -20,8 +22,9 @@ which won and why - that reconciliation is the part nobody can reconstruct later
 
 ## Dead ends
 
-What was tried and did not work. This is the section that saves the next person a day, and the one
-most often left out because it feels like an admission rather than a finding.
+Wrong hypotheses and misleading sources that cost real time - the section that saves the next person
+a day, and the one most often left out because it feels like an admission rather than a finding. Not
+a log of the research process itself (which pass found what, who suggested a search).
 
 ## Open questions
 

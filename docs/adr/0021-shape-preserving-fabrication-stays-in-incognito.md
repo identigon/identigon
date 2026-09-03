@@ -50,15 +50,14 @@ shape-preserving fabrication.
 
 - Good, because no migration work is owed to `alterego` for this - the code already lives on the
   correct side of the delegation boundary.
-- Good, because it keeps `alterego`'s built-in surface free of a `shapePreserving(domain)`
-  primitive that only Incognito would use today (mentioned as a possible future promotion, not
-  needed now).
+- Good, because it keeps `alterego`'s built-in surface free of a `shapePreserving(domain)` primitive
+  that only Incognito would use today (mentioned as a possible future promotion, not needed now).
 - Bad, because `ALTEREGO_GENERIC` / string-`SYNTHESISE` output can, by coincidence, equal a real
   value - callers who need the fictionality guarantee must be told explicitly to route to a typed
   strategy instead; the `VerificationStage` source-value survival check is a probabilistic net over
   this, not a guarantee.
-- Neutral: ADR 15's own Consequences named this as tracked debt; that characterisation is
-  superseded by this record, not corrected in place (ADR 15 is `accepted` and immutable).
+- Neutral: ADR 15's own Consequences named this as tracked debt; that characterisation is superseded
+  by this record, not corrected in place (ADR 15 is `accepted` and immutable).
 
 <!-- Originally drafted as incognito's own ADR 0009; renumbered during the doc-kit consolidation
      migration (docs/tasks/consolidate-subproject-docs.md). Mined from incognito/PLAN.md's "Phase 4

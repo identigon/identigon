@@ -10,18 +10,18 @@ decision-makers: David Conneely
 
 `RecordScope.apply(transformation, value)` (ADR 8) takes only a value - `Transformation<T>` is a
 plain `Function<T, T>` with no scope parameter - but the `TransformationContext` that needs to see
-the scope's attributes is created several calls deeper, inside
-`DefaultTransformation.apply(...)`. Threading an explicit scope parameter through that call chain
-would mean changing `Transformation`'s already-published public shape (section 2.5).
+the scope's attributes is created several calls deeper, inside `DefaultTransformation.apply(...)`.
+Threading an explicit scope parameter through that call chain would mean changing `Transformation`'s
+already-published public shape (section 2.5).
 
 Separately, `postcode()`/`phoneNumber()` establishing a _real_ town's area (not an arbitrary or
-fabricated one) when they run first in a scope requires telling "nothing fixed yet, but a real
-scope is active" apart from "outside any scope entirely" - both look identical via `get()` alone
-(empty either way). `computeIfAbsent` can't be used to probe for this cheaply either: outside a
-scope it still _runs its resolver_ against the live per-input randomness stream (that's what makes
-it behave identically in and out of a scope), so calling it just to check would itself consume
-randomness and silently perturb every subsequent draw - breaking the output-stability guarantee
-(section 3.4) for every built-in that ever runs outside a scope.
+fabricated one) when they run first in a scope requires telling "nothing fixed yet, but a real scope
+is active" apart from "outside any scope entirely" - both look identical via `get()` alone (empty
+either way). `computeIfAbsent` can't be used to probe for this cheaply either: outside a scope it
+still _runs its resolver_ against the live per-input randomness stream (that's what makes it behave
+identically in and out of a scope), so calling it just to check would itself consume randomness and
+silently perturb every subsequent draw - breaking the output-stability guarantee (section 3.4) for
+every built-in that ever runs outside a scope.
 
 ## Considered Options
 
@@ -64,6 +64,6 @@ either way.
   already requires: it is never consulted across threads, is fully deterministic (never time- or
   machine-dependent, restored via `finally` so it cannot leak into an unrelated later `apply()` on
   the same thread), and needs no new safety argument beyond the one `RecordScope` already makes.
-- Neutral: establishing costs one extra `computeIfAbsent` resolution the first time any of the
-  three is asked inside an active scope; outside a scope, the `isActive()` check is the only added
-  cost (a boolean read), so outputs for every pre-existing golden test stay byte-identical.
+- Neutral: establishing costs one extra `computeIfAbsent` resolution the first time any of the three
+  is asked inside an active scope; outside a scope, the `isActive()` check is the only added cost (a
+  boolean read), so outputs for every pre-existing golden test stay byte-identical.

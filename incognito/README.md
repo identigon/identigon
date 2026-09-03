@@ -10,8 +10,8 @@ explicit non-goals - see [ADR 14](../docs/adr/0014-fabrication-not-k-anonymity.m
 
 > **In one sentence:** _"I have a great production database and I want a test environment with
 > similar data volumes and similar relationships between entities, but with no danger of leaking
-> PII - a cloned database where the PII has been anonymised, and obviously anonymised, using
-> clearly fictional data."_
+> PII - a cloned database where the PII has been anonymised, and obviously anonymised, using clearly
+> fictional data."_
 
 See [`docs/spec/incognito.md`](../docs/spec/incognito.md) for the full behavioural contract, the
 root [`PLAN.md`](../PLAN.md) (`**Project:** incognito` entries) for the backlog,
@@ -33,9 +33,8 @@ Incognito delegates all **field-value** transformation to its sibling library
 The boundary is simply: **AlterEgo fabricates fields; Incognito preserves relationships**
 ([ADR 15](../docs/adr/0015-two-libraries-two-responsibilities.md), refined by
 [ADR 21](../docs/adr/0021-shape-preserving-fabrication-stays-in-incognito.md)). Incognito never
-implements its
-own value substitution - where it needs a transformation AlterEgo does not yet expose, the fix is to
-add it to AlterEgo, not to hand-roll it.
+implements its own value substitution - where it needs a transformation AlterEgo does not yet
+expose, the fix is to add it to AlterEgo, not to hand-roll it.
 
 ## Quick start
 
@@ -92,10 +91,10 @@ parse(in);
 ```
 
 Every field of the Java builder has a key (`role`, `surrogateStrategy`, `directIdStrategy`,
-`quasiIdStrategy`, `distinguishing`, `jitterDays`, `references`, `derivedFrom`,
-`coherenceGroup`, ...). All five benchmark end-to-end tests drive the pipeline from a `policy.yaml`
-resource, so the YAML path is exercised against every real-schema scenario (composite and
-self-referential keys, opaque column types, table omission).
+`quasiIdStrategy`, `distinguishing`, `jitterDays`, `references`, `derivedFrom`, `coherenceGroup`,
+...). All five benchmark end-to-end tests drive the pipeline from a `policy.yaml` resource, so the
+YAML path is exercised against every real-schema scenario (composite and self-referential keys,
+opaque column types, table omission).
 
 ## How it works
 
@@ -110,9 +109,9 @@ boolean discloses nothing about anyone.
 Relational coherence is Incognito's job: primary keys become fresh surrogates and foreign keys are
 rewritten to the same mapping ([key translation]); related dates shift by one shared, salt-keyed
 delta per entity so parent-child windows and orderings survive ([coherent jitter][adr5]);
-denormalised attributes are resolved from their root ancestor's fabricated value
-([inherited attributes][adr7]); and cyclic / self-referential foreign keys load via a placeholder
-plus a second-pass update ([cyclic FKs][adr6]).
+denormalised attributes are resolved from their root ancestor's fabricated value ([inherited
+attributes][adr7]); and cyclic / self-referential foreign keys load via a placeholder plus a
+second-pass update ([cyclic FKs][adr6]).
 
 [adr5]: ../docs/adr/0018-coherent-temporal-jitter.md
 [adr6]: ../docs/adr/0019-cyclic-fk-two-pass-load.md
@@ -132,8 +131,8 @@ the data ([ADR 16](../docs/adr/0016-declared-distinguishing-flag.md)).
 
 Fabrication severs the linkage between the clone and real subjects, and the fictionality guarantee
 stops the clone being mistaken for real data. The per-run salt is generated fresh, never persisted
-or logged, and destroyed when the run completes. Treat any salt you supply (in `reproducible`
-mode) exactly like a credential.
+or logged, and destroyed when the run completes. Treat any salt you supply (in `reproducible` mode)
+exactly like a credential.
 
 ## Building
 

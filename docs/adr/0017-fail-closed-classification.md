@@ -8,10 +8,10 @@ decision-makers: David Conneely
 
 ## Context and Problem Statement
 
-The one mistake that leaks real data is an identifier nobody classified - a column the policy
-simply did not mention, copied through verbatim because the engine assumed it was harmless.
-Auto-inference can _guess_ a column's role from its name, but a wrong or missing guess must never
-result in real data being copied silently.
+The one mistake that leaks real data is an identifier nobody classified - a column the policy simply
+did not mention, copied through verbatim because the engine assumed it was harmless. Auto-inference
+can _guess_ a column's role from its name, but a wrong or missing guess must never result in real
+data being copied silently.
 
 Backfilled 2026-07-30, documenting a decision made earlier in the project's development.
 

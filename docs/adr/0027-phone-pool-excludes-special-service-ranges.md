@@ -37,8 +37,8 @@ without re-doing the sourcing work.
   personal contact field.
 - Neutral: the unconstrained ("no area fixed") pool is exactly 17 distinct choices, not 20 - a
   future opt-in for the excluded three is additive, not a breaking change to today's pool.
-- Bad, because a caller who specifically wants a fictional freephone/premium-rate/UK-wide number
-  has no built-in option for it yet - deferred, not solved.
+- Bad, because a caller who specifically wants a fictional freephone/premium-rate/UK-wide number has
+  no built-in option for it yet - deferred, not solved.
 
 <!-- Extracted from alterego/docs/phone-ranges.md's "v1 scope" section during the docs/research/
      migration; the full Ofcom sourcing and licensing detail stays in

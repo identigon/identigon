@@ -25,8 +25,8 @@ ADR 21.
 ## Decision Outcome
 
 Chosen option: "two libraries, split by responsibility", because folding relational concerns into
-the value-transformation library would couple it to JDBC and destroy its reuse as a standalone
-value transformer.
+the value-transformation library would couple it to JDBC and destroy its reuse as a standalone value
+transformer.
 
 Split by **responsibility**, not batch size:
 

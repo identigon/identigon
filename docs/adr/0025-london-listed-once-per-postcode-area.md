@@ -9,9 +9,9 @@ decision-makers: David Conneely
 ## Context and Problem Statement
 
 The `city()`/coherence towns dictionary lists one postcode area per entry (spec section 6.3,
-`UK_POSTCODE_AREA`). London spans eight postcode areas (E, EC, N, NW, SE, SW, W, WC), so it does
-not fit the dictionary's one-area-per-entry model as a single row - but London is the UK's largest
-city and cannot be dropped from a population-ranked list.
+`UK_POSTCODE_AREA`). London spans eight postcode areas (E, EC, N, NW, SE, SW, W, WC), so it does not
+fit the dictionary's one-area-per-entry model as a single row - but London is the UK's largest city
+and cannot be dropped from a population-ranked list.
 
 ## Considered Options
 
@@ -32,8 +32,8 @@ precedent for its own single London range.
 
 ### Consequences
 
-- Good, because `city()`/`postcode()`/`phoneNumber()` record coherence (ADR 8) can resolve to any
-  of London's real postcode areas, not just one arbitrarily chosen one.
+- Good, because `city()`/`postcode()`/`phoneNumber()` record coherence (ADR 8) can resolve to any of
+  London's real postcode areas, not just one arbitrarily chosen one.
 - Neutral: the towns dictionary has 27 rows for 20 distinct places, not a 1:1 count - documented so
   it isn't mistaken for a duplication bug.
 - Neutral: this is not a duplicate-row well-formedness violation, since the tag (postcode area)

@@ -27,8 +27,8 @@ to evolve - regex heuristics today, an agent tomorrow.
 ## Considered Options
 
 - Push classification judgment (heuristics, model inference) further into the engine itself.
-- Split responsibilities across a fixed boundary: the engine stays deterministic and
-  judgment-free; all authoring (including inference) lives above it, in a separate tool.
+- Split responsibilities across a fixed boundary: the engine stays deterministic and judgment-free;
+  all authoring (including inference) lives above it, in a separate tool.
 
 ## Decision Outcome
 
@@ -40,12 +40,12 @@ freely without ever touching the engine's determinism or fail-closed guarantees,
   schema (it must, to execute), validates a _finished_ policy fail-closed, orchestrates the load,
   and emits the DPIA report. No inference, no defaults-that-guess.
 - **All authoring lives in Effigies, above the engine.** Effigies _reuses_ the engine's schema
-  discovery and policy model, and _owns_ everything judgment-shaped: inference, scaffolding, and
-  the artifact handed to an agent. Its output is a reviewed `policy.yaml`; the run itself is a
-  plain incognito execution.
-- **Inference migrates out of incognito into Effigies.** Because inference there was
-  execution-inert (fail-closed meant it never assigned a role), moving it changes zero engine
-  behaviour. This pairs with incognito's 2.0, which removes that public API.
+  discovery and policy model, and _owns_ everything judgment-shaped: inference, scaffolding, and the
+  artifact handed to an agent. Its output is a reviewed `policy.yaml`; the run itself is a plain
+  incognito execution.
+- **Inference migrates out of incognito into Effigies.** Because inference there was execution-inert
+  (fail-closed meant it never assigned a role), moving it changes zero engine behaviour. This pairs
+  with incognito's 2.0, which removes that public API.
 
 Corollary constraints (recorded in `docs/spec/effigies.md` §2): Effigies reads schema **metadata
 only, never row data**; it never emits a runnable policy that silently defaults a column; and

@@ -53,9 +53,9 @@ configured explicitly.
 
 ## This is pseudonymisation, not anonymisation
 
-**The salt is a secret.** Anyone holding it can confirm guesses about specific values (`does
-"Alice Smith" map to this row?`) by recomputing the same transformation. Treat it exactly like a
-credential: never log it, never commit it, and store it the way you'd store any other secret.
+**The salt is a secret.** Anyone holding it can confirm guesses about specific values
+(`does "Alice Smith" map to this row?`) by recomputing the same transformation. Treat it exactly
+like a credential: never log it, never commit it, and store it the way you'd store any other secret.
 
 Determinism itself has two inherent limits, not bugs, and not something a different implementation
 could avoid:
@@ -121,10 +121,10 @@ Transformation<String> uniqueCustomerId =
 fully order-independent - reordering, filtering, or deduplicating a stream never changes an
 individual mapping. `unique()` is the one deliberate exception: when two inputs' natural candidates
 would collide, whichever one is processed _first_ keeps that natural candidate, and the other is
-re-derived. Absent an actual collision - the overwhelming majority of real data -
-`unique()` output is identical regardless of processing order; when a collision does happen, only
-those specific inputs are affected, and the resolution is recorded in the mapping store, so it stays
-stable on every later run.
+re-derived. Absent an actual collision - the overwhelming majority of real data - `unique()` output
+is identical regardless of processing order; when a collision does happen, only those specific
+inputs are affected, and the resolution is recorded in the mapping store, so it stays stable on
+every later run.
 
 To make this stability permanent, back AlterEgo with a persistent file store:
 
@@ -179,9 +179,8 @@ The bundled UK dictionary data (names, towns, streets, organisation-name compone
 UK government sources published under the Open Government Licence v3.0, with one documented
 exception (Ofcom's drama phone-number ranges - see
 [research note 0003](../docs/research/0003-alterego-phone-ranges.md) for why). Full provenance for
-every source is tracked in [research note 0001](../docs/research/0001-alterego-dictionaries.md);
-the exact required attribution string for every
-source in use is consolidated in [`NOTICE`](NOTICE), which - along with `LICENCE` - is packaged into
-the built JAR's `META-INF/` directory. **This attribution obligation passes through transitively to
-any application that depends on AlterEgo**, since the JAR bundles this data into every application
-built on it, not just this repository.
+every source is tracked in [research note 0001](../docs/research/0001-alterego-dictionaries.md); the
+exact required attribution string for every source in use is consolidated in [`NOTICE`](NOTICE),
+which - along with `LICENCE` - is packaged into the built JAR's `META-INF/` directory. **This
+attribution obligation passes through transitively to any application that depends on AlterEgo**,
+since the JAR bundles this data into every application built on it, not just this repository.

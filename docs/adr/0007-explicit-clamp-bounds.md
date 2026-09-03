@@ -38,9 +38,9 @@ themselves:
 
 ### Consequences
 
-- Good, because the library never reads system time at all - a stronger invariant than requiring
-  the use of `java.time.Clock`, and simpler to enforce (no `now()` of any kind in library code).
+- Good, because the library never reads system time at all - a stronger invariant than requiring the
+  use of `java.time.Clock`, and simpler to enforce (no `now()` of any kind in library code).
 - Good, because fixed-bound callers get byte-reproducible runs with no special test configuration.
 - Neutral: run-dependence of now-relative bounds is visible in the caller's code, where it belongs.
-- Neutral: the Instant-vs-LocalDate "past" semantics are the caller's explicit choice, not a
-  library guess.
+- Neutral: the Instant-vs-LocalDate "past" semantics are the caller's explicit choice, not a library
+  guess.

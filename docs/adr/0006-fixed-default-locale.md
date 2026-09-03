@@ -9,9 +9,9 @@ decision-makers: David Conneely
 ## Context and Problem Statement
 
 A builder needs some default locale. The obvious default is `Locale.getDefault()` - but that makes
-output depend on the machine the code runs on: the same code with the same salt would pick
-different resources on differently configured hosts, silently producing different pseudonyms,
-contradicting the primary determinism goal. This library's primary deployment is UK data.
+output depend on the machine the code runs on: the same code with the same salt would pick different
+resources on differently configured hosts, silently producing different pseudonyms, contradicting
+the primary determinism goal. This library's primary deployment is UK data.
 
 Accepted 2026-07-12, revised 2026-07-13 (accepted date reflects the revision).
 
@@ -22,8 +22,8 @@ Accepted 2026-07-12, revised 2026-07-13 (accepted date reflects the revision).
 
 ## Decision Outcome
 
-Chosen option: "default to a fixed constant locale", because a fixed constant is identical on
-every machine, unlike the platform default.
+Chosen option: "default to a fixed constant locale", because a fixed constant is identical on every
+machine, unlike the platform default.
 
 The builder defaults to the fixed constant `Locale.UK` (`en-GB`). `Locale.getDefault()` is banned
 from all code paths. Non-UK users configure a locale explicitly; an unshipped country fails fast.
@@ -42,5 +42,5 @@ Abertawe).
 - Neutral: `en-GB` and `cy-GB` are configuration synonyms for the v1 built-ins (enforced by an
   equivalence test); `en-AU` fails fast (no AU resources) rather than silently borrowing another
   country's data.
-- Bad, because a non-UK adopter who forgets to set a locale gets UK output - obvious on first
-  look, and documented in the README.
+- Bad, because a non-UK adopter who forgets to set a locale gets UK output - obvious on first look,
+  and documented in the README.

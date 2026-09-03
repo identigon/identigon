@@ -10,8 +10,8 @@ decision-makers: David Conneely
 
 Schemas often denormalise an ancestor attribute onto descendant rows (a firm's type copied onto its
 contracts and schedules). For the clone to stay coherent, a denormalised copy must show the
-ancestor's **fabricated** value - the same value the ancestor row now carries - not its own
-original value and not an independently fabricated one.
+ancestor's **fabricated** value - the same value the ancestor row now carries - not its own original
+value and not an independently fabricated one.
 
 Backfilled 2026-07-30, documenting a decision made earlier in the project's development.
 
@@ -29,9 +29,9 @@ passes real data through exactly when resolution is hardest to verify.
 
 Model these columns as `INHERITED_ATTRIBUTE` with a declared `derivedFrom(table, column)`. As each
 row loads, parents **publish** their fabricated attribute value and their FK source-id **linkage**
-to the cascade store. A descendant resolves its value by **walking the FK chain** (via that
-linkage) up to the declared root-ancestor table and reading the ancestor's published value.
-Resolution is **fail-closed**:
+to the cascade store. A descendant resolves its value by **walking the FK chain** (via that linkage)
+up to the declared root-ancestor table and reading the ancestor's published value. Resolution is
+**fail-closed**:
 
 - a null ancestor (nullable FK is null) yields `null` - nothing to leak;
 - two _distinct_ ancestor rows reached (a genuine fork) throws `ConstraintException`;

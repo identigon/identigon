@@ -12,9 +12,9 @@ data, and no benchmark hits it - but the feature is absent.
 ## 2. Why this is bigger than "widen the deferred UPDATE" (correction)
 
 An earlier draft of this task assumed the only fix was to make the pass-2 cyclic-FK `UPDATE` key on
-all PK columns instead of one (the guard in `TableTransformLoadStage` that rejects `targetPk == null
-|| compositePk`). **That is necessary but not sufficient, and on its own is unreachable.** The
-reason is structural:
+all PK columns instead of one (the guard in `TableTransformLoadStage` that rejects
+`targetPk == null || compositePk`). **That is necessary but not sufficient, and on its own is
+unreachable.** The reason is structural:
 
 - A single-column FK is only _deferred_ when its target row is **not yet mapped** at apply time - a
   genuine forward reference, which only happens **inside a cycle** (`buildFkTransformer`,
@@ -52,8 +52,8 @@ lookup key. Resolution: `keyStore.get(parentTable, sourceCompositeKey)` -> the p
 This means `BulkDatabaseLoadStage.DeferredUpdate` (or a new sibling record) must carry:
 `List<String> pkColumns`, `List<Object> pkValues` (the row to update - a one-element list for a
 single PK), and a set of `(fkColumn -> parent-PK component index)` for the composite FK, plus
-`referencedTable` and the source composite key. `resolveDeferredCyclicFKs` builds `UPDATE child SET
-fk1 = ?, fk2 = ? WHERE <full PK>`.
+`referencedTable` and the source composite key. `resolveDeferredCyclicFKs` builds
+`UPDATE child SET fk1 = ?, fk2 = ? WHERE <full PK>`.
 
 The existing single-column cyclic path must keep working unchanged - ideally the composite path is
 an additive branch, not a rewrite of the single-column one.

@@ -54,8 +54,8 @@ This repository has three Gradle modules, each independently usable, but documen
 consolidated at the repository root rather than split per module (doc-kit's usual monorepo
 default) - see `docs/adr/0032-consolidate-documentation-at-repository-root.md`.
 
-**This map also covers `identigon.github.io`**, the separate repository holding the project's
-public site - its decisions live in `docs/adr/` here and its backlog in `PLAN.md` here (tagged
+**This map also covers `identigon.github.io`**, the separate repository holding the project's public
+site - its decisions live in `docs/adr/` here and its backlog in `PLAN.md` here (tagged
 `identigon.github.io`), rather than in a second, separate doc-kit instance of its own. See
 `docs/adr/0033-extend-documentation-coverage-to-identigon-github-io.md`. That repository keeps only
 its own `README.md` (orientation) and `AGENTS.md` (site-specific operational hazards - custom
@@ -147,13 +147,13 @@ concerns), following the [MADR](https://adr.github.io/madr/) minimal template - 
 - **Changing a status is a human action.**
 
 **Changelog** - reverse-chronological, an `Unreleased` section at the top, six fixed categories:
-`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security` - unmodified Keep a Changelog.
-Each entry is tagged `**alterego:**`/`**incognito:**`/`**effigies:**` for the subproject it
-concerns; an untagged entry is cross-cutting (build/CI/repository infrastructure). Pre-lockstep
-history from each subproject's own former `CHANGELOG.md` is folded in with a project-prefixed
-version tag (`alterego-0.1.0`, `incognito-1.0.0`, `effigies-1.0.0`, ...) to avoid colliding with
-the shared lockstep version numbers, which start fresh at `1.0.0` - those entries carry no
-per-item tag, since the version itself already scopes the release to one subproject.
+`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security` - unmodified Keep a Changelog. Each
+entry is tagged `**alterego:**`/`**incognito:**`/`**effigies:**` for the subproject it concerns; an
+untagged entry is cross-cutting (build/CI/repository infrastructure). Pre-lockstep history from each
+subproject's own former `CHANGELOG.md` is folded in with a project-prefixed version tag
+(`alterego-0.1.0`, `incognito-1.0.0`, `effigies-1.0.0`, ...) to avoid colliding with the shared
+lockstep version numbers, which start fresh at `1.0.0` - those entries carry no per-item tag, since
+the version itself already scopes the release to one subproject.
 
 **Plan entry** - a heading, a `**Type:**`/`**Importance:**`/`**Effort:**` line, an optional
 `**Project:**` line, then one paragraph:
@@ -170,20 +170,25 @@ One paragraph on what and why. If it needs more than that, it needs an ADR.
   debt-versus-feature trade-off can only be made inside one ordered list.
 - **Importance** - `low`, `medium`, `high`: what it costs to keep not doing this.
 - **Effort** - `low` under a day, `medium` under a week, `high` larger or not yet known.
-- **Project** - `alterego`, `incognito`, `effigies` or `identigon.github.io`, only when the entry
-  is scoped to one subproject or repository; a cross-cutting or unscoped entry carries no
-  `Project` line.
+- **Project** - `alterego`, `incognito`, `effigies` or `identigon.github.io`, only when the entry is
+  scoped to one subproject or repository; a cross-cutting or unscoped entry carries no `Project`
+  line.
 
 No design; anything longer needs an ADR. Entries are deleted when done, never annotated.
 
 **Research note** - one file per topic, numbered across the whole monorepo the same way as
 `docs/adr/`. A confidence level of `high` (verified directly against a primary source), `medium`
 (sources agree, not verified directly), or `low` (inferred, or a single unverified source), stated
-right under the title. Copy `docs/research/0000-template.md` for the shape. Where sources
-disagree, say which won and why - that reconciliation is the part nobody can reconstruct later. A
-genuine decision found while researching (a real alternative considered and rejected) belongs in
-its own ADR, not buried in the research note - the note may still carry the full sourcing detail
-the ADR only needs to point at.
+right under the title. Copy `docs/research/0000-template.md` for the shape. Where sources disagree,
+say which won and why - that reconciliation is the part nobody can reconstruct later. A genuine
+decision found while researching (a real alternative considered and rejected) belongs in its own
+ADR, not buried in the research note - the note may still carry the full sourcing detail the ADR
+only needs to point at.
+
+Findings and Evidence are the current answer, not a log of how it was reached - state what is true
+and its source, and rewrite in place when new evidence supersedes an earlier read. Dead ends are
+substantive wrong turns, not a record of the research process itself (pass counts, which fetch
+failed first).
 
 ## Deliberately not here
 
@@ -191,8 +196,8 @@ the ADR only needs to point at.
   See `docs/adr/0032-consolidate-documentation-at-repository-root.md`.
 - **A separate `DOC-MAP.md`/`PLAN.md`/`docs/adr/` instance inside `identigon.github.io`.** See
   `docs/adr/0033-extend-documentation-coverage-to-identigon-github-io.md`.
-- **`docs/adr/README.md`.** An index-by-title table was tried during the consolidation migration
-  and dropped: `docs/adr/*.md` is swept as ADR content, so an index file there fails the MADR-shape
+- **`docs/adr/README.md`.** An index-by-title table was tried during the consolidation migration and
+  dropped: `docs/adr/*.md` is swept as ADR content, so an index file there fails the MADR-shape
   check rather than being recognised as an exception. `docs/adr/` is small enough to browse
   directly; revisit if it grows past roughly 30 records.
 - **`docs/quirks.md`, `docs/glossary.md`.** Not yet adopted; each subproject's own `docs/spec/`

@@ -24,8 +24,8 @@ artifact.
 ## Decision Outcome
 
 Chosen option: "ship a JDK-only, single-process, file-backed store in core", because it makes the
-cross-run stability promise achievable out of the box without either leaving users to reinvent it
-or violating the zero-runtime-dependency invariant.
+cross-run stability promise achievable out of the box without either leaving users to reinvent it or
+violating the zero-runtime-dependency invariant.
 
 Ship `FileMappingStore` in the core library (spec 5.4): a persistent `MappingStore` backed by a
 single local file, implemented with the JDK only.
@@ -36,21 +36,19 @@ single local file, implemented with the JDK only.
   in-memory store. Replay rebuilds the same forward-map-plus-inverse-index structure the in-memory
   store uses, so read and uniqueness-check performance are identical after open.
 - **Single-process, enforced by an exclusive `FileChannel` lock** held from `open` to `close`.
-  Cross-process put-if-absent atomicity over a shared flat file cannot be made reliable and
-  portable with the JDK alone; rather than a store that is subtly unsafe when shared, sharing is
-  rejected at `open` time. Multi-process pipelines belong on an external store (a deferred JDBC
-  module).
+  Cross-process put-if-absent atomicity over a shared flat file cannot be made reliable and portable
+  with the JDK alone; rather than a store that is subtly unsafe when shared, sharing is rejected at
+  `open` time. Multi-process pipelines belong on an external store (a deferred JDBC module).
 - **Text format, frozen** (header line plus one tab-separated record per mapping, key and value
   base64url-encoded; spec 5.4). The file is persistent user data, exactly like the A.4 hex key
   encoding: the format is versioned by its header line and never changes within a major version.
-  Keys and values are always base64url-encoded because raw mapping keys (`rawMappingKeys(true)`)
-  can contain any character; the namespace is charset-constrained by section 2.6 and written
-  verbatim.
-- **Flush-per-write, no fsync.** Success is reported only after the record is written and flushed
-  to the OS, so a process crash cannot lose an acknowledged mapping. An OS/power crash can lose a
-  tail record; the torn-tail rule (ignore and overwrite an unterminated final line) makes reopening
-  safe, and an unacknowledged write never had callers relying on it. Interior corruption or
-  duplicate keys fail `open` loudly - the store never silently repairs data.
+  Keys and values are always base64url-encoded because raw mapping keys (`rawMappingKeys(true)`) can
+  contain any character; the namespace is charset-constrained by section 2.6 and written verbatim.
+- **Flush-per-write, no fsync.** Success is reported only after the record is written and flushed to
+  the OS, so a process crash cannot lose an acknowledged mapping. An OS/power crash can lose a tail
+  record; the torn-tail rule (ignore and overwrite an unterminated final line) makes reopening safe,
+  and an unacknowledged write never had callers relying on it. Interior corruption or duplicate keys
+  fail `open` loudly - the store never silently repairs data.
 
 ### Consequences
 
@@ -61,6 +59,6 @@ single local file, implemented with the JDK only.
 - Neutral: the file format joins the frozen persistent contract (spec 3.4 discipline applies: a
   change to it is a breaking change to users' stored data).
 - Bad, because `open` throwing on a held lock means two `AlterEgo` instances in one process cannot
-  share one store file via separate `open` calls - they share the single `FileMappingStore`
-  instance instead (it is thread-safe). Documented in Javadoc.
+  share one store file via separate `open` calls - they share the single `FileMappingStore` instance
+  instead (it is thread-safe). Documented in Javadoc.
 - Neutral: JDBC- and Redis-backed stores remain deferred as separate artifacts.

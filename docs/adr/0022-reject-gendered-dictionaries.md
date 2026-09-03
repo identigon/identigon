@@ -8,18 +8,17 @@ decision-makers: David Conneely
 
 ## Context and Problem Statement
 
-A proposed feature for `alterego` was "Tagged name dictionaries", which would include gendered
-name lists (e.g., mapping "Male" records to male fictional names and "Female" to female fictional
-names).
+A proposed feature for `alterego` was "Tagged name dictionaries", which would include gendered name
+lists (e.g., mapping "Male" records to male fictional names and "Female" to female fictional names).
 
 While generating gender-aligned names might seem to improve the realism of pseudonymised records,
 doing so natively in the library presents three major complications:
 
-1. **API complexity**: the library models transformations as independent operations on single
-   values (`Transformation<T>`). To select a name based on gender, the strategy would need the
-   `gender` column from the original record as a secondary input. This requires complex API
-   changes (e.g., parameterised transformations like `alterego.firstName(gender)`) and forces the
-   caller to write branching logic in their data pipeline.
+1. **API complexity**: the library models transformations as independent operations on single values
+   (`Transformation<T>`). To select a name based on gender, the strategy would need the `gender`
+   column from the original record as a secondary input. This requires complex API changes (e.g.,
+   parameterised transformations like `alterego.firstName(gender)`) and forces the caller to write
+   branching logic in their data pipeline.
 2. **Inference risk (data leakage)**: if pseudonymisation strictly partitions names by gender, an
    attacker can infer the original record's gender from the assigned fictional name. Crucially,
    mapping undisclosed genders ("prefer not to say") or non-binary identities to a distinct unisex
@@ -45,11 +44,10 @@ pool of diverse fictional names.
 
 ### Consequences
 
-- Good, because name transformations (`firstName()`, `lastName()`, `fullName()`) remain
-  structurally simple `Transformation<String>` implementations with no secondary input
-  dependencies.
+- Good, because name transformations (`firstName()`, `lastName()`, `fullName()`) remain structurally
+  simple `Transformation<String>` implementations with no secondary input dependencies.
 - Good, because secondary data leakage regarding gender is structurally prevented by design.
 - Good, because the library inherently handles all gender identities (including undisclosed and
   non-binary genders) gracefully without complex fallback configurations.
-- Neutral: the "tagged name dictionaries" item is permanently removed from consideration rather
-  than deferred.
+- Neutral: the "tagged name dictionaries" item is permanently removed from consideration rather than
+  deferred.

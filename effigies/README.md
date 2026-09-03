@@ -1,17 +1,16 @@
 # Effigies
 
-Effigies is a Java 25 command-line application that sits **above** the
-[incognito](../incognito) anonymisation engine. It is the
-_authoring and orchestration_ layer: it inspects a source database's schema, helps you author (and,
-later, infer) the declarative anonymisation policy, and then drives incognito to produce the
-schema-identical, PII-free clone.
+Effigies is a Java 25 command-line application that sits **above** the [incognito](../incognito)
+anonymisation engine. It is the _authoring and orchestration_ layer: it inspects a source database's
+schema, helps you author (and, later, infer) the declarative anonymisation policy, and then drives
+incognito to produce the schema-identical, PII-free clone.
 
 The name: an _effigy_ is a deliberately fake likeness. Effigies makes the likeness; incognito
 carries out the substitution.
 
 > **In one sentence:** _"Point me at a production database and help me produce a reviewable
-> configuration that incognito can run to make an anonymised copy - without me
-> hand-writing Java, and without ever showing a real data value to anything that doesn't need it."_
+> configuration that incognito can run to make an anonymised copy - without me hand-writing Java,
+> and without ever showing a real data value to anything that doesn't need it."_
 
 ## Where it sits (and what stays out)
 
@@ -30,16 +29,16 @@ Two boundaries are deliberate and load-bearing:
   YAML is the durable, checked-in, reviewable artifact; Effigies helps you write it, then gets out
   of the way.
 - **Fail-closed survives.** Effigies never assigns a column role behind your back. It _suggests_; an
-  unclassified column still aborts the run (incognito's fail-closed contract, ADR 17).
-  The DPIA report incognito emits - source-value survival, misdeclaration lint, structural
-  findings, and the illustrative sample rows - is the safety net that catches a bad classification.
+  unclassified column still aborts the run (incognito's fail-closed contract, ADR 17). The DPIA
+  report incognito emits - source-value survival, misdeclaration lint, structural findings, and the
+  illustrative sample rows - is the safety net that catches a bad classification.
 - **Metadata only.** Schema discovery and any artifact Effigies produces for a human or an agent
   carry schema _metadata_ (names, types, the FK graph) - never sampled real values. Authoring works
   from the schema, not the data.
 
-See [ADR 23](../docs/adr/0023-authoring-above-the-engine.md) for
-the reasoning, [`docs/spec/effigies.md`](../docs/spec/effigies.md) for the behavioural contract, and
-the root [`PLAN.md`](../PLAN.md) (`**Project:** effigies` entries) for the backlog.
+See [ADR 23](../docs/adr/0023-authoring-above-the-engine.md) for the reasoning,
+[`docs/spec/effigies.md`](../docs/spec/effigies.md) for the behavioural contract, and the root
+[`PLAN.md`](../PLAN.md) (`**Project:** effigies` entries) for the backlog.
 
 ## Status
 
@@ -47,9 +46,9 @@ the root [`PLAN.md`](../PLAN.md) (`**Project:** effigies` entries) for the backl
 
 ## Try it in five minutes
 
-[`quickstart/`](../quickstart/) (at the repository root - it exercises the whole pipeline, not
-just Effigies) is a small, self-contained PostgreSQL schema (no Docker, no third-party data) with
-a finished `policy.yaml` - the fastest way to see `discover` -> `scaffold` -> `run` and the DPIA
+[`quickstart/`](../quickstart/) (at the repository root - it exercises the whole pipeline, not just
+Effigies) is a small, self-contained PostgreSQL schema (no Docker, no third-party data) with a
+finished `policy.yaml` - the fastest way to see `discover` -> `scaffold` -> `run` and the DPIA
 report working end to end before pointing Identigon at a real database.
 
 ## Usage Workflow
@@ -74,8 +73,8 @@ java -jar effigies/build/libs/identigon.jar scaffold --source-url "jdbc:postgres
 Effigies ships with a built-in Agent Skill for AI assistants (Claude, Antigravity, Copilot, etc.)
 that interactively interviews you to safely classify the remaining columns.
 
-Activate the skill in your agent (located at
-`.agents/skills/identigon-policy-author/SKILL.md`). The agent will:
+Activate the skill in your agent (located at `.agents/skills/identigon-policy-author/SKILL.md`). The
+agent will:
 
 - Read your scaffolded `policy.yaml`.
 - Batch related columns (e.g., all audit timestamps) to prevent fatigue.
@@ -95,8 +94,8 @@ java -jar effigies/build/libs/identigon.jar validate --policy ./policy.yaml \
 
 ### 4. Orchestration (`run`)
 
-`run` needs a **schema-identical, empty** target database - `incognito` loads _into_ it, it does
-not create or replace it for you. The simplest way to get one is `pg_dump --schema-only` from the
+`run` needs a **schema-identical, empty** target database - `incognito` loads _into_ it, it does not
+create or replace it for you. The simplest way to get one is `pg_dump --schema-only` from the
 source, loaded into a fresh database:
 
 ```bash
@@ -130,8 +129,8 @@ java -jar effigies/build/libs/identigon.jar run \
 ```
 
 The engine will execute the pipeline and surface the DPIA accountability report as
-`dpia-report.html` (presentation-ready), `dpia-report.json` (machine-readable), and
-`dpia-report.md` (human-diffable).
+`dpia-report.html` (presentation-ready), `dpia-report.json` (machine-readable), and `dpia-report.md`
+(human-diffable).
 
 ## Build & run
 

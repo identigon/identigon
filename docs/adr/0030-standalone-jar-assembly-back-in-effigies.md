@@ -37,10 +37,10 @@ disappear, it just changes direction.
 
 ## Decision Outcome
 
-Chosen option: "move assembly into effigies", because the root-ownership argument survives on
-naming alone once the coordinate question is settled separately, and a task local to the project
-whose runtime classpath it packages is simpler to write and consume than one resolving that
-classpath from outside via a detached configuration.
+Chosen option: "move assembly into effigies", because the root-ownership argument survives on naming
+alone once the coordinate question is settled separately, and a task local to the project whose
+runtime classpath it packages is simpler to write and consume than one resolving that classpath from
+outside via a detached configuration.
 
 - **`identigonJar` moves to `effigies/build.gradle.kts`.** It consumes effigies' own
   `sourceSets.main.output` and `configurations.runtimeClasspath` directly - no attribute-matching
@@ -57,8 +57,8 @@ classpath from outside via a detached configuration.
 ### Consequences
 
 - Good, because root's build script has no buildable-artifact machinery to maintain, and the fat
-  jar's assembly sits next to the thin jar it is a variant of - the more idiomatic Gradle shape,
-  and where a reader would look for it first.
+  jar's assembly sits next to the thin jar it is a variant of - the more idiomatic Gradle shape, and
+  where a reader would look for it first.
 - Good, because `identigonJar` consuming effigies' own `runtimeClasspath` configuration directly is
   fewer moving parts than resolving the same classpath from outside via a detached configuration
   with hand-declared `Usage`/`Category`/`LibraryElements`/`Bundling` attributes.

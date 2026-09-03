@@ -24,15 +24,15 @@ All URLs retrieved **2026-07-31**.
 - **Download:**
   `https://raw.githubusercontent.com/spring-projects/spring-petclinic/main/src/main/resources/db/postgres/schema.sql`
   and `.../data.sql`
-- **Licence:** Apache-2.0 - <https://www.apache.org/licenses/LICENSE-2.0>
-  (copy: `LICENCES/Apache-2.0.txt`).
-- Verified against canonical counts (6 vets, 3 specialties, 5 vet_specialties, 6 types, 10
-  owners, 13 pets, 4 visits).
+- **Licence:** Apache-2.0 - <https://www.apache.org/licenses/LICENSE-2.0> (copy:
+  `LICENCES/Apache-2.0.txt`).
+- Verified against canonical counts (6 vets, 3 specialties, 5 vet_specialties, 6 types, 10 owners,
+  13 pets, 4 visits).
 
 ## Pagila - PostgreSQL License - **USED** (`PagilaBenchmarkE2ETest`)
 
-- A PostgreSQL port of MySQL's **Sakila** example DB (originally by Mike Hillyer, MySQL AB
-  docs team).
+- A PostgreSQL port of MySQL's **Sakila** example DB (originally by Mike Hillyer, MySQL AB docs
+  team).
 - **Pinned to tag `pagila-v3.0.0`** - deliberately _not_ `master`. Master requires the **pgvector**
   extension (a `film_embedding vector(20)` table) which stock `postgres:18-alpine` lacks, and has 55
   `payment` partitions. `pagila-v3.0.0` predates pgvector: 22 tables (15 Sakila core + 7 `payment`
@@ -42,14 +42,14 @@ All URLs retrieved **2026-07-31**.
 - **Also vendored:** `pagila/pagila-insert-data.sql` (~5 MB) -
   `https://raw.githubusercontent.com/devrimgunduz/pagila/refs/tags/pagila-v3.0.0/pagila-insert-data.sql`.
   SHA-256 at vendor time (2026-08-03):
-  `136f3105263a1338a9805da4c06b6b37b60f1abc15ce7dbc8d6f5501f506aa22`
-  (a provenance record, not re-checked at test time - see PLAN.md Phase 7 for why). INSERT format
-  (not the COPY-format `pagila-data.sql`) so it loads through a plain JDBC statement stream.
-- **Test note:** the benchmark clones the 15 non-partitioned Sakila core tables and excludes
-  the partitioned `payment` (+ its 7 partitions). `OWNER TO postgres` statements are stripped
-  at load (the role does not exist in the test container).
-- **Licence:** PostgreSQL License -
-  <https://www.postgresql.org/about/licence/> (copy: `LICENCES/PostgreSQL-License.txt`).
+  `136f3105263a1338a9805da4c06b6b37b60f1abc15ce7dbc8d6f5501f506aa22` (a provenance record, not
+  re-checked at test time - see PLAN.md Phase 7 for why). INSERT format (not the COPY-format
+  `pagila-data.sql`) so it loads through a plain JDBC statement stream.
+- **Test note:** the benchmark clones the 15 non-partitioned Sakila core tables and excludes the
+  partitioned `payment` (+ its 7 partitions). `OWNER TO postgres` statements are stripped at load
+  (the role does not exist in the test container).
+- **Licence:** PostgreSQL License - <https://www.postgresql.org/about/licence/> (copy:
+  `LICENCES/PostgreSQL-License.txt`).
 
 ## Northwind - Microsoft Public License (Ms-PL)
 
@@ -58,11 +58,11 @@ All URLs retrieved **2026-07-31**.
 - **Licence:** Ms-PL - <https://opensource.org/license/ms-pl-html> (copy: `LICENCES/Ms-PL.txt`).
 - Wired to a test (`NorthwindBenchmarkE2ETest`).
 - **Widened, not otherwise upstream-verbatim.** Four `VARCHAR(15)` city columns (`customers.city`,
-  `employees.city`, `orders.ship_city`, `suppliers.city`) were widened to `VARCHAR(20)` -
-  upstream's width doesn't fit `ae.city()`'s real GB town-name output (`"Newcastle upon Tyne"` is
-  19 characters, the dictionary's longest entry), which `northwind/policy.yaml` routes those
-  columns through. No other table, column, or data row was altered; the change is stated in the
-  file's own header.
+  `employees.city`, `orders.ship_city`, `suppliers.city`) were widened to `VARCHAR(20)` - upstream's
+  width doesn't fit `ae.city()`'s real GB town-name output (`"Newcastle upon Tyne"` is 19
+  characters, the dictionary's longest entry), which `northwind/policy.yaml` routes those columns
+  through. No other table, column, or data row was altered; the change is stated in the file's own
+  header.
 
 ## Employees - Creative Commons Attribution-Share Alike 3.0 (CC BY-SA 3.0) - **USED** (`EmployeesBenchmarkE2ETest`)
 
@@ -78,13 +78,12 @@ carries the original licence header inline.
   `postgres/dataset_small`. Bytebase's _repository_ `LICENSE` is MIT (© 2022 tianzhou) and covers
   their packaging/tooling only; the **data file itself is CC BY-SA 3.0** (header preserved verbatim
   in our copy), so that is the licence recorded and complied with here.
-- **Assembled, not upstream-verbatim.** Our `employees/employees.sql` is a mechanical
-  assembly of bytebase's `dataset_small/employee.sql` (schema) with its six `load_*.sql` data
-  includes inlined in FK-dependency order, and the psql meta-commands (`\echo`, `\i`) removed
-  so it loads through a plain JDBC statement stream. **No schema object or data row was
-  altered.** The changes made (assembly + meta-command removal) are stated in the file's own
-  header, satisfying the CC BY-SA "indicate changes" term; the work stays under CC BY-SA 3.0
-  (share-alike).
+- **Assembled, not upstream-verbatim.** Our `employees/employees.sql` is a mechanical assembly of
+  bytebase's `dataset_small/employee.sql` (schema) with its six `load_*.sql` data includes inlined
+  in FK-dependency order, and the psql meta-commands (`\echo`, `\i`) removed so it loads through a
+  plain JDBC statement stream. **No schema object or data row was altered.** The changes made
+  (assembly + meta-command removal) are stated in the file's own header, satisfying the CC BY-SA
+  "indicate changes" term; the work stays under CC BY-SA 3.0 (share-alike).
 - **Download URLs:**
   `https://raw.githubusercontent.com/bytebase/employee-sample-database/main/postgres/dataset_small/employee.sql`
   plus `load_department.sql`, `load_employee.sql`, `load_dept_emp.sql`, `load_dept_manager.sql`,
@@ -101,10 +100,10 @@ fictionality net), a self-referential `employee.reports_to` FK, and a `TIMESTAMP
 - **Origin:** authored by Luis Rocha; the single-file PostgreSQL script is generated from the
   project's canonical data sources. © 2008-2024 Luis Rocha.
 - **Vendored:** `chinook/chinook.sql` - the upstream `Chinook_PostgreSql.sql` with only its
-  database-creation preamble removed (`DROP DATABASE` / `CREATE DATABASE` / `\c chinook`) so
-  it loads into an existing database via a plain JDBC statement stream. No table or data row
-  was altered; the upstream header and licence reference are preserved. The change is stated
-  in the file's own header.
+  database-creation preamble removed (`DROP DATABASE` / `CREATE DATABASE` / `\c chinook`) so it
+  loads into an existing database via a plain JDBC statement stream. No table or data row was
+  altered; the upstream header and licence reference are preserved. The change is stated in the
+  file's own header.
 - **Download:**
   `https://raw.githubusercontent.com/lerocha/chinook-database/master/ChinookDatabase/DataSources/Chinook_PostgreSql.sql`
 - **Licence:** MIT - <https://github.com/lerocha/chinook-database/blob/master/LICENSE.md> (copy:
@@ -113,7 +112,7 @@ fictionality net), a self-referential `employee.reports_to` FK, and a `TIMESTAMP
 ## Notes on the model (improvements over `alterego`'s)
 
 `alterego` vendors small curated dictionaries that ship _inside the JAR_, so its `NOTICE` is
-top-level and packaged into `META-INF`. These fixtures are **test-only**, so the whole set is
-scoped under `benchmarks/` and kept out of the artifact. One addition beyond that model: the
-**licence URL** is recorded next to the data URL (not just the data provenance). Every
-fixture is vendored the same way, with no exceptions.
+top-level and packaged into `META-INF`. These fixtures are **test-only**, so the whole set is scoped
+under `benchmarks/` and kept out of the artifact. One addition beyond that model: the **licence
+URL** is recorded next to the data URL (not just the data provenance). Every fixture is vendored the
+same way, with no exceptions.

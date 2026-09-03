@@ -89,9 +89,9 @@ grown one.
 ## What is verified only approximately
 
 - **Pagila's vendored `pagila-insert-data.sql`** is checked by a SHA-256 recorded at vendor time
-  (`incognito/src/test/resources/benchmarks/SOURCES.md`), not re-checked at test time - a
-  provenance record, not a runtime guarantee. git/GitHub already guarantee the committed bytes, the
-  same as every other vendored fixture.
+  (`incognito/src/test/resources/benchmarks/SOURCES.md`), not re-checked at test time - a provenance
+  record, not a runtime guarantee. git/GitHub already guarantee the committed bytes, the same as
+  every other vendored fixture.
 - **`incognito`'s benchmark suites** assert surrogate-independent invariants (referential integrity,
   preserved multisets) rather than exact fabricated values, since fabrication is salt-keyed and the
   per-run salt is ephemeral by default - an intentional approximation, not a gap.
@@ -102,8 +102,8 @@ grown one.
   fidelity, formal re-identification bounds (ε-guarantees), exact row counts, structural outlier
   dropping, complex column types (JSON/JSONB, spatial, biometric/media BLOBs, arrays, INET), other
   database engines, parallel execution, free-text redaction, real-time proxying, and any UI. None of
-  these are tested because none of them are implemented - see the spec member for the full
-  reasoning per item.
+  these are tested because none of them are implemented - see the spec member for the full reasoning
+  per item.
 - **Composite PK + cyclic FK on the same table** (each supported alone) - fails closed with a clear
   message rather than corrupting data, but the combination itself has no passing test, because it
   has no implementation yet. Tracked in root `PLAN.md`

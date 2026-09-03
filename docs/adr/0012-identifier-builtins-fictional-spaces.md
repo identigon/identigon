@@ -8,9 +8,9 @@ decision-makers: David Conneely
 
 ## Context and Problem Statement
 
-Real datasets carry checksummed or format-constrained identifiers - NHS numbers, National
-Insurance numbers, driving licence numbers, passport numbers, payment card numbers. v0.1.0 offers
-only `pattern(...)` for these, which can reproduce the shape but neither the checksum nor any
+Real datasets carry checksummed or format-constrained identifiers - NHS numbers, National Insurance
+numbers, driving licence numbers, passport numbers, payment card numbers. v0.1.0 offers only
+`pattern(...)` for these, which can reproduce the shape but neither the checksum nor any
 fictionality guarantee; the deferred-list sketch was "checksum-aware (Luhn) generation" as a
 pattern-language extension.
 
@@ -21,9 +21,9 @@ pattern-language extension.
 
 ## Decision Outcome
 
-Chosen option: "five dedicated, identifier-specific built-ins", because a fictionality guarantee
-is identifier-specific knowledge (which prefix is never issued, which field value is impossible)
-that a generic pattern token cannot express - a Luhn token would produce checksum-valid numbers
+Chosen option: "five dedicated, identifier-specific built-ins", because a fictionality guarantee is
+identifier-specific knowledge (which prefix is never issued, which field value is impossible) that a
+generic pattern token cannot express - a Luhn token would produce checksum-valid numbers
 indistinguishable from real cards.
 
 Ship five dedicated built-ins (spec 4.8, algorithms A.5-A.9) rather than generic checksum tokens in
@@ -63,8 +63,7 @@ rejected outright, for the reason above.
   the same scoping as `postcode()`'s; the output's generic alphanumeric shape means passport-field
   validators that accept multiple nationalities still accept it.
 - Neutral: the README's extensibility example, which generates NHS numbers via a custom strategy,
-  must switch to a non-built-in identifier to avoid teaching users to hand-roll what is now
-  shipped.
+  must switch to a non-built-in identifier to avoid teaching users to hand-roll what is now shipped.
 - Bad, because none of the five participates in record coherence: none encodes a place, and
   coherence between an identifier's embedded date-of-birth block and jittered date fields is a
   non-goal for this version.

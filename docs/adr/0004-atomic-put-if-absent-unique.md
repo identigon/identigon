@@ -8,11 +8,11 @@ decision-makers: David Conneely
 
 ## Context and Problem Statement
 
-The `unique()` decorator must guarantee that distinct inputs never map to the same output. An
-early draft used a two-step protocol: `reserveValue(candidate)` then `putIfAbsent(key, candidate)`.
-That protocol cannot be made leak-free: a crash or a lost race between the two steps strands a
-reserved value with no owner, and adding a `releaseValue` operation just moves the problem (the
-releaser can also crash).
+The `unique()` decorator must guarantee that distinct inputs never map to the same output. An early
+draft used a two-step protocol: `reserveValue(candidate)` then `putIfAbsent(key, candidate)`. That
+protocol cannot be made leak-free: a crash or a lost race between the two steps strands a reserved
+value with no owner, and adding a `releaseValue` operation just moves the problem (the releaser can
+also crash).
 
 ## Considered Options
 
@@ -39,5 +39,4 @@ namespace, atomically as a whole (specification section 5.1).
   or compute.
 - Neutral: the `unique()` retry loop is simple: `ValueTaken` -> bump the derivation counter and try
   again.
-- Neutral: a reusable store contract test enforces the atomicity requirement on all
-  implementations.
+- Neutral: a reusable store contract test enforces the atomicity requirement on all implementations.

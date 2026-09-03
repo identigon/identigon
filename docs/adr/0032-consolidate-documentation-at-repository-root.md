@@ -16,9 +16,9 @@ publishable (`alterego`/`incognito` to GitHub Packages).
 That structure's own default for a monorepo is per-module: each subproject gets its own
 specification, its own ADR sequence, its own plan, with only the map, `README.md`, `CHANGELOG.md`
 and `PLAN.md` staying at the repository root. Identigon's actual layout puts all of these at the
-root instead - `docs/spec/` (indexed by root `SPECIFICATION.md`), `docs/adr/`, `docs/research/`,
-and `docs/testing.md` are shared, not per-subproject - and that choice was never recorded on its
-own terms. It followed from ADR 24 (lockstep versioning) in practice, but that record settles the
+root instead - `docs/spec/` (indexed by root `SPECIFICATION.md`), `docs/adr/`, `docs/research/`, and
+`docs/testing.md` are shared, not per-subproject - and that choice was never recorded on its own
+terms. It followed from ADR 24 (lockstep versioning) in practice, but that record settles the
 version-_number_ question specifically; it does not, by itself, settle where documentation lives.
 
 ## Considered Options
@@ -42,8 +42,8 @@ directly on `incognito`'s policy API, and `incognito`'s own specification carrie
 force many real decisions to be recorded twice, once per affected subproject, or awkwardly
 cross-referenced between separate ADR sequences.
 
-The one exception is the specification itself: `docs/spec/alterego.md`, `docs/spec/incognito.md`
-and `docs/spec/effigies.md` remain three separate members, each the sole place its subproject's
+The one exception is the specification itself: `docs/spec/alterego.md`, `docs/spec/incognito.md` and
+`docs/spec/effigies.md` remain three separate members, each the sole place its subproject's
 behavioural contract belongs, indexed by root `SPECIFICATION.md`. That split is not a per-module
 documentation structure in the sense this decision rejects - it is the ordinary "specification
 outgrows one file, becomes an index plus a tree" shape, applied because each subproject genuinely

@@ -9,8 +9,8 @@ the others (`effigies` -> `incognito` -> `alterego`, via `project(...)` dependen
 
 - `alterego/` - a zero-dependency Java 25 library for deterministic pseudonymisation.
 - `incognito/` - a Java 25 library that clones a production database into a schema-identical test
-  database with all PII replaced by clearly fictional data, preserving data volumes and
-  inter-entity relationships. Delegates all field-value fabrication to `alterego`.
+  database with all PII replaced by clearly fictional data, preserving data volumes and inter-entity
+  relationships. Delegates all field-value fabrication to `alterego`.
 - `effigies/` - a Java 25 authoring and orchestration CLI frontend that sits above `incognito`. It
   discovers schemas, scaffolds declarative `policy.yaml` files, and drives the engine to anonymise
   databases.
@@ -25,8 +25,8 @@ writing any code, for whichever subproject(s) you're touching:
 **This also covers `identigon.github.io`**, the separate repository holding the project's public
 site: its decisions live in this repo's `docs/adr/`, and its backlog in this `PLAN.md` (tagged
 `identigon.github.io`), rather than in a documentation structure of its own - see
-`docs/adr/0033-extend-documentation-coverage-to-identigon-github-io.md`. Working in that repo?
-Its own `AGENTS.md` there covers site-specific hazards only and routes back here for the rest.
+`docs/adr/0033-extend-documentation-coverage-to-identigon-github-io.md`. Working in that repo? Its
+own `AGENTS.md` there covers site-specific hazards only and routes back here for the rest.
 
 ## alterego/
 
@@ -63,8 +63,8 @@ When documents disagree, tense settles it:
 
 Before you edit:
 
-- A specification member follows the work. Change it because behaviour changed, not because it
-  would read better. Its purpose and scope are not yours to revise.
+- A specification member follows the work. Change it because behaviour changed, not because it would
+  read better. Its purpose and scope are not yours to revise.
 - Never change an ADR's `status`, and never edit one that says `accepted`. Drafting a record is
   yours; deciding one is not - leave `decision-makers` as the template's placeholder too.
 - Delete completed `PLAN.md` entries rather than marking them done.
@@ -93,8 +93,8 @@ Before you edit:
 
 ## Definition of done (every task)
 
-- `./gradlew build` is green (compile, tests, and whichever of spotbugs/pmd/jacoco/javadoc apply
-  to the subproject(s) touched).
+- `./gradlew build` is green (compile, tests, and whichever of spotbugs/pmd/jacoco/javadoc apply to
+  the subproject(s) touched).
 - New or changed public API exists only where a specification section (in `docs/spec/`) defines it.
 - **Update the root `CHANGELOG.md` under `## [Unreleased]`, staged in the same diff as the change -
   before considering the task done, not as a separate follow-up.** Covers fixes and test-coverage
@@ -104,35 +104,35 @@ Before you edit:
 - **alterego**: behaviour pinned in Appendix A is covered by a conformance test against the frozen
   vectors. Public types and methods have Javadoc that states behaviour, not implementation.
 - **incognito**: public types and methods have Javadoc that states behaviour, not implementation -
-  the doclint `missing` category is enforced (full `Xdoclint:all`): every public element needs a
-  doc comment and the appropriate `@param`/`@return`/`@throws`, or the build fails. The §7.3
-  invariants hold, and any new behaviour is covered by a test.
+  the doclint `missing` category is enforced (full `Xdoclint:all`): every public element needs a doc
+  comment and the appropriate `@param`/`@return`/`@throws`, or the build fails. The §7.3 invariants
+  hold, and any new behaviour is covered by a test.
 
 ## Hard invariants - never violate
 
 ### alterego
 
-1. Never change the Appendix A algorithms, the canonical encodings (spec section 2.6), the
-   built-in domain names (`"alterego:..."`), or the built-in attribute-key names (spec section
-   6.3 - they feed keyed-scope derivation). Changing any of them silently changes every user's
-   pseudonymised data.
+1. Never change the Appendix A algorithms, the canonical encodings (spec section 2.6), the built-in
+   domain names (`"alterego:..."`), or the built-in attribute-key names (spec section 6.3 - they
+   feed keyed-scope derivation). Changing any of them silently changes every user's pseudonymised
+   data.
 2. Never regenerate, edit, or delete frozen test vectors under
    `alterego/src/test/resources/vectors/`. If an implementation disagrees with a vector, the
    implementation is wrong.
 3. No runtime dependencies. The JDK (including `javax.crypto`) only. Test scope may use JUnit
-   Jupiter, and AssertJ if fluent assertions are wanted; no property-based-testing framework
-   (jqwik was removed - see the matching ADR). Property-style tests are plain JUnit loops over
+   Jupiter, and AssertJ if fluent assertions are wanted; no property-based-testing framework (jqwik
+   was removed - see the matching ADR). Property-style tests are plain JUnit loops over
    deterministically enumerated inputs.
 4. `java.util.random.RandomGenerator` must not appear anywhere in the public API, and no
    off-the-shelf PRNG may replace the HMAC counter-mode stream (see the library-owned-randomness
    ADR).
-5. Nothing machine- or time-dependent anywhere in library code: no `Locale.getDefault()`, no
-   system time of any kind (`System.currentTimeMillis()`, `Instant.now()`, `LocalDate.now()`,
-   `Clock`), no `new Random()` or `UUID.randomUUID()`, no iteration over unordered collections
-   where order reaches an output. Time-relative constraints are explicit caller-supplied bounds
-   (see the explicit-clamp-bounds ADR).
-6. If a change would alter any golden output, stop and flag it - that is a breaking change
-   requiring an independent decision, whatever the reason.
+5. Nothing machine- or time-dependent anywhere in library code: no `Locale.getDefault()`, no system
+   time of any kind (`System.currentTimeMillis()`, `Instant.now()`, `LocalDate.now()`, `Clock`), no
+   `new Random()` or `UUID.randomUUID()`, no iteration over unordered collections where order
+   reaches an output. Time-relative constraints are explicit caller-supplied bounds (see the
+   explicit-clamp-bounds ADR).
+6. If a change would alter any golden output, stop and flag it - that is a breaking change requiring
+   an independent decision, whatever the reason.
 7. Do not skip, disable or weaken tests to get a green build.
 
 ### incognito
@@ -140,29 +140,28 @@ Before you edit:
 1. **Fail-closed classification.** An unclassified column aborts the run; auto-inference only
    _suggests_ roles, never assigns them. A `SENSITIVE` column with no `distinguishing` declaration
    fails. Never copy a column you were not told how to handle (SPEC §7.2, and the matching ADR).
-2. **No `hashCode()`-derived fabricated values or jitter deltas.** Every fabricated value and
-   every jitter delta derives from `alterego`'s salt-keyed HMAC stream (SPEC §5.1, and the matching
-   ADR).
+2. **No `hashCode()`-derived fabricated values or jitter deltas.** Every fabricated value and every
+   jitter delta derives from `alterego`'s salt-keyed HMAC stream (SPEC §5.1, and the matching ADR).
 3. **The salt and row values are never logged**, and the salt is destroyed on completion. The
-   library performs no logging today; if it ever does, use the JDK `System.Logger` facade and
-   emit only coarse operational events - never the salt, never a field value (SPEC §5.1/§7.3).
-4. **Session settings on the insert connection only.** `session_replication_role='replica'` (and
-   any per-session state) is set on the same connection that performs the inserts (SPEC §9).
+   library performs no logging today; if it ever does, use the JDK `System.Logger` facade and emit
+   only coarse operational events - never the salt, never a field value (SPEC §5.1/§7.3).
+4. **Session settings on the insert connection only.** `session_replication_role='replica'` (and any
+   per-session state) is set on the same connection that performs the inserts (SPEC §9).
 5. **No `shiftDate(YEAR)` for a strongly-identifying date** (e.g. `dob`) - use wide jitter or
    synthesise (Appendix B).
-6. **No silent skipping** of tables or columns (cyclic, unclassified, untransformable): fail loud
-   or surface it in the `AnonymisationReport` - never drop.
+6. **No silent skipping** of tables or columns (cyclic, unclassified, untransformable): fail loud or
+   surface it in the `AnonymisationReport` - never drop.
 7. **`pg_stats` is an optimisation, never the privacy gate.** Keep-vs-fabricate is the
    `distinguishing` declaration alone (SPEC §4.1, and the matching ADR).
 8. **Incognito delegates value transformation to `alterego`.** Do not hand-roll redaction,
-   anonymisation, substitution, or format-preserving generation here; add the primitive to
-   AlterEgo and call it (SPEC §1.4, and the matching ADR). Existing violations are tracked bugs, not
-   licence to add more.
+   anonymisation, substitution, or format-preserving generation here; add the primitive to AlterEgo
+   and call it (SPEC §1.4, and the matching ADR). Existing violations are tracked bugs, not licence
+   to add more.
 
 ### effigies
 
-1. **Metadata only.** Discovery and every emitted artifact carry schema metadata, never sampled
-   real data values.
+1. **Metadata only.** Discovery and every emitted artifact carry schema metadata, never sampled real
+   data values.
 2. **Fail-closed preserved.** Effigies suggests roles; it never assigns one behind the user's back.
 3. **No model in the engine path.** Inference is authoring; the anonymisation run is a
    deterministic, model-free `incognito` execution.
@@ -175,11 +174,11 @@ Before you edit:
   conventions, comment density, and naming.
 - Wrap markdown files at column 100.
 - **alterego** additionally follows Google Java Style, with two exceptions: empty blocks may be on
-  one line (e.g. `record Stored() implements PutUniqueResult {}`), and implementation records
-  inside a sealed interface need no blank lines between them. Built-in strategies are
-  package-private; users reach them only through `AlterEgo` factory methods.
+  one line (e.g. `record Stored() implements PutUniqueResult {}`), and implementation records inside
+  a sealed interface need no blank lines between them. Built-in strategies are package-private;
+  users reach them only through `AlterEgo` factory methods.
 
 ## Git
 
-- Never run `git commit` or `git push` unless explicitly asked. Present the changes and a
-  suggested commit message, then wait.
+- Never run `git commit` or `git push` unless explicitly asked. Present the changes and a suggested
+  commit message, then wait.

@@ -25,9 +25,9 @@ Delete this comment in the copy.
 
 ## Context and Problem Statement
 
-What forces were at play, and what made this decision non-obvious. What was known at the time -
-and, more usefully, what was **not**. If nothing here would surprise a newcomer, this may not need
-a record.
+What forces were at play, and what made this decision non-obvious. What was known at the time - and,
+more usefully, what was **not**. If nothing here would surprise a newcomer, this may not need a
+record.
 
 ## Considered Options
 

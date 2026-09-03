@@ -12,9 +12,9 @@ Appendix B's `SYNTHESISE`-by-type table let a `QUASI_ID` column on a character t
 friends) with no `directIdStrategy` hint fall back to shape-preserving fabrication - the same
 guarantee-less mechanism ADR 21 already named for `DIRECT_ID`'s `ALTEREGO_GENERIC`. Unlike
 `DIRECT_ID`, this fallback was never a declared choice: `SchemaDiscoveryStage` treated character
-types as unconditionally "synthesisable" alongside temporal types, so a `postcode` column
-classified `QUASI_ID` with the default `SYNTHESISE` strategy and no hint passed validation and
-produced structurally-valid output that can collide with a real postcode - exactly the outcome
+types as unconditionally "synthesisable" alongside temporal types, so a `postcode` column classified
+`QUASI_ID` with the default `SYNTHESISE` strategy and no hint passed validation and produced
+structurally-valid output that can collide with a real postcode - exactly the outcome
 "guaranteed-fictional output" promises to prevent. External tutorial feedback demonstrated this on
 the shipped quickstart schema: removing the `directIdStrategy: ALTEREGO_POSTCODE` hint from
 `postcode` still produced a passing run with no findings, and two of three sampled output values
@@ -35,23 +35,23 @@ not pick a guarantee-less fabrication tool silently just because the author didn
   character-type `QUASI_ID` `SYNTHESISE` column.
 - Require an explicit `directIdStrategy` hint on a character-type `QUASI_ID` using `SYNTHESISE`,
   fail-closed at discovery when absent - extends ADR 29's `DIRECT_ID` treatment to `QUASI_ID`,
-  scoped to character types only (temporal types keep their existing, type-matched shift
-  primitive with no hint required).
+  scoped to character types only (temporal types keep their existing, type-matched shift primitive
+  with no hint required).
 
 ## Decision Outcome
 
 Chosen option: "require the hint", because a character-type `QUASI_ID` whose `SYNTHESISE` strategy
-resolves to shape-preserving fabrication is exactly the unmade decision ADR 29 already ruled out
-for `DIRECT_ID` - the role name changes what the value is used for, not whether silently picking a
+resolves to shape-preserving fabrication is exactly the unmade decision ADR 29 already ruled out for
+`DIRECT_ID` - the role name changes what the value is used for, not whether silently picking a
 guarantee-less fallback is acceptable.
 
-`SchemaDiscoveryStage.validateSynthesiseType` now distinguishes temporal types (a type-matched
-shift primitive - `shiftDate`/`shiftDateTime` - needs no hint) from character types (shape-preserve
-only, so a hint is always required) from every other type (already required a hint before this
-decision). `ALTEREGO_GENERIC` remains fully available as an explicit hint, exactly as ADR 29 kept
-it for `DIRECT_ID` - this does not narrow what a character-type `QUASI_ID` can be fabricated with,
-only requires the choice be stated. `effigies scaffold` gains a `QUASI_ID` stub for heuristics with
-a known typed generator (`POSTCODE_PATTERN` today), mirroring the existing `DIRECT_ID` stub.
+`SchemaDiscoveryStage.validateSynthesiseType` now distinguishes temporal types (a type-matched shift
+primitive - `shiftDate`/`shiftDateTime` - needs no hint) from character types (shape-preserve only,
+so a hint is always required) from every other type (already required a hint before this decision).
+`ALTEREGO_GENERIC` remains fully available as an explicit hint, exactly as ADR 29 kept it for
+`DIRECT_ID` - this does not narrow what a character-type `QUASI_ID` can be fabricated with, only
+requires the choice be stated. `effigies scaffold` gains a `QUASI_ID` stub for heuristics with a
+known typed generator (`POSTCODE_PATTERN` today), mirroring the existing `DIRECT_ID` stub.
 
 ### Consequences
 
