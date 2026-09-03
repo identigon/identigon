@@ -1,18 +1,16 @@
 package org.identigon.effigies;
 
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.Locale;
 import javax.sql.DataSource;
 import org.identigon.incognito.api.IncognitoPipeline;
 import org.identigon.incognito.api.PipelineResult;
 import org.identigon.incognito.core.DpiaArtefactEmitter;
+import org.identigon.incognito.policy.AnonymisationPolicy;
 import org.identigon.incognito.policy.YamlPolicyParser;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 class RunCommand {
     private static final String USAGE = "Usage: run --source-url <url> --source-user <user> "
@@ -70,16 +68,21 @@ class RunCommand {
             return 1;
         }
 
-        // Parse salt mode directly from YAML since incognito's YamlPolicyParser doesn't handle it
-        String saltMode = "ephemeral";
-        try (InputStream is = Files.newInputStream(policyPath)) {
-            Yaml yaml = new Yaml(new SafeConstructor(new org.yaml.snakeyaml.LoaderOptions()));
-            Map<String, Object> root = yaml.load(is);
-            if (root != null && root.containsKey("saltMode")) {
-                saltMode = String.valueOf(root.get("saltMode")).toLowerCase();
-            }
+        // Parsed here (not just to peek saltMode) so a malformed or schema-invalid policy file
+        // fails fast, before either database connection is opened - run() below parses the same
+        // path again to actually build the pipeline, but both parses go through the same
+        // schema-validated YamlPolicyParser now, so they can never disagree about what
+        // `saltMode: persistent` means (previously this peeked the raw YAML by hand because
+        // YamlPolicyParser didn't recognise the key at all, which meant a policy file that
+        // actually declared saltMode always failed later in run() with "Unrecognised policy
+        // key(s): 'saltMode'").
+        String saltMode;
+        try {
+            AnonymisationPolicy policy = new YamlPolicyParser().parse(policyPath);
+            saltMode = policy.saltMode().name().toLowerCase(Locale.ROOT);
         } catch (Exception e) {
-            err.println("Warning: failed to peek saltMode from YAML, defaulting to ephemeral: " + e.getMessage());
+            err.println("Error: failed to parse policy file: " + CliErrors.causeChain(e));
+            return 1;
         }
 
         byte[] salt = null;

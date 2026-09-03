@@ -28,7 +28,7 @@ public class YamlPolicyParser {
     // signal, changing the run's behaviour without changing what the author wrote or was told.
     private static final Set<String> KNOWN_ROOT_KEYS = Set.of(
         "maxCategoricalCardinality", "distinguishingLint", "structuralUniqueness",
-        "structuralRarenessK", "tables");
+        "structuralRarenessK", "tables", "saltMode");
 
     // Keys tolerated for back-compat, meaningless today but never rejected - the deliberate
     // exception to the rule above. Extend this set when a key retires; never remove an entry once
@@ -109,6 +109,10 @@ public class YamlPolicyParser {
             }
             if (root.containsKey("structuralRarenessK")) {
                 builder.structuralRarenessK((Integer) root.get("structuralRarenessK"));
+            }
+            if (root.containsKey("saltMode")) {
+                builder.saltMode(org.identigon.incognito.api.SaltMode.valueOf(
+                    String.valueOf(root.get("saltMode")).toUpperCase()));
             }
 
             if (root.containsKey("tables")) {

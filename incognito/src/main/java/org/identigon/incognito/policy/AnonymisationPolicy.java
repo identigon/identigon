@@ -21,13 +21,18 @@ import java.util.function.Consumer;
  * @param structuralRarenessK the "rare" cutoff for a structural-uniqueness finding: a parent row's
  *     child count is rare if fewer than this many parents in total share it
  * @param tables the per-table policies, keyed by table name
+ * @param saltMode the salt mode this policy declares the pipeline should be keyed with
+ *     (SPEC §5.1/§5.2) - {@code EPHEMERAL} by default. Only the mode travels here, never the salt
+ *     bytes: {@code PERSISTENT}/{@code REPRODUCIBLE} still require the caller to supply the actual
+ *     salt separately, via {@code IncognitoPipeline.Builder#persistentSalt}/{@code #reproducible}.
  */
 public record AnonymisationPolicy(
     int maxCategoricalCardinality,
     org.identigon.incognito.api.DistinguishingLint distinguishingLint,
     org.identigon.incognito.api.StructuralUniquenessMode structuralUniqueness,
     int structuralRarenessK,
-    Map<String, TablePolicy> tables
+    Map<String, TablePolicy> tables,
+    org.identigon.incognito.api.SaltMode saltMode
 ) {
     /**
      * Takes an unmodifiable, order-preserving defensive copy of the table map.
@@ -66,6 +71,7 @@ public record AnonymisationPolicy(
             org.identigon.incognito.api.StructuralUniquenessMode.OFF;
         private int structuralRarenessK = 5;
         private final Map<String, TablePolicy> tables = new LinkedHashMap<>();
+        private org.identigon.incognito.api.SaltMode saltMode = org.identigon.incognito.api.SaltMode.EPHEMERAL;
 
         /**
          * Sets the VARCHAR/SENSITIVE categorical threshold for the misdeclaration lint (SPEC §4.1).
@@ -114,6 +120,20 @@ public record AnonymisationPolicy(
         }
 
         /**
+         * Sets which salt mode this policy declares the pipeline should be keyed with (SPEC
+         * §5.1/§5.2). Only the mode travels here, never the salt bytes: {@code PERSISTENT}/
+         * {@code REPRODUCIBLE} still require the caller to supply the actual salt separately, via
+         * {@code IncognitoPipeline.Builder#persistentSalt}/{@code #reproducible}.
+         *
+         * @param saltMode EPHEMERAL (default), PERSISTENT, or REPRODUCIBLE
+         * @return this builder
+         */
+        public Builder saltMode(org.identigon.incognito.api.SaltMode saltMode) {
+            this.saltMode = saltMode;
+            return this;
+        }
+
+        /**
          * Adds a table policy.
          *
          * @param tablePolicy the table policy
@@ -144,7 +164,7 @@ public record AnonymisationPolicy(
          */
         public AnonymisationPolicy build() {
             return new AnonymisationPolicy(maxCategoricalCardinality, distinguishingLint,
-                structuralUniqueness, structuralRarenessK, tables);
+                structuralUniqueness, structuralRarenessK, tables, saltMode);
         }
     }
 }

@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import org.identigon.incognito.api.ColumnRole;
 import org.identigon.incognito.api.DirectIdStrategy;
 import org.identigon.incognito.api.IncognitoException;
+import org.identigon.incognito.api.SaltMode;
 import org.identigon.incognito.api.StructuralUniquenessMode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -150,6 +151,7 @@ class YamlConfigTest {
         assertEquals(64, policy.maxCategoricalCardinality());
         assertEquals(StructuralUniquenessMode.OFF, policy.structuralUniqueness(), "off by default (SPEC §2.4)");
         assertEquals(5, policy.structuralRarenessK());
+        assertEquals(SaltMode.EPHEMERAL, policy.saltMode(), "default (SPEC §5.1)");
         assertTrue(policy.tables().isEmpty());
     }
 
@@ -256,5 +258,40 @@ class YamlConfigTest {
 
         assertEquals(StructuralUniquenessMode.REPORT, policy.structuralUniqueness());
         assertEquals(10, policy.structuralRarenessK());
+    }
+
+    @Test
+    void saltModeParsesFromYamlCaseInsensitively() {
+        // Regression test: `saltMode` used to be entirely absent from KNOWN_ROOT_KEYS, so any
+        // policy.yaml that declared it was rejected outright by the unrecognised-key check below -
+        // even though effigies' RunCommand reads the very same file expecting this key to be
+        // legal. Lowercase here matches how effigies (and every other enum-valued key in this
+        // parser) writes it - the parser upper-cases before calling SaltMode.valueOf.
+        String yamlString = """
+            saltMode: persistent
+            """;
+
+        InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
+        AnonymisationPolicy policy = new YamlPolicyParser().parse(inputStream);
+
+        assertEquals(SaltMode.PERSISTENT, policy.saltMode());
+    }
+
+    @Test
+    void invalidSaltModeValueFailsClosed() {
+        // A typo'd/invalid saltMode (e.g. `personal` for `persistent`) must fail closed, not
+        // silently fall through to EPHEMERAL - the same fail-closed treatment every other
+        // enum-valued key here already gets. SaltMode.valueOf's IllegalArgumentException is caught
+        // and wrapped by parse(InputStream)'s generic catch, same as any other bad enum value.
+        String yamlString = """
+            saltMode: personal
+            """;
+
+        InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
+        YamlPolicyParser parser = new YamlPolicyParser();
+
+        IncognitoException.ConfigException ex = assertThrows(
+            IncognitoException.ConfigException.class, () -> parser.parse(inputStream));
+        assertInstanceOf(IllegalArgumentException.class, ex.getCause(), "must not swallow why it was invalid");
     }
 }

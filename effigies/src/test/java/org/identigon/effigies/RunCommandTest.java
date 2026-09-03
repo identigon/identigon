@@ -99,6 +99,61 @@ class RunCommandTest {
         Files.deleteIfExists(Path.of("./dpia-report.md"));
     }
 
+    /**
+     * Regression test: a policy.yaml that declares {@code saltMode:} at the root used to be
+     * rejected outright by {@code YamlPolicyParser}'s fail-closed unrecognised-key check ({@code
+     * saltMode} wasn't in {@code KNOWN_ROOT_KEYS}) - even though this is the only way a real user
+     * selects PERSISTENT/REPRODUCIBLE mode via a policy file, as opposed to this test file's other
+     * cases, which pass the mode straight into {@link RunCommand#run} as a bare Java string and
+     * never touch this codepath. {@code YamlPolicyParser} now recognises and validates the key.
+     */
+    @Test
+    void runsAFullPipelineWhenThePolicyFileDeclaresSaltMode(@TempDir Path tempDir) throws Exception {
+        String sourceUrl = "jdbc:h2:mem:" + UUID.randomUUID() + ";DB_CLOSE_DELAY=-1";
+        String targetUrl = "jdbc:h2:mem:" + UUID.randomUUID() + ";DB_CLOSE_DELAY=-1";
+
+        try (Connection conn = DriverManager.getConnection(sourceUrl, "sa", "");
+             Statement stmt = conn.createStatement()) {
+            stmt.execute("CREATE TABLE person (id BIGINT PRIMARY KEY, name VARCHAR(100))");
+            stmt.execute("INSERT INTO person VALUES (1, 'Alice')");
+        }
+        try (Connection conn = DriverManager.getConnection(targetUrl, "sa", "");
+             Statement stmt = conn.createStatement()) {
+            stmt.execute("CREATE TABLE person (id BIGINT PRIMARY KEY, name VARCHAR(100))");
+        }
+
+        Path policy = tempDir.resolve("policy.yaml");
+        Files.writeString(policy, """
+            saltMode: persistent
+            tables:
+              PERSON:
+                columns:
+                  ID:
+                    role: PRIMARY_KEY
+                    surrogateStrategy: SEQUENTIAL_LONG
+                  NAME:
+                    role: PAYLOAD
+            """);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        int code = RunCommand.run(
+            new SimpleDataSource(sourceUrl, "sa", ""),
+            new SimpleDataSource(targetUrl, "sa", ""),
+            policy, "persistent", "a-fixed-32-byte-salt-value-here".getBytes(StandardCharsets.UTF_8),
+            null, false,
+            new PrintStream(out, true, StandardCharsets.UTF_8),
+            new PrintStream(err, true, StandardCharsets.UTF_8));
+
+        String outStr = out.toString(StandardCharsets.UTF_8);
+        assertEquals(0, code, "err: " + err.toString(StandardCharsets.UTF_8) + " / out: " + outStr);
+        assertTrue(outStr.contains("Pipeline completed successfully"), outStr);
+
+        Files.deleteIfExists(Path.of("./dpia-report.html"));
+        Files.deleteIfExists(Path.of("./dpia-report.json"));
+        Files.deleteIfExists(Path.of("./dpia-report.md"));
+    }
+
     @Test
     void tooShortAPersistentSaltFailsBeforeEitherDatabaseIsTouched(@TempDir Path tempDir) throws Exception {
         Path policy = tempDir.resolve("policy.yaml");

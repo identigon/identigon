@@ -503,6 +503,8 @@ maxCategoricalCardinality: 64    # misdeclaration-lint threshold: flag a disting
 distinguishingLint: WARN         # default; cross-check distinguishing:false vs COUNT(DISTINCT). WARN | ERROR | OFF (§4.1)
 structuralUniqueness: OFF        # default; per-FK-edge relational-fingerprint findings. OFF | REPORT (§2.4)
 structuralRarenessK: 5           # rareness cutoff for structuralUniqueness findings
+saltMode: EPHEMERAL              # default; how this run is keyed. EPHEMERAL | PERSISTENT | REPRODUCIBLE (§5.1/§5.2) -
+                                  # only the mode lives here, never the salt itself (supplied separately by the caller)
 
 tables:
   customers:
@@ -663,6 +665,9 @@ public record AnonymisationPolicy(...) {                       // fields elided
         Builder structuralUniqueness(StructuralUniquenessMode mode); // default OFF (§2.4)
 
         Builder structuralRarenessK(int k);          // default 5; rareness cutoff for §2.4 findings
+
+        Builder saltMode(SaltMode mode); // default EPHEMERAL; declares intent only - the salt
+                                          // bytes themselves still come from the caller (§5.1/§5.2)
 
         Builder table(String name, java.util.function.Consumer<TablePolicy.Builder> spec);
 
