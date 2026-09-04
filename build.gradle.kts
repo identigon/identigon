@@ -28,6 +28,23 @@ val isExactlyTagged = providers.exec {
 
 version = if (isExactlyTagged) baseVersion else "$baseVersion-SNAPSHOT"
 
+// Whether a Docker daemon is actually reachable here - not the same question as "is this
+// windows-latest CI", which was the first (wrong) version of this check: a dev machine running
+// Docker Desktop on Windows gets full coverage from incognito's Testcontainers PostgreSQL E2Es
+// same as Linux does, so gating on OS alone would silently weaken the coverage-verification
+// threshold below on exactly the machine most day-to-day development happens on. `docker info`
+// exits 0 only when a daemon actually answers; both "docker isn't installed" (command not found)
+// and "docker is installed but the daemon isn't running" are caught and treated the same as
+// "unavailable" -- computed once here, not once per subproject, since it shells out.
+val dockerAvailable = try {
+    providers.exec {
+        commandLine("docker", "info")
+        isIgnoreExitValue = true
+    }.result.get().exitValue == 0
+} catch (e: Exception) {
+    false
+}
+
 subprojects {
     version = rootProject.version
 
@@ -127,10 +144,21 @@ subprojects {
         // so normal fluctuation doesn't fail a build - the point is to catch a regression, not to
         // ratchet coverage upward automatically. Same pattern as play-bazlang's own
         // build.gradle.kts, which found this worth having per-module rather than repo-wide.
+        //
+        // incognito is the one module this can't be a single cross-platform number for: its
+        // Testcontainers-backed PostgreSQL E2E tests need a Docker daemon, and skip gracefully
+        // (JUnit's Testcontainers extension does this on its own) rather than fail when there isn't
+        // one - a real, deterministic difference in what's achievable, not flakiness to paper over.
+        // Gating on `dockerAvailable` (not OS - see its own comment above) is what keeps this
+        // meaningful on a Windows dev machine running Docker Desktop, which gets full coverage same
+        // as Linux CI does. windows-latest CI has no Docker daemon and landed at 60% instruction
+        // coverage the first time this ran there - confirmed via the actual failing run (`gh run
+        // view <id> --log-failed`), not assumed; a single minimum could only ever be as strict as
+        // that weaker case allows, which would make it toothless everywhere Docker IS available.
         val minInstructionCoverage =
             when (project.name) {
                 "alterego" -> 0.92
-                "incognito" -> 0.88
+                "incognito" -> if (dockerAvailable) 0.88 else 0.55
                 else -> 0.75 // effigies
             }
 
