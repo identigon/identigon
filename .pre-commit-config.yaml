@@ -99,12 +99,24 @@ repos:
       # losing that bit (harmless on Windows, but `./run-quickstart.sh` then fails on Linux/macOS).
       - id: check-shebang-scripts-are-executable
       # .gitattributes already pins eol=lf; this guards against that being weakened rather than
-      # being the fix for it. Same vendored-fixtures exclude as above - fixing a frozen fixture's
-      # line endings would be the same kind of silent byte-level drift trailing-whitespace/
-      # end-of-file-fixer are already excluded from it for (none currently use CRLF, checked).
+      # being the fix for it. Same vendored-fixtures paths as trailing-whitespace/end-of-file-fixer
+      # above (fixing a frozen fixture's line endings would be the same kind of silent byte-level
+      # drift they're already excluded from), plus *.bat: .gitattributes separately pins
+      # `*.bat text eol=crlf` (gradlew.bat needs CRLF to run on Windows), and an unexcluded
+      # mixed-line-ending hook rewrites it to LF on its first run -- hit for real in play-bazlang's
+      # own .pre-commit-config.yaml before its `\.bat$` exclude existed. Written out rather than
+      # reusing the vendored-fixtures anchor via alias, since trailing-whitespace/end-of-file-fixer
+      # deliberately do NOT get the .bat exclude (nothing about a trailing newline or trailing
+      # whitespace check is CRLF-unsafe the way --fix=lf is).
       - id: mixed-line-ending
         args: [--fix=lf]
-        exclude: *vendored-fixtures
+        exclude: |
+          (?x)^(
+            alterego/src/test/resources/vectors/|
+            incognito/src/test/resources/benchmarks/LICENCES/|
+            incognito/src/test/resources/benchmarks/.*\.sql|
+            .*\.bat$
+          )
 
   # Line-length gate only (see .markdownlint-cli2.jsonc) -- catches >100-column Markdown, doesn't
   # fix it; MD013 has no auto-fix in any markdownlint implementation (checked directly: neither
@@ -125,6 +137,11 @@ repos:
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
+        # gradlew has the same #!/bin/sh shebang as run-quickstart.sh, so pre-commit's file-type
+        # detection picks it up too -- but it's Gradle-vendored boilerplate, not ours to fix
+        # shellcheck findings in. Same exclude, same reasoning, as play-bazlang's own
+        # .pre-commit-config.yaml.
+        exclude: ^gradlew$
 
   # Link rot, on demand only: `prek run --hook-stage manual lychee` (or `pre-commit run
   # --hook-stage manual lychee`). Deliberately NOT on commit - external hosts fail for reasons
