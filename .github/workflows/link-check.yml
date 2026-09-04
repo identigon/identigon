@@ -1,0 +1,25 @@
+# Nightly link sweep. Same flags as the local `lychee-system` pre-commit hook's manual stage
+# (.pre-commit-config.yaml) - --method get, not the default HEAD, for the same reason recorded
+# there. The target scope is deliberately narrower than that hook's (which sweeps the whole repo
+# when run manually): docs/research/*.md cites dozens of external manuals and archive.org items,
+# and docs/adr/*.md cites external references too - those are the two places link rot has actually
+# been found worth guarding against here, so this is scoped to them rather than the full tree.
+# Same pattern as play-bazlang's and doc-kit's own link-check.yml.
+name: "Link check"
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # 03:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  lychee:
+    name: "lychee"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --no-progress --method get --max-concurrency 4 "docs/research/**/*.md" "docs/adr/**/*.md"
+          fail: true
