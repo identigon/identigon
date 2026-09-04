@@ -192,7 +192,10 @@ repos:
   # `infra`/`release` appear only before that date - abandoned, not current convention
   # (`chore: Release v0.4.0` became `build: Release v3.2.0`, not a distinct thing kept alongside
   # it) - and `style` (in doc-kit's own list) has never been used here at all. `chore` shows the
-  # same pre-2026-08-10-only pattern but is allowed back in regardless, by request.
+  # same pre-2026-08-10-only pattern but is allowed back in regardless, by request. `perf` has
+  # never been used here either, but is allowed too, by request - same type play-bazlang's own
+  # list already carries, for a monorepo where a subproject's hot path (alterego's KDF, say) can
+  # get a commit that's purely a performance change.
   #
   # This checks the *shape* of a subject, not whether the type is the right one: `docs:` on a
   # change to alterego/ passes and is still wrong. It also accepts `Feat:` - there is no
@@ -202,4 +205,4 @@ repos:
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
-        args: [build, chore, ci, docs, feat, fix, refactor, test]
+        args: [build, chore, ci, docs, feat, fix, perf, refactor, test]
