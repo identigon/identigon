@@ -10,8 +10,8 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Appendix A.1: {@code message = utf8(purpose) || 0x00 || utf8(domain) || 0x00 ||
- * utf8(canonical) || 0x00 || uint32_be(counter)}, {@code key = HMAC-SHA256(salt, message)}.
+ * Appendix A.1: {@code message = utf8(purpose) || 0x00 || utf8(domain) || 0x00 || utf8(canonical)
+ * || 0x00 || uint32_be(counter)}, {@code key = HMAC-SHA256(salt, message)}.
  */
 final class Derivation {
 
@@ -24,7 +24,8 @@ final class Derivation {
   private Derivation() {}
 
   /** Derives the 32-byte key for one (salt, purpose, domain, canonical, counter) tuple. */
-  static byte[] deriveKey(byte[] salt, String purpose, String domain, String canonical, int counter) {
+  static byte[] deriveKey(
+      byte[] salt, String purpose, String domain, String canonical, int counter) {
     return hmac(salt, buildMessage(purpose, domain, canonical, counter));
   }
 
@@ -35,20 +36,20 @@ final class Derivation {
 
   /**
    * Builds a {@link HmacRandomness} stream for keyed record-attribute resolution (section 6.2,
-   * Appendix A.1, purpose {@code alterego/1/record}): the domain slot carries the attribute
-   * name, the canonical slot carries the record key, counter always {@code 0} - independent of
-   * which field asks first.
+   * Appendix A.1, purpose {@code alterego/1/record}): the domain slot carries the attribute name,
+   * the canonical slot carries the record key, counter always {@code 0} - independent of which
+   * field asks first.
    */
   static Randomness recordRandomness(byte[] salt, String attributeName, String recordKey) {
     return new HmacRandomness(deriveKey(salt, PURPOSE_RECORD, attributeName, recordKey, 0));
   }
 
   /**
-   * The store key for {@code canonical} under {@code domain} (section 5.1, Appendix A.4):
-   * {@code raw} writes the canonical text itself (the {@code rawMappingKeys} opt-in, section
-   * 2.6); otherwise the purpose-separated {@code HMAC(salt, input)}, as 64 lowercase hex
-   * characters. The single path both {@code DefaultMappings} and the {@code stored()}/
-   * {@code unique()} decorator logic use, so the two never diverge.
+   * The store key for {@code canonical} under {@code domain} (section 5.1, Appendix A.4): {@code
+   * raw} writes the canonical text itself (the {@code rawMappingKeys} opt-in, section 2.6);
+   * otherwise the purpose-separated {@code HMAC(salt, input)}, as 64 lowercase hex characters. The
+   * single path both {@code DefaultMappings} and the {@code stored()}/ {@code unique()} decorator
+   * logic use, so the two never diverge.
    */
   static String mapKey(byte[] salt, String domain, String canonical, boolean raw) {
     if (raw) {

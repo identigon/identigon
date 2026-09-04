@@ -12,7 +12,8 @@ import org.junit.jupiter.api.Test;
  */
 class CustomCoherenceTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   private static AlterEgo gb() {
     return AlterEgo.builder().salt(SALT).build();
@@ -22,7 +23,9 @@ class CustomCoherenceTest {
       (in, ctx) -> {
         UkNation nation =
             ctx.record()
-                .computeIfAbsent(AlterEgoAttributes.UK_NATION, random -> random.pick(java.util.List.of(UkNation.values())));
+                .computeIfAbsent(
+                    AlterEgoAttributes.UK_NATION,
+                    random -> random.pick(java.util.List.of(UkNation.values())));
         String prefix =
             switch (nation) {
               case SCOTLAND -> "SC";

@@ -5,8 +5,10 @@ import org.identigon.alterego.Randomness;
 import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
-/** Implements the normative GB driving licence number generation algorithm
- * (docs/spec/alterego.md A.7). */
+/**
+ * Implements the normative GB driving licence number generation algorithm (docs/spec/alterego.md
+ * A.7).
+ */
 public final class DrivingLicenceNumberStrategy implements Strategy<String> {
   /** Singleton instance. */
   public static final DrivingLicenceNumberStrategy INSTANCE = new DrivingLicenceNumberStrategy();
@@ -28,7 +30,7 @@ public final class DrivingLicenceNumberStrategy implements Strategy<String> {
 
     int mm = month + (female ? 50 : 0);
 
-    return String.format(Locale.ROOT, "99999%c%02d%02d%c%c%c9%c%c",
-        decade, mm, day, yearUnit, i1, i2, t1, t2);
+    return String.format(
+        Locale.ROOT, "99999%c%02d%02d%c%c%c9%c%c", decade, mm, day, yearUnit, i1, i2, t1, t2);
   }
 }

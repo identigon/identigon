@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A hand-rolled JSON reader/writer for the conformance vector fixtures. No JSON library is a
- * test dependency, and the vector schemas are simple enough (objects, arrays, strings, longs,
- * booleans) that this is the pragmatic choice over adding one.
+ * A hand-rolled JSON reader/writer for the conformance vector fixtures. No JSON library is a test
+ * dependency, and the vector schemas are simple enough (objects, arrays, strings, longs, booleans)
+ * that this is the pragmatic choice over adding one.
  */
 final class MinimalJson {
 

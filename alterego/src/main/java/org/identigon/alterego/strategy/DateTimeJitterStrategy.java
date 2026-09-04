@@ -12,13 +12,13 @@ import org.identigon.alterego.TransformationContext;
 
 /**
  * Date-and-time jitter (docs/spec/alterego.md section 4.5): pairs one of the two date strategies
- * (shared with {@link DateJitterStrategy}) with one of three time strategies, the date part
- * always drawn before the time part. Nanoseconds are zeroed in every output, unconditionally,
- * regardless of which time strategy ran.
+ * (shared with {@link DateJitterStrategy}) with one of three time strategies, the date part always
+ * drawn before the time part. Nanoseconds are zeroed in every output, unconditionally, regardless
+ * of which time strategy ran.
  *
- * <p>The {@code int seconds} time strategy shifts the time-of-day only (wrapping within the
- * same day via {@code Math.floorMod}), independently of the date part, matching the other two
- * time strategies, which are likewise bounded to a single day.
+ * <p>The {@code int seconds} time strategy shifts the time-of-day only (wrapping within the same
+ * day via {@code Math.floorMod}), independently of the date part, matching the other two time
+ * strategies, which are likewise bounded to a single day.
  */
 public final class DateTimeJitterStrategy implements Strategy<LocalDateTime> {
 
@@ -82,7 +82,8 @@ public final class DateTimeJitterStrategy implements Strategy<LocalDateTime> {
    */
   public static DateTimeJitterStrategy of(int days, AlterEgo.TimeField timeField) {
     DateJitterStrategy.requireNonNegative(days, "days");
-    return new DateTimeJitterStrategy(days, null, null, null, null, Objects.requireNonNull(timeField, "timeField"));
+    return new DateTimeJitterStrategy(
+        days, null, null, null, null, Objects.requireNonNull(timeField, "timeField"));
   }
 
   /**
@@ -106,7 +107,8 @@ public final class DateTimeJitterStrategy implements Strategy<LocalDateTime> {
    * @param end the inclusive upper bound of the time-of-day range
    * @return a strategy pairing the given date strategy with a uniform time-of-day range
    */
-  public static DateTimeJitterStrategy of(AlterEgo.DateField dateField, LocalTime start, LocalTime end) {
+  public static DateTimeJitterStrategy of(
+      AlterEgo.DateField dateField, LocalTime start, LocalTime end) {
     Objects.requireNonNull(dateField, "dateField");
     requireValidRange(start, end);
     return new DateTimeJitterStrategy(null, dateField, null, start, end, null);
@@ -119,7 +121,8 @@ public final class DateTimeJitterStrategy implements Strategy<LocalDateTime> {
    * @param timeField which time-jitter strategy to run
    * @return a strategy pairing the given date and time strategies
    */
-  public static DateTimeJitterStrategy of(AlterEgo.DateField dateField, AlterEgo.TimeField timeField) {
+  public static DateTimeJitterStrategy of(
+      AlterEgo.DateField dateField, AlterEgo.TimeField timeField) {
     return new DateTimeJitterStrategy(
         null,
         Objects.requireNonNull(dateField, "dateField"),
@@ -137,7 +140,8 @@ public final class DateTimeJitterStrategy implements Strategy<LocalDateTime> {
     Objects.requireNonNull(start, "start");
     Objects.requireNonNull(end, "end");
     if (start.isAfter(end)) {
-      throw new AlterEgoConfigException("start must not be after end, got start=" + start + ", end=" + end);
+      throw new AlterEgoConfigException(
+          "start must not be after end, got start=" + start + ", end=" + end);
     }
   }
 

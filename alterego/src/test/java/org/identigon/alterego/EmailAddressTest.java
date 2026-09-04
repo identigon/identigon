@@ -9,13 +9,15 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Exercises {@code emailAddress()}: last-{@code @} splitting, class-wise local-part replacement,
- * the RFC 2606 fictionality guarantee, and the preserve/map domain options (section 4.1,
- * section 4.4).
+ * the RFC 2606 fictionality guarantee, and the preserve/map domain options (section 4.1, section
+ * 4.4).
  */
 class EmailAddressTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
-  private static final Set<String> RESERVED_DOMAINS = Set.of("example.com", "example.net", "example.org");
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final Set<String> RESERVED_DOMAINS =
+      Set.of("example.com", "example.net", "example.org");
 
   private static AlterEgo alterego() {
     return AlterEgo.builder().salt(SALT).build();
@@ -23,12 +25,14 @@ class EmailAddressTest {
 
   @Test
   void splitsAtTheLastAtSign() {
-    // A quoted local part containing an internal '@' - the split must use the last '@', not the first.
+    // A quoted local part containing an internal '@' - the split must use the last '@', not the
+    // first.
     Transformation<String> t = alterego().emailAddress();
     String result = t.apply("\"a@b\"@example.org");
     int lastAt = result.lastIndexOf('@');
     assertTrue(RESERVED_DOMAINS.contains(result.substring(lastAt + 1)));
-    // Local part must still contain exactly one literal '@' (the one inside the quotes), preserved untouched.
+    // Local part must still contain exactly one literal '@' (the one inside the quotes), preserved
+    // untouched.
     String localPart = result.substring(0, lastAt);
     assertEquals(1, localPart.chars().filter(c -> c == '@').count());
   }
@@ -85,7 +89,8 @@ class EmailAddressTest {
   @Test
   void isDeterministic() {
     Transformation<String> t = alterego().emailAddress();
-    assertEquals(t.apply("original@example.com"), alterego().emailAddress().apply("original@example.com"));
+    assertEquals(
+        t.apply("original@example.com"), alterego().emailAddress().apply("original@example.com"));
   }
 
   @Test

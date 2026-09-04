@@ -15,13 +15,14 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Exercises {@code unique()} (spec section 5.3): the retry loop, the collision-exhaustion
- * exception, and the order-independence caveat (undecorated transformations don't care about
- * order; {@code unique()} is the documented exception only when two inputs' natural candidates
- * actually collide).
+ * exception, and the order-independence caveat (undecorated transformations don't care about order;
+ * {@code unique()} is the documented exception only when two inputs' natural candidates actually
+ * collide).
  */
 class UniqueTransformationTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   private static AlterEgo alterego(MappingStore store) {
     return AlterEgo.builder().salt(SALT).mappingStore(store).build();
@@ -44,7 +45,8 @@ class UniqueTransformationTest {
     Strategy<String> pickOfTwo = (in, ctx) -> ctx.random().pick(List.of("X", "Y"));
     String[] colliding = findNaturallyCollidingPair(pickOfTwo);
 
-    Transformation<String> t = alterego(new InMemoryMappingStore()).bind("test:collide", pickOfTwo).unique();
+    Transformation<String> t =
+        alterego(new InMemoryMappingStore()).bind("test:collide", pickOfTwo).unique();
     String outputA = t.apply(colliding[0]);
     String outputB = t.apply(colliding[1]);
     assertNotEquals(outputA, outputB);
@@ -77,14 +79,17 @@ class UniqueTransformationTest {
     // Distinct inputs whose *natural* candidates already differ: unique() changes nothing, and
     // processing order doesn't affect the result (section 3.1's general order-independence,
     // undisturbed because no collision occurs here).
-    Strategy<String> strategy = (in, ctx) -> ctx.random().pick(List.of("Alice", "Bob", "Carol", "Dave", "Eve"));
+    Strategy<String> strategy =
+        (in, ctx) -> ctx.random().pick(List.of("Alice", "Bob", "Carol", "Dave", "Eve"));
     String[] nonColliding = findNonCollidingPair(strategy);
 
-    Transformation<String> orderOne = alterego(new InMemoryMappingStore()).bind("test:order", strategy).unique();
+    Transformation<String> orderOne =
+        alterego(new InMemoryMappingStore()).bind("test:order", strategy).unique();
     String a1 = orderOne.apply(nonColliding[0]);
     String b1 = orderOne.apply(nonColliding[1]);
 
-    Transformation<String> orderTwo = alterego(new InMemoryMappingStore()).bind("test:order", strategy).unique();
+    Transformation<String> orderTwo =
+        alterego(new InMemoryMappingStore()).bind("test:order", strategy).unique();
     String b2 = orderTwo.apply(nonColliding[1]);
     String a2 = orderTwo.apply(nonColliding[0]);
 
@@ -98,7 +103,8 @@ class UniqueTransformationTest {
    * collision-escape path rather than only its (overwhelmingly common) no-collision path.
    */
   private static String[] findNaturallyCollidingPair(Strategy<String> strategy) {
-    Transformation<String> undecorated = alterego(new InMemoryMappingStore()).bind("test:collide", strategy);
+    Transformation<String> undecorated =
+        alterego(new InMemoryMappingStore()).bind("test:collide", strategy);
     Map<String, String> outputToInput = new HashMap<>();
     for (int i = 0; i < 200; i++) {
       String input = "input-" + i;
@@ -113,7 +119,8 @@ class UniqueTransformationTest {
 
   /** The counterpart search: two distinct inputs whose undecorated outputs differ. */
   private static String[] findNonCollidingPair(Strategy<String> strategy) {
-    Transformation<String> undecorated = alterego(new InMemoryMappingStore()).bind("test:order", strategy);
+    Transformation<String> undecorated =
+        alterego(new InMemoryMappingStore()).bind("test:order", strategy);
     String first = undecorated.apply("input-0");
     for (int i = 1; i < 200; i++) {
       String candidate = "input-" + i;

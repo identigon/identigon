@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 
 class HmacRandomnessTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   private static Randomness fresh(String canonical) {
     return Derivation.randomness(SALT, "test:domain", canonical, 0);

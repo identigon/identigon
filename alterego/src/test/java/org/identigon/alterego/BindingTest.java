@@ -13,7 +13,8 @@ import org.junit.jupiter.api.Test;
 
 class BindingTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   private static AlterEgo alterego() {
     return AlterEgo.builder().salt(SALT).build();
@@ -60,8 +61,7 @@ class BindingTest {
 
   @Test
   void bindRejectsInvalidDomain() {
-    assertThrows(
-        AlterEgoConfigException.class, () -> alterego().bind("bad domain!", PICK_A_NAME));
+    assertThrows(AlterEgoConfigException.class, () -> alterego().bind("bad domain!", PICK_A_NAME));
   }
 
   @Test

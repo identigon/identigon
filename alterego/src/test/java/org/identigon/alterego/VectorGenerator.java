@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Generates the frozen conformance vector fixtures under {@code src/test/resources/vectors/}
- * from the Appendix A implementation. Run once via {@code main}; the output is reviewed by hand
- * (spec section 10) and then never regenerated.
+ * Generates the frozen conformance vector fixtures under {@code src/test/resources/vectors/} from
+ * the Appendix A implementation. Run once via {@code main}; the output is reviewed by hand (spec
+ * section 10) and then never regenerated.
  */
 final class VectorGenerator {
 
@@ -35,7 +35,8 @@ final class VectorGenerator {
     System.out.println("Wrote vector files to " + OUTPUT_DIR.toAbsolutePath());
   }
 
-  private static void writeVectorFile(String fileName, List<Map<String, Object>> cases) throws IOException {
+  private static void writeVectorFile(String fileName, List<Map<String, Object>> cases)
+      throws IOException {
     Files.writeString(OUTPUT_DIR.resolve(fileName), MinimalJson.write(cases));
   }
 
@@ -43,19 +44,52 @@ final class VectorGenerator {
 
   private static List<Map<String, Object>> derivationCases() {
     List<Map<String, Object>> cases = new ArrayList<>();
-    cases.add(derivationCase("random-purpose-basic", Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", 0));
-    cases.add(derivationCase("mapkey-purpose-basic", Derivation.PURPOSE_MAPKEY, "alterego:first-name", "Alice", 0));
-    cases.add(derivationCase("record-purpose-basic", Derivation.PURPOSE_RECORD, "alterego:gb-postcode-area", "case-12345", 0));
-    cases.add(derivationCase("counter-nonzero", Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", 5));
-    cases.add(derivationCase("counter-max-uint32", Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", -1));
-    cases.add(derivationCase("empty-canonical", Derivation.PURPOSE_RANDOM, "alterego:first-name", "", 0));
-    cases.add(derivationCase("nul-embedded-canonical", Derivation.PURPOSE_RANDOM, "alterego:first-name", "a\u0000b", 0));
-    cases.add(derivationCase("non-ascii-canonical", Derivation.PURPOSE_RANDOM, "alterego:first-name", "café", 0));
-    cases.add(derivationCase("emoji-canonical", Derivation.PURPOSE_RANDOM, "alterego:first-name", "🔑", 0));
-    cases.add(derivationCase("long-canonical", Derivation.PURPOSE_RANDOM, "alterego:first-name",
-        "a-fairly-long-canonical-value-used-to-exercise-multi-block-messages", 0));
-    cases.add(derivationCase("max-length-domain", Derivation.PURPOSE_RANDOM, "a".repeat(100), "x", 0));
-    cases.add(derivationCase("domain-charset-variety", Derivation.PURPOSE_RANDOM, "myapp:case_ref-1.v2", "x", 0));
+    cases.add(
+        derivationCase(
+            "random-purpose-basic", Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", 0));
+    cases.add(
+        derivationCase(
+            "mapkey-purpose-basic", Derivation.PURPOSE_MAPKEY, "alterego:first-name", "Alice", 0));
+    cases.add(
+        derivationCase(
+            "record-purpose-basic",
+            Derivation.PURPOSE_RECORD,
+            "alterego:gb-postcode-area",
+            "case-12345",
+            0));
+    cases.add(
+        derivationCase(
+            "counter-nonzero", Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", 5));
+    cases.add(
+        derivationCase(
+            "counter-max-uint32", Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", -1));
+    cases.add(
+        derivationCase("empty-canonical", Derivation.PURPOSE_RANDOM, "alterego:first-name", "", 0));
+    cases.add(
+        derivationCase(
+            "nul-embedded-canonical",
+            Derivation.PURPOSE_RANDOM,
+            "alterego:first-name",
+            "a\u0000b",
+            0));
+    cases.add(
+        derivationCase(
+            "non-ascii-canonical", Derivation.PURPOSE_RANDOM, "alterego:first-name", "café", 0));
+    cases.add(
+        derivationCase(
+            "emoji-canonical", Derivation.PURPOSE_RANDOM, "alterego:first-name", "🔑", 0));
+    cases.add(
+        derivationCase(
+            "long-canonical",
+            Derivation.PURPOSE_RANDOM,
+            "alterego:first-name",
+            "a-fairly-long-canonical-value-used-to-exercise-multi-block-messages",
+            0));
+    cases.add(
+        derivationCase("max-length-domain", Derivation.PURPOSE_RANDOM, "a".repeat(100), "x", 0));
+    cases.add(
+        derivationCase(
+            "domain-charset-variety", Derivation.PURPOSE_RANDOM, "myapp:case_ref-1.v2", "x", 0));
     cases.add(derivationCase("nul-boundary-ab-c", Derivation.PURPOSE_RANDOM, "ab", "c", 0));
     cases.add(derivationCase("nul-boundary-a-bc", Derivation.PURPOSE_RANDOM, "a", "bc", 0));
     return cases;
@@ -79,7 +113,9 @@ final class VectorGenerator {
 
   private static List<Map<String, Object>> streamCases(List<Map<String, Object>> derivationCases) {
     List<Map<String, Object>> cases = new ArrayList<>();
-    for (String name : List.of("random-purpose-basic", "counter-nonzero", "non-ascii-canonical", "long-canonical")) {
+    for (String name :
+        List.of(
+            "random-purpose-basic", "counter-nonzero", "non-ascii-canonical", "long-canonical")) {
       Map<String, Object> derivationCase = findByName(derivationCases, name);
       byte[] key = HEX.parseHex((String) derivationCase.get("keyHex"));
       byte[] stream = RawStream.firstBytes(key, 96);
@@ -104,61 +140,93 @@ final class VectorGenerator {
   private static List<Map<String, Object>> samplingCases() {
     List<Map<String, Object>> cases = new ArrayList<>();
 
-    cases.add(samplingCase("mixed-basic", keyFor("sampling-1"), rand -> List.of(
-        call("nextInt", Map.of("bound", 10L), (long) rand.nextInt(10)),
-        call("nextInt", Map.of("bound", 100L), (long) rand.nextInt(100)),
-        call("digit", Map.of(), String.valueOf(rand.digit())),
-        call("letterUpper", Map.of(), String.valueOf(rand.letterUpper())),
-        call("letterLower", Map.of(), String.valueOf(rand.letterLower())))));
+    cases.add(
+        samplingCase(
+            "mixed-basic",
+            keyFor("sampling-1"),
+            rand ->
+                List.of(
+                    call("nextInt", Map.of("bound", 10L), (long) rand.nextInt(10)),
+                    call("nextInt", Map.of("bound", 100L), (long) rand.nextInt(100)),
+                    call("digit", Map.of(), String.valueOf(rand.digit())),
+                    call("letterUpper", Map.of(), String.valueOf(rand.letterUpper())),
+                    call("letterLower", Map.of(), String.valueOf(rand.letterLower())))));
 
-    cases.add(samplingCase("boolean-sequence", keyFor("sampling-2"), rand -> List.of(
-        call("nextBoolean", Map.of(), rand.nextBoolean()),
-        call("nextBoolean", Map.of(), rand.nextBoolean()),
-        call("nextBoolean", Map.of(), rand.nextBoolean()),
-        call("nextBoolean", Map.of(), rand.nextBoolean()))));
+    cases.add(
+        samplingCase(
+            "boolean-sequence",
+            keyFor("sampling-2"),
+            rand ->
+                List.of(
+                    call("nextBoolean", Map.of(), rand.nextBoolean()),
+                    call("nextBoolean", Map.of(), rand.nextBoolean()),
+                    call("nextBoolean", Map.of(), rand.nextBoolean()),
+                    call("nextBoolean", Map.of(), rand.nextBoolean()))));
 
-    cases.add(samplingCase("pick-sequence", keyFor("sampling-3"), rand -> List.of(
-        call("pick", Map.of("size", 5L), (long) rand.nextInt(5)))));
+    cases.add(
+        samplingCase(
+            "pick-sequence",
+            keyFor("sampling-3"),
+            rand -> List.of(call("pick", Map.of("size", 5L), (long) rand.nextInt(5)))));
     // pick(choices) == choices.get(nextInt(choices.size())); recorded as the chosen index since
     // the algorithm depends only on list size, not content (Appendix A.3).
 
     Map<String, Object> rejectionCase = nextLongRejectionCase();
     cases.add(rejectionCase);
 
-    cases.add(samplingCase("bound-two-repeated", keyFor("sampling-5"), rand -> {
-      List<Map<String, Object>> calls = new ArrayList<>();
-      for (int i = 0; i < 10; i++) {
-        calls.add(call("nextInt", Map.of("bound", 2L), (long) rand.nextInt(2)));
-      }
-      return calls;
-    }));
+    cases.add(
+        samplingCase(
+            "bound-two-repeated",
+            keyFor("sampling-5"),
+            rand -> {
+              List<Map<String, Object>> calls = new ArrayList<>();
+              for (int i = 0; i < 10; i++) {
+                calls.add(call("nextInt", Map.of("bound", 2L), (long) rand.nextInt(2)));
+              }
+              return calls;
+            }));
 
-    cases.add(samplingCase("bound-one-collapses-to-zero", keyFor("sampling-6"), rand -> List.of(
-        call("nextLong", Map.of("bound", 1L), rand.nextLong(1)),
-        call("nextLong", Map.of("bound", 1L), rand.nextLong(1)))));
+    cases.add(
+        samplingCase(
+            "bound-one-collapses-to-zero",
+            keyFor("sampling-6"),
+            rand ->
+                List.of(
+                    call("nextLong", Map.of("bound", 1L), rand.nextLong(1)),
+                    call("nextLong", Map.of("bound", 1L), rand.nextLong(1)))));
 
-    cases.add(samplingCase("interleaved-mixed-ops", keyFor("sampling-7"), rand -> List.of(
-        call("nextInt", Map.of("bound", 26L), (long) rand.nextInt(26)),
-        call("pick", Map.of("size", 3L), (long) rand.nextInt(3)),
-        call("digit", Map.of(), String.valueOf(rand.digit())),
-        call("nextBoolean", Map.of(), rand.nextBoolean()),
-        call("nextInt", Map.of("bound", 1000L), (long) rand.nextInt(1000)))));
+    cases.add(
+        samplingCase(
+            "interleaved-mixed-ops",
+            keyFor("sampling-7"),
+            rand ->
+                List.of(
+                    call("nextInt", Map.of("bound", 26L), (long) rand.nextInt(26)),
+                    call("pick", Map.of("size", 3L), (long) rand.nextInt(3)),
+                    call("digit", Map.of(), String.valueOf(rand.digit())),
+                    call("nextBoolean", Map.of(), rand.nextBoolean()),
+                    call("nextInt", Map.of("bound", 1000L), (long) rand.nextInt(1000)))));
 
-    cases.add(samplingCase("long-char-sequence", keyFor("sampling-8"), rand -> {
-      List<Map<String, Object>> calls = new ArrayList<>();
-      for (int i = 0; i < 8; i++) {
-        calls.add(call("digit", Map.of(), String.valueOf(rand.digit())));
-        calls.add(call("letterUpper", Map.of(), String.valueOf(rand.letterUpper())));
-        calls.add(call("letterLower", Map.of(), String.valueOf(rand.letterLower())));
-      }
-      return calls;
-    }));
+    cases.add(
+        samplingCase(
+            "long-char-sequence",
+            keyFor("sampling-8"),
+            rand -> {
+              List<Map<String, Object>> calls = new ArrayList<>();
+              for (int i = 0; i < 8; i++) {
+                calls.add(call("digit", Map.of(), String.valueOf(rand.digit())));
+                calls.add(call("letterUpper", Map.of(), String.valueOf(rand.letterUpper())));
+                calls.add(call("letterLower", Map.of(), String.valueOf(rand.letterLower())));
+              }
+              return calls;
+            }));
 
     return cases;
   }
 
   private static byte[] keyFor(String seed) {
-    return Derivation.deriveKey(REFERENCE_SALT, Derivation.PURPOSE_RANDOM, "vector-generator", seed, 0);
+    return Derivation.deriveKey(
+        REFERENCE_SALT, Derivation.PURPOSE_RANDOM, "vector-generator", seed, 0);
   }
 
   @FunctionalInterface
@@ -184,10 +252,10 @@ final class VectorGenerator {
   }
 
   /**
-   * Finds a key whose first stream draw for {@code bound = floor(MAX/2)+1} is already out of
-   * range, so {@code nextLong(bound)} is provably forced to reject and redraw at least once.
-   * This checks Appendix A.2's block(0) formula directly, independent of {@link HmacRandomness},
-   * to confirm the case genuinely exercises the redraw path before recording the real result.
+   * Finds a key whose first stream draw for {@code bound = floor(MAX/2)+1} is already out of range,
+   * so {@code nextLong(bound)} is provably forced to reject and redraw at least once. This checks
+   * Appendix A.2's block(0) formula directly, independent of {@link HmacRandomness}, to confirm the
+   * case genuinely exercises the redraw path before recording the real result.
    */
   private static Map<String, Object> nextLongRejectionCase() {
     long bound = (Long.MAX_VALUE / 2) + 1;
@@ -222,7 +290,8 @@ final class VectorGenerator {
   }
 
   private static Map<String, Object> mapkeyCase(String name, String domain, String canonical) {
-    byte[] key = Derivation.deriveKey(REFERENCE_SALT, Derivation.PURPOSE_MAPKEY, domain, canonical, 0);
+    byte[] key =
+        Derivation.deriveKey(REFERENCE_SALT, Derivation.PURPOSE_MAPKEY, domain, canonical, 0);
     Map<String, Object> entry = new LinkedHashMap<>();
     entry.put("name", name);
     entry.put("saltHex", HEX.formatHex(REFERENCE_SALT));

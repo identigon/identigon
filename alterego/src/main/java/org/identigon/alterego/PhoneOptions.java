@@ -23,8 +23,8 @@ public final class PhoneOptions {
   }
 
   /**
-   * Opts out of the fictionality guarantee (ADR 0005): every digit is replaced independently,
-   * so the output may coincide with a real, connectable phone number.
+   * Opts out of the fictionality guarantee (ADR 0005): every digit is replaced independently, so
+   * the output may coincide with a real, connectable phone number.
    *
    * @return options that opt out of the fictionality guarantee
    */
@@ -33,7 +33,8 @@ public final class PhoneOptions {
   }
 
   /**
-   * Includes the non-geographic (freephone, premium rate, UK-wide) drama ranges in the generation pool.
+   * Includes the non-geographic (freephone, premium rate, UK-wide) drama ranges in the generation
+   * pool.
    *
    * @return options that include non-geographic ranges
    */

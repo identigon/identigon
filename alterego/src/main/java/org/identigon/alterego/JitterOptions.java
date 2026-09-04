@@ -5,10 +5,10 @@ import java.util.Objects;
 /**
  * Inclusive clamp bounds for a {@code shiftDate}/{@code shiftDateTime} jitter strategy
  * (docs/spec/alterego.md section 4.5), applied last, after the strategy has run. {@code T} is
- * {@link java.time.LocalDate} or {@link java.time.LocalDateTime}, matching the method it is
- * passed to. Values that would fall outside a bound are clamped to it, not rejected - values
- * near a bound pile up on it, documented rather than hidden. There is no "unbounded" instance:
- * an unclamped call simply omits the trailing {@code JitterOptions} argument.
+ * {@link java.time.LocalDate} or {@link java.time.LocalDateTime}, matching the method it is passed
+ * to. Values that would fall outside a bound are clamped to it, not rejected - values near a bound
+ * pile up on it, documented rather than hidden. There is no "unbounded" instance: an unclamped call
+ * simply omits the trailing {@code JitterOptions} argument.
  *
  * @param <T> {@link java.time.LocalDate} or {@link java.time.LocalDateTime}
  */
@@ -56,7 +56,8 @@ public final class JitterOptions<T extends Comparable<? super T>> {
     Objects.requireNonNull(min, "min");
     Objects.requireNonNull(max, "max");
     if (min.compareTo(max) > 0) {
-      throw new AlterEgoConfigException("min must not be after max, got min=" + min + ", max=" + max);
+      throw new AlterEgoConfigException(
+          "min must not be after max, got min=" + min + ", max=" + max);
     }
     return new JitterOptions<>(min, max);
   }

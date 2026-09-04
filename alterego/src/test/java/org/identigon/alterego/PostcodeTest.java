@@ -17,7 +17,8 @@ import org.junit.jupiter.api.Test;
  */
 class PostcodeTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
   private static final Pattern SHAPE = Pattern.compile("[A-Z]{1,2}[0-9]{1,2} [0-9][A-Z]{2}");
   private static final Set<Character> NEVER_USED_LETTERS = Set.of('C', 'I', 'K', 'M', 'O', 'V');
 

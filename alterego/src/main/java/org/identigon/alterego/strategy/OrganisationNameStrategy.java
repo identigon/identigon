@@ -8,12 +8,11 @@ import org.identigon.alterego.TransformationContext;
  * Composes an organisation name from the country's tagged component dictionary
  * (docs/spec/alterego.md section 4.2): three distinct words, {@code [MODIFIER-or-NOUN] + NOUN +
  * NOUN} - position 1 may be either category, positions 2 and 3 must be {@code NOUN} and distinct
- * from every word already chosen, so the same word can never repeat and two place-like
- * {@code MODIFIER} words can never land next to each other (ADR 26 has the reasoning;
- * docs/research/0001-alterego-dictionaries.md has the curation detail). A recognised legal
- * suffix detected at
- * the end of the input (case-insensitive) is preserved on the output in its canonical form;
- * {@link LegalSuffixes} holds the fixed per-country list.
+ * from every word already chosen, so the same word can never repeat and two place-like {@code
+ * MODIFIER} words can never land next to each other (ADR 26 has the reasoning;
+ * docs/research/0001-alterego-dictionaries.md has the curation detail). A recognised legal suffix
+ * detected at the end of the input (case-insensitive) is preserved on the output in its canonical
+ * form; {@link LegalSuffixes} holds the fixed per-country list.
  */
 public final class OrganisationNameStrategy implements Strategy<String> {
 
@@ -21,7 +20,8 @@ public final class OrganisationNameStrategy implements Strategy<String> {
   private final List<String> nouns;
   private final List<String> suffixes;
 
-  private OrganisationNameStrategy(List<String> allWords, List<String> nouns, List<String> suffixes) {
+  private OrganisationNameStrategy(
+      List<String> allWords, List<String> nouns, List<String> suffixes) {
     this.allWords = allWords;
     this.nouns = nouns;
     this.suffixes = suffixes;
@@ -40,7 +40,8 @@ public final class OrganisationNameStrategy implements Strategy<String> {
             .filter(entry -> entry.tags().get(0).equals("NOUN"))
             .map(DictionaryEntry::value)
             .toList();
-    return new OrganisationNameStrategy(dictionary.values(), nouns, LegalSuffixes.forCountry(country));
+    return new OrganisationNameStrategy(
+        dictionary.values(), nouns, LegalSuffixes.forCountry(country));
   }
 
   @Override
@@ -50,7 +51,8 @@ public final class OrganisationNameStrategy implements Strategy<String> {
     String word1 = context.random().pick(allWords);
     List<String> remainingAfterWord1 = nouns.stream().filter(w -> !w.equals(word1)).toList();
     String word2 = context.random().pick(remainingAfterWord1);
-    List<String> remainingAfterWord2 = remainingAfterWord1.stream().filter(w -> !w.equals(word2)).toList();
+    List<String> remainingAfterWord2 =
+        remainingAfterWord1.stream().filter(w -> !w.equals(word2)).toList();
     String word3 = context.random().pick(remainingAfterWord2);
 
     String body = word1 + " " + word2 + " " + word3;
@@ -68,7 +70,8 @@ public final class OrganisationNameStrategy implements Strategy<String> {
       }
       String withSeparator = " " + suffix;
       int start = trimmed.length() - withSeparator.length();
-      if (start > 0 && trimmed.regionMatches(true, start, withSeparator, 0, withSeparator.length())) {
+      if (start > 0
+          && trimmed.regionMatches(true, start, withSeparator, 0, withSeparator.length())) {
         return suffix;
       }
     }

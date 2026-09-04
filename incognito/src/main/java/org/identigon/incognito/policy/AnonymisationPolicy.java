@@ -9,10 +9,10 @@ import java.util.function.Consumer;
 /**
  * Top-level anonymisation policy: default parameters and table-level policies. The fabrication
  * model (SPEC §4) has no k-factor or l-diversity. Whether a {@code SENSITIVE} column is kept real
- * or fabricated is <em>declared</em> per column via a boolean {@code distinguishing} flag (§2.2/§4.1);
- * {@code maxCategoricalCardinality} is only the threshold for the default-on misdeclaration lint
- * ({@code distinguishingLint}: WARN | ERROR | OFF) that flags a {@code distinguishing: false} column
- * looking free-text - it is not the gate.
+ * or fabricated is <em>declared</em> per column via a boolean {@code distinguishing} flag
+ * (§2.2/§4.1); {@code maxCategoricalCardinality} is only the threshold for the default-on
+ * misdeclaration lint ({@code distinguishingLint}: WARN | ERROR | OFF) that flags a {@code
+ * distinguishing: false} column looking free-text - it is not the gate.
  *
  * @param maxCategoricalCardinality the distinct-count threshold for the misdeclaration lint (§4.1)
  * @param distinguishingLint how the misdeclaration lint behaves (WARN / ERROR / OFF)
@@ -21,10 +21,10 @@ import java.util.function.Consumer;
  * @param structuralRarenessK the "rare" cutoff for a structural-uniqueness finding: a parent row's
  *     child count is rare if fewer than this many parents in total share it
  * @param tables the per-table policies, keyed by table name
- * @param saltMode the salt mode this policy declares the pipeline should be keyed with
- *     (SPEC §5.1/§5.2) - {@code EPHEMERAL} by default. Only the mode travels here, never the salt
- *     bytes: {@code PERSISTENT}/{@code REPRODUCIBLE} still require the caller to supply the actual
- *     salt separately, via {@code IncognitoPipeline.Builder#persistentSalt}/{@code #reproducible}.
+ * @param saltMode the salt mode this policy declares the pipeline should be keyed with (SPEC
+ *     §5.1/§5.2) - {@code EPHEMERAL} by default. Only the mode travels here, never the salt bytes:
+ *     {@code PERSISTENT}/{@code REPRODUCIBLE} still require the caller to supply the actual salt
+ *     separately, via {@code IncognitoPipeline.Builder#persistentSalt}/{@code #reproducible}.
  */
 public record AnonymisationPolicy(
     int maxCategoricalCardinality,
@@ -32,139 +32,144 @@ public record AnonymisationPolicy(
     org.identigon.incognito.api.StructuralUniquenessMode structuralUniqueness,
     int structuralRarenessK,
     Map<String, TablePolicy> tables,
-    org.identigon.incognito.api.SaltMode saltMode
-) {
+    org.identigon.incognito.api.SaltMode saltMode) {
+  /** Takes an unmodifiable, order-preserving defensive copy of the table map. */
+  public AnonymisationPolicy {
+    tables = Collections.unmodifiableMap(new LinkedHashMap<>(tables));
+  }
+
+  /**
+   * Looks up the policy for a table.
+   *
+   * @param tableName the table name
+   * @return the table's policy, or empty if the table is not declared
+   */
+  public Optional<TablePolicy> table(String tableName) {
+    return Optional.ofNullable(tables.get(tableName));
+  }
+
+  /**
+   * Starts building a policy.
+   *
+   * @return a new builder
+   */
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  /** Fluent builder for an {@link AnonymisationPolicy}. */
+  public static class Builder {
+    /** Creates a builder with fail-closed defaults (lint {@code WARN}). */
+    public Builder() {}
+
+    private int maxCategoricalCardinality = 64;
+    private org.identigon.incognito.api.DistinguishingLint distinguishingLint =
+        org.identigon.incognito.api.DistinguishingLint.WARN;
+    private org.identigon.incognito.api.StructuralUniquenessMode structuralUniqueness =
+        org.identigon.incognito.api.StructuralUniquenessMode.OFF;
+    private int structuralRarenessK = 5;
+    private final Map<String, TablePolicy> tables = new LinkedHashMap<>();
+    private org.identigon.incognito.api.SaltMode saltMode =
+        org.identigon.incognito.api.SaltMode.EPHEMERAL;
+
     /**
-     * Takes an unmodifiable, order-preserving defensive copy of the table map.
+     * Sets the VARCHAR/SENSITIVE categorical threshold for the misdeclaration lint (SPEC §4.1).
+     *
+     * @param maxCategoricalCardinality the distinct-count threshold; default 64
+     * @return this builder
      */
-    public AnonymisationPolicy {
-        tables = Collections.unmodifiableMap(new LinkedHashMap<>(tables));
+    public Builder maxCategoricalCardinality(int maxCategoricalCardinality) {
+      this.maxCategoricalCardinality = maxCategoricalCardinality;
+      return this;
     }
 
     /**
-     * Looks up the policy for a table.
+     * Sets how the default-on misdeclaration lint behaves.
+     *
+     * @param distinguishingLint WARN (default), ERROR, or OFF
+     * @return this builder
+     */
+    public Builder distinguishingLint(
+        org.identigon.incognito.api.DistinguishingLint distinguishingLint) {
+      this.distinguishingLint = distinguishingLint;
+      return this;
+    }
+
+    /**
+     * Sets whether {@code VerificationStage} computes structural-uniqueness findings (SPEC §2.4).
+     *
+     * @param structuralUniqueness OFF (default) or REPORT
+     * @return this builder
+     */
+    public Builder structuralUniqueness(
+        org.identigon.incognito.api.StructuralUniquenessMode structuralUniqueness) {
+      this.structuralUniqueness = structuralUniqueness;
+      return this;
+    }
+
+    /**
+     * Sets the rareness cutoff for structural-uniqueness findings: a parent row's child count is
+     * rare if fewer than this many parents in total share it.
+     *
+     * @param structuralRarenessK the rareness threshold; default 5
+     * @return this builder
+     */
+    public Builder structuralRarenessK(int structuralRarenessK) {
+      this.structuralRarenessK = structuralRarenessK;
+      return this;
+    }
+
+    /**
+     * Sets which salt mode this policy declares the pipeline should be keyed with (SPEC §5.1/§5.2).
+     * Only the mode travels here, never the salt bytes: {@code PERSISTENT}/ {@code REPRODUCIBLE}
+     * still require the caller to supply the actual salt separately, via {@code
+     * IncognitoPipeline.Builder#persistentSalt}/{@code #reproducible}.
+     *
+     * @param saltMode EPHEMERAL (default), PERSISTENT, or REPRODUCIBLE
+     * @return this builder
+     */
+    public Builder saltMode(org.identigon.incognito.api.SaltMode saltMode) {
+      this.saltMode = saltMode;
+      return this;
+    }
+
+    /**
+     * Adds a table policy.
+     *
+     * @param tablePolicy the table policy
+     * @return this builder
+     */
+    public Builder table(TablePolicy tablePolicy) {
+      this.tables.put(tablePolicy.tableName(), tablePolicy);
+      return this;
+    }
+
+    /**
+     * Adds a table policy configured via a callback.
      *
      * @param tableName the table name
-     * @return the table's policy, or empty if the table is not declared
+     * @param configurer configures the table's {@link TablePolicy.Builder}
+     * @return this builder
      */
-    public Optional<TablePolicy> table(String tableName) {
-        return Optional.ofNullable(tables.get(tableName));
+    public Builder table(String tableName, Consumer<TablePolicy.Builder> configurer) {
+      TablePolicy.Builder tableBuilder = TablePolicy.builder(tableName);
+      configurer.accept(tableBuilder);
+      return table(tableBuilder.build());
     }
 
     /**
-     * Starts building a policy.
+     * Builds the policy.
      *
-     * @return a new builder
+     * @return the built {@link AnonymisationPolicy}
      */
-    public static Builder builder() {
-        return new Builder();
+    public AnonymisationPolicy build() {
+      return new AnonymisationPolicy(
+          maxCategoricalCardinality,
+          distinguishingLint,
+          structuralUniqueness,
+          structuralRarenessK,
+          tables,
+          saltMode);
     }
-
-    /** Fluent builder for an {@link AnonymisationPolicy}. */
-    public static class Builder {
-        /** Creates a builder with fail-closed defaults (lint {@code WARN}). */
-        public Builder() {}
-
-        private int maxCategoricalCardinality = 64;
-        private org.identigon.incognito.api.DistinguishingLint distinguishingLint = org.identigon.incognito.api.DistinguishingLint.WARN;
-        private org.identigon.incognito.api.StructuralUniquenessMode structuralUniqueness =
-            org.identigon.incognito.api.StructuralUniquenessMode.OFF;
-        private int structuralRarenessK = 5;
-        private final Map<String, TablePolicy> tables = new LinkedHashMap<>();
-        private org.identigon.incognito.api.SaltMode saltMode = org.identigon.incognito.api.SaltMode.EPHEMERAL;
-
-        /**
-         * Sets the VARCHAR/SENSITIVE categorical threshold for the misdeclaration lint (SPEC §4.1).
-         *
-         * @param maxCategoricalCardinality the distinct-count threshold; default 64
-         * @return this builder
-         */
-        public Builder maxCategoricalCardinality(int maxCategoricalCardinality) {
-            this.maxCategoricalCardinality = maxCategoricalCardinality;
-            return this;
-        }
-
-        /**
-         * Sets how the default-on misdeclaration lint behaves.
-         *
-         * @param distinguishingLint WARN (default), ERROR, or OFF
-         * @return this builder
-         */
-        public Builder distinguishingLint(org.identigon.incognito.api.DistinguishingLint distinguishingLint) {
-            this.distinguishingLint = distinguishingLint;
-            return this;
-        }
-
-        /**
-         * Sets whether {@code VerificationStage} computes structural-uniqueness findings (SPEC §2.4).
-         *
-         * @param structuralUniqueness OFF (default) or REPORT
-         * @return this builder
-         */
-        public Builder structuralUniqueness(
-                org.identigon.incognito.api.StructuralUniquenessMode structuralUniqueness) {
-            this.structuralUniqueness = structuralUniqueness;
-            return this;
-        }
-
-        /**
-         * Sets the rareness cutoff for structural-uniqueness findings: a parent row's child count is
-         * rare if fewer than this many parents in total share it.
-         *
-         * @param structuralRarenessK the rareness threshold; default 5
-         * @return this builder
-         */
-        public Builder structuralRarenessK(int structuralRarenessK) {
-            this.structuralRarenessK = structuralRarenessK;
-            return this;
-        }
-
-        /**
-         * Sets which salt mode this policy declares the pipeline should be keyed with (SPEC
-         * §5.1/§5.2). Only the mode travels here, never the salt bytes: {@code PERSISTENT}/
-         * {@code REPRODUCIBLE} still require the caller to supply the actual salt separately, via
-         * {@code IncognitoPipeline.Builder#persistentSalt}/{@code #reproducible}.
-         *
-         * @param saltMode EPHEMERAL (default), PERSISTENT, or REPRODUCIBLE
-         * @return this builder
-         */
-        public Builder saltMode(org.identigon.incognito.api.SaltMode saltMode) {
-            this.saltMode = saltMode;
-            return this;
-        }
-
-        /**
-         * Adds a table policy.
-         *
-         * @param tablePolicy the table policy
-         * @return this builder
-         */
-        public Builder table(TablePolicy tablePolicy) {
-            this.tables.put(tablePolicy.tableName(), tablePolicy);
-            return this;
-        }
-
-        /**
-         * Adds a table policy configured via a callback.
-         *
-         * @param tableName the table name
-         * @param configurer configures the table's {@link TablePolicy.Builder}
-         * @return this builder
-         */
-        public Builder table(String tableName, Consumer<TablePolicy.Builder> configurer) {
-            TablePolicy.Builder tableBuilder = TablePolicy.builder(tableName);
-            configurer.accept(tableBuilder);
-            return table(tableBuilder.build());
-        }
-
-        /**
-         * Builds the policy.
-         *
-         * @return the built {@link AnonymisationPolicy}
-         */
-        public AnonymisationPolicy build() {
-            return new AnonymisationPolicy(maxCategoricalCardinality, distinguishingLint,
-                structuralUniqueness, structuralRarenessK, tables, saltMode);
-        }
-    }
+  }
 }

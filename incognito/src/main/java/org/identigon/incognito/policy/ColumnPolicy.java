@@ -8,11 +8,11 @@ import org.identigon.incognito.api.RedactionStrategy;
 import org.identigon.incognito.api.SurrogateStrategy;
 
 /**
- * Anonymisation policy definition for a single database column (SPEC §4.1). The applicable
- * strategy depends on the role: {@code surrogateStrategy} for {@code PRIMARY_KEY};
- * {@code directIdStrategy} for {@code DIRECT_ID}/{@code UNIQUE_CANDIDATE_KEY}; {@code quasiIdStrategy}
- * (with {@code jitterDays}/{@code coherenceGroup} for temporal jitter) for {@code QUASI_ID};
- * {@code referenced*} for {@code FOREIGN_KEY}; {@code derivedFrom*} for {@code INHERITED_ATTRIBUTE}.
+ * Anonymisation policy definition for a single database column (SPEC §4.1). The applicable strategy
+ * depends on the role: {@code surrogateStrategy} for {@code PRIMARY_KEY}; {@code directIdStrategy}
+ * for {@code DIRECT_ID}/{@code UNIQUE_CANDIDATE_KEY}; {@code quasiIdStrategy} (with {@code
+ * jitterDays}/{@code coherenceGroup} for temporal jitter) for {@code QUASI_ID}; {@code referenced*}
+ * for {@code FOREIGN_KEY}; {@code derivedFrom*} for {@code INHERITED_ATTRIBUTE}.
  *
  * @param columnName the column name
  * @param role the column's {@link ColumnRole}; {@code null} if not yet declared - a policy author
@@ -24,7 +24,8 @@ import org.identigon.incognito.api.SurrogateStrategy;
  * @param redactionConstant the fixed placeholder {@link RedactionStrategy#CONSTANT} writes, for a
  *     text-type column only (e.g. {@code "0000 0000 0000 0000"} for a card number); {@code null}
  *     falls back to the type-appropriate default ({@code "REDACTED"} for text)
- * @param distinguishing the {@code SENSITIVE} keep-vs-fabricate declaration (§4.1); {@code null} if not declared
+ * @param distinguishing the {@code SENSITIVE} keep-vs-fabricate declaration (§4.1); {@code null} if
+ *     not declared
  * @param jitterDays the ±window in days for {@link QuasiIdStrategy#JITTER_DAYS}
  * @param coherenceGroup the shared temporal-jitter group name (SPEC §4.2)
  * @param referencedTable the parent table for a {@code FOREIGN_KEY}
@@ -46,197 +47,205 @@ public record ColumnPolicy(
     String referencedTable,
     String referencedColumn,
     String derivedFromTable,
-    String derivedFromColumn
-) {
-    /**
-     * Validates required fields. {@code role} is deliberately NOT validated here - a {@code null}
-     * role means "not yet declared", a distinct, legitimate state that
-     * {@code SchemaDiscoveryStage} must detect and fail closed on with a specific, actionable
-     * message (SPEC §7.2); rejecting it here instead would only produce a generic parse-failure
-     * exception with no column/table context.
-     *
-     * @throws NullPointerException if {@code columnName} is null
-     */
-    public ColumnPolicy {
-        Objects.requireNonNull(columnName, "columnName cannot be null");
-    }
+    String derivedFromColumn) {
+  /**
+   * Validates required fields. {@code role} is deliberately NOT validated here - a {@code null}
+   * role means "not yet declared", a distinct, legitimate state that {@code SchemaDiscoveryStage}
+   * must detect and fail closed on with a specific, actionable message (SPEC §7.2); rejecting it
+   * here instead would only produce a generic parse-failure exception with no column/table context.
+   *
+   * @throws NullPointerException if {@code columnName} is null
+   */
+  public ColumnPolicy {
+    Objects.requireNonNull(columnName, "columnName cannot be null");
+  }
+
+  /**
+   * Starts a builder for a column policy.
+   *
+   * @param columnName the column name
+   * @return a new builder
+   */
+  public static Builder builder(String columnName) {
+    return new Builder(columnName);
+  }
+
+  /** Fluent builder for a {@link ColumnPolicy}. */
+  public static class Builder {
+    private final String columnName;
+    private ColumnRole role;
+    private SurrogateStrategy surrogateStrategy = SurrogateStrategy.SEQUENTIAL_LONG;
+    private DirectIdStrategy directIdStrategy;
+    private QuasiIdStrategy quasiIdStrategy;
+    private RedactionStrategy redactionStrategy;
+    private String redactionConstant;
+    private Boolean distinguishing;
+    private int jitterDays;
+    private String coherenceGroup;
+    private String referencedTable;
+    private String referencedColumn;
+    private String derivedFromTable;
+    private String derivedFromColumn;
 
     /**
-     * Starts a builder for a column policy.
+     * Creates a builder for the given column.
      *
-     * @param columnName the column name
-     * @return a new builder
+     * @param columnName the column this policy is for
      */
-    public static Builder builder(String columnName) {
-        return new Builder(columnName);
+    public Builder(String columnName) {
+      this.columnName = columnName;
     }
 
-    /** Fluent builder for a {@link ColumnPolicy}. */
-    public static class Builder {
-        private final String columnName;
-        private ColumnRole role;
-        private SurrogateStrategy surrogateStrategy = SurrogateStrategy.SEQUENTIAL_LONG;
-        private DirectIdStrategy directIdStrategy;
-        private QuasiIdStrategy quasiIdStrategy;
-        private RedactionStrategy redactionStrategy;
-        private String redactionConstant;
-        private Boolean distinguishing;
-        private int jitterDays;
-        private String coherenceGroup;
-        private String referencedTable;
-        private String referencedColumn;
-        private String derivedFromTable;
-        private String derivedFromColumn;
-
-        /**
-         * Creates a builder for the given column.
-         *
-         * @param columnName the column this policy is for
-         */
-        public Builder(String columnName) {
-            this.columnName = columnName;
-        }
-
-        /**
-         * Sets the column's classification role.
-         *
-         * @param role the column's role
-         * @return this builder
-         */
-        public Builder role(ColumnRole role) {
-            this.role = role;
-            return this;
-        }
-
-        /**
-         * Sets the surrogate-key strategy for a {@code PRIMARY_KEY}.
-         *
-         * @param strategy the surrogate strategy for a {@code PRIMARY_KEY}
-         * @return this builder
-         */
-        public Builder surrogateStrategy(SurrogateStrategy strategy) {
-            this.surrogateStrategy = strategy;
-            return this;
-        }
-
-        /**
-         * Sets the fabrication strategy for a {@code DIRECT_ID}/{@code UNIQUE_CANDIDATE_KEY}.
-         *
-         * @param strategy the fabrication strategy for a {@code DIRECT_ID}/{@code UNIQUE_CANDIDATE_KEY}
-         * @return this builder
-         */
-        public Builder directIdStrategy(DirectIdStrategy strategy) {
-            this.directIdStrategy = strategy;
-            return this;
-        }
-
-        /**
-         * Sets the jitter/synthesise strategy for a {@code QUASI_ID}.
-         *
-         * @param strategy the jitter/synthesise strategy for a {@code QUASI_ID}
-         * @return this builder
-         */
-        public Builder quasiIdStrategy(QuasiIdStrategy strategy) {
-            this.quasiIdStrategy = strategy;
-            return this;
-        }
-
-        /**
-         * Sets the redaction strategy for a distinguishing {@code SENSITIVE} column.
-         *
-         * @param strategy the redaction strategy for a distinguishing {@code SENSITIVE} column
-         * @return this builder
-         */
-        public Builder redactionStrategy(RedactionStrategy strategy) {
-            this.redactionStrategy = strategy;
-            return this;
-        }
-
-        /**
-         * Sets the fixed placeholder {@link RedactionStrategy#CONSTANT} writes for this column,
-         * e.g. {@code "0000 0000 0000 0000"} for a card number. Text-type columns only - checked
-         * at pipeline-build time, not per row (SPEC §7.2). Leave unset for the type-appropriate
-         * default ({@code "REDACTED"} for text).
-         *
-         * @param redactionConstant the fixed placeholder value
-         * @return this builder
-         */
-        public Builder redactionConstant(String redactionConstant) {
-            this.redactionConstant = redactionConstant;
-            return this;
-        }
-
-        /**
-         * Declares the {@code SENSITIVE} keep-vs-fabricate flag (§4.1).
-         *
-         * @param distinguishing the {@code SENSITIVE} keep-vs-fabricate declaration (§4.1)
-         * @return this builder
-         */
-        public Builder distinguishing(Boolean distinguishing) {
-            this.distinguishing = distinguishing;
-            return this;
-        }
-
-        /**
-         * Sets the ±window in days for {@link QuasiIdStrategy#JITTER_DAYS}.
-         *
-         * @param jitterDays the half-range of the day shift
-         * @return this builder
-         */
-        public Builder jitterDays(int jitterDays) {
-            this.jitterDays = jitterDays;
-            return this;
-        }
-
-        /**
-         * Names a set of temporal columns (within a row/entity) that share one jitter delta (SPEC §4.2).
-         *
-         * @param coherenceGroup the coherence-group name
-         * @return this builder
-         */
-        public Builder coherenceGroup(String coherenceGroup) {
-            this.coherenceGroup = coherenceGroup;
-            return this;
-        }
-
-        /**
-         * Declares the parent this {@code FOREIGN_KEY} references.
-         *
-         * @param table the referenced table
-         * @param column the referenced column
-         * @return this builder
-         */
-        public Builder references(String table, String column) {
-            this.referencedTable = table;
-            this.referencedColumn = column;
-            return this;
-        }
-
-        /**
-         * Declares the ancestor an {@code INHERITED_ATTRIBUTE} is derived from.
-         *
-         * @param table the ancestor table
-         * @param column the ancestor column
-         * @return this builder
-         */
-        public Builder derivedFrom(String table, String column) {
-            this.derivedFromTable = table;
-            this.derivedFromColumn = column;
-            return this;
-        }
-
-        /**
-         * Builds the column policy.
-         *
-         * @return the built {@link ColumnPolicy}
-         */
-        public ColumnPolicy build() {
-            return new ColumnPolicy(
-                columnName, role, surrogateStrategy, directIdStrategy, quasiIdStrategy, redactionStrategy,
-                redactionConstant, distinguishing, jitterDays, coherenceGroup,
-                referencedTable, referencedColumn,
-                derivedFromTable, derivedFromColumn
-            );
-        }
+    /**
+     * Sets the column's classification role.
+     *
+     * @param role the column's role
+     * @return this builder
+     */
+    public Builder role(ColumnRole role) {
+      this.role = role;
+      return this;
     }
+
+    /**
+     * Sets the surrogate-key strategy for a {@code PRIMARY_KEY}.
+     *
+     * @param strategy the surrogate strategy for a {@code PRIMARY_KEY}
+     * @return this builder
+     */
+    public Builder surrogateStrategy(SurrogateStrategy strategy) {
+      this.surrogateStrategy = strategy;
+      return this;
+    }
+
+    /**
+     * Sets the fabrication strategy for a {@code DIRECT_ID}/{@code UNIQUE_CANDIDATE_KEY}.
+     *
+     * @param strategy the fabrication strategy for a {@code DIRECT_ID}/{@code UNIQUE_CANDIDATE_KEY}
+     * @return this builder
+     */
+    public Builder directIdStrategy(DirectIdStrategy strategy) {
+      this.directIdStrategy = strategy;
+      return this;
+    }
+
+    /**
+     * Sets the jitter/synthesise strategy for a {@code QUASI_ID}.
+     *
+     * @param strategy the jitter/synthesise strategy for a {@code QUASI_ID}
+     * @return this builder
+     */
+    public Builder quasiIdStrategy(QuasiIdStrategy strategy) {
+      this.quasiIdStrategy = strategy;
+      return this;
+    }
+
+    /**
+     * Sets the redaction strategy for a distinguishing {@code SENSITIVE} column.
+     *
+     * @param strategy the redaction strategy for a distinguishing {@code SENSITIVE} column
+     * @return this builder
+     */
+    public Builder redactionStrategy(RedactionStrategy strategy) {
+      this.redactionStrategy = strategy;
+      return this;
+    }
+
+    /**
+     * Sets the fixed placeholder {@link RedactionStrategy#CONSTANT} writes for this column, e.g.
+     * {@code "0000 0000 0000 0000"} for a card number. Text-type columns only - checked at
+     * pipeline-build time, not per row (SPEC §7.2). Leave unset for the type-appropriate default
+     * ({@code "REDACTED"} for text).
+     *
+     * @param redactionConstant the fixed placeholder value
+     * @return this builder
+     */
+    public Builder redactionConstant(String redactionConstant) {
+      this.redactionConstant = redactionConstant;
+      return this;
+    }
+
+    /**
+     * Declares the {@code SENSITIVE} keep-vs-fabricate flag (§4.1).
+     *
+     * @param distinguishing the {@code SENSITIVE} keep-vs-fabricate declaration (§4.1)
+     * @return this builder
+     */
+    public Builder distinguishing(Boolean distinguishing) {
+      this.distinguishing = distinguishing;
+      return this;
+    }
+
+    /**
+     * Sets the ±window in days for {@link QuasiIdStrategy#JITTER_DAYS}.
+     *
+     * @param jitterDays the half-range of the day shift
+     * @return this builder
+     */
+    public Builder jitterDays(int jitterDays) {
+      this.jitterDays = jitterDays;
+      return this;
+    }
+
+    /**
+     * Names a set of temporal columns (within a row/entity) that share one jitter delta (SPEC
+     * §4.2).
+     *
+     * @param coherenceGroup the coherence-group name
+     * @return this builder
+     */
+    public Builder coherenceGroup(String coherenceGroup) {
+      this.coherenceGroup = coherenceGroup;
+      return this;
+    }
+
+    /**
+     * Declares the parent this {@code FOREIGN_KEY} references.
+     *
+     * @param table the referenced table
+     * @param column the referenced column
+     * @return this builder
+     */
+    public Builder references(String table, String column) {
+      this.referencedTable = table;
+      this.referencedColumn = column;
+      return this;
+    }
+
+    /**
+     * Declares the ancestor an {@code INHERITED_ATTRIBUTE} is derived from.
+     *
+     * @param table the ancestor table
+     * @param column the ancestor column
+     * @return this builder
+     */
+    public Builder derivedFrom(String table, String column) {
+      this.derivedFromTable = table;
+      this.derivedFromColumn = column;
+      return this;
+    }
+
+    /**
+     * Builds the column policy.
+     *
+     * @return the built {@link ColumnPolicy}
+     */
+    public ColumnPolicy build() {
+      return new ColumnPolicy(
+          columnName,
+          role,
+          surrogateStrategy,
+          directIdStrategy,
+          quasiIdStrategy,
+          redactionStrategy,
+          redactionConstant,
+          distinguishing,
+          jitterDays,
+          coherenceGroup,
+          referencedTable,
+          referencedColumn,
+          derivedFromTable,
+          derivedFromColumn);
+    }
+  }
 }

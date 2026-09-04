@@ -5,8 +5,8 @@ import java.util.function.Function;
 
 /**
  * The {@link RecordAttributes} seen outside any {@code RecordScope} (section 6.2): nothing is
- * retained. {@code computeIfAbsent} still runs its resolver, against this context's own
- * {@link Randomness}, so strategy code behaves identically whether or not a scope is active.
+ * retained. {@code computeIfAbsent} still runs its resolver, against this context's own {@link
+ * Randomness}, so strategy code behaves identically whether or not a scope is active.
  */
 final class NoOpRecordAttributes implements RecordAttributes {
 

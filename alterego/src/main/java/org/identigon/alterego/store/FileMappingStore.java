@@ -16,11 +16,11 @@ import org.identigon.alterego.AlterEgoStoreException;
 
 /**
  * A persistent {@link MappingStore} backed by a single local file.
- * <p>
- * This store is single-process: an exclusive file lock prevents sharing across processes.
- * It grows by exactly one line per distinct stored mapping, and provides durability against
- * process crashes. One instance can be safely shared by multiple threads or {@code AlterEgo}
- * instances in the same process.
+ *
+ * <p>This store is single-process: an exclusive file lock prevents sharing across processes. It
+ * grows by exactly one line per distinct stored mapping, and provides durability against process
+ * crashes. One instance can be safely shared by multiple threads or {@code AlterEgo} instances in
+ * the same process.
  */
 public final class FileMappingStore implements MappingStore, AutoCloseable {
 
@@ -52,13 +52,16 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
    *
    * @param file the path to the store file
    * @return a new {@link FileMappingStore} instance
-   * @throws AlterEgoStoreException if the file cannot be opened, is locked by another process, or is malformed
+   * @throws AlterEgoStoreException if the file cannot be opened, is locked by another process, or
+   *     is malformed
    */
   public static FileMappingStore open(Path file) {
     FileChannel channel = null;
     FileLock lock = null;
     try {
-      channel = FileChannel.open(file, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
+      channel =
+          FileChannel.open(
+              file, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
       try {
         lock = channel.tryLock();
       } catch (java.nio.channels.OverlappingFileLockException e) {
@@ -74,18 +77,30 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
       return store;
     } catch (IOException e) {
       if (lock != null) {
-        try { lock.release(); } catch (IOException ignored) {}
+        try {
+          lock.release();
+        } catch (IOException ignored) {
+        }
       }
       if (channel != null) {
-        try { channel.close(); } catch (IOException ignored) {}
+        try {
+          channel.close();
+        } catch (IOException ignored) {
+        }
       }
       throw new AlterEgoStoreException("Failed to open file-backed store: " + file, e);
     } catch (AlterEgoStoreException e) {
       if (lock != null) {
-        try { lock.release(); } catch (IOException ignored) {}
+        try {
+          lock.release();
+        } catch (IOException ignored) {
+        }
       }
       if (channel != null) {
-        try { channel.close(); } catch (IOException ignored) {}
+        try {
+          channel.close();
+        } catch (IOException ignored) {
+        }
       }
       throw e;
     }
@@ -98,11 +113,14 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
       return;
     }
 
-    // Read whole file for replay. File footprint matches in-memory map footprint, so memory is sufficient.
+    // Read whole file for replay. File footprint matches in-memory map footprint, so memory is
+    // sufficient.
     ByteBuffer buffer = ByteBuffer.allocate((int) size);
     while (buffer.hasRemaining()) {
       int read = channel.read(buffer);
-      if (read == -1) break;
+      if (read == -1) {
+        break;
+      }
     }
     buffer.flip();
 
@@ -133,7 +151,8 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
       } else {
         String[] parts = line.split("\t", -1);
         if (parts.length != 3) {
-          throw new AlterEgoStoreException("Malformed line in file " + file + " at line " + lineNum);
+          throw new AlterEgoStoreException(
+              "Malformed line in file " + file + " at line " + lineNum);
         }
         String namespaceName = parts[0];
         String key;
@@ -142,12 +161,19 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
           key = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
           value = new String(Base64.getUrlDecoder().decode(parts[2]), StandardCharsets.UTF_8);
         } catch (IllegalArgumentException e) {
-          throw new AlterEgoStoreException("Invalid base64 in file " + file + " at line " + lineNum, e);
+          throw new AlterEgoStoreException(
+              "Invalid base64 in file " + file + " at line " + lineNum, e);
         }
 
         Namespace ns = namespace(namespaceName);
         if (ns.forward.containsKey(key)) {
-          throw new AlterEgoStoreException("Duplicate key in file " + file + " at line " + lineNum + ": namespace=" + namespaceName);
+          throw new AlterEgoStoreException(
+              "Duplicate key in file "
+                  + file
+                  + " at line "
+                  + lineNum
+                  + ": namespace="
+                  + namespaceName);
         }
         ns.forward.put(key, value);
         ns.inverse.put(value, key);
@@ -221,8 +247,14 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
   }
 
   private void appendRecord(String namespace, String key, String value) {
-    String encodedKey = Base64.getUrlEncoder().withoutPadding().encodeToString(key.getBytes(StandardCharsets.UTF_8));
-    String encodedValue = Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    String encodedKey =
+        Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(key.getBytes(StandardCharsets.UTF_8));
+    String encodedValue =
+        Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(value.getBytes(StandardCharsets.UTF_8));
     String line = namespace + "\t" + encodedKey + "\t" + encodedValue + "\n";
     byte[] bytes = line.getBytes(StandardCharsets.UTF_8);
 
@@ -247,10 +279,16 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
     synchronized (writeMonitor) {
       closed = true;
       if (lock != null) {
-        try { lock.release(); } catch (IOException ignored) {}
+        try {
+          lock.release();
+        } catch (IOException ignored) {
+        }
       }
       if (channel != null) {
-        try { channel.close(); } catch (IOException ignored) {}
+        try {
+          channel.close();
+        } catch (IOException ignored) {
+        }
       }
     }
   }

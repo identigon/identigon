@@ -16,14 +16,16 @@ import org.junit.jupiter.api.Test;
 /**
  * Exercises the eight jitter strategies of docs/spec/alterego.md section 4.5: uniform-in-range,
  * determinism, leap-year coverage, nanosecond-zeroing, the {@code start > end} rejection, and
- * {@link JitterOptions} clamp piling at both boundaries, for both {@code LocalDate} and
- * {@code LocalDateTime}.
+ * {@link JitterOptions} clamp piling at both boundaries, for both {@code LocalDate} and {@code
+ * LocalDateTime}.
  */
 class TemporalJitterTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
   private static final LocalDate DAY = LocalDate.of(2026, 7, 25);
-  private static final LocalDateTime MOMENT = LocalDateTime.of(2026, 7, 25, 14, 30, 15, 123_456_789);
+  private static final LocalDateTime MOMENT =
+      LocalDateTime.of(2026, 7, 25, 14, 30, 15, 123_456_789);
   private static final Instant INSTANT_MOMENT = Instant.parse("2026-07-25T14:30:15.123456789Z");
 
   private static AlterEgo alterego() {
@@ -97,10 +99,12 @@ class TemporalJitterTest {
   @Test
   void shiftDateTimeByDaysAndSecondsIsDeterministic() {
     assertEquals(
-        alterego().shiftDateTime(30, 3600).apply(MOMENT), alterego().shiftDateTime(30, 3600).apply(MOMENT));
+        alterego().shiftDateTime(30, 3600).apply(MOMENT),
+        alterego().shiftDateTime(30, 3600).apply(MOMENT));
   }
 
-  // --- shiftDateTime(int, LocalTime, LocalTime) ---------------------------------------------------
+  // --- shiftDateTime(int, LocalTime, LocalTime)
+  // ---------------------------------------------------
 
   @Test
   void shiftDateTimeByRangeStaysWithinStartAndEndAndZerosNanos() {
@@ -123,7 +127,8 @@ class TemporalJitterTest {
         () -> alterego().shiftDateTime(30, LocalTime.of(17, 0), LocalTime.of(9, 0)));
   }
 
-  // --- shiftDateTime(int, TimeField.HOUR) ---------------------------------------------------------
+  // --- shiftDateTime(int, TimeField.HOUR)
+  // ---------------------------------------------------------
 
   @Test
   void shiftDateTimeByHourFieldKeepsInputsHourAndZerosNanos() {
@@ -136,7 +141,8 @@ class TemporalJitterTest {
     }
   }
 
-  // --- shiftDateTime(DateField, ...) --------------------------------------------------------------
+  // --- shiftDateTime(DateField, ...)
+  // --------------------------------------------------------------
 
   @Test
   void shiftDateTimeByDateFieldAndSecondsZerosNanosAndStaysWithinMonth() {
@@ -165,13 +171,15 @@ class TemporalJitterTest {
 
   @Test
   void shiftDateTimeByDateFieldAndHourFieldKeepsInputsHour() {
-    Transformation<LocalDateTime> t = alterego().shiftDateTime(AlterEgo.DateField.MONTH, AlterEgo.TimeField.HOUR);
+    Transformation<LocalDateTime> t =
+        alterego().shiftDateTime(AlterEgo.DateField.MONTH, AlterEgo.TimeField.HOUR);
     LocalDateTime result = t.apply(MOMENT);
     assertEquals(MOMENT.getHour(), result.getHour());
     assertEquals(0, result.getNano());
   }
 
-  // --- JitterOptions clamping ----------------------------------------------------------------------
+  // --- JitterOptions clamping
+  // ----------------------------------------------------------------------
 
   @Test
   void clampPilesResultsAtTheMinBoundaryForLocalDate() {
@@ -195,7 +203,8 @@ class TemporalJitterTest {
 
   @Test
   void clampAppliesToShiftDateTimeToo() {
-    JitterOptions<LocalDateTime> options = JitterOptions.minmax(MOMENT.minusDays(1), MOMENT.plusDays(1));
+    JitterOptions<LocalDateTime> options =
+        JitterOptions.minmax(MOMENT.minusDays(1), MOMENT.plusDays(1));
     Transformation<LocalDateTime> t = alterego().shiftDateTime(365, 3600, options);
     for (int i = 0; i < 100; i++) {
       LocalDateTime result = t.apply(MOMENT.plusHours(i));
@@ -222,7 +231,8 @@ class TemporalJitterTest {
   @Test
   void shiftInstantByDaysAndSecondsIsDeterministic() {
     assertEquals(
-        alterego().shiftInstant(30, 3600).apply(INSTANT_MOMENT), alterego().shiftInstant(30, 3600).apply(INSTANT_MOMENT));
+        alterego().shiftInstant(30, 3600).apply(INSTANT_MOMENT),
+        alterego().shiftInstant(30, 3600).apply(INSTANT_MOMENT));
   }
 
   @Test
@@ -233,7 +243,9 @@ class TemporalJitterTest {
 
   @Test
   void clampAppliesToShiftInstantToo() {
-    JitterOptions<Instant> options = JitterOptions.minmax(INSTANT_MOMENT.minus(1, ChronoUnit.DAYS), INSTANT_MOMENT.plus(1, ChronoUnit.DAYS));
+    JitterOptions<Instant> options =
+        JitterOptions.minmax(
+            INSTANT_MOMENT.minus(1, ChronoUnit.DAYS), INSTANT_MOMENT.plus(1, ChronoUnit.DAYS));
     Transformation<Instant> t = alterego().shiftInstant(365, 3600, options);
     for (int i = 0; i < 100; i++) {
       Instant result = t.apply(INSTANT_MOMENT.plusSeconds(i * 3600L));

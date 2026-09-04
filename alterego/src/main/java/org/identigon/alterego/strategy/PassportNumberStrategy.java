@@ -15,7 +15,9 @@ public final class PassportNumberStrategy implements Strategy<String> {
   public String transform(String input, TransformationContext context) {
     Randomness random = context.random();
     char[] d = new char[7];
-    for (int i = 0; i < 7; i++) d[i] = random.digit();
+    for (int i = 0; i < 7; i++) {
+      d[i] = random.digit();
+    }
     return "ZZ" + new String(d);
   }
 }

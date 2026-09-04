@@ -35,14 +35,16 @@ class DictionaryLoaderTest {
   @Test
   void missingCountryThrowsNamingCountryAndDictionary() {
     AlterEgoConfigException ex =
-        assertThrows(AlterEgoConfigException.class, () -> DictionaryLoader.load("XX", "first-names"));
+        assertThrows(
+            AlterEgoConfigException.class, () -> DictionaryLoader.load("XX", "first-names"));
     assertTrue(ex.getMessage().contains("XX"));
     assertTrue(ex.getMessage().contains("first-names"));
   }
 
   @Test
   void missingDictionaryNameThrows() {
-    assertThrows(AlterEgoConfigException.class, () -> DictionaryLoader.load("ZZ", "no-such-dictionary"));
+    assertThrows(
+        AlterEgoConfigException.class, () -> DictionaryLoader.load("ZZ", "no-such-dictionary"));
   }
 
   @Test
@@ -52,7 +54,8 @@ class DictionaryLoaderTest {
 
   @Test
   void requireCountryThrowsForLocaleWithNoCountry() {
-    assertThrows(AlterEgoConfigException.class, () -> DictionaryLoader.requireCountry(Locale.of("en")));
+    assertThrows(
+        AlterEgoConfigException.class, () -> DictionaryLoader.requireCountry(Locale.of("en")));
   }
 
   @Test

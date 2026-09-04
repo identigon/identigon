@@ -7,16 +7,17 @@ import org.identigon.alterego.TransformationContext;
 
 /**
  * Tokenises and delegates to the first-name/surname strategies (docs/spec/alterego.md section 4.2,
- * the pinned rules): trim and split on whitespace; a single token is transformed as a surname;
- * with two or more tokens, the first and any middle tokens use the first-name domain and the
- * last token uses the surname domain; hyphenated tokens are split and rejoined; blank input is
- * returned unchanged. Each part goes through {@code context.derived(...)} with the built-in
- * domain, so results agree with standalone {@code firstName()}/{@code lastName()} by
- * construction.
+ * the pinned rules): trim and split on whitespace; a single token is transformed as a surname; with
+ * two or more tokens, the first and any middle tokens use the first-name domain and the last token
+ * uses the surname domain; hyphenated tokens are split and rejoined; blank input is returned
+ * unchanged. Each part goes through {@code context.derived(...)} with the built-in domain, so
+ * results agree with standalone {@code firstName()}/{@code lastName()} by construction.
  */
 public final class FullNameStrategy implements Strategy<String> {
 
-  /** The built-in domain {@code firstName()} and {@code fullName()}'s first-name tokens both use. */
+  /**
+   * The built-in domain {@code firstName()} and {@code fullName()}'s first-name tokens both use.
+   */
   public static final String FIRST_NAME_DOMAIN = "alterego:first-name";
 
   /** The built-in domain {@code lastName()} and {@code fullName()}'s surname token both use. */
@@ -25,7 +26,8 @@ public final class FullNameStrategy implements Strategy<String> {
   private final NameDictionaryStrategy firstNameStrategy;
   private final NameDictionaryStrategy lastNameStrategy;
 
-  private FullNameStrategy(NameDictionaryStrategy firstNameStrategy, NameDictionaryStrategy lastNameStrategy) {
+  private FullNameStrategy(
+      NameDictionaryStrategy firstNameStrategy, NameDictionaryStrategy lastNameStrategy) {
     this.firstNameStrategy = firstNameStrategy;
     this.lastNameStrategy = lastNameStrategy;
   }
@@ -37,8 +39,10 @@ public final class FullNameStrategy implements Strategy<String> {
    * @return a strategy for that country
    */
   public static FullNameStrategy forCountry(String country) {
-    NameDictionaryStrategy firstNames = NameDictionaryStrategy.forDictionary(country, "first-names", false);
-    NameDictionaryStrategy lastNames = NameDictionaryStrategy.forDictionary(country, "surnames", false);
+    NameDictionaryStrategy firstNames =
+        NameDictionaryStrategy.forDictionary(country, "first-names", false);
+    NameDictionaryStrategy lastNames =
+        NameDictionaryStrategy.forDictionary(country, "surnames", false);
     return new FullNameStrategy(firstNames, lastNames);
   }
 
@@ -77,7 +81,10 @@ public final class FullNameStrategy implements Strategy<String> {
   }
 
   private static String transformSegment(
-      String segment, String domain, NameDictionaryStrategy strategy, TransformationContext context) {
+      String segment,
+      String domain,
+      NameDictionaryStrategy strategy,
+      TransformationContext context) {
     TransformationContext derived = context.derived(domain, segment);
     return strategy.transform(segment, derived);
   }

@@ -22,8 +22,7 @@ class BuilderTest {
   @Test
   void rejectsSaltShorterThan16Bytes() {
     byte[] shortSalt = "short".getBytes(StandardCharsets.UTF_8);
-    assertThrows(
-        AlterEgoConfigException.class, () -> AlterEgo.builder().salt(shortSalt).build());
+    assertThrows(AlterEgoConfigException.class, () -> AlterEgo.builder().salt(shortSalt).build());
   }
 
   @Test
@@ -108,7 +107,8 @@ class BuilderTest {
     // defensively copy, this would change the salt effectively used by `built`.
     mutableSalt[0] = (byte) (mutableSalt[0] + 1);
 
-    Strategy<String> revealsRandomness = (in, ctx) -> String.valueOf(ctx.random().nextInt(1_000_000));
+    Strategy<String> revealsRandomness =
+        (in, ctx) -> String.valueOf(ctx.random().nextInt(1_000_000));
     String fromBuilt = built.bind("test:mutation-check", revealsRandomness).apply("x");
     String fromReference = reference.bind("test:mutation-check", revealsRandomness).apply("x");
 

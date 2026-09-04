@@ -14,20 +14,35 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Property-style tests backing the PLAN.md M1 "done when" criterion: {@code t.apply(x)} is stable
- * across repeated calls, input-order permutations, and sequential vs parallel streams
- * (section 3.1's order-independence guarantee). Inputs are enumerated deterministically so a
- * failure always reproduces.
+ * across repeated calls, input-order permutations, and sequential vs parallel streams (section
+ * 3.1's order-independence guarantee). Inputs are enumerated deterministically so a failure always
+ * reproduces.
  */
 class PatternDeterminismPropertyTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   /** A deliberately varied fixed input set: lengths, casing, punctuation, whitespace, non-ASCII. */
   private static final List<String> VARIED_INPUTS =
       List.of(
-          "a", "Z", "7", "!", "  ", "abc", "Hello, World", "1234567890",
-          "the-quick-brown-fox", "MiXeDcAsE", "café", "naïve", "東京", "🙂emoji",
-          "line\nbreak", "tab\there", "xxxxxxxxxxxxxxxxxxxx");
+          "a",
+          "Z",
+          "7",
+          "!",
+          "  ",
+          "abc",
+          "Hello, World",
+          "1234567890",
+          "the-quick-brown-fox",
+          "MiXeDcAsE",
+          "café",
+          "naïve",
+          "東京",
+          "🙂emoji",
+          "line\nbreak",
+          "tab\there",
+          "xxxxxxxxxxxxxxxxxxxx");
 
   private static AlterEgo alterego() {
     return AlterEgo.builder().salt(SALT).build();
@@ -69,7 +84,8 @@ class PatternDeterminismPropertyTest {
     List<String> inputs = IntStream.range(0, 500).mapToObj(i -> "input-" + i).toList();
 
     Map<String, String> sequential = inputs.stream().collect(Collectors.toMap(in -> in, t));
-    Map<String, String> parallel = inputs.parallelStream().collect(Collectors.toConcurrentMap(in -> in, t));
+    Map<String, String> parallel =
+        inputs.parallelStream().collect(Collectors.toConcurrentMap(in -> in, t));
 
     assertEquals(sequential, parallel);
   }
@@ -83,7 +99,8 @@ class PatternDeterminismPropertyTest {
     List<String> inputs = IntStream.range(0, 500).mapToObj(i -> "shared-" + i).toList();
 
     Map<String, String> sequential = inputs.stream().collect(Collectors.toMap(in -> in, t));
-    Map<String, String> parallel = inputs.parallelStream().collect(Collectors.toConcurrentMap(in -> in, t));
+    Map<String, String> parallel =
+        inputs.parallelStream().collect(Collectors.toConcurrentMap(in -> in, t));
 
     assertEquals(sequential, parallel);
   }

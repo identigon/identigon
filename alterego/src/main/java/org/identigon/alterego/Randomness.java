@@ -3,10 +3,10 @@ package org.identigon.alterego;
 import java.util.List;
 
 /**
- * Deterministic randomness for one strategy invocation. A stateful, single-threaded consumer of
- * an HMAC-SHA256 counter-mode byte stream derived from the input value: the sequence of calls a
- * strategy makes is part of its deterministic behaviour. Never backed by
- * {@link java.util.random.RandomGenerator} or any other JDK or third-party PRNG.
+ * Deterministic randomness for one strategy invocation. A stateful, single-threaded consumer of an
+ * HMAC-SHA256 counter-mode byte stream derived from the input value: the sequence of calls a
+ * strategy makes is part of its deterministic behaviour. Never backed by {@link
+ * java.util.random.RandomGenerator} or any other JDK or third-party PRNG.
  */
 public interface Randomness {
 

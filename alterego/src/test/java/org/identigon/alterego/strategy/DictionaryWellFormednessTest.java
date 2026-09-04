@@ -24,11 +24,17 @@ class DictionaryWellFormednessTest {
   void fixtureDictionariesArePresentAndWellFormed() {
     Dictionary firstNames = DictionaryLoader.load("ZZ", "first-names");
     assertDoesNotThrow(
-        () -> DictionaryWellFormedness.validate(firstNames, "ZZ/first-names", DictionaryLoader.licenceTextExists(firstNames.header().licence())));
+        () ->
+            DictionaryWellFormedness.validate(
+                firstNames,
+                "ZZ/first-names",
+                DictionaryLoader.licenceTextExists(firstNames.header().licence())));
 
     Dictionary towns = DictionaryLoader.load("ZZ", "towns");
     assertDoesNotThrow(
-        () -> DictionaryWellFormedness.validate(towns, "ZZ/towns", DictionaryLoader.licenceTextExists(towns.header().licence())));
+        () ->
+            DictionaryWellFormedness.validate(
+                towns, "ZZ/towns", DictionaryLoader.licenceTextExists(towns.header().licence())));
     assertDoesNotThrow(() -> DictionaryWellFormedness.validateTownTags(towns, "ZZ/towns"));
 
     Dictionary orgComponents = DictionaryLoader.load("ZZ", "organisation-components");
@@ -39,14 +45,19 @@ class DictionaryWellFormednessTest {
                 "ZZ/organisation-components",
                 DictionaryLoader.licenceTextExists(orgComponents.header().licence())));
     assertDoesNotThrow(
-        () -> DictionaryWellFormedness.validateOrgComponentTags(orgComponents, "ZZ/organisation-components"));
+        () ->
+            DictionaryWellFormedness.validateOrgComponentTags(
+                orgComponents, "ZZ/organisation-components"));
 
     Dictionary phoneRanges = DictionaryLoader.load("ZZ", "phone-ranges");
     assertDoesNotThrow(
         () ->
             DictionaryWellFormedness.validate(
-                phoneRanges, "ZZ/phone-ranges", DictionaryLoader.licenceTextExists(phoneRanges.header().licence())));
-    assertDoesNotThrow(() -> DictionaryWellFormedness.validatePhoneRangeTags(phoneRanges, "ZZ/phone-ranges"));
+                phoneRanges,
+                "ZZ/phone-ranges",
+                DictionaryLoader.licenceTextExists(phoneRanges.header().licence())));
+    assertDoesNotThrow(
+        () -> DictionaryWellFormedness.validatePhoneRangeTags(phoneRanges, "ZZ/phone-ranges"));
   }
 
   @Test
@@ -73,16 +84,21 @@ class DictionaryWellFormednessTest {
     assertDoesNotThrow(() -> DictionaryWellFormedness.validateTownTags(towns, "GB/towns"));
     Dictionary orgComponents = DictionaryLoader.load("GB", "organisation-components");
     assertDoesNotThrow(
-        () -> DictionaryWellFormedness.validateOrgComponentTags(orgComponents, "GB/organisation-components"));
+        () ->
+            DictionaryWellFormedness.validateOrgComponentTags(
+                orgComponents, "GB/organisation-components"));
     Dictionary phoneRanges = DictionaryLoader.load("GB", "phone-ranges");
-    assertDoesNotThrow(() -> DictionaryWellFormedness.validatePhoneRangeTags(phoneRanges, "GB/phone-ranges"));
+    assertDoesNotThrow(
+        () -> DictionaryWellFormedness.validatePhoneRangeTags(phoneRanges, "GB/phone-ranges"));
   }
 
   @Test
   void emptyDictionaryFails() {
     Dictionary empty = DictionaryParser.parse(VALID_HEADER, "test");
     AlterEgoConfigException ex =
-        assertThrows(AlterEgoConfigException.class, () -> DictionaryWellFormedness.validate(empty, "test", true));
+        assertThrows(
+            AlterEgoConfigException.class,
+            () -> DictionaryWellFormedness.validate(empty, "test", true));
     assertTrue(ex.getMessage().contains("empty"));
   }
 
@@ -91,7 +107,8 @@ class DictionaryWellFormednessTest {
     Dictionary duplicated = DictionaryParser.parse(VALID_HEADER + "Alice\nAlice\nBob\n", "test");
     AlterEgoConfigException ex =
         assertThrows(
-            AlterEgoConfigException.class, () -> DictionaryWellFormedness.validate(duplicated, "test", true));
+            AlterEgoConfigException.class,
+            () -> DictionaryWellFormedness.validate(duplicated, "test", true));
     assertTrue(ex.getMessage().contains("duplicate"));
   }
 
@@ -101,7 +118,8 @@ class DictionaryWellFormednessTest {
     // spans several UK postcode areas) - only an exact repeated (value, tags) row is rejected.
     Dictionary multiAreaTown =
         DictionaryParser.parse(
-            VALID_HEADER + "London\tE\tENGLAND\nLondon\tSW\tENGLAND\nLondon\tWC\tENGLAND\n", "test");
+            VALID_HEADER + "London\tE\tENGLAND\nLondon\tSW\tENGLAND\nLondon\tWC\tENGLAND\n",
+            "test");
     assertDoesNotThrow(() -> DictionaryWellFormedness.validate(multiAreaTown, "test", true));
     assertEquals(3, multiAreaTown.entries().size());
   }
@@ -120,7 +138,8 @@ class DictionaryWellFormednessTest {
     Dictionary unsorted = DictionaryParser.parse(VALID_HEADER + "Bob\nAlice\n", "test");
     AlterEgoConfigException ex =
         assertThrows(
-            AlterEgoConfigException.class, () -> DictionaryWellFormedness.validate(unsorted, "test", true));
+            AlterEgoConfigException.class,
+            () -> DictionaryWellFormedness.validate(unsorted, "test", true));
     assertTrue(ex.getMessage().contains("sorted"));
   }
 
@@ -129,7 +148,8 @@ class DictionaryWellFormednessTest {
     Dictionary dict = DictionaryParser.parse(VALID_HEADER + "Alice\n", "test");
     AlterEgoConfigException ex =
         assertThrows(
-            AlterEgoConfigException.class, () -> DictionaryWellFormedness.validate(dict, "test", false));
+            AlterEgoConfigException.class,
+            () -> DictionaryWellFormedness.validate(dict, "test", false));
     assertTrue(ex.getMessage().contains("LICENCES"));
   }
 
@@ -137,21 +157,24 @@ class DictionaryWellFormednessTest {
   void townTagWrongCountFails() {
     Dictionary dict = DictionaryParser.parse(VALID_HEADER + "Manchester\tM\n", "test");
     assertThrows(
-        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validateTownTags(dict, "test"));
+        AlterEgoConfigException.class,
+        () -> DictionaryWellFormedness.validateTownTags(dict, "test"));
   }
 
   @Test
   void townTagInvalidPostcodeAreaFails() {
     Dictionary dict = DictionaryParser.parse(VALID_HEADER + "Manchester\tManc\tENGLAND\n", "test");
     assertThrows(
-        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validateTownTags(dict, "test"));
+        AlterEgoConfigException.class,
+        () -> DictionaryWellFormedness.validateTownTags(dict, "test"));
   }
 
   @Test
   void townTagInvalidCountryFails() {
     Dictionary dict = DictionaryParser.parse(VALID_HEADER + "Manchester\tM\tATLANTIS\n", "test");
     assertThrows(
-        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validateTownTags(dict, "test"));
+        AlterEgoConfigException.class,
+        () -> DictionaryWellFormedness.validateTownTags(dict, "test"));
   }
 
   @Test
@@ -174,42 +197,53 @@ class DictionaryWellFormednessTest {
   void phoneRangeTagWrongCountFails() {
     Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\n", "test");
     assertThrows(
-        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
+        AlterEgoConfigException.class,
+        () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
   }
 
   @Test
   void phoneRangeValueNotEightDigitsFails() {
     Dictionary dict = DictionaryParser.parse(VALID_HEADER + "0123456\t012 345 6XXX\tLS\n", "test");
     assertThrows(
-        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
+        AlterEgoConfigException.class,
+        () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
   }
 
   @Test
   void phoneRangeTemplateMissingXxxSuffixFails() {
     Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\t0123 4560\tLS\n", "test");
     assertThrows(
-        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
+        AlterEgoConfigException.class,
+        () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
   }
 
   @Test
   void phoneRangeTemplateNotReconstructingValueFails() {
-    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\t0999 999 0XXX\tLS\n", "test");
+    Dictionary dict =
+        DictionaryParser.parse(VALID_HEADER + "01234560\t0999 999 0XXX\tLS\n", "test");
     assertThrows(
-        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
+        AlterEgoConfigException.class,
+        () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
   }
 
   @Test
   void phoneRangeInvalidPlaceTagFails() {
-    Dictionary dict = DictionaryParser.parse(VALID_HEADER + "01234560\t0123 456 0XXX\tLondon\n", "test");
+    Dictionary dict =
+        DictionaryParser.parse(VALID_HEADER + "01234560\t0123 456 0XXX\tLondon\n", "test");
     assertThrows(
-        AlterEgoConfigException.class, () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
+        AlterEgoConfigException.class,
+        () -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
   }
 
   @Test
   void phoneRangeAcceptsNoneAndMobileAndNonGeographicPlaceTags() {
     Dictionary dict =
         DictionaryParser.parse(
-            VALID_HEADER + "01234560\t0123 456 0XXX\tNONE\n03069990\t03069 990XXX\tUK_WIDE\n07700900\t07700 900XXX\tMOBILE\n08081570\t08081 570XXX\tFREEPHONE\n09098790\t0909 879 0XXX\tPREMIUM\n", "test");
+            VALID_HEADER
+                + "01234560\t0123 456 0XXX\tNONE\n03069990\t03069 990XXX\tUK_WIDE\n"
+                + "07700900\t07700 900XXX\tMOBILE\n08081570\t08081 570XXX\tFREEPHONE\n"
+                + "09098790\t0909 879 0XXX\tPREMIUM\n",
+            "test");
     assertDoesNotThrow(() -> DictionaryWellFormedness.validatePhoneRangeTags(dict, "test"));
   }
 }

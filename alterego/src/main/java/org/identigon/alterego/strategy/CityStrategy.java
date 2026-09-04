@@ -10,8 +10,8 @@ import org.identigon.alterego.UkNation;
 
 /**
  * Replacement drawn from the country's town/city dictionary (docs/spec/alterego.md section 4.3,
- * section 6.3): inside a record scope with an already-fixed {@code UK_POSTCODE_AREA}, restricts
- * the pick to towns tagged with that exact area; otherwise picks freely and fixes both {@code
+ * section 6.3): inside a record scope with an already-fixed {@code UK_POSTCODE_AREA}, restricts the
+ * pick to towns tagged with that exact area; otherwise picks freely and fixes both {@code
  * UK_POSTCODE_AREA} and {@code UK_NATION} from the chosen town's tags, so a later {@code
  * postcode()}/{@code phoneNumber()} in the same scope can follow. Outside any scope (or with
  * nothing yet fixed), this is exactly the unconstrained pick over the same underlying rows in the
@@ -19,19 +19,19 @@ import org.identigon.alterego.UkNation;
  *
  * <p>If an area is fixed but matches no town in the dictionary (e.g. a caller pre-seeded {@code
  * UK_POSTCODE_AREA} to a value with no town entry), this falls back to an unconstrained pick -
- * still deterministic, since the fallback consumes the same context randomness either way, the
- * same family of fallback as {@code NameOptions.preserveInitial()}'s no-matching-initial case.
+ * still deterministic, since the fallback consumes the same context randomness either way, the same
+ * family of fallback as {@code NameOptions.preserveInitial()}'s no-matching-initial case.
  * Documented v1 limitation, not silently dropped.
  *
- * <p>Each attribute is set from the chosen town's tags whenever it is not already present (not
- * only when *neither* was fixed yet): if the area was already fixed (by a pre-seed, or
- * established by {@code postcode()}/{@code phoneNumber()} running first) but {@code UK_NATION}
- * was not - since neither of those builtins knows a nation, only an area - this is what fixes it
- * too, consistently with the chosen town. Checking presence first, rather than calling {@code
- * set} unconditionally and relying on its no-op-if-equal behaviour, matters specifically for the
- * unmatched-fixed-area fallback above: the chosen (unconstrained) town's own area will generally
- * *disagree* with an already-fixed-but-unmatched area, which would otherwise throw
- * {@link org.identigon.alterego.AlterEgoCoherenceException} instead of silently degrading.
+ * <p>Each attribute is set from the chosen town's tags whenever it is not already present (not only
+ * when *neither* was fixed yet): if the area was already fixed (by a pre-seed, or established by
+ * {@code postcode()}/{@code phoneNumber()} running first) but {@code UK_NATION} was not - since
+ * neither of those builtins knows a nation, only an area - this is what fixes it too, consistently
+ * with the chosen town. Checking presence first, rather than calling {@code set} unconditionally
+ * and relying on its no-op-if-equal behaviour, matters specifically for the unmatched-fixed-area
+ * fallback above: the chosen (unconstrained) town's own area will generally *disagree* with an
+ * already-fixed-but-unmatched area, which would otherwise throw {@link
+ * org.identigon.alterego.AlterEgoCoherenceException} instead of silently degrading.
  */
 public final class CityStrategy implements Strategy<String> {
 
@@ -56,7 +56,8 @@ public final class CityStrategy implements Strategy<String> {
     Optional<String> fixedArea = context.record().get(AlterEgoAttributes.UK_POSTCODE_AREA);
     List<DictionaryEntry> candidates = entries;
     if (fixedArea.isPresent()) {
-      List<DictionaryEntry> matching = entries.stream().filter(e -> e.tags().get(0).equals(fixedArea.get())).toList();
+      List<DictionaryEntry> matching =
+          entries.stream().filter(e -> e.tags().get(0).equals(fixedArea.get())).toList();
       if (!matching.isEmpty()) {
         candidates = matching;
       }

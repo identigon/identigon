@@ -4,9 +4,9 @@ import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
 /**
- * Composes a street address from the country's street dictionaries (docs/spec/alterego.md
- * section 4.3): a house number drawn deterministically from 1-299, plus a complete street name (a
- * theme word plus a type word, e.g. "Victoria Road" - docs/research/0001-alterego-dictionaries.md,
+ * Composes a street address from the country's street dictionaries (docs/spec/alterego.md section
+ * 4.3): a house number drawn deterministically from 1-299, plus a complete street name (a theme
+ * word plus a type word, e.g. "Victoria Road" - docs/research/0001-alterego-dictionaries.md,
  * "Street names").
  */
 public final class StreetAddressStrategy implements Strategy<String> {
@@ -36,7 +36,8 @@ public final class StreetAddressStrategy implements Strategy<String> {
 
   @Override
   public String transform(String input, TransformationContext context) {
-    int houseNumber = MIN_HOUSE_NUMBER + context.random().nextInt(MAX_HOUSE_NUMBER - MIN_HOUSE_NUMBER + 1);
+    int houseNumber =
+        MIN_HOUSE_NUMBER + context.random().nextInt(MAX_HOUSE_NUMBER - MIN_HOUSE_NUMBER + 1);
     String theme = context.random().pick(themes.values());
     String type = context.random().pick(types.values());
     return houseNumber + " " + theme + " " + type;

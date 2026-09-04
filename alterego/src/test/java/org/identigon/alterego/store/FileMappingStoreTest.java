@@ -2,6 +2,7 @@ package org.identigon.alterego.store;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,13 +35,16 @@ class FileMappingStoreTest {
     Path file = tempDir.resolve("store.txt");
     try (FileMappingStore store = FileMappingStore.open(file)) {
       assertEquals("v1", store.putIfAbsent("ns1", "k1", "v1"));
-      assertEquals(new MappingStore.PutUniqueResult.Stored(), store.putIfAbsentUnique("ns2", "k2", "v2"));
+      assertEquals(
+          new MappingStore.PutUniqueResult.Stored(), store.putIfAbsentUnique("ns2", "k2", "v2"));
     }
     try (FileMappingStore store = FileMappingStore.open(file)) {
       assertEquals("v1", store.get("ns1", "k1").orElse(null));
       assertEquals("v2", store.get("ns2", "k2").orElse(null));
       // uniqueness survives:
-      assertTrue(store.putIfAbsentUnique("ns2", "k3", "v2") instanceof MappingStore.PutUniqueResult.ValueTaken);
+      assertTrue(
+          store.putIfAbsentUnique("ns2", "k3", "v2")
+              instanceof MappingStore.PutUniqueResult.ValueTaken);
     }
   }
 
@@ -53,11 +57,15 @@ class FileMappingStoreTest {
 
       // Existing mapping
       assertEquals("v1", store.putIfAbsent("ns", "k1", "v2"));
-      assertTrue(store.putIfAbsentUnique("ns", "k1", "v3") instanceof MappingStore.PutUniqueResult.ExistingMapping);
+      assertTrue(
+          store.putIfAbsentUnique("ns", "k1", "v3")
+              instanceof MappingStore.PutUniqueResult.ExistingMapping);
 
       // Value taken
       store.putIfAbsentUnique("ns", "k2", "v2");
-      assertTrue(store.putIfAbsentUnique("ns", "k3", "v2") instanceof MappingStore.PutUniqueResult.ValueTaken);
+      assertTrue(
+          store.putIfAbsentUnique("ns", "k3", "v2")
+              instanceof MappingStore.PutUniqueResult.ValueTaken);
 
       long sizeAfter = Files.size(file);
       // Only 2 mappings actually written (k1->v1 and k2->v2)
@@ -66,8 +74,14 @@ class FileMappingStoreTest {
   }
 
   private long getLineLength(String ns, String k, String v) {
-    String ek = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(k.getBytes(StandardCharsets.UTF_8));
-    String ev = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(v.getBytes(StandardCharsets.UTF_8));
+    String ek =
+        java.util.Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(k.getBytes(StandardCharsets.UTF_8));
+    String ev =
+        java.util.Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(v.getBytes(StandardCharsets.UTF_8));
     return (ns + "\t" + ek + "\t" + ev + "\n").getBytes(StandardCharsets.UTF_8).length;
   }
 
@@ -78,7 +92,8 @@ class FileMappingStoreTest {
       store.putIfAbsent("ns", "k1", "v1");
     }
 
-    Files.write(file, "torn-record-no-newline".getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+    Files.write(
+        file, "torn-record-no-newline".getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
 
     try (FileMappingStore store = FileMappingStore.open(file)) {
       assertEquals("v1", store.get("ns", "k1").orElse(null));
@@ -126,8 +141,12 @@ class FileMappingStoreTest {
     try (FileMappingStore store = FileMappingStore.open(tempDir.resolve("good.txt"))) {
       store.putIfAbsent("ns", "k1", "v1");
     }
-    List<String> goodLines = Files.readAllLines(tempDir.resolve("good.txt"), StandardCharsets.UTF_8);
-    Files.writeString(file, "alterego-mapping-store 1\n" + goodLines.get(1) + "\n" + goodLines.get(1) + "\n", StandardCharsets.UTF_8);
+    List<String> goodLines =
+        Files.readAllLines(tempDir.resolve("good.txt"), StandardCharsets.UTF_8);
+    Files.writeString(
+        file,
+        "alterego-mapping-store 1\n" + goodLines.get(1) + "\n" + goodLines.get(1) + "\n",
+        StandardCharsets.UTF_8);
     assertThrows(AlterEgoStoreException.class, () -> FileMappingStore.open(file));
   }
 
@@ -139,7 +158,7 @@ class FileMappingStoreTest {
     }
     // After close, it succeeds
     try (FileMappingStore ignored2 = FileMappingStore.open(file)) {
-      // successfully opened
+      assertNotNull(ignored2, "successfully opened");
     }
   }
 

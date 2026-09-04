@@ -5,4 +5,5 @@ package org.identigon.alterego.strategy;
  * exact original data URL, licence name (must match a file under {@code dictionaries/LICENCES/}),
  * licence URL, and retrieval date.
  */
-record DictionaryHeader(String source, String dataUrl, String licence, String licenceUrl, String retrieved) {}
+record DictionaryHeader(
+    String source, String dataUrl, String licence, String licenceUrl, String retrieved) {}

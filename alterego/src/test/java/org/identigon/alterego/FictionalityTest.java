@@ -8,39 +8,95 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 /**
- * The section 4.1 "fictional by default" property tests, gathered in one place now that there
- * are five built-ins with some kind of guaranteed-fictional value space (spec section 10): every
- * default {@code postcode()} inward code violates the real inward-code rule, every default
- * {@code emailAddress()} uses an RFC 2606 reserved domain, every default {@code phoneNumber()}
- * falls inside a published Ofcom drama range, and every default {@code lastName()}/{@code
- * streetAddress()} theme word is drawn from the authored, deliberately fictional word list
- * (ADR 0010) rather than real population/vocabulary data - each over a large sample.
+ * The section 4.1 "fictional by default" property tests, gathered in one place now that there are
+ * five built-ins with some kind of guaranteed-fictional value space (spec section 10): every
+ * default {@code postcode()} inward code violates the real inward-code rule, every default {@code
+ * emailAddress()} uses an RFC 2606 reserved domain, every default {@code phoneNumber()} falls
+ * inside a published Ofcom drama range, and every default {@code lastName()}/{@code
+ * streetAddress()} theme word is drawn from the authored, deliberately fictional word list (ADR
+ * 0010) rather than real population/vocabulary data - each over a large sample.
  */
 class FictionalityTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
   private static final int SAMPLE_SIZE = 500;
 
-  private static final Set<Character> NEVER_USED_POSTCODE_LETTERS = Set.of('C', 'I', 'K', 'M', 'O', 'V');
-  private static final Set<String> RESERVED_EMAIL_DOMAINS = Set.of("example.com", "example.net", "example.org");
+  private static final Set<Character> NEVER_USED_POSTCODE_LETTERS =
+      Set.of('C', 'I', 'K', 'M', 'O', 'V');
+  private static final Set<String> RESERVED_EMAIL_DOMAINS =
+      Set.of("example.com", "example.net", "example.org");
   private static final Set<String> GB_PHONE_FIXED_PREFIXES =
       Set.of(
-          "01134960", "01144960", "01154960", "01164960", "01174960", "01184960", "01214960",
-          "01314960", "01414960", "01514960", "01614960", "01632960", "01914980", "02079460",
-          "02896496", "02920180", "07700900");
+          "01134960",
+          "01144960",
+          "01154960",
+          "01164960",
+          "01174960",
+          "01184960",
+          "01214960",
+          "01314960",
+          "01414960",
+          "01514960",
+          "01614960",
+          "01632960",
+          "01914980",
+          "02079460",
+          "02896496",
+          "02920180",
+          "07700900");
   private static final Set<String> GB_FICTIONAL_SURNAMES =
       Set.of(
-          "Artificialworth", "Bogusmore", "Concoctedham", "Counterfeitby", "Dummyford",
-          "Examplewick", "Fabricatedstead", "Fakemore", "Fictionalhurst", "Hypotheticalby",
-          "Imaginarydale", "Inventedthorpe", "Madeupperson", "Nonexistentham", "Phonycroft",
-          "Placeholdergate", "Pretendbrook", "Pseudonymby", "Samplebrook", "Sampleford",
-          "Simulatedgate", "Specimenworth", "Syntheticcombe", "Testperson");
+          "Artificialworth",
+          "Bogusmore",
+          "Concoctedham",
+          "Counterfeitby",
+          "Dummyford",
+          "Examplewick",
+          "Fabricatedstead",
+          "Fakemore",
+          "Fictionalhurst",
+          "Hypotheticalby",
+          "Imaginarydale",
+          "Inventedthorpe",
+          "Madeupperson",
+          "Nonexistentham",
+          "Phonycroft",
+          "Placeholdergate",
+          "Pretendbrook",
+          "Pseudonymby",
+          "Samplebrook",
+          "Sampleford",
+          "Simulatedgate",
+          "Specimenworth",
+          "Syntheticcombe",
+          "Testperson");
   private static final Set<String> GB_FICTIONAL_STREET_THEMES =
       Set.of(
-          "Artificial", "Bluff", "Bogus", "Counterfeit", "Demo", "Dummy", "Example", "Fabricated",
-          "Fake", "Fictional", "Hypothetical", "Imaginary", "Invented", "Madeup", "Nonexistent",
-          "Notreal", "Phony", "Placeholder", "Pretend", "Sample", "Somewhere", "Specimen",
-          "Synthetic", "Unreal");
+          "Artificial",
+          "Bluff",
+          "Bogus",
+          "Counterfeit",
+          "Demo",
+          "Dummy",
+          "Example",
+          "Fabricated",
+          "Fake",
+          "Fictional",
+          "Hypothetical",
+          "Imaginary",
+          "Invented",
+          "Madeup",
+          "Nonexistent",
+          "Notreal",
+          "Phony",
+          "Placeholder",
+          "Pretend",
+          "Sample",
+          "Somewhere",
+          "Specimen",
+          "Synthetic",
+          "Unreal");
 
   private static AlterEgo alterego() {
     return AlterEgo.builder().salt(SALT).build();
@@ -98,7 +154,8 @@ class FictionalityTest {
       String result = t.apply("input-" + i);
       String theme = result.split(" ")[1];
       assertTrue(
-          GB_FICTIONAL_STREET_THEMES.contains(theme), "not an authored fictional theme word: " + theme);
+          GB_FICTIONAL_STREET_THEMES.contains(theme),
+          "not an authored fictional theme word: " + theme);
     }
   }
 
@@ -115,7 +172,9 @@ class FictionalityTest {
         sum += (digits.charAt(j) - '0') * (10 - j);
       }
       int c = 11 - (sum % 11);
-      if (c == 11) c = 0;
+      if (c == 11) {
+        c = 0;
+      }
       assertEquals(c, digits.charAt(9) - '0', "invalid check digit in: " + result);
     }
   }
@@ -125,7 +184,8 @@ class FictionalityTest {
     Transformation<String> t = alterego().nationalInsuranceNumber();
     for (int i = 0; i < SAMPLE_SIZE; i++) {
       String result = t.apply("input-" + i);
-      assertTrue(result.matches("^QQ \\d{2} \\d{2} \\d{2} [A-D]$"), "malformed NI number: " + result);
+      assertTrue(
+          result.matches("^QQ \\d{2} \\d{2} \\d{2} [A-D]$"), "malformed NI number: " + result);
     }
   }
 
@@ -134,7 +194,8 @@ class FictionalityTest {
     Transformation<String> t = alterego().drivingLicenceNumber();
     for (int i = 0; i < SAMPLE_SIZE; i++) {
       String result = t.apply("input-" + i);
-      assertTrue(result.matches("^99999\\d{6}[A-Z]{2}9[A-Z]{2}$"), "malformed DL number: " + result);
+      assertTrue(
+          result.matches("^99999\\d{6}[A-Z]{2}9[A-Z]{2}$"), "malformed DL number: " + result);
     }
   }
 
@@ -152,7 +213,8 @@ class FictionalityTest {
     Transformation<String> t = alterego().creditCardNumber();
     for (int i = 0; i < SAMPLE_SIZE; i++) {
       String result = t.apply("input-" + i);
-      assertTrue(result.matches("^0\\d{3}( \\d{4}){3}$"), "malformed credit card number: " + result);
+      assertTrue(
+          result.matches("^0\\d{3}( \\d{4}){3}$"), "malformed credit card number: " + result);
 
       String digits = result.replace(" ", "");
       int sum = 0;
@@ -160,7 +222,9 @@ class FictionalityTest {
         int v = digits.charAt(14 - j) - '0';
         if (j % 2 == 0) {
           v *= 2;
-          if (v > 9) v -= 9;
+          if (v > 9) {
+            v -= 9;
+          }
         }
         sum += v;
       }

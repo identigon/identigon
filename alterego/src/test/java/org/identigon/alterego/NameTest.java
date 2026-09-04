@@ -10,18 +10,19 @@ import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
 /**
- * Exercises firstName()/lastName()/fullName() against the ZZ synthetic test fixtures (for
- * exact, controlled assertions) and the default-configured GB dictionaries (for end-to-end
- * coverage of the default-configured path). firstName() draws from a real curated dictionary;
- * lastName() draws from an authored, deliberately fictional dictionary (ADR 0010) - see
- * {@link FictionalityTest} for the property test confirming every lastName() output is drawn
- * from that fictional set.
+ * Exercises firstName()/lastName()/fullName() against the ZZ synthetic test fixtures (for exact,
+ * controlled assertions) and the default-configured GB dictionaries (for end-to-end coverage of the
+ * default-configured path). firstName() draws from a real curated dictionary; lastName() draws from
+ * an authored, deliberately fictional dictionary (ADR 0010) - see {@link FictionalityTest} for the
+ * property test confirming every lastName() output is drawn from that fictional set.
  */
 class NameTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
   private static final Locale ZZ = Locale.of("en", "ZZ");
-  private static final List<String> FIXTURE_FIRST_NAMES = List.of("Alice", "Bob", "Carol", "Dave", "Eve");
+  private static final List<String> FIXTURE_FIRST_NAMES =
+      List.of("Alice", "Bob", "Carol", "Dave", "Eve");
   private static final List<String> FIXTURE_SURNAMES =
       List.of("Anderson", "Baker", "Clarke", "Dixon", "Ellis");
 
@@ -161,6 +162,7 @@ class NameTest {
   @Test
   void fullNameIsDeterministic() {
     AlterEgo eg = alterego();
-    assertEquals(eg.fullName().apply("Original Person"), alterego().fullName().apply("Original Person"));
+    assertEquals(
+        eg.fullName().apply("Original Person"), alterego().fullName().apply("Original Person"));
   }
 }

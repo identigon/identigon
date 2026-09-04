@@ -8,13 +8,14 @@ import org.identigon.alterego.store.InMemoryMappingStore;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@code context.mappings()} ({@link DefaultMappings}) honours {@code rawMappingKeys} exactly
- * like {@code stored()}/{@code unique()} (spec section 2.6, section 5.1) - a dedicated test since
- * this path isn't exercised by either decorator.
+ * {@code context.mappings()} ({@link DefaultMappings}) honours {@code rawMappingKeys} exactly like
+ * {@code stored()}/{@code unique()} (spec section 2.6, section 5.1) - a dedicated test since this
+ * path isn't exercised by either decorator.
  */
 class MappingsRawKeyTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
   private static final String DOMAIN = "test:mappings";
   private static final String CANONICAL_KEY = "my-canonical-key";
 

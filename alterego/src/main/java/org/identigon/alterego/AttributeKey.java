@@ -3,8 +3,8 @@ package org.identigon.alterego;
 import java.util.Objects;
 
 /**
- * A typed key for a {@link RecordAttributes} value. Two keys are equal iff their name and type
- * are equal.
+ * A typed key for a {@link RecordAttributes} value. Two keys are equal iff their name and type are
+ * equal.
  *
  * @param <A> the attribute's value type
  */

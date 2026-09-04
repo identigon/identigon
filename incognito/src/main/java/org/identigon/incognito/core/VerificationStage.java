@@ -24,811 +24,1190 @@ import org.identigon.incognito.policy.TablePolicy;
 
 /**
  * Stage 4: Verifies the target database after loading.
+ *
  * <ul>
- *   <li>Referential integrity: no dangling FK references.</li>
- *   <li>Fictionality: a DIRECT_ID (or QUASI_ID SYNTHESISE carrying the same {@code directIdStrategy}
- *       hint, ADR 31) column is checked per its typed strategy - email columns use RFC 2606
- *       reserved domains; postcode columns use the guaranteed-fictional inward-code letter;
- *       domain/URL columns use RFC 2606 reserved domains/TLDs; National Insurance number (NINO)
- *       columns use the guaranteed-fictional QQ prefix; NHS number columns use the reserved 999
- *       test-range prefix; passport number columns use the structurally-impossible ZZ prefix;
+ *   <li>Referential integrity: no dangling FK references.
+ *   <li>Fictionality: a DIRECT_ID (or QUASI_ID SYNTHESISE carrying the same {@code
+ *       directIdStrategy} hint, ADR 31) column is checked per its typed strategy - email columns
+ *       use RFC 2606 reserved domains; postcode columns use the guaranteed-fictional inward-code
+ *       letter; domain/URL columns use RFC 2606 reserved domains/TLDs; National Insurance number
+ *       (NINO) columns use the guaranteed-fictional QQ prefix; NHS number columns use the reserved
+ *       999 test-range prefix; passport number columns use the structurally-impossible ZZ prefix;
  *       driving licence number columns use the zero-letter-surname 99999 block. A column with no
  *       typed check (e.g. {@code ALTEREGO_GENERIC}) is never marked fictionality-verified - see
- *       {@link org.identigon.incognito.api.AnonymisationReport.ColumnAction#fictionalityVerified()}.</li>
+ *       {@link
+ *       org.identigon.incognito.api.AnonymisationReport.ColumnAction#fictionalityVerified()}.
  *   <li>Misdeclaration lint (SPEC §4.1): cross-checks every {@code SENSITIVE distinguishing: false}
- *       column's real {@code COUNT(DISTINCT)} against {@code maxCategoricalCardinality}.</li>
+ *       column's real {@code COUNT(DISTINCT)} against {@code maxCategoricalCardinality}.
  *   <li>Per-period volume tolerance (SPEC §4.2, Appendix D): for temporal QUASI_ID columns,
- *       verifies that monthly/yearly bucket counts in the target match the source within ±2%
- *       (min ±1 row).</li>
- *   <li>Source-value survival: for DIRECT_ID columns, verifies that no real source value
- *       survived in the target (a sanity net beyond the email-domain check).</li>
- *   <li>Structural-uniqueness findings (SPEC §2.4, opt-in via {@code structuralUniqueness}): per-FK-edge
- *       relational fingerprints - a parent row singled out by its count of referencing child rows.</li>
+ *       verifies that monthly/yearly bucket counts in the target match the source within ±2% (min
+ *       ±1 row).
+ *   <li>Source-value survival: for DIRECT_ID columns, verifies that no real source value survived
+ *       in the target (a sanity net beyond the email-domain check).
+ *   <li>Structural-uniqueness findings (SPEC §2.4, opt-in via {@code structuralUniqueness}):
+ *       per-FK-edge relational fingerprints - a parent row singled out by its count of referencing
+ *       child rows.
  * </ul>
  */
 public final class VerificationStage implements PipelineStage {
 
-    /** Creates a verification stage. */
-    public VerificationStage() {}
+  /** Creates a verification stage. */
+  public VerificationStage() {}
 
-    private static final System.Logger LOG = System.getLogger(VerificationStage.class.getName());
+  private static final System.Logger LOG = System.getLogger(VerificationStage.class.getName());
 
-    /** RFC 2606 reserved domains that AlterEgo uses for fictional emails. */
-    private static final List<String> RESERVED_EMAIL_DOMAINS = List.of(
-        "example.com", "example.net", "example.org",
-        "example.co.uk", "example.org.uk"
-    );
+  /** RFC 2606 reserved domains that AlterEgo uses for fictional emails. */
+  private static final List<String> RESERVED_EMAIL_DOMAINS =
+      List.of("example.com", "example.net", "example.org", "example.co.uk", "example.org.uk");
 
-    /**
-     * Matches exactly the domains {@code DomainNameStrategy} (alterego) can produce: one of its
-     * three reserved second-level domains, or a freshly-minted subdomain of one of its three
-     * reserved TLDs (RFC 2606).
-     */
-    private static final String RESERVED_DOMAIN_REGEX =
-        "^(example\\.com|example\\.net|example\\.org|[a-z]+\\.(test|example|invalid))$";
+  /**
+   * Matches exactly the domains {@code DomainNameStrategy} (alterego) can produce: one of its three
+   * reserved second-level domains, or a freshly-minted subdomain of one of its three reserved TLDs
+   * (RFC 2606).
+   */
+  private static final String RESERVED_DOMAIN_REGEX =
+      "^(example\\.com|example\\.net|example\\.org|[a-z]+\\.(test|example|invalid))$";
 
-    /** As {@link #RESERVED_DOMAIN_REGEX}, wrapped in the scheme + optional path {@code UrlStrategy} adds. */
-    private static final String RESERVED_URL_REGEX =
-        "^https?://(example\\.com|example\\.net|example\\.org|[a-z]+\\.(test|example|invalid))(/.*)?$";
+  /**
+   * As {@link #RESERVED_DOMAIN_REGEX}, wrapped in the scheme + optional path {@code UrlStrategy}
+   * adds.
+   */
+  private static final String RESERVED_URL_REGEX =
+      "^https?://(example\\.com|example\\.net|example\\.org|"
+          + "[a-z]+\\.(test|example|invalid))(/.*)?$";
 
-    /**
-     * {@code PostcodeStrategy}'s default (non-{@code realistic}) guarantee (ADR 0005, alterego):
-     * the inward code's last letter is drawn only from these - letters Royal Mail never uses there
-     * - so the output can never coincide with a real, deliverable postcode.
-     */
-    private static final List<String> POSTCODE_NEVER_USED_LETTERS = List.of("C", "I", "K", "M", "O", "V");
+  /**
+   * {@code PostcodeStrategy}'s default (non-{@code realistic}) guarantee (ADR 0005, alterego): the
+   * inward code's last letter is drawn only from these - letters Royal Mail never uses there - so
+   * the output can never coincide with a real, deliverable postcode.
+   */
+  private static final List<String> POSTCODE_NEVER_USED_LETTERS =
+      List.of("C", "I", "K", "M", "O", "V");
 
-    /**
-     * {@code NationalInsuranceNumberStrategy}'s guarantee (alterego): every output starts with the
-     * {@code QQ} prefix, which HMRC structurally never allocates - so the output can never coincide
-     * with a real National Insurance number (NINO).
-     */
-    private static final String NINO_RESERVED_PREFIX = "QQ ";
+  /**
+   * {@code NationalInsuranceNumberStrategy}'s guarantee (alterego): every output starts with the
+   * {@code QQ} prefix, which HMRC structurally never allocates - so the output can never coincide
+   * with a real National Insurance number (NINO).
+   */
+  private static final String NINO_RESERVED_PREFIX = "QQ ";
 
-    /**
-     * {@code NhsNumberStrategy}'s guarantee (alterego): every output starts with the {@code 999}
-     * prefix, reserved for test/synthetic use and never issued to a real patient - so the output
-     * can never coincide with a real NHS number.
-     */
-    private static final String NHS_NUMBER_RESERVED_PREFIX = "999 ";
+  /**
+   * {@code NhsNumberStrategy}'s guarantee (alterego): every output starts with the {@code 999}
+   * prefix, reserved for test/synthetic use and never issued to a real patient - so the output can
+   * never coincide with a real NHS number.
+   */
+  private static final String NHS_NUMBER_RESERVED_PREFIX = "999 ";
 
-    /**
-     * {@code PassportNumberStrategy}'s guarantee (alterego): every output starts with the
-     * {@code ZZ} prefix, structurally impossible on a real UK passport (which must be 9 numeric
-     * digits) - so the output can never coincide with a real passport number.
-     */
-    private static final String PASSPORT_NUMBER_RESERVED_PREFIX = "ZZ";
+  /**
+   * {@code PassportNumberStrategy}'s guarantee (alterego): every output starts with the {@code ZZ}
+   * prefix, structurally impossible on a real UK passport (which must be 9 numeric digits) - so the
+   * output can never coincide with a real passport number.
+   */
+  private static final String PASSPORT_NUMBER_RESERVED_PREFIX = "ZZ";
 
-    /**
-     * {@code DrivingLicenceNumberStrategy}'s guarantee (alterego): every output starts with the
-     * {@code 99999} surname block, which implies a zero-letter surname and can never occur on a
-     * real licence - so the output can never coincide with a real driving licence number.
-     */
-    private static final String DRIVING_LICENCE_NUMBER_RESERVED_PREFIX = "99999";
+  /**
+   * {@code DrivingLicenceNumberStrategy}'s guarantee (alterego): every output starts with the
+   * {@code 99999} surname block, which implies a zero-letter surname and can never occur on a real
+   * licence - so the output can never coincide with a real driving licence number.
+   */
+  private static final String DRIVING_LICENCE_NUMBER_RESERVED_PREFIX = "99999";
 
-    /**
-     * {@code PhoneNumberStrategy}'s guarantee under its default (non-{@code realistic}) options
-     * (alterego, {@code GB/phone-ranges.txt}, sourced from Ofcom's drama-number table): every
-     * digit-only output starts with one of these 8-digit area-coded prefixes, followed by exactly
-     * 3 free digits - never a connectable number. Unlike QQ/999/ZZ/99999 above (fixed by the
-     * algorithm itself), this list mirrors a loaded dictionary file rather than an algorithmic
-     * constant, so it must be kept in sync with that file by hand if it ever changes.
-     */
-    private static final List<String> PHONE_RESERVED_PREFIXES = List.of(
-        "01134960", "01144960", "01154960", "01164960", "01174960", "01184960", "01214960",
-        "01314960", "01414960", "01514960", "01614960", "01632960", "01914980", "02079460",
-        "02896496", "02920180", "03069990", "07700900", "08081570", "09098790");
+  /**
+   * {@code PhoneNumberStrategy}'s guarantee under its default (non-{@code realistic}) options
+   * (alterego, {@code GB/phone-ranges.txt}, sourced from Ofcom's drama-number table): every
+   * digit-only output starts with one of these 8-digit area-coded prefixes, followed by exactly 3
+   * free digits - never a connectable number. Unlike QQ/999/ZZ/99999 above (fixed by the algorithm
+   * itself), this list mirrors a loaded dictionary file rather than an algorithmic constant, so it
+   * must be kept in sync with that file by hand if it ever changes.
+   */
+  private static final List<String> PHONE_RESERVED_PREFIXES =
+      List.of(
+          "01134960",
+          "01144960",
+          "01154960",
+          "01164960",
+          "01174960",
+          "01184960",
+          "01214960",
+          "01314960",
+          "01414960",
+          "01514960",
+          "01614960",
+          "01632960",
+          "01914980",
+          "02079460",
+          "02896496",
+          "02920180",
+          "03069990",
+          "07700900",
+          "08081570",
+          "09098790");
 
-    /**
-     * Margin above the threshold at which we skip the pg_stats pre-filter and run the exact count
-     * directly. If pg_stats reports n_distinct within this factor of the threshold we fall through
-     * to the exact query to avoid false negatives from stale statistics.
-     */
-    private static final double PG_STATS_MARGIN = 2.0;
+  /**
+   * Margin above the threshold at which we skip the pg_stats pre-filter and run the exact count
+   * directly. If pg_stats reports n_distinct within this factor of the threshold we fall through to
+   * the exact query to avoid false negatives from stale statistics.
+   */
+  private static final double PG_STATS_MARGIN = 2.0;
 
-    /**
-     * Per-period volume tolerance: ±2% of the source bucket count, minimum ±1 row (Appendix D).
-     */
-    private static final double VOLUME_TOLERANCE_FRACTION = 0.02;
-    private static final long VOLUME_TOLERANCE_MIN_ROWS = 1;
+  /** Per-period volume tolerance: ±2% of the source bucket count, minimum ±1 row (Appendix D). */
+  private static final double VOLUME_TOLERANCE_FRACTION = 0.02;
 
-    /**
-     * Fraction of a DIRECT_ID column's sampled distinct values that must survive into the target
-     * before survival counts as a hard failure rather than a warning. Shape-preserving fabrication
-     * of low-entropy values can collide with a real value purely by chance; a genuine leak (e.g. an
-     * accidental passthrough) survives ~all values, so a high ratio distinguishes the two.
-     */
-    private static final double SURVIVAL_FAILURE_RATIO = 0.20;
+  private static final long VOLUME_TOLERANCE_MIN_ROWS = 1;
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public StageResult process(PipelineContext context) throws IncognitoException {
-        List<SchemaInspector.TableMetadata> allMetadata =
-            (List<SchemaInspector.TableMetadata>) context.attributes().get(SchemaDiscoveryStage.ATTR_TABLE_METADATA);
-        TableDependencyGraph.TopologicalExecutionPlan plan =
-            (TableDependencyGraph.TopologicalExecutionPlan) context.attributes().get(SchemaDiscoveryStage.ATTR_EXECUTION_PLAN);
+  /**
+   * Fraction of a DIRECT_ID column's sampled distinct values that must survive into the target
+   * before survival counts as a hard failure rather than a warning. Shape-preserving fabrication of
+   * low-entropy values can collide with a real value purely by chance; a genuine leak (e.g. an
+   * accidental passthrough) survives ~all values, so a high ratio distinguishes the two.
+   */
+  private static final double SURVIVAL_FAILURE_RATIO = 0.20;
 
-        if (allMetadata == null || plan == null) {
-            throw new IncognitoException.ConfigException(
-                "SchemaDiscoveryStage must run before VerificationStage");
-        }
+  @Override
+  @SuppressWarnings("unchecked")
+  public StageResult process(PipelineContext context) throws IncognitoException {
+    List<SchemaInspector.TableMetadata> allMetadata =
+        (List<SchemaInspector.TableMetadata>)
+            context.attributes().get(SchemaDiscoveryStage.ATTR_TABLE_METADATA);
+    TableDependencyGraph.TopologicalExecutionPlan plan =
+        (TableDependencyGraph.TopologicalExecutionPlan)
+            context.attributes().get(SchemaDiscoveryStage.ATTR_EXECUTION_PLAN);
 
-        Map<String, SchemaInspector.TableMetadata> metadataByName = allMetadata.stream()
+    if (allMetadata == null || plan == null) {
+      throw new IncognitoException.ConfigException(
+          "SchemaDiscoveryStage must run before VerificationStage");
+    }
+
+    Map<String, SchemaInspector.TableMetadata> metadataByName =
+        allMetadata.stream()
             .collect(Collectors.toMap(SchemaInspector.TableMetadata::tableName, m -> m));
 
-        AnonymisationPolicy policy = context.policy();
-        List<String> failures = new ArrayList<>();
-        List<String> warnings = new ArrayList<>();
-        // Structured, queryable residual-risk evidence for the DPIA report (SPEC §4.1/§4.3), captured
-        // alongside the human-readable prose that lands in this stage's result message.
-        List<org.identigon.incognito.api.AnonymisationReport.SurvivalFinding> survivalFindings = new ArrayList<>();
-        List<org.identigon.incognito.api.AnonymisationReport.LintFinding> lintFindings = new ArrayList<>();
-        // Tables that contributed at least one hard failure - the complement (in-policy, no failure)
-        // are reported as verified in the DPIA report.
-        java.util.Set<String> failedTables = new java.util.HashSet<>();
-        // "table.column" keys where an actual typed SPEC §4.3 fictionality check (§2 below) ran and
-        // passed for that specific column - the precise, per-column complement to failedTables above:
-        // a column using ALTEREGO_GENERIC, or any strategy with no typed check, is simply never added
-        // here, rather than being counted as verified merely by the absence of a failure.
-        java.util.Set<String> fictionalityVerifiedColumns = new java.util.HashSet<>();
+    AnonymisationPolicy policy = context.policy();
+    List<String> failures = new ArrayList<>();
+    List<String> warnings = new ArrayList<>();
+    // Structured, queryable residual-risk evidence for the DPIA report (SPEC §4.1/§4.3), captured
+    // alongside the human-readable prose that lands in this stage's result message.
+    List<org.identigon.incognito.api.AnonymisationReport.SurvivalFinding> survivalFindings =
+        new ArrayList<>();
+    List<org.identigon.incognito.api.AnonymisationReport.LintFinding> lintFindings =
+        new ArrayList<>();
+    // Tables that contributed at least one hard failure - the complement (in-policy, no failure)
+    // are reported as verified in the DPIA report.
+    java.util.Set<String> failedTables = new java.util.HashSet<>();
+    // "table.column" keys where an actual typed SPEC §4.3 fictionality check (§2 below) ran and
+    // passed for that specific column - the precise, per-column complement to failedTables above:
+    // a column using ALTEREGO_GENERIC, or any strategy with no typed check, is simply never added
+    // here, rather than being counted as verified merely by the absence of a failure.
+    java.util.Set<String> fictionalityVerifiedColumns = new java.util.HashSet<>();
 
-        try (Connection targetConn = context.target().getConnection()) {
-            // 1. Verify referential integrity on the target.
-            for (String tableName : plan.sequentialTableOrder()) {
-                SchemaInspector.TableMetadata meta = metadataByName.get(tableName);
-                if (meta == null) continue;
-
-                // Check each FK constraint as a whole tuple - so a composite FK is verified across all
-                // its columns, not one column at a time (SPEC §5.2).
-                for (SchemaInspector.ForeignKeyConstraint fk : meta.foreignKeyConstraints()) {
-                    String parentTable = fk.parentTable();
-                    if (metadataByName.get(parentTable) == null) continue;
-
-                    StringBuilder join = new StringBuilder(32);
-                    StringBuilder notNull = new StringBuilder(32);
-                    for (int i = 0; i < fk.childColumns().size(); i++) {
-                        if (i > 0) { join.append(" AND "); notNull.append(" AND "); }
-                        join.append("p.").append(fk.parentColumns().get(i)).append(" = c.").append(fk.childColumns().get(i));
-                        notNull.append("c.").append(fk.childColumns().get(i)).append(" IS NOT NULL");
-                    }
-
-                    String checkSql = "SELECT COUNT(*) FROM " + tableName + " c "
-                        + "WHERE (" + notNull + ") "
-                        + "AND NOT EXISTS (SELECT 1 FROM " + parentTable + " p WHERE " + join + ")";
-
-                    try (Statement stmt = targetConn.createStatement();
-                         ResultSet rs = stmt.executeQuery(checkSql)) {
-                        if (rs.next() && rs.getLong(1) > 0) {
-                            failures.add("Dangling FK: " + tableName + "." + fk.childColumns()
-                                + " has " + rs.getLong(1) + " orphaned references to " + parentTable);
-                            failedTables.add(tableName);
-                        }
-                    }
-                }
-            }
-
-            // 2. Verify fictionality of every column routed through a typed generator on the target -
-            //    a DIRECT_ID with that directIdStrategy, or a QUASI_ID SYNTHESISE column carrying the
-            //    same hint (SPEC Appendix B, ADR 31): TableTransformLoadStage routes both through the
-            //    identical buildDirectIdTransformer, so both get the identical guarantee to verify.
-            for (String tableName : plan.sequentialTableOrder()) {
-                Optional<TablePolicy> tablePolicyOpt = policy.table(tableName);
-                if (tablePolicyOpt.isEmpty()) continue;
-
-                TablePolicy tablePolicy = tablePolicyOpt.get();
-                for (Map.Entry<String, ColumnPolicy> entry : getColumnPolicies(tablePolicy)) {
-                    ColumnPolicy colPolicy = entry.getValue();
-                    boolean isDirectId = colPolicy.role() == ColumnRole.DIRECT_ID;
-                    boolean isTypedQuasiId = colPolicy.role() == ColumnRole.QUASI_ID
-                        && colPolicy.directIdStrategy() != null
-                        && (colPolicy.quasiIdStrategy() == null
-                            || colPolicy.quasiIdStrategy() == org.identigon.incognito.api.QuasiIdStrategy.SYNTHESISE);
-                    if (!isDirectId && !isTypedQuasiId) continue;
-
-                    String columnName = colPolicy.columnName();
-                    String columnKey = tableName + "." + columnName;
-                    DirectIdStrategy strategy = colPolicy.directIdStrategy();
-                    int failuresBefore = failures.size();
-                    if (strategy == DirectIdStrategy.ALTEREGO_EMAIL) {
-                        verifyEmailFictionality(targetConn, tableName, columnName, failures, failedTables);
-                    } else if (strategy == DirectIdStrategy.ALTEREGO_POSTCODE) {
-                        verifyPostcodeFictionality(targetConn, tableName, columnName, failures, failedTables);
-                    } else if (strategy == DirectIdStrategy.ALTEREGO_DOMAIN) {
-                        verifyDomainFictionality(targetConn, tableName, columnName, failures, failedTables);
-                    } else if (strategy == DirectIdStrategy.ALTEREGO_URL) {
-                        verifyUrlFictionality(targetConn, tableName, columnName, failures, failedTables);
-                    } else if (strategy == DirectIdStrategy.ALTEREGO_PHONE) {
-                        verifyPhoneFictionality(targetConn, tableName, columnName, failures, failedTables);
-                    } else if (strategy == DirectIdStrategy.ALTEREGO_NINO) {
-                        verifyNinoFictionality(targetConn, tableName, columnName, failures, failedTables);
-                    } else if (strategy == DirectIdStrategy.ALTEREGO_NHS_NUMBER) {
-                        verifyNhsNumberFictionality(targetConn, tableName, columnName, failures, failedTables);
-                    } else if (strategy == DirectIdStrategy.ALTEREGO_PASSPORT_NUMBER) {
-                        verifyPassportNumberFictionality(targetConn, tableName, columnName, failures, failedTables);
-                    } else if (strategy == DirectIdStrategy.ALTEREGO_DRIVING_LICENCE_NUMBER) {
-                        verifyDrivingLicenceNumberFictionality(targetConn, tableName, columnName, failures, failedTables);
-                    } else {
-                        // ALTEREGO_GENERIC (or any strategy with no typed check): no fictionality
-                        // guarantee to verify - deliberately NOT added to fictionalityVerifiedColumns,
-                        // the fix for the DPIA report overstating this column's guarantee (SPEC §4.3).
-                        continue;
-                    }
-                    if (failures.size() == failuresBefore) {
-                        fictionalityVerifiedColumns.add(columnKey);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new IncognitoException.SchemaException("Verification failed", e);
+    try (Connection targetConn = context.target().getConnection()) {
+      // 1. Verify referential integrity on the target.
+      for (String tableName : plan.sequentialTableOrder()) {
+        SchemaInspector.TableMetadata meta = metadataByName.get(tableName);
+        if (meta == null) {
+          continue;
         }
 
-        // 3. Misdeclaration lint: cross-check distinguishing:false columns against real distinct
-        //    counts on the SOURCE database (SPEC §4.1). This is NOT the privacy gate - the
-        //    distinguishing declaration is - this is a safety net against misdeclaration.
-        DistinguishingLint lintMode = policy.distinguishingLint();
-        if (lintMode != DistinguishingLint.OFF) {
-            int threshold = policy.maxCategoricalCardinality();
-            try (Connection sourceConn = context.source().getConnection()) {
-                for (String tableName : plan.sequentialTableOrder()) {
-                    Optional<TablePolicy> tablePolicyOpt = policy.table(tableName);
-                    if (tablePolicyOpt.isEmpty()) continue;
+        // Check each FK constraint as a whole tuple - so a composite FK is verified across all
+        // its columns, not one column at a time (SPEC §5.2).
+        for (SchemaInspector.ForeignKeyConstraint fk : meta.foreignKeyConstraints()) {
+          String parentTable = fk.parentTable();
+          if (metadataByName.get(parentTable) == null) {
+            continue;
+          }
 
-                    TablePolicy tablePolicy = tablePolicyOpt.get();
-                    for (Map.Entry<String, ColumnPolicy> entry : getColumnPolicies(tablePolicy)) {
-                        ColumnPolicy colPolicy = entry.getValue();
-                        if (colPolicy.role() != ColumnRole.SENSITIVE) continue;
-                        if (!Boolean.FALSE.equals(colPolicy.distinguishing())) continue;
-                        // This is a SENSITIVE distinguishing:false column - check its real cardinality.
-
-                        long distinctCount = countDistinctWithPgStatsPreFilter(
-                            sourceConn, tableName, colPolicy.columnName(), threshold);
-
-                        if (distinctCount > threshold) {
-                            lintFindings.add(new org.identigon.incognito.api.AnonymisationReport.LintFinding(
-                                tableName, colPolicy.columnName(), distinctCount, threshold));
-
-                            String msg = "Misdeclaration lint: " + tableName + "." + colPolicy.columnName()
-                                + " is declared distinguishing: false but has " + distinctCount
-                                + " distinct values (threshold: " + threshold + ")."
-                                + " Consider whether this column should be distinguishing: true.";
-
-                            if (lintMode == DistinguishingLint.ERROR) {
-                                throw new IncognitoException.ConstraintException(msg);
-                            }
-                            // WARN: record the warning and continue.
-                            warnings.add(msg);
-                        }
-                    }
-                }
-            } catch (SQLException e) {
-                // IncognitoException (e.g. the ConstraintException ERROR mode throws above)
-                // propagates unchanged -- it isn't a SQLException, so it never reaches this catch.
-                throw new IncognitoException.SchemaException(
-                    "Misdeclaration lint failed querying source database", e);
+          StringBuilder join = new StringBuilder(32);
+          StringBuilder notNull = new StringBuilder(32);
+          for (int i = 0; i < fk.childColumns().size(); i++) {
+            if (i > 0) {
+              join.append(" AND ");
+              notNull.append(" AND ");
             }
+            join.append("p.")
+                .append(fk.parentColumns().get(i))
+                .append(" = c.")
+                .append(fk.childColumns().get(i));
+            notNull.append("c.").append(fk.childColumns().get(i)).append(" IS NOT NULL");
+          }
+
+          String checkSql =
+              "SELECT COUNT(*) FROM "
+                  + tableName
+                  + " c "
+                  + "WHERE ("
+                  + notNull
+                  + ") "
+                  + "AND NOT EXISTS (SELECT 1 FROM "
+                  + parentTable
+                  + " p WHERE "
+                  + join
+                  + ")";
+
+          try (Statement stmt = targetConn.createStatement();
+              ResultSet rs = stmt.executeQuery(checkSql)) {
+            if (rs.next() && rs.getLong(1) > 0) {
+              failures.add(
+                  "Dangling FK: "
+                      + tableName
+                      + "."
+                      + fk.childColumns()
+                      + " has "
+                      + rs.getLong(1)
+                      + " orphaned references to "
+                      + parentTable);
+              failedTables.add(tableName);
+            }
+          }
+        }
+      }
+
+      // 2. Verify fictionality of every column routed through a typed generator on the target -
+      //    a DIRECT_ID with that directIdStrategy, or a QUASI_ID SYNTHESISE column carrying the
+      //    same hint (SPEC Appendix B, ADR 31): TableTransformLoadStage routes both through the
+      //    identical buildDirectIdTransformer, so both get the identical guarantee to verify.
+      for (String tableName : plan.sequentialTableOrder()) {
+        Optional<TablePolicy> tablePolicyOpt = policy.table(tableName);
+        if (tablePolicyOpt.isEmpty()) {
+          continue;
         }
 
-        // 4. Per-period volume tolerance for temporal QUASI_ID columns (SPEC §4.2, Appendix D).
-        //    JITTER_WITHIN_MONTH -> monthly buckets must match exactly.
-        //    JITTER_WITHIN_YEAR  -> yearly buckets must match exactly.
-        //    JITTER_DAYS         -> YEARLY buckets within ±2% (min ±1 row). A ±N-day jitter routinely
-        //                          crosses month boundaries, so monthly buckets are not preserved and
-        //                          would raise spurious drift warnings; the yearly bucket barely leaks.
-        //    SYNTHESISE          -> distribution not preserved; skip.
-        try (Connection sourceConn = context.source().getConnection();
-             Connection targetConn2 = context.target().getConnection()) {
-            for (String tableName : plan.sequentialTableOrder()) {
-                Optional<TablePolicy> tablePolicyOpt = policy.table(tableName);
-                if (tablePolicyOpt.isEmpty()) continue;
+        TablePolicy tablePolicy = tablePolicyOpt.get();
+        for (Map.Entry<String, ColumnPolicy> entry : getColumnPolicies(tablePolicy)) {
+          ColumnPolicy colPolicy = entry.getValue();
+          boolean isDirectId = colPolicy.role() == ColumnRole.DIRECT_ID;
+          boolean isTypedQuasiId =
+              colPolicy.role() == ColumnRole.QUASI_ID
+                  && colPolicy.directIdStrategy() != null
+                  && (colPolicy.quasiIdStrategy() == null
+                      || colPolicy.quasiIdStrategy()
+                          == org.identigon.incognito.api.QuasiIdStrategy.SYNTHESISE);
+          if (!isDirectId && !isTypedQuasiId) {
+            continue;
+          }
 
-                TablePolicy tablePolicy = tablePolicyOpt.get();
-                for (Map.Entry<String, ColumnPolicy> entry : getColumnPolicies(tablePolicy)) {
-                    ColumnPolicy colPolicy = entry.getValue();
-                    if (colPolicy.role() != ColumnRole.QUASI_ID) continue;
-                    org.identigon.incognito.api.QuasiIdStrategy qiStrategy = colPolicy.quasiIdStrategy();
-                    if (qiStrategy == null || qiStrategy == org.identigon.incognito.api.QuasiIdStrategy.SYNTHESISE) continue;
-
-                    String colName = colPolicy.columnName();
-                    String truncExpr;
-                    boolean exact;
-
-                    switch (qiStrategy) {
-                        case JITTER_WITHIN_MONTH -> { truncExpr = "date_trunc('month', " + colName + ")"; exact = true; }
-                        case JITTER_WITHIN_YEAR  -> { truncExpr = "date_trunc('year', " + colName + ")";  exact = true; }
-                        case JITTER_DAYS         -> { truncExpr = "date_trunc('year', " + colName + ")";  exact = false; }
-                        default -> { continue; }
-                    }
-
-                    Map<String, Long> sourceBuckets = queryBucketCounts(sourceConn, tableName, truncExpr);
-                    Map<String, Long> targetBuckets = queryBucketCounts(targetConn2, tableName, truncExpr);
-
-                    for (Map.Entry<String, Long> bucket : sourceBuckets.entrySet()) {
-                        String period = bucket.getKey();
-                        long sourceCount = bucket.getValue();
-                        long targetCount = targetBuckets.getOrDefault(period, 0L);
-
-                        if (exact) {
-                            if (sourceCount != targetCount) {
-                                warnings.add("Volume drift: " + tableName + "." + colName
-                                    + " period " + period + ": source=" + sourceCount
-                                    + " target=" + targetCount + " (expected exact match for " + qiStrategy + ")");
-                            }
-                        } else {
-                            long tolerance = Math.max(VOLUME_TOLERANCE_MIN_ROWS,
-                                (long) Math.ceil(sourceCount * VOLUME_TOLERANCE_FRACTION));
-                            if (Math.abs(targetCount - sourceCount) > tolerance) {
-                                warnings.add("Volume drift: " + tableName + "." + colName
-                                    + " period " + period + ": source=" + sourceCount
-                                    + " target=" + targetCount + " (tolerance ±" + tolerance + ")");
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new IncognitoException.SchemaException(
-                "Per-period volume verification failed", e);
+          String columnName = colPolicy.columnName();
+          String columnKey = tableName + "." + columnName;
+          DirectIdStrategy strategy = colPolicy.directIdStrategy();
+          int failuresBefore = failures.size();
+          if (strategy == DirectIdStrategy.ALTEREGO_EMAIL) {
+            verifyEmailFictionality(targetConn, tableName, columnName, failures, failedTables);
+          } else if (strategy == DirectIdStrategy.ALTEREGO_POSTCODE) {
+            verifyPostcodeFictionality(targetConn, tableName, columnName, failures, failedTables);
+          } else if (strategy == DirectIdStrategy.ALTEREGO_DOMAIN) {
+            verifyDomainFictionality(targetConn, tableName, columnName, failures, failedTables);
+          } else if (strategy == DirectIdStrategy.ALTEREGO_URL) {
+            verifyUrlFictionality(targetConn, tableName, columnName, failures, failedTables);
+          } else if (strategy == DirectIdStrategy.ALTEREGO_PHONE) {
+            verifyPhoneFictionality(targetConn, tableName, columnName, failures, failedTables);
+          } else if (strategy == DirectIdStrategy.ALTEREGO_NINO) {
+            verifyNinoFictionality(targetConn, tableName, columnName, failures, failedTables);
+          } else if (strategy == DirectIdStrategy.ALTEREGO_NHS_NUMBER) {
+            verifyNhsNumberFictionality(targetConn, tableName, columnName, failures, failedTables);
+          } else if (strategy == DirectIdStrategy.ALTEREGO_PASSPORT_NUMBER) {
+            verifyPassportNumberFictionality(
+                targetConn, tableName, columnName, failures, failedTables);
+          } else if (strategy == DirectIdStrategy.ALTEREGO_DRIVING_LICENCE_NUMBER) {
+            verifyDrivingLicenceNumberFictionality(
+                targetConn, tableName, columnName, failures, failedTables);
+          } else {
+            // ALTEREGO_GENERIC (or any strategy with no typed check): no fictionality
+            // guarantee to verify - deliberately NOT added to fictionalityVerifiedColumns,
+            // the fix for the DPIA report overstating this column's guarantee (SPEC §4.3).
+            continue;
+          }
+          if (failures.size() == failuresBefore) {
+            fictionalityVerifiedColumns.add(columnKey);
+          }
         }
+      }
+    } catch (SQLException e) {
+      throw new IncognitoException.SchemaException("Verification failed", e);
+    }
 
-        // 5. Source-value survival check for DIRECT_ID columns: verify that no real source value
-        //    survives in the target (a sanity net - if fabrication worked, the intersection is empty).
-        try (Connection sourceConn = context.source().getConnection();
-             Connection targetConn3 = context.target().getConnection()) {
-            for (String tableName : plan.sequentialTableOrder()) {
-                Optional<TablePolicy> tablePolicyOpt = policy.table(tableName);
-                if (tablePolicyOpt.isEmpty()) continue;
-
-                TablePolicy tablePolicy = tablePolicyOpt.get();
-                for (Map.Entry<String, ColumnPolicy> entry : getColumnPolicies(tablePolicy)) {
-                    ColumnPolicy colPolicy = entry.getValue();
-                    if (colPolicy.role() != ColumnRole.DIRECT_ID) continue;
-                    // Email/postcode/domain/URL/phone/NINO/NHS-number/passport-number/driving-licence
-                    // fictionality is already checked in section 2 against an absolute
-                    // reserved-value guarantee; this survival net is for other strategies.
-                    DirectIdStrategy strategy = colPolicy.directIdStrategy();
-                    if (strategy == DirectIdStrategy.ALTEREGO_EMAIL
-                            || strategy == DirectIdStrategy.ALTEREGO_POSTCODE
-                            || strategy == DirectIdStrategy.ALTEREGO_DOMAIN
-                            || strategy == DirectIdStrategy.ALTEREGO_URL
-                            || strategy == DirectIdStrategy.ALTEREGO_PHONE
-                            || strategy == DirectIdStrategy.ALTEREGO_NINO
-                            || strategy == DirectIdStrategy.ALTEREGO_NHS_NUMBER
-                            || strategy == DirectIdStrategy.ALTEREGO_PASSPORT_NUMBER
-                            || strategy == DirectIdStrategy.ALTEREGO_DRIVING_LICENCE_NUMBER) continue;
-
-                    String colName = colPolicy.columnName();
-                    verifySurvival(sourceConn, targetConn3, tableName, colName,
-                        failures, warnings, failedTables, survivalFindings);
-                }
-            }
-        } catch (SQLException e) {
-            throw new IncognitoException.SchemaException(
-                "Source-value survival check failed", e);
-        }
-
-        // 6. Structural-uniqueness findings (SPEC §2.4, opt-in - off by default): a per-FK-edge
-        //    relational fingerprint. Row counts and the FK graph are preserved 1:1, so a parent row
-        //    with a rare/unique count of referencing children can be singled out from structure
-        //    alone, even though every field on it was fabricated. Advisory evidence only - never a
-        //    privacy gate, never a run-abort (there is no ERROR mode).
-        List<org.identigon.incognito.api.AnonymisationReport.StructuralUniquenessFinding> structuralFindings =
-            new ArrayList<>();
-        if (policy.structuralUniqueness() == org.identigon.incognito.api.StructuralUniquenessMode.REPORT) {
-            int rarenessK = policy.structuralRarenessK();
-            try (Connection sourceConn = context.source().getConnection()) {
-                for (String parentTableName : plan.sequentialTableOrder()) {
-                    if (policy.table(parentTableName).isEmpty()) continue;
-                    SchemaInspector.TableMetadata parentMeta = metadataByName.get(parentTableName);
-                    if (parentMeta == null || parentMeta.primaryKeyColumns().isEmpty()) continue;
-
-                    for (String childTableName : plan.sequentialTableOrder()) {
-                        SchemaInspector.TableMetadata childMeta = metadataByName.get(childTableName);
-                        if (childMeta == null) continue;
-
-                        for (SchemaInspector.ForeignKeyConstraint fk : childMeta.foreignKeyConstraints()) {
-                            if (!fk.parentTable().equals(parentTableName)) continue;
-
-                            var finding = computeStructuralFinding(
-                                sourceConn, parentTableName, childTableName, fk, rarenessK);
-                            if (finding != null) {
-                                structuralFindings.add(finding);
-                            }
-                        }
-                    }
-                }
-            } catch (SQLException e) {
-                throw new IncognitoException.SchemaException(
-                    "Structural-uniqueness analysis failed querying source database", e);
-            }
-        }
-
-        // Record which in-policy tables hit no verification failure (dangling FK, a fictionality
-        // check, or a hard survival failure) - the table-level "no problem found" signal the DPIA
-        // report reads as TableReport.fictionalityVerified. It is coarser than the name suggests: a
-        // table with every check passing still reports true even if it also has an ALTEREGO_GENERIC
-        // column no check ever covers - fictionalityVerifiedColumns below is the precise, per-column
-        // answer to "was THIS column's fictionality actually verified" (AnonymisationReportBuilder
-        // reads both attributes).
-        List<String> verifiedTables = new ArrayList<>();
+    // 3. Misdeclaration lint: cross-check distinguishing:false columns against real distinct
+    //    counts on the SOURCE database (SPEC §4.1). This is NOT the privacy gate - the
+    //    distinguishing declaration is - this is a safety net against misdeclaration.
+    DistinguishingLint lintMode = policy.distinguishingLint();
+    if (lintMode != DistinguishingLint.OFF) {
+      int threshold = policy.maxCategoricalCardinality();
+      try (Connection sourceConn = context.source().getConnection()) {
         for (String tableName : plan.sequentialTableOrder()) {
-            if (policy.table(tableName).isPresent() && !failedTables.contains(tableName)) {
-                verifiedTables.add(tableName);
-            }
-        }
-        context.attributes().put("incognito.verification.verifiedTables", verifiedTables);
-        context.attributes().put(
-            AnonymisationReportBuilder.ATTR_FICTIONALITY_VERIFIED_COLUMNS, fictionalityVerifiedColumns);
-        context.attributes().put(AnonymisationReportBuilder.ATTR_SURVIVAL_FINDINGS, survivalFindings);
-        context.attributes().put(AnonymisationReportBuilder.ATTR_LINT_FINDINGS, lintFindings);
-        context.attributes().put(AnonymisationReportBuilder.ATTR_STRUCTURAL_FINDINGS, structuralFindings);
+          Optional<TablePolicy> tablePolicyOpt = policy.table(tableName);
+          if (tablePolicyOpt.isEmpty()) {
+            continue;
+          }
 
-        // Build the result message.
-        if (!failures.isEmpty()) {
-            String msg = "Verification FAILED:\n  " + String.join("\n  ", failures);
-            if (!warnings.isEmpty()) {
-                msg += "\nWarnings:\n  " + String.join("\n  ", warnings);
+          TablePolicy tablePolicy = tablePolicyOpt.get();
+          for (Map.Entry<String, ColumnPolicy> entry : getColumnPolicies(tablePolicy)) {
+            ColumnPolicy colPolicy = entry.getValue();
+            if (colPolicy.role() != ColumnRole.SENSITIVE) {
+              continue;
             }
-            return new StageResult("VerificationStage", false, failures.size(), msg);
-        }
+            if (!Boolean.FALSE.equals(colPolicy.distinguishing())) {
+              continue;
+            }
+            // This is a SENSITIVE distinguishing:false column - check its real cardinality.
 
-        String msg = "All verifications passed";
-        if (!warnings.isEmpty()) {
-            msg += "\nWarnings:\n  " + String.join("\n  ", warnings);
+            long distinctCount =
+                countDistinctWithPgStatsPreFilter(
+                    sourceConn, tableName, colPolicy.columnName(), threshold);
+
+            if (distinctCount > threshold) {
+              lintFindings.add(
+                  new org.identigon.incognito.api.AnonymisationReport.LintFinding(
+                      tableName, colPolicy.columnName(), distinctCount, threshold));
+
+              String msg =
+                  "Misdeclaration lint: "
+                      + tableName
+                      + "."
+                      + colPolicy.columnName()
+                      + " is declared distinguishing: false but has "
+                      + distinctCount
+                      + " distinct values (threshold: "
+                      + threshold
+                      + ")."
+                      + " Consider whether this column should be distinguishing: true.";
+
+              if (lintMode == DistinguishingLint.ERROR) {
+                throw new IncognitoException.ConstraintException(msg);
+              }
+              // WARN: record the warning and continue.
+              warnings.add(msg);
+            }
+          }
         }
-        return new StageResult("VerificationStage", true, warnings.size(), msg);
+      } catch (SQLException e) {
+        // IncognitoException (e.g. the ConstraintException ERROR mode throws above)
+        // propagates unchanged -- it isn't a SQLException, so it never reaches this catch.
+        throw new IncognitoException.SchemaException(
+            "Misdeclaration lint failed querying source database", e);
+      }
     }
 
-    /**
-     * Returns the distinct count of a column, using PostgreSQL {@code pg_stats.n_distinct} as a
-     * cheap pre-filter where available (SPEC §4.1). If pg_stats reports a value comfortably below
-     * the threshold we can skip the exact scan. Near the boundary or on non-PostgreSQL databases
-     * we fall through to the exact {@code COUNT(DISTINCT)}.
-     *
-     * <p>pg_stats encodes: positive values = estimated distinct count; negative values = fraction
-     * of rows (e.g. -1.0 = all unique). A negative value or a value near/above the threshold
-     * triggers the exact count.
-     */
-    private long countDistinctWithPgStatsPreFilter(
-            Connection conn, String tableName, String columnName, int threshold) throws SQLException {
+    // 4. Per-period volume tolerance for temporal QUASI_ID columns (SPEC §4.2, Appendix D).
+    //    JITTER_WITHIN_MONTH -> monthly buckets must match exactly.
+    //    JITTER_WITHIN_YEAR  -> yearly buckets must match exactly.
+    //    JITTER_DAYS         -> YEARLY buckets within ±2% (min ±1 row). A ±N-day jitter routinely
+    //                          crosses month boundaries, so monthly buckets are not preserved and
+    //                          would raise spurious drift warnings; the yearly bucket barely leaks.
+    //    SYNTHESISE          -> distribution not preserved; skip.
+    try (Connection sourceConn = context.source().getConnection();
+        Connection targetConn2 = context.target().getConnection()) {
+      for (String tableName : plan.sequentialTableOrder()) {
+        Optional<TablePolicy> tablePolicyOpt = policy.table(tableName);
+        if (tablePolicyOpt.isEmpty()) {
+          continue;
+        }
 
-        // Try pg_stats first (PostgreSQL only; silently falls through on other databases).
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(
-                 "SELECT n_distinct FROM pg_stats WHERE tablename = '" + tableName
-                     + "' AND attname = '" + columnName + "'")) {
-            if (rs.next()) {
-                float nDistinct = rs.getFloat(1);
-                if (!rs.wasNull() && nDistinct >= 0 && nDistinct < threshold / PG_STATS_MARGIN) {
-                    // Comfortably below threshold - pg_stats says it's low-cardinality.
-                    return (long) nDistinct;
-                }
-                // Otherwise: null, near/above threshold, or negative (fraction-of-rows, likely
-                // high) - fall through to the exact count.
+        TablePolicy tablePolicy = tablePolicyOpt.get();
+        for (Map.Entry<String, ColumnPolicy> entry : getColumnPolicies(tablePolicy)) {
+          ColumnPolicy colPolicy = entry.getValue();
+          if (colPolicy.role() != ColumnRole.QUASI_ID) {
+            continue;
+          }
+          org.identigon.incognito.api.QuasiIdStrategy qiStrategy = colPolicy.quasiIdStrategy();
+          if (qiStrategy == null
+              || qiStrategy == org.identigon.incognito.api.QuasiIdStrategy.SYNTHESISE) {
+            continue;
+          }
+
+          String colName = colPolicy.columnName();
+          String truncExpr;
+          boolean exact;
+
+          switch (qiStrategy) {
+            case JITTER_WITHIN_MONTH -> {
+              truncExpr = "date_trunc('month', " + colName + ")";
+              exact = true;
             }
-        } catch (SQLException e) {
-            // Not PostgreSQL, or pg_stats not accessible - pg_stats is only an optimisation, never the
-            // privacy gate (SPEC §4.1), so fall through to the exact count. Surface at DEBUG only.
-            LOG.log(System.Logger.Level.DEBUG,
-                "pg_stats pre-filter unavailable for {0}.{1} (SQLState {2}); using exact COUNT(DISTINCT)",
-                tableName, columnName, e.getSQLState());
-        }
+            case JITTER_WITHIN_YEAR -> {
+              truncExpr = "date_trunc('year', " + colName + ")";
+              exact = true;
+            }
+            case JITTER_DAYS -> {
+              truncExpr = "date_trunc('year', " + colName + ")";
+              exact = false;
+            }
+            default -> {
+              continue;
+            }
+          }
 
-        // Exact count.
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(
-                 "SELECT COUNT(DISTINCT " + columnName + ") FROM " + tableName)) {
-            rs.next();
-            return rs.getLong(1);
+          Map<String, Long> sourceBuckets = queryBucketCounts(sourceConn, tableName, truncExpr);
+          Map<String, Long> targetBuckets = queryBucketCounts(targetConn2, tableName, truncExpr);
+
+          for (Map.Entry<String, Long> bucket : sourceBuckets.entrySet()) {
+            String period = bucket.getKey();
+            long sourceCount = bucket.getValue();
+            long targetCount = targetBuckets.getOrDefault(period, 0L);
+
+            if (exact) {
+              if (sourceCount != targetCount) {
+                warnings.add(
+                    "Volume drift: "
+                        + tableName
+                        + "."
+                        + colName
+                        + " period "
+                        + period
+                        + ": source="
+                        + sourceCount
+                        + " target="
+                        + targetCount
+                        + " (expected exact match for "
+                        + qiStrategy
+                        + ")");
+              }
+            } else {
+              long tolerance =
+                  Math.max(
+                      VOLUME_TOLERANCE_MIN_ROWS,
+                      (long) Math.ceil(sourceCount * VOLUME_TOLERANCE_FRACTION));
+              if (Math.abs(targetCount - sourceCount) > tolerance) {
+                warnings.add(
+                    "Volume drift: "
+                        + tableName
+                        + "."
+                        + colName
+                        + " period "
+                        + period
+                        + ": source="
+                        + sourceCount
+                        + " target="
+                        + targetCount
+                        + " (tolerance ±"
+                        + tolerance
+                        + ")");
+              }
+            }
+          }
         }
+      }
+    } catch (SQLException e) {
+      throw new IncognitoException.SchemaException("Per-period volume verification failed", e);
     }
 
-    private void verifyEmailFictionality(
-            Connection conn, String tableName, String columnName,
-            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
+    // 5. Source-value survival check for DIRECT_ID columns: verify that no real source value
+    //    survives in the target (a sanity net - if fabrication worked, the intersection is empty).
+    try (Connection sourceConn = context.source().getConnection();
+        Connection targetConn3 = context.target().getConnection()) {
+      for (String tableName : plan.sequentialTableOrder()) {
+        Optional<TablePolicy> tablePolicyOpt = policy.table(tableName);
+        if (tablePolicyOpt.isEmpty()) {
+          continue;
+        }
 
-        // Check that all non-null email values end with a reserved domain.
-        String domainCondition = RESERVED_EMAIL_DOMAINS.stream()
+        TablePolicy tablePolicy = tablePolicyOpt.get();
+        for (Map.Entry<String, ColumnPolicy> entry : getColumnPolicies(tablePolicy)) {
+          ColumnPolicy colPolicy = entry.getValue();
+          if (colPolicy.role() != ColumnRole.DIRECT_ID) {
+            continue;
+          }
+          // Email/postcode/domain/URL/phone/NINO/NHS-number/passport-number/driving-licence
+          // fictionality is already checked in section 2 against an absolute
+          // reserved-value guarantee; this survival net is for other strategies.
+          DirectIdStrategy strategy = colPolicy.directIdStrategy();
+          if (strategy == DirectIdStrategy.ALTEREGO_EMAIL
+              || strategy == DirectIdStrategy.ALTEREGO_POSTCODE
+              || strategy == DirectIdStrategy.ALTEREGO_DOMAIN
+              || strategy == DirectIdStrategy.ALTEREGO_URL
+              || strategy == DirectIdStrategy.ALTEREGO_PHONE
+              || strategy == DirectIdStrategy.ALTEREGO_NINO
+              || strategy == DirectIdStrategy.ALTEREGO_NHS_NUMBER
+              || strategy == DirectIdStrategy.ALTEREGO_PASSPORT_NUMBER
+              || strategy == DirectIdStrategy.ALTEREGO_DRIVING_LICENCE_NUMBER) {
+            continue;
+          }
+
+          String colName = colPolicy.columnName();
+          verifySurvival(
+              sourceConn,
+              targetConn3,
+              tableName,
+              colName,
+              failures,
+              warnings,
+              failedTables,
+              survivalFindings);
+        }
+      }
+    } catch (SQLException e) {
+      throw new IncognitoException.SchemaException("Source-value survival check failed", e);
+    }
+
+    // 6. Structural-uniqueness findings (SPEC §2.4, opt-in - off by default): a per-FK-edge
+    //    relational fingerprint. Row counts and the FK graph are preserved 1:1, so a parent row
+    //    with a rare/unique count of referencing children can be singled out from structure
+    //    alone, even though every field on it was fabricated. Advisory evidence only - never a
+    //    privacy gate, never a run-abort (there is no ERROR mode).
+    List<org.identigon.incognito.api.AnonymisationReport.StructuralUniquenessFinding>
+        structuralFindings = new ArrayList<>();
+    if (policy.structuralUniqueness()
+        == org.identigon.incognito.api.StructuralUniquenessMode.REPORT) {
+      int rarenessK = policy.structuralRarenessK();
+      try (Connection sourceConn = context.source().getConnection()) {
+        for (String parentTableName : plan.sequentialTableOrder()) {
+          if (policy.table(parentTableName).isEmpty()) {
+            continue;
+          }
+          SchemaInspector.TableMetadata parentMeta = metadataByName.get(parentTableName);
+          if (parentMeta == null || parentMeta.primaryKeyColumns().isEmpty()) {
+            continue;
+          }
+
+          for (String childTableName : plan.sequentialTableOrder()) {
+            SchemaInspector.TableMetadata childMeta = metadataByName.get(childTableName);
+            if (childMeta == null) {
+              continue;
+            }
+
+            for (SchemaInspector.ForeignKeyConstraint fk : childMeta.foreignKeyConstraints()) {
+              if (!fk.parentTable().equals(parentTableName)) {
+                continue;
+              }
+
+              var finding =
+                  computeStructuralFinding(
+                      sourceConn, parentTableName, childTableName, fk, rarenessK);
+              if (finding != null) {
+                structuralFindings.add(finding);
+              }
+            }
+          }
+        }
+      } catch (SQLException e) {
+        throw new IncognitoException.SchemaException(
+            "Structural-uniqueness analysis failed querying source database", e);
+      }
+    }
+
+    // Record which in-policy tables hit no verification failure (dangling FK, a fictionality
+    // check, or a hard survival failure) - the table-level "no problem found" signal the DPIA
+    // report reads as TableReport.fictionalityVerified. It is coarser than the name suggests: a
+    // table with every check passing still reports true even if it also has an ALTEREGO_GENERIC
+    // column no check ever covers - fictionalityVerifiedColumns below is the precise, per-column
+    // answer to "was THIS column's fictionality actually verified" (AnonymisationReportBuilder
+    // reads both attributes).
+    List<String> verifiedTables = new ArrayList<>();
+    for (String tableName : plan.sequentialTableOrder()) {
+      if (policy.table(tableName).isPresent() && !failedTables.contains(tableName)) {
+        verifiedTables.add(tableName);
+      }
+    }
+    context.attributes().put("incognito.verification.verifiedTables", verifiedTables);
+    context
+        .attributes()
+        .put(
+            AnonymisationReportBuilder.ATTR_FICTIONALITY_VERIFIED_COLUMNS,
+            fictionalityVerifiedColumns);
+    context.attributes().put(AnonymisationReportBuilder.ATTR_SURVIVAL_FINDINGS, survivalFindings);
+    context.attributes().put(AnonymisationReportBuilder.ATTR_LINT_FINDINGS, lintFindings);
+    context
+        .attributes()
+        .put(AnonymisationReportBuilder.ATTR_STRUCTURAL_FINDINGS, structuralFindings);
+
+    // Build the result message.
+    if (!failures.isEmpty()) {
+      String msg = "Verification FAILED:\n  " + String.join("\n  ", failures);
+      if (!warnings.isEmpty()) {
+        msg += "\nWarnings:\n  " + String.join("\n  ", warnings);
+      }
+      return new StageResult("VerificationStage", false, failures.size(), msg);
+    }
+
+    String msg = "All verifications passed";
+    if (!warnings.isEmpty()) {
+      msg += "\nWarnings:\n  " + String.join("\n  ", warnings);
+    }
+    return new StageResult("VerificationStage", true, warnings.size(), msg);
+  }
+
+  /**
+   * Returns the distinct count of a column, using PostgreSQL {@code pg_stats.n_distinct} as a cheap
+   * pre-filter where available (SPEC §4.1). If pg_stats reports a value comfortably below the
+   * threshold we can skip the exact scan. Near the boundary or on non-PostgreSQL databases we fall
+   * through to the exact {@code COUNT(DISTINCT)}.
+   *
+   * <p>pg_stats encodes: positive values = estimated distinct count; negative values = fraction of
+   * rows (e.g. -1.0 = all unique). A negative value or a value near/above the threshold triggers
+   * the exact count.
+   */
+  private long countDistinctWithPgStatsPreFilter(
+      Connection conn, String tableName, String columnName, int threshold) throws SQLException {
+
+    // Try pg_stats first (PostgreSQL only; silently falls through on other databases).
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs =
+            stmt.executeQuery(
+                "SELECT n_distinct FROM pg_stats WHERE tablename = '"
+                    + tableName
+                    + "' AND attname = '"
+                    + columnName
+                    + "'")) {
+      if (rs.next()) {
+        float nDistinct = rs.getFloat(1);
+        if (!rs.wasNull() && nDistinct >= 0 && nDistinct < threshold / PG_STATS_MARGIN) {
+          // Comfortably below threshold - pg_stats says it's low-cardinality.
+          return (long) nDistinct;
+        }
+        // Otherwise: null, near/above threshold, or negative (fraction-of-rows, likely
+        // high) - fall through to the exact count.
+      }
+    } catch (SQLException e) {
+      // Not PostgreSQL, or pg_stats not accessible - pg_stats is only an optimisation, never the
+      // privacy gate (SPEC §4.1), so fall through to the exact count. Surface at DEBUG only.
+      LOG.log(
+          System.Logger.Level.DEBUG,
+          "pg_stats pre-filter unavailable for {0}.{1} (SQLState {2}); using exact COUNT(DISTINCT)",
+          tableName,
+          columnName,
+          e.getSQLState());
+    }
+
+    // Exact count.
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs =
+            stmt.executeQuery("SELECT COUNT(DISTINCT " + columnName + ") FROM " + tableName)) {
+      rs.next();
+      return rs.getLong(1);
+    }
+  }
+
+  private void verifyEmailFictionality(
+      Connection conn,
+      String tableName,
+      String columnName,
+      List<String> failures,
+      java.util.Set<String> failedTables)
+      throws SQLException {
+
+    // Check that all non-null email values end with a reserved domain.
+    String domainCondition =
+        RESERVED_EMAIL_DOMAINS.stream()
             .map(d -> columnName + " LIKE '%@" + d + "'")
             .collect(Collectors.joining(" OR "));
 
-        String sql = "SELECT COUNT(*) FROM " + tableName
-            + " WHERE " + columnName + " IS NOT NULL"
-            + " AND NOT (" + domainCondition + ")";
+    String sql =
+        "SELECT COUNT(*) FROM "
+            + tableName
+            + " WHERE "
+            + columnName
+            + " IS NOT NULL"
+            + " AND NOT ("
+            + domainCondition
+            + ")";
 
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next() && rs.getLong(1) > 0) {
-                failures.add("Fictionality violation: " + tableName + "." + columnName
-                    + " has " + rs.getLong(1) + " email(s) not using RFC 2606 reserved domains");
-                failedTables.add(tableName);
-            }
-        }
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      if (rs.next() && rs.getLong(1) > 0) {
+        failures.add(
+            "Fictionality violation: "
+                + tableName
+                + "."
+                + columnName
+                + " has "
+                + rs.getLong(1)
+                + " email(s) not using RFC 2606 reserved domains");
+        failedTables.add(tableName);
+      }
     }
+  }
 
-    private void verifyPostcodeFictionality(
-            Connection conn, String tableName, String columnName,
-            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
+  private void verifyPostcodeFictionality(
+      Connection conn,
+      String tableName,
+      String columnName,
+      List<String> failures,
+      java.util.Set<String> failedTables)
+      throws SQLException {
 
-        // Every non-null postcode's inward code must end in one of the never-used letters.
-        String letterCondition = POSTCODE_NEVER_USED_LETTERS.stream()
+    // Every non-null postcode's inward code must end in one of the never-used letters.
+    String letterCondition =
+        POSTCODE_NEVER_USED_LETTERS.stream()
             .map(l -> "RIGHT(" + columnName + ", 1) = '" + l + "'")
             .collect(Collectors.joining(" OR "));
 
-        String sql = "SELECT COUNT(*) FROM " + tableName
-            + " WHERE " + columnName + " IS NOT NULL"
-            + " AND NOT (" + letterCondition + ")";
+    String sql =
+        "SELECT COUNT(*) FROM "
+            + tableName
+            + " WHERE "
+            + columnName
+            + " IS NOT NULL"
+            + " AND NOT ("
+            + letterCondition
+            + ")";
 
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next() && rs.getLong(1) > 0) {
-                failures.add("Fictionality violation: " + tableName + "." + columnName
-                    + " has " + rs.getLong(1) + " postcode(s) not using the guaranteed-fictional inward-code letter");
-                failedTables.add(tableName);
-            }
-        }
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      if (rs.next() && rs.getLong(1) > 0) {
+        failures.add(
+            "Fictionality violation: "
+                + tableName
+                + "."
+                + columnName
+                + " has "
+                + rs.getLong(1)
+                + " postcode(s) not using the guaranteed-fictional inward-code letter");
+        failedTables.add(tableName);
+      }
     }
+  }
 
-    private void verifyDomainFictionality(
-            Connection conn, String tableName, String columnName,
-            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
+  private void verifyDomainFictionality(
+      Connection conn,
+      String tableName,
+      String columnName,
+      List<String> failures,
+      java.util.Set<String> failedTables)
+      throws SQLException {
 
-        String sql = "SELECT COUNT(*) FROM " + tableName
-            + " WHERE " + columnName + " IS NOT NULL"
-            + " AND " + columnName + " !~ '" + RESERVED_DOMAIN_REGEX + "'";
+    String sql =
+        "SELECT COUNT(*) FROM "
+            + tableName
+            + " WHERE "
+            + columnName
+            + " IS NOT NULL"
+            + " AND "
+            + columnName
+            + " !~ '"
+            + RESERVED_DOMAIN_REGEX
+            + "'";
 
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next() && rs.getLong(1) > 0) {
-                failures.add("Fictionality violation: " + tableName + "." + columnName
-                    + " has " + rs.getLong(1) + " domain(s) not using RFC 2606 reserved domains/TLDs");
-                failedTables.add(tableName);
-            }
-        }
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      if (rs.next() && rs.getLong(1) > 0) {
+        failures.add(
+            "Fictionality violation: "
+                + tableName
+                + "."
+                + columnName
+                + " has "
+                + rs.getLong(1)
+                + " domain(s) not using RFC 2606 reserved domains/TLDs");
+        failedTables.add(tableName);
+      }
     }
+  }
 
-    private void verifyUrlFictionality(
-            Connection conn, String tableName, String columnName,
-            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
+  private void verifyUrlFictionality(
+      Connection conn,
+      String tableName,
+      String columnName,
+      List<String> failures,
+      java.util.Set<String> failedTables)
+      throws SQLException {
 
-        String sql = "SELECT COUNT(*) FROM " + tableName
-            + " WHERE " + columnName + " IS NOT NULL"
-            + " AND " + columnName + " !~ '" + RESERVED_URL_REGEX + "'";
+    String sql =
+        "SELECT COUNT(*) FROM "
+            + tableName
+            + " WHERE "
+            + columnName
+            + " IS NOT NULL"
+            + " AND "
+            + columnName
+            + " !~ '"
+            + RESERVED_URL_REGEX
+            + "'";
 
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next() && rs.getLong(1) > 0) {
-                failures.add("Fictionality violation: " + tableName + "." + columnName
-                    + " has " + rs.getLong(1) + " URL(s) not using a reserved scheme/domain");
-                failedTables.add(tableName);
-            }
-        }
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      if (rs.next() && rs.getLong(1) > 0) {
+        failures.add(
+            "Fictionality violation: "
+                + tableName
+                + "."
+                + columnName
+                + " has "
+                + rs.getLong(1)
+                + " URL(s) not using a reserved scheme/domain");
+        failedTables.add(tableName);
+      }
     }
+  }
 
-    private void verifyPhoneFictionality(
-            Connection conn, String tableName, String columnName,
-            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
+  private void verifyPhoneFictionality(
+      Connection conn,
+      String tableName,
+      String columnName,
+      List<String> failures,
+      java.util.Set<String> failedTables)
+      throws SQLException {
 
-        // Strip every non-digit character (spaces, the leading +44, etc.) before matching, so
-        // formatting differences never cause a false failure - only the digit sequence matters.
-        String digitsExpr = "REGEXP_REPLACE(" + columnName + ", '[^0-9]', '', 'g')";
-        String prefixCondition = PHONE_RESERVED_PREFIXES.stream()
+    // Strip every non-digit character (spaces, the leading +44, etc.) before matching, so
+    // formatting differences never cause a false failure - only the digit sequence matters.
+    String digitsExpr = "REGEXP_REPLACE(" + columnName + ", '[^0-9]', '', 'g')";
+    String prefixCondition =
+        PHONE_RESERVED_PREFIXES.stream()
             .map(prefix -> digitsExpr + " LIKE '" + prefix + "___'")
             .collect(Collectors.joining(" OR "));
 
-        String sql = "SELECT COUNT(*) FROM " + tableName
-            + " WHERE " + columnName + " IS NOT NULL"
-            + " AND NOT (" + prefixCondition + ")";
+    String sql =
+        "SELECT COUNT(*) FROM "
+            + tableName
+            + " WHERE "
+            + columnName
+            + " IS NOT NULL"
+            + " AND NOT ("
+            + prefixCondition
+            + ")";
 
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next() && rs.getLong(1) > 0) {
-                failures.add("Fictionality violation: " + tableName + "." + columnName
-                    + " has " + rs.getLong(1) + " phone number(s) not using a reserved Ofcom drama-number range");
-                failedTables.add(tableName);
-            }
-        }
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      if (rs.next() && rs.getLong(1) > 0) {
+        failures.add(
+            "Fictionality violation: "
+                + tableName
+                + "."
+                + columnName
+                + " has "
+                + rs.getLong(1)
+                + " phone number(s) not using a reserved Ofcom drama-number range");
+        failedTables.add(tableName);
+      }
+    }
+  }
+
+  private void verifyNinoFictionality(
+      Connection conn,
+      String tableName,
+      String columnName,
+      List<String> failures,
+      java.util.Set<String> failedTables)
+      throws SQLException {
+
+    String sql =
+        "SELECT COUNT(*) FROM "
+            + tableName
+            + " WHERE "
+            + columnName
+            + " IS NOT NULL"
+            + " AND "
+            + columnName
+            + " NOT LIKE '"
+            + NINO_RESERVED_PREFIX
+            + "%'";
+
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      if (rs.next() && rs.getLong(1) > 0) {
+        failures.add(
+            "Fictionality violation: "
+                + tableName
+                + "."
+                + columnName
+                + " has "
+                + rs.getLong(1)
+                + " NINO(s) not using the guaranteed-fictional QQ prefix");
+        failedTables.add(tableName);
+      }
+    }
+  }
+
+  private void verifyNhsNumberFictionality(
+      Connection conn,
+      String tableName,
+      String columnName,
+      List<String> failures,
+      java.util.Set<String> failedTables)
+      throws SQLException {
+
+    String sql =
+        "SELECT COUNT(*) FROM "
+            + tableName
+            + " WHERE "
+            + columnName
+            + " IS NOT NULL"
+            + " AND "
+            + columnName
+            + " NOT LIKE '"
+            + NHS_NUMBER_RESERVED_PREFIX
+            + "%'";
+
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      if (rs.next() && rs.getLong(1) > 0) {
+        failures.add(
+            "Fictionality violation: "
+                + tableName
+                + "."
+                + columnName
+                + " has "
+                + rs.getLong(1)
+                + " NHS number(s) not using the reserved 999 test-range prefix");
+        failedTables.add(tableName);
+      }
+    }
+  }
+
+  private void verifyPassportNumberFictionality(
+      Connection conn,
+      String tableName,
+      String columnName,
+      List<String> failures,
+      java.util.Set<String> failedTables)
+      throws SQLException {
+
+    String sql =
+        "SELECT COUNT(*) FROM "
+            + tableName
+            + " WHERE "
+            + columnName
+            + " IS NOT NULL"
+            + " AND "
+            + columnName
+            + " NOT LIKE '"
+            + PASSPORT_NUMBER_RESERVED_PREFIX
+            + "%'";
+
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      if (rs.next() && rs.getLong(1) > 0) {
+        failures.add(
+            "Fictionality violation: "
+                + tableName
+                + "."
+                + columnName
+                + " has "
+                + rs.getLong(1)
+                + " passport number(s) not using the structurally-impossible ZZ prefix");
+        failedTables.add(tableName);
+      }
+    }
+  }
+
+  private void verifyDrivingLicenceNumberFictionality(
+      Connection conn,
+      String tableName,
+      String columnName,
+      List<String> failures,
+      java.util.Set<String> failedTables)
+      throws SQLException {
+
+    String sql =
+        "SELECT COUNT(*) FROM "
+            + tableName
+            + " WHERE "
+            + columnName
+            + " IS NOT NULL"
+            + " AND "
+            + columnName
+            + " NOT LIKE '"
+            + DRIVING_LICENCE_NUMBER_RESERVED_PREFIX
+            + "%'";
+
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      if (rs.next() && rs.getLong(1) > 0) {
+        failures.add(
+            "Fictionality violation: "
+                + tableName
+                + "."
+                + columnName
+                + " has "
+                + rs.getLong(1)
+                + " driving licence number(s) not using the zero-letter-surname 99999 block");
+        failedTables.add(tableName);
+      }
+    }
+  }
+
+  /**
+   * Queries per-period bucket counts for a date column, returning a map of period-label ->
+   * row-count.
+   */
+  private Map<String, Long> queryBucketCounts(Connection conn, String tableName, String truncExpr)
+      throws SQLException {
+    Map<String, Long> buckets = new LinkedHashMap<>();
+    String sql =
+        "SELECT "
+            + truncExpr
+            + " AS period, COUNT(*) AS cnt FROM "
+            + tableName
+            + " WHERE "
+            + truncExpr
+            + " IS NOT NULL GROUP BY period ORDER BY period";
+    try (Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      while (rs.next()) {
+        buckets.put(rs.getString(1), rs.getLong(2));
+      }
+    }
+    return buckets;
+  }
+
+  /**
+   * Verifies that real source values for a DIRECT_ID column did not survive into the target.
+   * Compares the fraction of sampled distinct source values that reappear in the target: a genuine
+   * fabrication failure (e.g. an accidental passthrough) resurfaces ~all values and is a hard
+   * failure, whereas a handful of coincidental shape-preserving collisions on low-entropy values is
+   * only a warning - so this net never fails a healthy run over a low-cardinality identifier.
+   */
+  private void verifySurvival(
+      Connection sourceConn,
+      Connection targetConn,
+      String tableName,
+      String columnName,
+      List<String> failures,
+      List<String> warnings,
+      java.util.Set<String> failedTables,
+      List<org.identigon.incognito.api.AnonymisationReport.SurvivalFinding> survivalFindings)
+      throws SQLException {
+    // Collect non-null distinct source values (bounded to a reasonable sample for large tables).
+    List<String> sourceValues = new ArrayList<>();
+    try (Statement stmt = sourceConn.createStatement();
+        ResultSet rs =
+            stmt.executeQuery(
+                "SELECT DISTINCT "
+                    + columnName
+                    + " FROM "
+                    + tableName
+                    + " WHERE "
+                    + columnName
+                    + " IS NOT NULL LIMIT 1000")) {
+      while (rs.next()) {
+        sourceValues.add(rs.getString(1));
+      }
+    }
+    if (sourceValues.isEmpty()) {
+      return;
     }
 
-    private void verifyNinoFictionality(
-            Connection conn, String tableName, String columnName,
-            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
-
-        String sql = "SELECT COUNT(*) FROM " + tableName
-            + " WHERE " + columnName + " IS NOT NULL"
-            + " AND " + columnName + " NOT LIKE '" + NINO_RESERVED_PREFIX + "%'";
-
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next() && rs.getLong(1) > 0) {
-                failures.add("Fictionality violation: " + tableName + "." + columnName
-                    + " has " + rs.getLong(1) + " NINO(s) not using the guaranteed-fictional QQ prefix");
-                failedTables.add(tableName);
-            }
-        }
+    // How many of those DISTINCT source values reappear in the target?
+    // String literals are safe here: the values come from our own source DB, quotes escaped.
+    StringBuilder inClause = new StringBuilder();
+    for (int i = 0; i < sourceValues.size(); i++) {
+      if (i > 0) {
+        inClause.append(',');
+      }
+      inClause.append('\'').append(sourceValues.get(i).replace("'", "''")).append('\'');
     }
-
-    private void verifyNhsNumberFictionality(
-            Connection conn, String tableName, String columnName,
-            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
-
-        String sql = "SELECT COUNT(*) FROM " + tableName
-            + " WHERE " + columnName + " IS NOT NULL"
-            + " AND " + columnName + " NOT LIKE '" + NHS_NUMBER_RESERVED_PREFIX + "%'";
-
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next() && rs.getLong(1) > 0) {
-                failures.add("Fictionality violation: " + tableName + "." + columnName
-                    + " has " + rs.getLong(1) + " NHS number(s) not using the reserved 999 test-range prefix");
-                failedTables.add(tableName);
-            }
+    String checkSql =
+        "SELECT COUNT(DISTINCT "
+            + columnName
+            + ") FROM "
+            + tableName
+            + " WHERE "
+            + columnName
+            + " IN ("
+            + inClause
+            + ")";
+    try (Statement stmt = targetConn.createStatement();
+        ResultSet rs = stmt.executeQuery(checkSql)) {
+      if (rs.next()) {
+        long survived = rs.getLong(1);
+        if (survived == 0) {
+          return;
         }
+        double ratio = (double) survived / sourceValues.size();
+        boolean hardFailure = ratio >= SURVIVAL_FAILURE_RATIO;
+        survivalFindings.add(
+            new org.identigon.incognito.api.AnonymisationReport.SurvivalFinding(
+                tableName, columnName, sourceValues.size(), survived, hardFailure));
+        if (hardFailure) {
+          failures.add(
+              "Source-value survival: "
+                  + tableName
+                  + "."
+                  + columnName
+                  + " has "
+                  + survived
+                  + " of "
+                  + sourceValues.size()
+                  + " sampled distinct source values surviving in the target ("
+                  + String.format("%.0f%%", ratio * 100)
+                  + ") - fabrication may not have been applied");
+          failedTables.add(tableName);
+        } else {
+          warnings.add(
+              "Source-value survival (likely coincidental): "
+                  + tableName
+                  + "."
+                  + columnName
+                  + " has "
+                  + survived
+                  + " of "
+                  + sourceValues.size()
+                  + " sampled distinct source values matching in the target - below the "
+                  + String.format("%.0f%%", SURVIVAL_FAILURE_RATIO * 100)
+                  + " failure threshold");
+        }
+      }
     }
+  }
 
-    private void verifyPassportNumberFictionality(
-            Connection conn, String tableName, String columnName,
-            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
+  /**
+   * Computes the relational fingerprint for a single FK edge (SPEC §2.4) on the source database:
+   * the distribution of referencing-child-row counts per parent row. Fabrication preserves row
+   * counts and the FK graph exactly, so the source distribution is also the target's residual risk
+   * - no second scan of the target is needed. Returns {@code null} if no parent row on this edge is
+   * singled out (unique fingerprint) or rare, so callers only ever see edges worth reporting.
+   */
+  private org.identigon.incognito.api.AnonymisationReport.StructuralUniquenessFinding
+      computeStructuralFinding(
+          Connection sourceConn,
+          String parentTable,
+          String childTable,
+          SchemaInspector.ForeignKeyConstraint fk,
+          int rarenessK)
+          throws SQLException {
 
-        String sql = "SELECT COUNT(*) FROM " + tableName
-            + " WHERE " + columnName + " IS NOT NULL"
-            + " AND " + columnName + " NOT LIKE '" + PASSPORT_NUMBER_RESERVED_PREFIX + "%'";
-
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next() && rs.getLong(1) > 0) {
-                failures.add("Fictionality violation: " + tableName + "." + columnName
-                    + " has " + rs.getLong(1) + " passport number(s) not using the structurally-impossible ZZ prefix");
-                failedTables.add(tableName);
-            }
-        }
-    }
-
-    private void verifyDrivingLicenceNumberFictionality(
-            Connection conn, String tableName, String columnName,
-            List<String> failures, java.util.Set<String> failedTables) throws SQLException {
-
-        String sql = "SELECT COUNT(*) FROM " + tableName
-            + " WHERE " + columnName + " IS NOT NULL"
-            + " AND " + columnName + " NOT LIKE '" + DRIVING_LICENCE_NUMBER_RESERVED_PREFIX + "%'";
-
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next() && rs.getLong(1) > 0) {
-                failures.add("Fictionality violation: " + tableName + "." + columnName
-                    + " has " + rs.getLong(1) + " driving licence number(s) not using the zero-letter-surname 99999 block");
-                failedTables.add(tableName);
-            }
-        }
-    }
-
-    /**
-     * Queries per-period bucket counts for a date column, returning a map of
-     * period-label -> row-count.
-     */
-    private Map<String, Long> queryBucketCounts(
-            Connection conn, String tableName, String truncExpr) throws SQLException {
-        Map<String, Long> buckets = new LinkedHashMap<>();
-        String sql = "SELECT " + truncExpr + " AS period, COUNT(*) AS cnt FROM " + tableName
-            + " WHERE " + truncExpr + " IS NOT NULL GROUP BY period ORDER BY period";
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                buckets.put(rs.getString(1), rs.getLong(2));
-            }
-        }
-        return buckets;
-    }
-
-    /**
-     * Verifies that real source values for a DIRECT_ID column did not survive into the target.
-     * Compares the fraction of sampled distinct source values that reappear in the target: a genuine
-     * fabrication failure (e.g. an accidental passthrough) resurfaces ~all values and is a hard
-     * failure, whereas a handful of coincidental shape-preserving collisions on low-entropy values is
-     * only a warning - so this net never fails a healthy run over a low-cardinality identifier.
-     */
-    private void verifySurvival(
-            Connection sourceConn, Connection targetConn, String tableName,
-            String columnName, List<String> failures, List<String> warnings,
-            java.util.Set<String> failedTables,
-            List<org.identigon.incognito.api.AnonymisationReport.SurvivalFinding> survivalFindings)
-            throws SQLException {
-        // Collect non-null distinct source values (bounded to a reasonable sample for large tables).
-        List<String> sourceValues = new ArrayList<>();
-        try (Statement stmt = sourceConn.createStatement();
-             ResultSet rs = stmt.executeQuery(
-                 "SELECT DISTINCT " + columnName + " FROM " + tableName
-                     + " WHERE " + columnName + " IS NOT NULL LIMIT 1000")) {
-            while (rs.next()) {
-                sourceValues.add(rs.getString(1));
-            }
-        }
-        if (sourceValues.isEmpty()) return;
-
-        // How many of those DISTINCT source values reappear in the target?
-        // String literals are safe here: the values come from our own source DB, quotes escaped.
-        StringBuilder inClause = new StringBuilder();
-        for (int i = 0; i < sourceValues.size(); i++) {
-            if (i > 0) inClause.append(',');
-            inClause.append('\'').append(sourceValues.get(i).replace("'", "''")).append('\'');
-        }
-        String checkSql = "SELECT COUNT(DISTINCT " + columnName + ") FROM " + tableName
-            + " WHERE " + columnName + " IN (" + inClause + ")";
-        try (Statement stmt = targetConn.createStatement();
-             ResultSet rs = stmt.executeQuery(checkSql)) {
-            if (rs.next()) {
-                long survived = rs.getLong(1);
-                if (survived == 0) return;
-                double ratio = (double) survived / sourceValues.size();
-                boolean hardFailure = ratio >= SURVIVAL_FAILURE_RATIO;
-                survivalFindings.add(new org.identigon.incognito.api.AnonymisationReport.SurvivalFinding(
-                    tableName, columnName, sourceValues.size(), survived, hardFailure));
-                if (hardFailure) {
-                    failures.add("Source-value survival: " + tableName + "." + columnName
-                        + " has " + survived + " of " + sourceValues.size()
-                        + " sampled distinct source values surviving in the target ("
-                        + String.format("%.0f%%", ratio * 100) + ") - fabrication may not have been applied");
-                    failedTables.add(tableName);
-                } else {
-                    warnings.add("Source-value survival (likely coincidental): " + tableName + "." + columnName
-                        + " has " + survived + " of " + sourceValues.size()
-                        + " sampled distinct source values matching in the target - below the "
-                        + String.format("%.0f%%", SURVIVAL_FAILURE_RATIO * 100) + " failure threshold");
-                }
-            }
-        }
-    }
-
-    /**
-     * Computes the relational fingerprint for a single FK edge (SPEC §2.4) on the source database:
-     * the distribution of referencing-child-row counts per parent row. Fabrication preserves row
-     * counts and the FK graph exactly, so the source distribution is also the target's residual risk
-     * - no second scan of the target is needed. Returns {@code null} if no parent row on this edge
-     * is singled out (unique fingerprint) or rare, so callers only ever see edges worth reporting.
-     */
-    private org.identigon.incognito.api.AnonymisationReport.StructuralUniquenessFinding computeStructuralFinding(
-            Connection sourceConn, String parentTable, String childTable,
-            SchemaInspector.ForeignKeyConstraint fk, int rarenessK) throws SQLException {
-
-        String cols = String.join(", ", fk.childColumns());
-        String notNull = fk.childColumns().stream()
+    String cols = String.join(", ", fk.childColumns());
+    String notNull =
+        fk.childColumns().stream()
             .map(c -> c + " IS NOT NULL")
             .collect(Collectors.joining(" AND "));
 
-        String sql = "SELECT c, COUNT(*) AS parents FROM ("
-            + "SELECT " + cols + ", COUNT(*) AS c FROM " + childTable
-            + " WHERE " + notNull + " GROUP BY " + cols
+    String sql =
+        "SELECT c, COUNT(*) AS parents FROM ("
+            + "SELECT "
+            + cols
+            + ", COUNT(*) AS c FROM "
+            + childTable
+            + " WHERE "
+            + notNull
+            + " GROUP BY "
+            + cols
             + ") parent_counts GROUP BY c";
 
-        long distinctParents = 0;
-        long maxChildCount = 0;
-        long uniqueFingerprintCount = 0;
-        long rareFingerprintCount = 0;
+    long distinctParents = 0;
+    long maxChildCount = 0;
+    long uniqueFingerprintCount = 0;
+    long rareFingerprintCount = 0;
 
-        try (Statement stmt = sourceConn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                long c = rs.getLong(1);
-                long parentsWithThisCount = rs.getLong(2);
-                distinctParents += parentsWithThisCount;
-                maxChildCount = Math.max(maxChildCount, c);
-                if (parentsWithThisCount == 1) {
-                    uniqueFingerprintCount += 1;
-                }
-                if (parentsWithThisCount < rarenessK) {
-                    rareFingerprintCount += parentsWithThisCount;
-                }
-            }
+    try (Statement stmt = sourceConn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      while (rs.next()) {
+        long c = rs.getLong(1);
+        long parentsWithThisCount = rs.getLong(2);
+        distinctParents += parentsWithThisCount;
+        maxChildCount = Math.max(maxChildCount, c);
+        if (parentsWithThisCount == 1) {
+          uniqueFingerprintCount += 1;
         }
-
-        if (uniqueFingerprintCount == 0 && rareFingerprintCount == 0) return null;
-
-        return new org.identigon.incognito.api.AnonymisationReport.StructuralUniquenessFinding(
-            parentTable, childTable, List.copyOf(fk.childColumns()), distinctParents, maxChildCount,
-            uniqueFingerprintCount, rareFingerprintCount, rarenessK);
+        if (parentsWithThisCount < rarenessK) {
+          rareFingerprintCount += parentsWithThisCount;
+        }
+      }
     }
 
-    /** Helper to get column policies from a TablePolicy. Uses the columns() accessor. */
-    private Iterable<Map.Entry<String, ColumnPolicy>> getColumnPolicies(TablePolicy tablePolicy) {
-        return tablePolicy.columns().entrySet();
+    if (uniqueFingerprintCount == 0 && rareFingerprintCount == 0) {
+      return null;
     }
+
+    return new org.identigon.incognito.api.AnonymisationReport.StructuralUniquenessFinding(
+        parentTable,
+        childTable,
+        List.copyOf(fk.childColumns()),
+        distinctParents,
+        maxChildCount,
+        uniqueFingerprintCount,
+        rareFingerprintCount,
+        rarenessK);
+  }
+
+  /** Helper to get column policies from a TablePolicy. Uses the columns() accessor. */
+  private Iterable<Map.Entry<String, ColumnPolicy>> getColumnPolicies(TablePolicy tablePolicy) {
+    return tablePolicy.columns().entrySet();
+  }
 }

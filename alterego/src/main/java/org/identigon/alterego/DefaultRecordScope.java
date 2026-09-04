@@ -7,12 +7,11 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * The concrete {@link RecordScope}: a plain (single-thread use is already a documented
- * precondition - section 6.1), non-concurrent map of fixed attributes, plus an optional record
- * key ({@code null} for an anonymous scope). Made visible to whatever {@link
- * TransformationContext} gets created while {@link #apply} is running via a thread-local - the
- * only way to reach it, since {@code Transformation<T>} is a plain {@code Function<T, T>} with no
- * scope parameter of its own.
+ * The concrete {@link RecordScope}: a plain (single-thread use is already a documented precondition
+ * - section 6.1), non-concurrent map of fixed attributes, plus an optional record key ({@code null}
+ * for an anonymous scope). Made visible to whatever {@link TransformationContext} gets created
+ * while {@link #apply} is running via a thread-local - the only way to reach it, since {@code
+ * Transformation<T>} is a plain {@code Function<T, T>} with no scope parameter of its own.
  */
 final class DefaultRecordScope implements RecordScope {
 
@@ -54,7 +53,10 @@ final class DefaultRecordScope implements RecordScope {
     attributes.clear();
   }
 
-  /** A {@link RecordAttributes} view of this scope, for a context whose own randomness is {@code contextRandomness}. */
+  /**
+   * A {@link RecordAttributes} view of this scope, for a context whose own randomness is {@code
+   * contextRandomness}.
+   */
   RecordAttributes viewFor(Randomness contextRandomness) {
     return new ScopedRecordAttributes(this, contextRandomness);
   }
@@ -65,12 +67,15 @@ final class DefaultRecordScope implements RecordScope {
   }
 
   @SuppressWarnings("unchecked")
-  <A> A computeIfAbsent(AttributeKey<A> key, Function<Randomness, A> resolver, Randomness anonymousFallback) {
+  <A> A computeIfAbsent(
+      AttributeKey<A> key, Function<Randomness, A> resolver, Randomness anonymousFallback) {
     if (attributes.containsKey(key)) {
       return (A) attributes.get(key);
     }
     Randomness randomness =
-        recordKey != null ? Derivation.recordRandomness(salt, key.name(), recordKey) : anonymousFallback;
+        recordKey != null
+            ? Derivation.recordRandomness(salt, key.name(), recordKey)
+            : anonymousFallback;
     A resolved = resolver.apply(randomness);
     attributes.put(key, resolved);
     return resolved;

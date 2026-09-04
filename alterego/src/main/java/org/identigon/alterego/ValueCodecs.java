@@ -9,10 +9,10 @@ import java.time.YearMonth;
 import java.util.UUID;
 
 /**
- * Canonical text encoding and decoding for the fixed value-type set (section 2.6): {@code
- * String}, {@code Integer}, {@code Long}, {@code Boolean}, {@code LocalDate}, {@code
- * LocalDateTime}, {@code Instant}, {@code UUID}, and any enum. There is no public codec SPI
- * (ADR 0003); this registry is the whole of it.
+ * Canonical text encoding and decoding for the fixed value-type set (section 2.6): {@code String},
+ * {@code Integer}, {@code Long}, {@code Boolean}, {@code LocalDate}, {@code LocalDateTime}, {@code
+ * Instant}, {@code UUID}, and any enum. There is no public codec SPI (ADR 0003); this registry is
+ * the whole of it.
  */
 final class ValueCodecs {
 
@@ -44,7 +44,10 @@ final class ValueCodecs {
     }
   }
 
-  /** Encodes {@code value} to its canonical text form. Enums use {@code name()}, not {@code toString()}. */
+  /**
+   * Encodes {@code value} to its canonical text form. Enums use {@code name()}, not {@code
+   * toString()}.
+   */
   static <T> String encode(T value, Class<T> type) {
     requireSupported(type);
     if (type.isEnum()) {
@@ -56,9 +59,8 @@ final class ValueCodecs {
   }
 
   /**
-   * Decodes {@code text} back into {@code type}. Throws {@link AlterEgoStoreException} if
-   * {@code text} is not a valid canonical form for {@code type} (corrupted store, renamed enum
-   * constant).
+   * Decodes {@code text} back into {@code type}. Throws {@link AlterEgoStoreException} if {@code
+   * text} is not a valid canonical form for {@code type} (corrupted store, renamed enum constant).
    */
   @SuppressWarnings("unchecked")
   static <T> T decode(String text, Class<T> type) {

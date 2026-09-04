@@ -12,21 +12,35 @@ import org.junit.jupiter.api.Test;
 /**
  * Exercises {@code phoneNumber()}: the section 4.1 fictionality guarantee against the GB Ofcom
  * drama ranges ({@code docs/research/0003-alterego-phone-ranges.md}), in-place digit replacement
- * with punctuation
- * preserved (the {@code PhoneOptions.realistic()} and no-range-country paths, where the output
- * takes the input's own shape rather than a reserved template's), and the {@code realistic()}
- * opt-out.
+ * with punctuation preserved (the {@code PhoneOptions.realistic()} and no-range-country paths,
+ * where the output takes the input's own shape rather than a reserved template's), and the {@code
+ * realistic()} opt-out.
  */
 class PhoneNumberTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   // The 8-digit fixed prefix of every range in src/main/resources/dictionaries/GB/phone-ranges.txt.
   private static final Set<String> GB_FIXED_PREFIXES =
       Set.of(
-          "01134960", "01144960", "01154960", "01164960", "01174960", "01184960", "01214960",
-          "01314960", "01414960", "01514960", "01614960", "01632960", "01914980", "02079460",
-          "02896496", "02920180", "07700900");
+          "01134960",
+          "01144960",
+          "01154960",
+          "01164960",
+          "01174960",
+          "01184960",
+          "01214960",
+          "01314960",
+          "01414960",
+          "01514960",
+          "01614960",
+          "01632960",
+          "01914980",
+          "02079460",
+          "02896496",
+          "02920180",
+          "07700900");
 
   private static AlterEgo gb() {
     return AlterEgo.builder().salt(SALT).build();

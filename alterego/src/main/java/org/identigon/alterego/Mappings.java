@@ -5,8 +5,8 @@ import java.util.Optional;
 /**
  * A domain-scoped view of the configured mapping store, for maintaining persistent, cross-record
  * relationships between values. Keys are hashed before reaching the store, so this view never
- * exposes or accepts raw store keys. For ephemeral, intra-record consistency, use
- * {@link TransformationContext#record()} instead.
+ * exposes or accepts raw store keys. For ephemeral, intra-record consistency, use {@link
+ * TransformationContext#record()} instead.
  */
 public interface Mappings {
 
@@ -19,8 +19,8 @@ public interface Mappings {
   Optional<String> get(String canonicalKey);
 
   /**
-   * Stores {@code value} under {@code canonicalKey} if absent, atomically. Returns the value
-   * now associated with the key: {@code value} itself, or an existing value on a race.
+   * Stores {@code value} under {@code canonicalKey} if absent, atomically. Returns the value now
+   * associated with the key: {@code value} itself, or an existing value on a race.
    *
    * @param canonicalKey the canonical text form of the key (section 2.6)
    * @param value the value to store if the key is absent

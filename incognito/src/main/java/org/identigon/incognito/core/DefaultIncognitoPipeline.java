@@ -11,78 +11,83 @@ import org.identigon.incognito.api.PipelineResult;
 import org.identigon.incognito.api.PipelineStage;
 
 /**
- * The default {@link IncognitoPipeline}: runs the configured stages in order, then destroys the salt
- * - Incognito's own copy and the AlterEgo clone - on completion, on both success and failure.
+ * The default {@link IncognitoPipeline}: runs the configured stages in order, then destroys the
+ * salt - Incognito's own copy and the AlterEgo clone - on completion, on both success and failure.
  */
 public final class DefaultIncognitoPipeline implements IncognitoPipeline {
 
-    private final PipelineContext context;
-    private final List<PipelineStage> stages;
-    private final byte[] saltToClear;
+  private final PipelineContext context;
+  private final List<PipelineStage> stages;
+  private final byte[] saltToClear;
 
-    /**
-     * Creates a pipeline over the given context and stages.
-     *
-     * @param context     the shared pipeline context
-     * @param stages      the stages to run, in order
-     * @param saltToClear Incognito's own salt copy to zero on completion (may be {@code null})
-     */
-    public DefaultIncognitoPipeline(PipelineContext context, List<PipelineStage> stages, byte[] saltToClear) {
-        this.context = context;
-        this.stages = List.copyOf(stages);
-        this.saltToClear = saltToClear;
+  /**
+   * Creates a pipeline over the given context and stages.
+   *
+   * @param context the shared pipeline context
+   * @param stages the stages to run, in order
+   * @param saltToClear Incognito's own salt copy to zero on completion (may be {@code null})
+   */
+  public DefaultIncognitoPipeline(
+      PipelineContext context, List<PipelineStage> stages, byte[] saltToClear) {
+    this.context = context;
+    this.stages = List.copyOf(stages);
+    this.saltToClear = saltToClear;
+  }
+
+  @Override
+  // Not a try-with-resources candidate: the AlterEgo clone must be closed AFTER
+  // IncognitoCleanUpHandler.compensate() runs in the catch below (compensation needs a still-live
+  // pipeline), which try-with-resources cannot express -- it closes resources before the catch
+  // clause runs, reordering the salt destruction ahead of compensation.
+  @SuppressWarnings("PMD.UseTryWithResources")
+  public PipelineResult execute() throws IncognitoException {
+    long startNanos = System.nanoTime();
+    try {
+      java.util.List<PipelineStage.StageResult> stageResults = new java.util.ArrayList<>();
+      for (PipelineStage stage : stages) {
+        stageResults.add(stage.process(context));
+      }
+
+      long rowsLoaded =
+          stageResults.stream()
+              .filter(r -> "TableTransformLoadStage".equals(r.stageName()))
+              .mapToLong(PipelineStage.StageResult::processedCount)
+              .sum();
+      int tablesProcessed =
+          stageResults.stream()
+              .filter(r -> "SchemaDiscoveryStage".equals(r.stageName()))
+              .mapToInt(r -> (int) r.processedCount())
+              .findFirst()
+              .orElse(0);
+
+      // Overall success reflects every stage: a VerificationStage that reports failures
+      // (dangling FK, surviving source value, fictionality violation) must fail the run,
+      // not be silently swallowed while the report still records the failed StageResult.
+      boolean overallSuccess = stageResults.stream().allMatch(PipelineStage.StageResult::success);
+
+      return new PipelineResult(
+          overallSuccess,
+          rowsLoaded,
+          tablesProcessed,
+          Duration.ofNanos(System.nanoTime() - startNanos),
+          org.identigon.incognito.core.AnonymisationReportBuilder.build(context, stageResults));
+    } catch (IncognitoException e) {
+      org.identigon.incognito.core.IncognitoCleanUpHandler.compensate(context);
+      throw e;
+    } catch (Exception e) {
+      org.identigon.incognito.core.IncognitoCleanUpHandler.compensate(context);
+      throw new IncognitoException("Pipeline execution failed", e);
+    } finally {
+      if (saltToClear != null) {
+        Arrays.fill(saltToClear, (byte) 0);
+      }
+      // Destroy AlterEgo's own defensive salt clone too (SPEC §5.1/§8.1): clearing the raw
+      // bytes above does not touch the copy AlterEgo holds internally, which would otherwise
+      // outlive the run until GC. close() zeroes it and disables the instance.
+      AlterEgo alterEgo = context.alterEgo();
+      if (alterEgo != null) {
+        alterEgo.close();
+      }
     }
-
-    @Override
-    // Not a try-with-resources candidate: the AlterEgo clone must be closed AFTER
-    // IncognitoCleanUpHandler.compensate() runs in the catch below (compensation needs a still-live
-    // pipeline), which try-with-resources cannot express -- it closes resources before the catch
-    // clause runs, reordering the salt destruction ahead of compensation.
-    @SuppressWarnings("PMD.UseTryWithResources")
-    public PipelineResult execute() throws IncognitoException {
-        long startNanos = System.nanoTime();
-        try {
-            java.util.List<PipelineStage.StageResult> stageResults = new java.util.ArrayList<>();
-            for (PipelineStage stage : stages) {
-                stageResults.add(stage.process(context));
-            }
-
-            long rowsLoaded = stageResults.stream()
-                .filter(r -> "TableTransformLoadStage".equals(r.stageName()))
-                .mapToLong(PipelineStage.StageResult::processedCount).sum();
-            int tablesProcessed = stageResults.stream()
-                .filter(r -> "SchemaDiscoveryStage".equals(r.stageName()))
-                .mapToInt(r -> (int) r.processedCount()).findFirst().orElse(0);
-
-            // Overall success reflects every stage: a VerificationStage that reports failures
-            // (dangling FK, surviving source value, fictionality violation) must fail the run,
-            // not be silently swallowed while the report still records the failed StageResult.
-            boolean overallSuccess = stageResults.stream().allMatch(PipelineStage.StageResult::success);
-
-            return new PipelineResult(
-                overallSuccess,
-                rowsLoaded,
-                tablesProcessed,
-                Duration.ofNanos(System.nanoTime() - startNanos),
-                org.identigon.incognito.core.AnonymisationReportBuilder.build(context, stageResults)
-            );
-        } catch (IncognitoException e) {
-            org.identigon.incognito.core.IncognitoCleanUpHandler.compensate(context);
-            throw e;
-        } catch (Exception e) {
-            org.identigon.incognito.core.IncognitoCleanUpHandler.compensate(context);
-            throw new IncognitoException("Pipeline execution failed", e);
-        } finally {
-            if (saltToClear != null) {
-                Arrays.fill(saltToClear, (byte) 0);
-            }
-            // Destroy AlterEgo's own defensive salt clone too (SPEC §5.1/§8.1): clearing the raw
-            // bytes above does not touch the copy AlterEgo holds internally, which would otherwise
-            // outlive the run until GC. close() zeroes it and disables the instance.
-            AlterEgo alterEgo = context.alterEgo();
-            if (alterEgo != null) {
-                alterEgo.close();
-            }
-        }
-    }
+  }
 }

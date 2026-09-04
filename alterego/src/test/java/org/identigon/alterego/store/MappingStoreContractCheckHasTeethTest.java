@@ -8,10 +8,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 /**
- * Proves {@link MappingStoreContractTest#runConcurrencyCheck} actually detects a broken,
- * non-atomic {@code putIfAbsentUnique} rather than passing vacuously against any store - a real
- * requirement, not just an inherited test that happens to be green (spec section 10: "a
- * deliberately broken fake store... fails at least one contract test").
+ * Proves {@link MappingStoreContractTest#runConcurrencyCheck} actually detects a broken, non-atomic
+ * {@code putIfAbsentUnique} rather than passing vacuously against any store - a real requirement,
+ * not just an inherited test that happens to be green (spec section 10: "a deliberately broken fake
+ * store... fails at least one contract test").
  */
 class MappingStoreContractCheckHasTeethTest {
 
@@ -21,14 +21,15 @@ class MappingStoreContractCheckHasTeethTest {
         MappingStoreContractTest.runConcurrencyCheck(new NonAtomicFakeMappingStore(), 64);
     assertFalse(
         result.noDuplicateValues() && result.noLostKeys(),
-        "the non-atomic fake store should have failed the concurrency check, but didn't: " + result);
+        "the non-atomic fake store should have failed the concurrency check, but didn't: "
+            + result);
   }
 
   /**
-   * Deliberately non-atomic: {@code putIfAbsentUnique} checks both maps, then sleeps (widening
-   * the race window so the violation reproduces reliably rather than depending on unlucky
-   * timing), and only then writes - the textbook check-then-act race the real atomicity
-   * requirement exists to rule out.
+   * Deliberately non-atomic: {@code putIfAbsentUnique} checks both maps, then sleeps (widening the
+   * race window so the violation reproduces reliably rather than depending on unlucky timing), and
+   * only then writes - the textbook check-then-act race the real atomicity requirement exists to
+   * rule out.
    */
   private static final class NonAtomicFakeMappingStore implements MappingStore {
     private final Map<String, String> forward = new HashMap<>();

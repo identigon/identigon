@@ -12,13 +12,14 @@ import org.identigon.alterego.store.InMemoryMappingStore;
 import org.junit.jupiter.api.Test;
 
 /**
- * A real {@code unique()} transformation, backed by {@link InMemoryMappingStore}, driven through
- * a parallel stream (spec section 10) - shows no duplicate outputs and no lost mappings under
- * genuine concurrent load, not just via the store's own contract test.
+ * A real {@code unique()} transformation, backed by {@link InMemoryMappingStore}, driven through a
+ * parallel stream (spec section 10) - shows no duplicate outputs and no lost mappings under genuine
+ * concurrent load, not just via the store's own contract test.
  */
 class UniqueParallelStreamHammerTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   @Test
   void parallelStreamThroughUniqueProducesNoDuplicatesAndNoLostMappings() {
@@ -34,6 +35,8 @@ class UniqueParallelStreamHammerTest {
     assertEquals(inputs.size(), outputs.size(), "lost a mapping: fewer outputs than inputs");
     assertFalse(outputs.contains(null), "a null output was produced");
     assertEquals(
-        inputs.size(), Set.copyOf(outputs).size(), "duplicate output detected across parallel unique() calls");
+        inputs.size(),
+        Set.copyOf(outputs).size(),
+        "duplicate output detected across parallel unique() calls");
   }
 }

@@ -3,10 +3,9 @@ package org.identigon.alterego.store;
 import java.util.Optional;
 
 /**
- * The SPI a persistent input-to-output mapping store implements to back {@code stored()} and
- * {@code unique()}. Implementations must be thread-safe: transformations run under parallel
- * streams. Keys and values are opaque strings; by default the library writes hashed keys, never
- * raw input data.
+ * The SPI a persistent input-to-output mapping store implements to back {@code stored()} and {@code
+ * unique()}. Implementations must be thread-safe: transformations run under parallel streams. Keys
+ * and values are opaque strings; by default the library writes hashed keys, never raw input data.
  */
 public interface MappingStore {
 
@@ -20,8 +19,8 @@ public interface MappingStore {
   Optional<String> get(String namespace, String key);
 
   /**
-   * Stores {@code value} under {@code key} in {@code namespace} if absent, atomically. Returns
-   * the value now associated with the key: {@code value} itself, or an existing value on a race.
+   * Stores {@code value} under {@code key} in {@code namespace} if absent, atomically. Returns the
+   * value now associated with the key: {@code value} itself, or an existing value on a race.
    *
    * @param namespace the namespace (a transformation's domain)
    * @param key the store key
@@ -32,8 +31,8 @@ public interface MappingStore {
 
   /**
    * Stores {@code key} to {@code value} in {@code namespace} only if {@code key} has no mapping
-   * <em>and</em> {@code value} is not already in use as an output in {@code namespace}. The
-   * whole check-and-store is atomic (one transaction for a store backed by a database).
+   * <em>and</em> {@code value} is not already in use as an output in {@code namespace}. The whole
+   * check-and-store is atomic (one transaction for a store backed by a database).
    *
    * @param namespace the namespace (a transformation's domain)
    * @param key the store key

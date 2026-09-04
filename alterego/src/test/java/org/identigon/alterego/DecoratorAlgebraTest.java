@@ -10,14 +10,15 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The section 2.5 decorator algebra: {@code unique()} subsumes {@code stored()}; both are
- * idempotent; {@code t.unique().stored()} === {@code t.unique()}; {@code t.stored().unique()}
- * === {@code t.unique()}. Proven by observing behaviour (an ever-incrementing strategy reveals
- * whether a given call actually reused a stored/unique value or re-ran the strategy), not by
- * inspecting internals.
+ * idempotent; {@code t.unique().stored()} === {@code t.unique()}; {@code t.stored().unique()} ===
+ * {@code t.unique()}. Proven by observing behaviour (an ever-incrementing strategy reveals whether
+ * a given call actually reused a stored/unique value or re-ran the strategy), not by inspecting
+ * internals.
  */
 class DecoratorAlgebraTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   private static AlterEgo alterego(MappingStore store) {
     return AlterEgo.builder().salt(SALT).mappingStore(store).build();
@@ -31,7 +32,8 @@ class DecoratorAlgebraTest {
   @Test
   void storedIsIdempotent() {
     AtomicInteger counter = new AtomicInteger();
-    Transformation<String> t = everIncrementing(alterego(new InMemoryMappingStore()), counter).stored().stored();
+    Transformation<String> t =
+        everIncrementing(alterego(new InMemoryMappingStore()), counter).stored().stored();
     String first = t.apply("alice");
     assertEquals(first, t.apply("alice"));
   }
@@ -39,7 +41,8 @@ class DecoratorAlgebraTest {
   @Test
   void uniqueIsIdempotent() {
     AtomicInteger counter = new AtomicInteger();
-    Transformation<String> t = everIncrementing(alterego(new InMemoryMappingStore()), counter).unique().unique();
+    Transformation<String> t =
+        everIncrementing(alterego(new InMemoryMappingStore()), counter).unique().unique();
     String first = t.apply("alice");
     assertEquals(first, t.apply("alice"));
   }

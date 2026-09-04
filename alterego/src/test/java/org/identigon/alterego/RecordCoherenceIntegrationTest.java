@@ -7,13 +7,14 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * The full spec section 10 record-coherence suite: town/postcode/phone agree whichever field
- * runs first, in every ordering - not just the city-first case each built-in's own coherence test
+ * The full spec section 10 record-coherence suite: town/postcode/phone agree whichever field runs
+ * first, in every ordering - not just the city-first case each built-in's own coherence test
  * already covers individually.
  */
 class RecordCoherenceIntegrationTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   // The 6 orderings of {city=0, postcode=1, phone=2}.
   private static final List<int[]> ORDERINGS =
@@ -36,7 +37,9 @@ class RecordCoherenceIntegrationTest {
     Transformation<String> postcode = eg.postcode();
     Transformation<String> phone = eg.phoneNumber();
     Transformation<String> areaReader =
-        eg.bind("test:reads-area", (in, ctx) -> ctx.record().get(AlterEgoAttributes.UK_POSTCODE_AREA).orElse(""));
+        eg.bind(
+            "test:reads-area",
+            (in, ctx) -> ctx.record().get(AlterEgoAttributes.UK_POSTCODE_AREA).orElse(""));
 
     int caseIndex = 0;
     for (int[] ordering : ORDERINGS) {
@@ -53,7 +56,10 @@ class RecordCoherenceIntegrationTest {
         }
         String area = rec.apply(areaReader, "ignored");
 
-        assertTrue(!area.isEmpty(), "an area should have been established, ordering " + java.util.Arrays.toString(ordering));
+        assertTrue(
+            !area.isEmpty(),
+            "an area should have been established, ordering "
+                + java.util.Arrays.toString(ordering));
         assertTrue(
             GbTownAreas.BY_TOWN.getOrDefault(resultByField[0], List.of()).contains(area),
             "city '" + resultByField[0] + "' inconsistent with area '" + area + "'");

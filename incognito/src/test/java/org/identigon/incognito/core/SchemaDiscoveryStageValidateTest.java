@@ -23,117 +23,206 @@ import org.junit.jupiter.api.Test;
  */
 class SchemaDiscoveryStageValidateTest {
 
-    @Test
-    void aFullyClassifiedTablePassesWithNoDatabaseInvolvedAtAll() {
-        SchemaInspector.TableMetadata customers = new SchemaInspector.TableMetadata(
-            "CUSTOMERS", List.of("ID"), Map.of(), List.of(), List.of("ID", "NAME"), List.of(),
-            List.of(), Map.of("ID", Types.BIGINT, "NAME", Types.VARCHAR), List.of());
+  @Test
+  void aFullyClassifiedTablePassesWithNoDatabaseInvolvedAtAll() {
+    SchemaInspector.TableMetadata customers =
+        new SchemaInspector.TableMetadata(
+            "CUSTOMERS",
+            List.of("ID"),
+            Map.of(),
+            List.of(),
+            List.of("ID", "NAME"),
+            List.of(),
+            List.of(),
+            Map.of("ID", Types.BIGINT, "NAME", Types.VARCHAR),
+            List.of());
 
-        AnonymisationPolicy policy = AnonymisationPolicy.builder()
-            .table("CUSTOMERS", t -> t
-                .column("ID", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
-                .column("NAME", ColumnRole.PAYLOAD))
+    AnonymisationPolicy policy =
+        AnonymisationPolicy.builder()
+            .table(
+                "CUSTOMERS",
+                t ->
+                    t.column("ID", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
+                        .column("NAME", ColumnRole.PAYLOAD))
             .build();
 
-        assertDoesNotThrow(() -> new SchemaDiscoveryStage().validate(List.of(customers), policy));
-    }
+    assertDoesNotThrow(() -> new SchemaDiscoveryStage().validate(List.of(customers), policy));
+  }
 
-    @Test
-    void anUnclassifiedColumnFailsClosedTheSameWayProcessDoes() {
-        SchemaInspector.TableMetadata customers = new SchemaInspector.TableMetadata(
-            "CUSTOMERS", List.of("ID"), Map.of(), List.of(), List.of("ID", "NAME"), List.of(),
-            List.of(), Map.of("ID", Types.BIGINT, "NAME", Types.VARCHAR), List.of());
+  @Test
+  void anUnclassifiedColumnFailsClosedTheSameWayProcessDoes() {
+    SchemaInspector.TableMetadata customers =
+        new SchemaInspector.TableMetadata(
+            "CUSTOMERS",
+            List.of("ID"),
+            Map.of(),
+            List.of(),
+            List.of("ID", "NAME"),
+            List.of(),
+            List.of(),
+            Map.of("ID", Types.BIGINT, "NAME", Types.VARCHAR),
+            List.of());
 
-        // NAME left unclassified.
-        AnonymisationPolicy policy = AnonymisationPolicy.builder()
-            .table("CUSTOMERS", t -> t.column("ID", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG))
+    // NAME left unclassified.
+    AnonymisationPolicy policy =
+        AnonymisationPolicy.builder()
+            .table(
+                "CUSTOMERS",
+                t -> t.column("ID", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG))
             .build();
 
-        IncognitoException.ConfigException ex = assertThrows(IncognitoException.ConfigException.class,
+    IncognitoException.ConfigException ex =
+        assertThrows(
+            IncognitoException.ConfigException.class,
             () -> new SchemaDiscoveryStage().validate(List.of(customers), policy));
-        assertTrue(ex.getMessage().contains("NAME"), ex.getMessage());
-        assertTrue(ex.getMessage().contains("Fail-closed"), ex.getMessage());
-    }
+    assertTrue(ex.getMessage().contains("NAME"), ex.getMessage());
+    assertTrue(ex.getMessage().contains("Fail-closed"), ex.getMessage());
+  }
 
-    /**
-     * A {@code FOREIGN_KEY} column with no {@code references} used to validate cleanly and then hit
-     * a raw {@code NullPointerException} at {@code run} time (v3.1.0 tutorial-feedback finding):
-     * {@code TableTransformLoadStage.buildFkTransformer} passes the null {@code referencedTable}
-     * straight to the key-translation store's lookup. This is the fail-closed check that catches it
-     * here instead - and, since the parent's single-column PK is discoverable, offers the exact
-     * suggestion {@code ScaffoldCommand} would.
-     */
-    @Test
-    void aForeignKeyColumnWithNoReferencesFailsClosedWithASuggestion() {
-        SchemaInspector.TableMetadata customers = new SchemaInspector.TableMetadata(
-            "CUSTOMERS", List.of("ID"), Map.of(), List.of(), List.of("ID"), List.of(),
-            List.of(), Map.of("ID", Types.BIGINT), List.of());
-        SchemaInspector.TableMetadata orders = new SchemaInspector.TableMetadata(
-            "ORDERS", List.of("ID"), Map.of("CUSTOMER_ID", "CUSTOMERS"), List.of(),
-            List.of("ID", "CUSTOMER_ID"), List.of(), List.of(),
+  /**
+   * A {@code FOREIGN_KEY} column with no {@code references} used to validate cleanly and then hit a
+   * raw {@code NullPointerException} at {@code run} time (v3.1.0 tutorial-feedback finding): {@code
+   * TableTransformLoadStage.buildFkTransformer} passes the null {@code referencedTable} straight to
+   * the key-translation store's lookup. This is the fail-closed check that catches it here instead
+   * - and, since the parent's single-column PK is discoverable, offers the exact suggestion {@code
+   * ScaffoldCommand} would.
+   */
+  @Test
+  void aForeignKeyColumnWithNoReferencesFailsClosedWithASuggestion() {
+    SchemaInspector.TableMetadata customers =
+        new SchemaInspector.TableMetadata(
+            "CUSTOMERS",
+            List.of("ID"),
+            Map.of(),
+            List.of(),
+            List.of("ID"),
+            List.of(),
+            List.of(),
+            Map.of("ID", Types.BIGINT),
+            List.of());
+    SchemaInspector.TableMetadata orders =
+        new SchemaInspector.TableMetadata(
+            "ORDERS",
+            List.of("ID"),
+            Map.of("CUSTOMER_ID", "CUSTOMERS"),
+            List.of(),
+            List.of("ID", "CUSTOMER_ID"),
+            List.of(),
+            List.of(),
             Map.of("ID", Types.BIGINT, "CUSTOMER_ID", Types.BIGINT),
-            List.of(new SchemaInspector.ForeignKeyConstraint("CUSTOMERS", List.of("CUSTOMER_ID"), List.of("ID"))));
+            List.of(
+                new SchemaInspector.ForeignKeyConstraint(
+                    "CUSTOMERS", List.of("CUSTOMER_ID"), List.of("ID"))));
 
-        // CUSTOMER_ID declared FOREIGN_KEY but never given a references block.
-        AnonymisationPolicy policy = AnonymisationPolicy.builder()
-            .table("ORDERS", t -> t
-                .column("ID", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
-                .column("CUSTOMER_ID", ColumnRole.FOREIGN_KEY))
+    // CUSTOMER_ID declared FOREIGN_KEY but never given a references block.
+    AnonymisationPolicy policy =
+        AnonymisationPolicy.builder()
+            .table(
+                "ORDERS",
+                t ->
+                    t.column("ID", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
+                        .column("CUSTOMER_ID", ColumnRole.FOREIGN_KEY))
             .build();
 
-        IncognitoException.ConfigException ex = assertThrows(IncognitoException.ConfigException.class,
+    IncognitoException.ConfigException ex =
+        assertThrows(
+            IncognitoException.ConfigException.class,
             () -> new SchemaDiscoveryStage().validate(List.of(customers, orders), policy));
-        assertTrue(ex.getMessage().contains("'CUSTOMER_ID'"), ex.getMessage());
-        assertTrue(ex.getMessage().contains("does not declare a references block"), ex.getMessage());
-        assertTrue(ex.getMessage().contains("references: { table: CUSTOMERS, column: ID }"), ex.getMessage());
-    }
+    assertTrue(ex.getMessage().contains("'CUSTOMER_ID'"), ex.getMessage());
+    assertTrue(ex.getMessage().contains("does not declare a references block"), ex.getMessage());
+    assertTrue(
+        ex.getMessage().contains("references: { table: CUSTOMERS, column: ID }"), ex.getMessage());
+  }
 
-    @Test
-    void aForeignKeyColumnWithReferencesDeclaredPasses() {
-        SchemaInspector.TableMetadata customers = new SchemaInspector.TableMetadata(
-            "CUSTOMERS", List.of("ID"), Map.of(), List.of(), List.of("ID"), List.of(),
-            List.of(), Map.of("ID", Types.BIGINT), List.of());
-        SchemaInspector.TableMetadata orders = new SchemaInspector.TableMetadata(
-            "ORDERS", List.of("ID"), Map.of("CUSTOMER_ID", "CUSTOMERS"), List.of(),
-            List.of("ID", "CUSTOMER_ID"), List.of(), List.of(),
+  @Test
+  void aForeignKeyColumnWithReferencesDeclaredPasses() {
+    SchemaInspector.TableMetadata customers =
+        new SchemaInspector.TableMetadata(
+            "CUSTOMERS",
+            List.of("ID"),
+            Map.of(),
+            List.of(),
+            List.of("ID"),
+            List.of(),
+            List.of(),
+            Map.of("ID", Types.BIGINT),
+            List.of());
+    SchemaInspector.TableMetadata orders =
+        new SchemaInspector.TableMetadata(
+            "ORDERS",
+            List.of("ID"),
+            Map.of("CUSTOMER_ID", "CUSTOMERS"),
+            List.of(),
+            List.of("ID", "CUSTOMER_ID"),
+            List.of(),
+            List.of(),
             Map.of("ID", Types.BIGINT, "CUSTOMER_ID", Types.BIGINT),
-            List.of(new SchemaInspector.ForeignKeyConstraint("CUSTOMERS", List.of("CUSTOMER_ID"), List.of("ID"))));
+            List.of(
+                new SchemaInspector.ForeignKeyConstraint(
+                    "CUSTOMERS", List.of("CUSTOMER_ID"), List.of("ID"))));
 
-        AnonymisationPolicy policy = AnonymisationPolicy.builder()
-            .table("ORDERS", t -> t
-                .column("ID", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
-                .column(org.identigon.incognito.policy.ColumnPolicy.builder("CUSTOMER_ID")
-                    .role(ColumnRole.FOREIGN_KEY).references("CUSTOMERS", "ID").build()))
+    AnonymisationPolicy policy =
+        AnonymisationPolicy.builder()
+            .table(
+                "ORDERS",
+                t ->
+                    t.column("ID", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
+                        .column(
+                            org.identigon.incognito.policy.ColumnPolicy.builder("CUSTOMER_ID")
+                                .role(ColumnRole.FOREIGN_KEY)
+                                .references("CUSTOMERS", "ID")
+                                .build()))
             .build();
 
-        assertDoesNotThrow(() -> new SchemaDiscoveryStage().validate(List.of(customers, orders), policy));
-    }
+    assertDoesNotThrow(
+        () -> new SchemaDiscoveryStage().validate(List.of(customers, orders), policy));
+  }
 
-    /**
-     * A composite FK is resolved purely structurally by {@code buildFkTransformer} (it never reads
-     * {@code referencedTable}/{@code referencedColumn}), so - unlike the single-column case above -
-     * it must stay valid with no {@code references} block declared on either column.
-     */
-    @Test
-    void aCompositeForeignKeyNeedsNoReferencesBlock() {
-        SchemaInspector.TableMetadata authorship = new SchemaInspector.TableMetadata(
-            "AUTHORSHIP", List.of("AUTHOR_ID", "BOOK_ID"), Map.of(), List.of(),
-            List.of("AUTHOR_ID", "BOOK_ID"), List.of(), List.of(),
-            Map.of("AUTHOR_ID", Types.BIGINT, "BOOK_ID", Types.BIGINT), List.of());
-        SchemaInspector.TableMetadata chapter = new SchemaInspector.TableMetadata(
-            "CHAPTER", List.of("ID"), Map.of("AUTHOR_ID", "AUTHORSHIP", "BOOK_ID", "AUTHORSHIP"), List.of(),
-            List.of("ID", "AUTHOR_ID", "BOOK_ID"), List.of(), List.of(),
+  /**
+   * A composite FK is resolved purely structurally by {@code buildFkTransformer} (it never reads
+   * {@code referencedTable}/{@code referencedColumn}), so - unlike the single-column case above -
+   * it must stay valid with no {@code references} block declared on either column.
+   */
+  @Test
+  void aCompositeForeignKeyNeedsNoReferencesBlock() {
+    SchemaInspector.TableMetadata authorship =
+        new SchemaInspector.TableMetadata(
+            "AUTHORSHIP",
+            List.of("AUTHOR_ID", "BOOK_ID"),
+            Map.of(),
+            List.of(),
+            List.of("AUTHOR_ID", "BOOK_ID"),
+            List.of(),
+            List.of(),
+            Map.of("AUTHOR_ID", Types.BIGINT, "BOOK_ID", Types.BIGINT),
+            List.of());
+    SchemaInspector.TableMetadata chapter =
+        new SchemaInspector.TableMetadata(
+            "CHAPTER",
+            List.of("ID"),
+            Map.of("AUTHOR_ID", "AUTHORSHIP", "BOOK_ID", "AUTHORSHIP"),
+            List.of(),
+            List.of("ID", "AUTHOR_ID", "BOOK_ID"),
+            List.of(),
+            List.of(),
             Map.of("ID", Types.BIGINT, "AUTHOR_ID", Types.BIGINT, "BOOK_ID", Types.BIGINT),
-            List.of(new SchemaInspector.ForeignKeyConstraint(
-                "AUTHORSHIP", List.of("AUTHOR_ID", "BOOK_ID"), List.of("AUTHOR_ID", "BOOK_ID"))));
+            List.of(
+                new SchemaInspector.ForeignKeyConstraint(
+                    "AUTHORSHIP",
+                    List.of("AUTHOR_ID", "BOOK_ID"),
+                    List.of("AUTHOR_ID", "BOOK_ID"))));
 
-        AnonymisationPolicy policy = AnonymisationPolicy.builder()
-            .table("CHAPTER", t -> t
-                .column("ID", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
-                .column("AUTHOR_ID", ColumnRole.FOREIGN_KEY)
-                .column("BOOK_ID", ColumnRole.FOREIGN_KEY))
+    AnonymisationPolicy policy =
+        AnonymisationPolicy.builder()
+            .table(
+                "CHAPTER",
+                t ->
+                    t.column("ID", ColumnRole.PRIMARY_KEY, SurrogateStrategy.SEQUENTIAL_LONG)
+                        .column("AUTHOR_ID", ColumnRole.FOREIGN_KEY)
+                        .column("BOOK_ID", ColumnRole.FOREIGN_KEY))
             .build();
 
-        assertDoesNotThrow(() -> new SchemaDiscoveryStage().validate(List.of(authorship, chapter), policy));
-    }
+    assertDoesNotThrow(
+        () -> new SchemaDiscoveryStage().validate(List.of(authorship, chapter), policy));
+  }
 }

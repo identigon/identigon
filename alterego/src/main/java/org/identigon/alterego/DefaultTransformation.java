@@ -42,7 +42,16 @@ final class DefaultTransformation<T> implements Transformation<T> {
       int uniqueMaxAttempts,
       BooleanSupplier parentClosed) {
     this(
-        salt, locale, domain, type, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts, Mode.NONE,
+        salt,
+        locale,
+        domain,
+        type,
+        strategy,
+        mappingStore,
+        nullPolicy,
+        rawMappingKeys,
+        uniqueMaxAttempts,
+        Mode.NONE,
         parentClosed);
   }
 
@@ -77,7 +86,8 @@ final class DefaultTransformation<T> implements Transformation<T> {
   public T apply(T input) {
     if (parentClosed.getAsBoolean()) {
       throw new IllegalStateException(
-          "AlterEgo instance has been destroyed; its transformations can no longer be applied (domain: "
+          "AlterEgo instance has been destroyed; its transformations can no longer be applied "
+              + "(domain: "
               + domain
               + ")");
     }
@@ -121,9 +131,11 @@ final class DefaultTransformation<T> implements Transformation<T> {
       TransformationContext context =
           counter == 0
               ? topLevelContext(canonical)
-              : DefaultTransformationContext.retry(salt, locale, domain, canonical, counter, mappingStore, rawMappingKeys);
+              : DefaultTransformationContext.retry(
+                  salt, locale, domain, canonical, counter, mappingStore, rawMappingKeys);
       T candidate = strategy.transform(input, context);
-      PutUniqueResult result = mappingStore.putIfAbsentUnique(domain, key, ValueCodecs.encode(candidate, type));
+      PutUniqueResult result =
+          mappingStore.putIfAbsentUnique(domain, key, ValueCodecs.encode(candidate, type));
       switch (result) {
         case PutUniqueResult.Stored ignored -> {
           return candidate;
@@ -145,7 +157,8 @@ final class DefaultTransformation<T> implements Transformation<T> {
   }
 
   private TransformationContext topLevelContext(String canonical) {
-    return DefaultTransformationContext.topLevel(salt, locale, domain, canonical, mappingStore, rawMappingKeys);
+    return DefaultTransformationContext.topLevel(
+        salt, locale, domain, canonical, mappingStore, rawMappingKeys);
   }
 
   private String mapKey(String canonical) {
@@ -170,13 +183,23 @@ final class DefaultTransformation<T> implements Transformation<T> {
 
   private void requireMappingStore() {
     if (mappingStore == null) {
-      throw new AlterEgoStoreException("unique()/stored() require a configured MappingStore (domain: " + domain + ")");
+      throw new AlterEgoStoreException(
+          "unique()/stored() require a configured MappingStore (domain: " + domain + ")");
     }
   }
 
   private DefaultTransformation<T> withMode(Mode newMode) {
     return new DefaultTransformation<>(
-        salt, locale, domain, type, strategy, mappingStore, nullPolicy, rawMappingKeys, uniqueMaxAttempts, newMode,
+        salt,
+        locale,
+        domain,
+        type,
+        strategy,
+        mappingStore,
+        nullPolicy,
+        rawMappingKeys,
+        uniqueMaxAttempts,
+        newMode,
         parentClosed);
   }
 }

@@ -6,38 +6,40 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * ANSI fallback generic dialect handler.
- * Does not support trigger isolation or sequence resync. Assumes strict topological ordering.
+ * ANSI fallback generic dialect handler. Does not support trigger isolation or sequence resync.
+ * Assumes strict topological ordering.
  */
 public final class GenericDialectHandler implements DialectHandler {
 
-    /** Creates a generic ANSI dialect handler. */
-    public GenericDialectHandler() {}
+  /** Creates a generic ANSI dialect handler. */
+  public GenericDialectHandler() {}
 
-    @Override
-    public void preLoadTable(Connection targetConn, String tableName) throws SQLException {
-        // No-op. Rely on topological ordering.
-    }
+  @Override
+  public void preLoadTable(Connection targetConn, String tableName) throws SQLException {
+    // No-op. Rely on topological ordering.
+  }
 
-    @Override
-    public String buildInsertSql(String tableName, List<String> columns, boolean hasIdentityPk) {
-        String cols = columns.stream().map(GenericDialectHandler::quoteIdent).collect(Collectors.joining(", "));
-        String placeholders = columns.stream().map(c -> "?").collect(Collectors.joining(", "));
-        return "INSERT INTO " + quoteIdent(tableName) + " (" + cols + ") VALUES (" + placeholders + ")";
-    }
+  @Override
+  public String buildInsertSql(String tableName, List<String> columns, boolean hasIdentityPk) {
+    String cols =
+        columns.stream().map(GenericDialectHandler::quoteIdent).collect(Collectors.joining(", "));
+    String placeholders = columns.stream().map(c -> "?").collect(Collectors.joining(", "));
+    return "INSERT INTO " + quoteIdent(tableName) + " (" + cols + ") VALUES (" + placeholders + ")";
+  }
 
-    @Override
-    public void postLoadTable(Connection targetConn, String tableName) throws SQLException {
-        // No-op.
-    }
+  @Override
+  public void postLoadTable(Connection targetConn, String tableName) throws SQLException {
+    // No-op.
+  }
 
-    @Override
-    public void resyncSequence(Connection targetConn, String tableName, String pkCol) throws SQLException {
-        // No-op. Generic ANSI SQL has no standard way to resync sequences.
-    }
+  @Override
+  public void resyncSequence(Connection targetConn, String tableName, String pkCol)
+      throws SQLException {
+    // No-op. Generic ANSI SQL has no standard way to resync sequences.
+  }
 
-    /** Double-quotes an SQL identifier, the ANSI-standard delimited-identifier form. */
-    private static String quoteIdent(String ident) {
-        return '"' + ident.replace("\"", "\"\"") + '"';
-    }
+  /** Double-quotes an SQL identifier, the ANSI-standard delimited-identifier form. */
+  private static String quoteIdent(String ident) {
+    return '"' + ident.replace("\"", "\"\"") + '"';
+  }
 }

@@ -14,15 +14,17 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Exercises {@code organisationName()} against the ZZ synthetic test fixtures (for exact,
- * controlled assertions of the composition rule) and the real curated dictionary and legal
- * suffixes (for end-to-end coverage of the default-configured path).
+ * controlled assertions of the composition rule) and the real curated dictionary and legal suffixes
+ * (for end-to-end coverage of the default-configured path).
  */
 class OrganisationNameTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
   private static final Locale ZZ = Locale.of("en", "ZZ");
   private static final Set<String> FIXTURE_MODIFIERS = Set.of("Fixtureland", "Sampleshire");
-  private static final Set<String> FIXTURE_NOUNS = Set.of("Mocking", "Stubbing", "Testing", "Widgets");
+  private static final Set<String> FIXTURE_NOUNS =
+      Set.of("Mocking", "Stubbing", "Testing", "Widgets");
 
   private static AlterEgo alterego() {
     return AlterEgo.builder().salt(SALT).locale(ZZ).build();
@@ -35,7 +37,9 @@ class OrganisationNameTest {
       String[] words = t.apply("input-" + i).split(" ");
       assertEquals(3, words.length);
       assertEquals(
-          3, new HashSet<>(List.of(words)).size(), "words must be distinct: " + String.join(" ", words));
+          3,
+          new HashSet<>(List.of(words)).size(),
+          "words must be distinct: " + String.join(" ", words));
       for (String word : words) {
         assertTrue(
             FIXTURE_MODIFIERS.contains(word) || FIXTURE_NOUNS.contains(word),
@@ -86,7 +90,8 @@ class OrganisationNameTest {
   void preservesEnglishPlcSuffixCaseInsensitively() {
     AlterEgo gb = AlterEgo.builder().salt(SALT).build();
     String result = gb.organisationName().apply("ACME TRADING PLC");
-    assertTrue(result.endsWith(" plc"), result); // canonical casing from the suffix list, not the input's
+    assertTrue(
+        result.endsWith(" plc"), result); // canonical casing from the suffix list, not the input's
   }
 
   @Test

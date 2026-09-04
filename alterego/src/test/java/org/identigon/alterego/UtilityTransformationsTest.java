@@ -13,7 +13,8 @@ import org.junit.jupiter.api.Test;
 
 class UtilityTransformationsTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   private static AlterEgo alterego() {
     return AlterEgo.builder().salt(SALT).build();
@@ -154,10 +155,20 @@ class UtilityTransformationsTest {
     assertEquals(0, alterego().redact(Integer.class).apply(123));
     assertEquals(0L, alterego().redact(Long.class).apply(123L));
     assertEquals(Boolean.FALSE, alterego().redact(Boolean.class).apply(true));
-    assertEquals(LocalDate.of(1970, 1, 1), alterego().redact(LocalDate.class).apply(LocalDate.of(2026, 7, 13)));
-    assertEquals(java.time.LocalDateTime.of(1970, 1, 1, 0, 0), alterego().redact(java.time.LocalDateTime.class).apply(java.time.LocalDateTime.of(2026, 7, 13, 12, 0)));
-    assertEquals(java.time.Instant.EPOCH, alterego().redact(java.time.Instant.class).apply(java.time.Instant.EPOCH.plusSeconds(10)));
-    assertEquals(new java.util.UUID(0L, 0L), alterego().redact(java.util.UUID.class).apply(new java.util.UUID(1L, 2L)));
+    assertEquals(
+        LocalDate.of(1970, 1, 1),
+        alterego().redact(LocalDate.class).apply(LocalDate.of(2026, 7, 13)));
+    assertEquals(
+        java.time.LocalDateTime.of(1970, 1, 1, 0, 0),
+        alterego()
+            .redact(java.time.LocalDateTime.class)
+            .apply(java.time.LocalDateTime.of(2026, 7, 13, 12, 0)));
+    assertEquals(
+        java.time.Instant.EPOCH,
+        alterego().redact(java.time.Instant.class).apply(java.time.Instant.EPOCH.plusSeconds(10)));
+    assertEquals(
+        new java.util.UUID(0L, 0L),
+        alterego().redact(java.util.UUID.class).apply(new java.util.UUID(1L, 2L)));
   }
 
   @Test
@@ -165,13 +176,27 @@ class UtilityTransformationsTest {
     assertThrows(AlterEgoConfigException.class, () -> alterego().redact(UkNation.class));
   }
 
-  /** A varied fixed input set (including the empty string and non-ASCII) for the loop-based tests. */
+  /**
+   * A varied fixed input set (including the empty string and non-ASCII) for the loop-based tests.
+   */
   private static List<String> manyInputs() {
     List<String> inputs =
         new ArrayList<>(
             List.of(
-                "", "a", "Z", "7", "!", "  ", "abc", "café", "naïve", "東京都",
-                "🙂", "MiXeD", "the-quick-brown-fox-jumps!!", "1234567890123456789012345678"));
+                "",
+                "a",
+                "Z",
+                "7",
+                "!",
+                "  ",
+                "abc",
+                "café",
+                "naïve",
+                "東京都",
+                "🙂",
+                "MiXeD",
+                "the-quick-brown-fox-jumps!!",
+                "1234567890123456789012345678"));
     for (int i = 0; i < 200; i++) {
       inputs.add("input-" + i);
     }

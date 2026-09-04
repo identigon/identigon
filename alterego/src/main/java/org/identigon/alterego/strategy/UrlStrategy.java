@@ -5,9 +5,7 @@ import org.identigon.alterego.Randomness;
 import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
-/**
- * Generates a fictional URL using a domain name drawn from {@link DomainNameStrategy}.
- */
+/** Generates a fictional URL using a domain name drawn from {@link DomainNameStrategy}. */
 public final class UrlStrategy implements Strategy<String> {
 
   /** Singleton instance. */

@@ -17,5 +17,4 @@ public record PipelineResult(
     long totalRowsLoaded,
     int tablesProcessed,
     Duration duration,
-    AnonymisationReport report
-) {}
+    AnonymisationReport report) {}

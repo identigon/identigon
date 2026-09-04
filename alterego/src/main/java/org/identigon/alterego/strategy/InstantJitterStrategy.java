@@ -5,9 +5,7 @@ import org.identigon.alterego.Randomness;
 import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
-/**
- * Instant jitter: shifts the instant by up to a given number of days and seconds.
- */
+/** Instant jitter: shifts the instant by up to a given number of days and seconds. */
 public final class InstantJitterStrategy implements Strategy<Instant> {
 
   private final int days;

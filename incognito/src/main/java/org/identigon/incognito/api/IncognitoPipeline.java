@@ -3,136 +3,135 @@ package org.identigon.incognito.api;
 import javax.sql.DataSource;
 import org.identigon.incognito.policy.AnonymisationPolicy;
 
-/**
- * Entry point for executing a relational database anonymisation pipeline.
- */
+/** Entry point for executing a relational database anonymisation pipeline. */
 // Not a lambda target: intentionally not @FunctionalInterface -- {@link #builder()} is a static
 // factory, not the intended construction path for implementations, and the single-method shape
 // is incidental rather than a contract to preserve.
 @SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface IncognitoPipeline {
 
-    /**
-     * The minimum length, in bytes, {@link Builder#persistentSalt(byte[])} and
-     * {@link Builder#reproducible(byte[], long)} require - re-exported from
-     * {@code AlterEgo.MIN_SALT_BYTES} so a caller can validate a salt before {@link Builder#build()}
-     * without depending on {@code alterego} directly.
-     */
-    int MIN_SALT_BYTES = org.identigon.alterego.AlterEgo.MIN_SALT_BYTES;
+  /**
+   * The minimum length, in bytes, {@link Builder#persistentSalt(byte[])} and {@link
+   * Builder#reproducible(byte[], long)} require - re-exported from {@code AlterEgo.MIN_SALT_BYTES}
+   * so a caller can validate a salt before {@link Builder#build()} without depending on {@code
+   * alterego} directly.
+   */
+  int MIN_SALT_BYTES = org.identigon.alterego.AlterEgo.MIN_SALT_BYTES;
 
+  /**
+   * Starts building a pipeline. {@code IncognitoPipelineBuilder} is package-private in this (api)
+   * package, so this factory does not create an api -&gt; core dependency cycle.
+   *
+   * @return a new {@link Builder}
+   */
+  static Builder builder() {
+    return new IncognitoPipelineBuilder();
+  }
+
+  /**
+   * Executes the anonymisation pipeline.
+   *
+   * @return Result metadata containing tables transformed, row counts, and execution metrics.
+   * @throws IncognitoException if configuration, schema discovery, transformation, or loading
+   *     fails.
+   */
+  PipelineResult execute() throws IncognitoException;
+
+  /**
+   * Fluent builder for an {@link IncognitoPipeline}. Incognito owns the salt and builds the backing
+   * {@code AlterEgo} internally (in-memory mapping store), so there is deliberately no way to
+   * inject one - that guarantees the salt lifecycle (SPEC §5.1).
+   */
+  interface Builder {
     /**
-     * Starts building a pipeline. {@code IncognitoPipelineBuilder} is package-private in this
-     * (api) package, so this factory does not create an api -&gt; core dependency cycle.
+     * Sets the production source database to read from.
      *
-     * @return a new {@link Builder}
+     * @param source the source data source
+     * @return this builder
      */
-    static Builder builder() {
-        return new IncognitoPipelineBuilder();
-    }
+    Builder source(DataSource source);
 
     /**
-     * Executes the anonymisation pipeline.
+     * Sets the target database the fabricated clone is written to.
      *
-     * @return Result metadata containing tables transformed, row counts, and execution metrics.
-     * @throws IncognitoException if configuration, schema discovery, transformation, or loading fails.
+     * @param target the target data source
+     * @return this builder
      */
-    PipelineResult execute() throws IncognitoException;
+    Builder target(DataSource target);
 
     /**
-     * Fluent builder for an {@link IncognitoPipeline}. Incognito owns the salt and builds the backing
-     * {@code AlterEgo} internally (in-memory mapping store), so there is deliberately no way to inject
-     * one - that guarantees the salt lifecycle (SPEC §5.1).
+     * Sets the locale for direct-ID generators (default {@code Locale.UK}).
+     *
+     * @param locale the generator locale
+     * @return this builder
      */
-    interface Builder {
-        /**
-         * Sets the production source database to read from.
-         *
-         * @param source the source data source
-         * @return this builder
-         */
-        Builder source(DataSource source);
+    Builder locale(java.util.Locale locale);
 
-        /**
-         * Sets the target database the fabricated clone is written to.
-         *
-         * @param target the target data source
-         * @return this builder
-         */
-        Builder target(DataSource target);
+    /**
+     * Supplies a custom key-translation store (v1.0 ships an in-memory store).
+     *
+     * @param store the key-translation store
+     * @return this builder
+     */
+    Builder keyStore(KeyTranslationStore store);
 
-        /**
-         * Sets the locale for direct-ID generators (default {@code Locale.UK}).
-         *
-         * @param locale the generator locale
-         * @return this builder
-         */
-        Builder locale(java.util.Locale locale);
+    /**
+     * Uses a random secret salt, destroyed on completion (the default, irreversible mode).
+     *
+     * @return this builder
+     */
+    Builder ephemeralSalt();
 
-        /**
-         * Supplies a custom key-translation store (v1.0 ships an in-memory store).
-         *
-         * @param store the key-translation store
-         * @return this builder
-         */
-        Builder keyStore(KeyTranslationStore store);
+    /**
+     * Uses a caller-supplied fixed salt - opt-in linkable mode that forfeits irreversibility.
+     *
+     * @param salt the persistent salt bytes, at least {@link IncognitoPipeline#MIN_SALT_BYTES}
+     * @return this builder
+     */
+    Builder persistentSalt(byte[] salt);
 
-        /**
-         * Uses a random secret salt, destroyed on completion (the default, irreversible mode).
-         *
-         * @return this builder
-         */
-        Builder ephemeralSalt();
+    /**
+     * Uses a fixed salt and RNG seed for deterministic, reproducible output (for tests).
+     *
+     * @param salt the fixed salt bytes, at least {@link IncognitoPipeline#MIN_SALT_BYTES}
+     * @param seed the fixed RNG seed
+     * @return this builder
+     */
+    Builder reproducible(byte[] salt, long seed);
 
-        /**
-         * Uses a caller-supplied fixed salt - opt-in linkable mode that forfeits irreversibility.
-         *
-         * @param salt the persistent salt bytes, at least {@link IncognitoPipeline#MIN_SALT_BYTES}
-         * @return this builder
-         */
-        Builder persistentSalt(byte[] salt);
+    /**
+     * Sets the anonymisation policy (column roles, strategies, and the distinguishing flag).
+     *
+     * @param policy the policy
+     * @return this builder
+     */
+    Builder policy(AnonymisationPolicy policy);
 
-        /**
-         * Uses a fixed salt and RNG seed for deterministic, reproducible output (for tests).
-         *
-         * @param salt the fixed salt bytes, at least {@link IncognitoPipeline#MIN_SALT_BYTES}
-         * @param seed the fixed RNG seed
-         * @return this builder
-         */
-        Builder reproducible(byte[] salt, long seed);
+    /**
+     * Appends a pipeline stage; stages run in the order added.
+     *
+     * @param stage the stage to append
+     * @return this builder
+     */
+    Builder stage(PipelineStage stage);
 
-        /**
-         * Sets the anonymisation policy (column roles, strategies, and the distinguishing flag).
-         *
-         * @param policy the policy
-         * @return this builder
-         */
-        Builder policy(AnonymisationPolicy policy);
+    /**
+     * Skips the non-empty-target guard - by default, {@link #build()}'s default stage list refuses
+     * to run against a target where any policy-covered table already has rows, since a failed run's
+     * compensation deletes existing rows during clean-up. Opt in only once that risk is understood
+     * and accepted (the CLI's {@code --force}). Has no effect if the caller supplies their own
+     * stage list via {@link #stage(PipelineStage)} - the guard is only ever added to the default
+     * one.
+     *
+     * @return this builder
+     */
+    Builder allowNonEmptyTarget();
 
-        /**
-         * Appends a pipeline stage; stages run in the order added.
-         *
-         * @param stage the stage to append
-         * @return this builder
-         */
-        Builder stage(PipelineStage stage);
-
-        /**
-         * Skips the non-empty-target guard - by default, {@link #build()}'s default stage list
-         * refuses to run against a target where any policy-covered table already has rows, since a
-         * failed run's compensation deletes existing rows during clean-up. Opt in only once that
-         * risk is understood and accepted (the CLI's {@code --force}). Has no effect if the caller
-         * supplies their own stage list via {@link #stage(PipelineStage)} - the guard is only ever
-         * added to the default one.
-         *
-         * @return this builder
-         */
-        Builder allowNonEmptyTarget();
-
-        /**
-         * Builds the configured pipeline.
-         *
-         * @return the assembled pipeline
-         */
-        IncognitoPipeline build();
-    }
+    /**
+     * Builds the configured pipeline.
+     *
+     * @return the assembled pipeline
+     */
+    IncognitoPipeline build();
+  }
 }

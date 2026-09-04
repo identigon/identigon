@@ -10,9 +10,9 @@ import org.identigon.alterego.TransformationContext;
 
 /**
  * Date-part jitter (docs/spec/alterego.md section 4.5, Appendix A.3): either a whole-day shift
- * uniform over {@code [-days, +days]}, or a uniform random day within the input's own month or
- * year (leap-aware for {@code YEAR}). Also used, via its package-private helpers, as the date
- * component of {@link DateTimeJitterStrategy}.
+ * uniform over {@code [-days, +days]}, or a uniform random day within the input's own month or year
+ * (leap-aware for {@code YEAR}). Also used, via its package-private helpers, as the date component
+ * of {@link DateTimeJitterStrategy}.
  */
 public final class DateJitterStrategy implements Strategy<LocalDate> {
 

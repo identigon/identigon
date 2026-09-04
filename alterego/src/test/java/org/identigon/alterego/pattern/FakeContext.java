@@ -6,7 +6,9 @@ import org.identigon.alterego.Randomness;
 import org.identigon.alterego.RecordAttributes;
 import org.identigon.alterego.TransformationContext;
 
-/** A minimal {@link TransformationContext} test double exposing only a chosen {@link Randomness}. */
+/**
+ * A minimal {@link TransformationContext} test double exposing only a chosen {@link Randomness}.
+ */
 final class FakeContext implements TransformationContext {
 
   private final Randomness random;

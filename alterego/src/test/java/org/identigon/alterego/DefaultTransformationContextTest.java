@@ -13,7 +13,8 @@ import org.junit.jupiter.api.Test;
 
 class DefaultTransformationContextTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   private static TransformationContext topLevel(String domain, String canonical) {
     return DefaultTransformationContext.topLevel(SALT, Locale.UK, domain, canonical, null, false);
@@ -28,7 +29,8 @@ class DefaultTransformationContextTest {
     TransformationContext equivalentTopLevel = topLevel("sub-domain", "sub-input");
 
     for (int i = 0; i < 50; i++) {
-      assertEquals(equivalentTopLevel.random().nextInt(1_000_000), derived.random().nextInt(1_000_000));
+      assertEquals(
+          equivalentTopLevel.random().nextInt(1_000_000), derived.random().nextInt(1_000_000));
     }
   }
 
@@ -54,7 +56,8 @@ class DefaultTransformationContextTest {
 
   @Test
   void derivedContextCarriesLocaleForward() {
-    TransformationContext parent = DefaultTransformationContext.topLevel(SALT, Locale.UK, "d", "x", null, false);
+    TransformationContext parent =
+        DefaultTransformationContext.topLevel(SALT, Locale.UK, "d", "x", null, false);
     TransformationContext derived = parent.derived("sub", "y");
     assertEquals(Locale.UK, derived.locale());
   }
@@ -62,7 +65,8 @@ class DefaultTransformationContextTest {
   // --- outside-scope record() no-op (section 6.2) ---------------------------------------------
 
   private static final AttributeKey<String> KEY = AttributeKey.of("test:attr", String.class);
-  private static final AttributeKey<Integer> INT_KEY = AttributeKey.of("test:int-attr", Integer.class);
+  private static final AttributeKey<Integer> INT_KEY =
+      AttributeKey.of("test:int-attr", Integer.class);
 
   @Test
   void recordGetIsEmptyOutsideScope() {

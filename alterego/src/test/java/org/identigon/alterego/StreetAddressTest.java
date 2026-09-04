@@ -10,15 +10,16 @@ import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
 /**
- * Exercises {@code streetAddress()} against the ZZ synthetic street-theme/street-type fixtures
- * and the default-configured GB dictionaries. The GB theme words are authored, deliberately
- * fictional vocabulary (ADR 0010), not real UK street-name data; the type words (Road, Avenue,
- * Close...) are real and structural. See {@link FictionalityTest} for the property test
- * confirming every streetAddress() theme word is drawn from that fictional set.
+ * Exercises {@code streetAddress()} against the ZZ synthetic street-theme/street-type fixtures and
+ * the default-configured GB dictionaries. The GB theme words are authored, deliberately fictional
+ * vocabulary (ADR 0010), not real UK street-name data; the type words (Road, Avenue, Close...) are
+ * real and structural. See {@link FictionalityTest} for the property test confirming every
+ * streetAddress() theme word is drawn from that fictional set.
  */
 class StreetAddressTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
   private static final Locale ZZ = Locale.of("en", "ZZ");
   private static final List<String> FIXTURE_THEMES = List.of("Fixture", "Mock", "Sample");
   private static final List<String> FIXTURE_TYPES = List.of("Avenue", "Road", "Street");
@@ -33,7 +34,8 @@ class StreetAddressTest {
     for (int i = 0; i < 30; i++) {
       String[] parts = t.apply("input-" + i).split(" ", 2);
       int houseNumber = Integer.parseInt(parts[0]);
-      assertTrue(houseNumber >= 1 && houseNumber <= 299, "house number out of range: " + houseNumber);
+      assertTrue(
+          houseNumber >= 1 && houseNumber <= 299, "house number out of range: " + houseNumber);
 
       String[] streetParts = parts[1].split(" ");
       assertEquals(2, streetParts.length);

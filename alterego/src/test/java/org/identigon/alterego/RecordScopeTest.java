@@ -9,12 +9,13 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Exercises {@link RecordScope}/{@link RecordAttributes} directly (section 6.1, section 6.2):
- * first-touch-wins, conflicting {@code set}, keyed vs anonymous {@code computeIfAbsent}
- * resolution, scope isolation, and {@code derived(...)} sharing a parent's record attributes.
+ * first-touch-wins, conflicting {@code set}, keyed vs anonymous {@code computeIfAbsent} resolution,
+ * scope isolation, and {@code derived(...)} sharing a parent's record attributes.
  */
 class RecordScopeTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
   private static final AttributeKey<String> PLACE = AttributeKey.of("test:place", String.class);
 
   private static AlterEgo alterego() {

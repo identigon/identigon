@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 class PatternStrategyTest {
 
   /**
-   * A {@link Randomness} that returns one fixed value from {@code nextInt} and fails on any
-   * other method, so a test can pin exactly which draw the 'A' token consumes.
+   * A {@link Randomness} that returns one fixed value from {@code nextInt} and fails on any other
+   * method, so a test can pin exactly which draw the 'A' token consumes.
    */
   private static Randomness fixedNextInt(int value) {
     return new ThrowingRandomness() {

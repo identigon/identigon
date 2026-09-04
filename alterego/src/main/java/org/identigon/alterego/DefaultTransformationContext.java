@@ -40,7 +40,8 @@ final class DefaultTransformationContext implements TransformationContext {
       String canonical,
       MappingStore mappingStore,
       boolean rawMappingKeys) {
-    return new DefaultTransformationContext(salt, locale, domain, canonical, 0, mappingStore, rawMappingKeys);
+    return new DefaultTransformationContext(
+        salt, locale, domain, canonical, 0, mappingStore, rawMappingKeys);
   }
 
   /** Creates a retry context for {@code unique()} collision escape (Appendix A.1). */
@@ -52,7 +53,8 @@ final class DefaultTransformationContext implements TransformationContext {
       int counter,
       MappingStore mappingStore,
       boolean rawMappingKeys) {
-    return new DefaultTransformationContext(salt, locale, domain, canonical, counter, mappingStore, rawMappingKeys);
+    return new DefaultTransformationContext(
+        salt, locale, domain, canonical, counter, mappingStore, rawMappingKeys);
   }
 
   @Override
@@ -87,6 +89,7 @@ final class DefaultTransformationContext implements TransformationContext {
   @Override
   public TransformationContext derived(String subDomain, String subInput) {
     DomainNames.requireValid(subDomain, "domain");
-    return new DefaultTransformationContext(salt, locale, subDomain, subInput, 0, mappingStore, rawMappingKeys);
+    return new DefaultTransformationContext(
+        salt, locale, subDomain, subInput, 0, mappingStore, rawMappingKeys);
   }
 }

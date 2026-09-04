@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test;
 /** {@code postcode()}'s record-coherence behaviour (docs/spec/alterego.md section 6.3). */
 class PostcodeCoherenceTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
   private static final Set<Character> NEVER_USED_LETTERS = Set.of('C', 'I', 'K', 'M', 'O', 'V');
 
   private static AlterEgo gb() {
@@ -50,7 +51,9 @@ class PostcodeCoherenceTest {
     Transformation<String> postcode = eg.postcode();
     Transformation<String> city = eg.city();
     Transformation<String> areaReader =
-        eg.bind("test:reads-area", (in, ctx) -> ctx.record().get(AlterEgoAttributes.UK_POSTCODE_AREA).orElse(""));
+        eg.bind(
+            "test:reads-area",
+            (in, ctx) -> ctx.record().get(AlterEgoAttributes.UK_POSTCODE_AREA).orElse(""));
 
     for (int i = 0; i < 20; i++) {
       try (RecordScope rec = eg.record()) {
@@ -59,12 +62,22 @@ class PostcodeCoherenceTest {
         assertTrue(!establishedArea.isEmpty(), "postcode() should have established an area");
         assertTrue(
             postcodeResult.startsWith(establishedArea),
-            "outward code '" + postcodeResult + "' should start with established area '" + establishedArea + "'");
+            "outward code '"
+                + postcodeResult
+                + "' should start with established area '"
+                + establishedArea
+                + "'");
 
         String cityResult = rec.apply(city, "input-" + i);
         assertTrue(
-            GbTownAreas.BY_TOWN.getOrDefault(cityResult, java.util.List.of()).contains(establishedArea),
-            "city '" + cityResult + "' does not carry the established area '" + establishedArea + "'");
+            GbTownAreas.BY_TOWN
+                .getOrDefault(cityResult, java.util.List.of())
+                .contains(establishedArea),
+            "city '"
+                + cityResult
+                + "' does not carry the established area '"
+                + establishedArea
+                + "'");
       }
     }
   }
@@ -77,7 +90,8 @@ class PostcodeCoherenceTest {
       for (int i = 0; i < 200; i++) {
         String result = rec.apply(postcode, "input-" + i);
         char lastLetter = result.charAt(result.length() - 1);
-        assertTrue(NEVER_USED_LETTERS.contains(lastLetter), "expected a never-used letter in " + result);
+        assertTrue(
+            NEVER_USED_LETTERS.contains(lastLetter), "expected a never-used letter in " + result);
       }
     }
   }

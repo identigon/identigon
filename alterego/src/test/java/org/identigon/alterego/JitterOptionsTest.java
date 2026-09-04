@@ -35,7 +35,8 @@ class JitterOptionsTest {
   @Test
   void minmaxRejectsMinAfterMax() {
     assertThrows(
-        AlterEgoConfigException.class, () -> JitterOptions.minmax(DAY.plusDays(1), DAY.minusDays(1)));
+        AlterEgoConfigException.class,
+        () -> JitterOptions.minmax(DAY.plusDays(1), DAY.minusDays(1)));
   }
 
   @Test

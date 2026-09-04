@@ -11,18 +11,22 @@ import org.junit.jupiter.api.Test;
 
 class DerivationTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   @Test
   void sameInputsProduceSameKey() {
-    byte[] a = Derivation.deriveKey(SALT, Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", 0);
-    byte[] b = Derivation.deriveKey(SALT, Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", 0);
+    byte[] a =
+        Derivation.deriveKey(SALT, Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", 0);
+    byte[] b =
+        Derivation.deriveKey(SALT, Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", 0);
     assertArrayEquals(a, b);
   }
 
   @Test
   void keyIs32Bytes() {
-    byte[] key = Derivation.deriveKey(SALT, Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", 0);
+    byte[] key =
+        Derivation.deriveKey(SALT, Derivation.PURPOSE_RANDOM, "alterego:first-name", "Alice", 0);
     assertEquals(32, key.length);
   }
 

@@ -13,7 +13,8 @@ import org.junit.jupiter.api.Test;
 
 class IdentifierTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
 
   private static AlterEgo alterego() {
     return AlterEgo.builder().salt(SALT).build();
@@ -29,8 +30,7 @@ class IdentifierTest {
         AlterEgo::nationalInsuranceNumber,
         AlterEgo::drivingLicenceNumber,
         AlterEgo::passportNumber,
-        AlterEgo::creditCardNumber
-    );
+        AlterEgo::creditCardNumber);
   }
 
   private List<Function<AlterEgo, Transformation<String>>> ukIdentifiers() {
@@ -38,8 +38,7 @@ class IdentifierTest {
         AlterEgo::nhsNumber,
         AlterEgo::nationalInsuranceNumber,
         AlterEgo::drivingLicenceNumber,
-        AlterEgo::passportNumber
-    );
+        AlterEgo::passportNumber);
   }
 
   @Test

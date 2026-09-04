@@ -15,132 +15,145 @@ import org.identigon.incognito.engine.SchemaInspector;
 import org.identigon.incognito.engine.TableDependencyGraph;
 
 /**
- * Compensating transaction handler. When a pipeline fails mid-execution, this handler
- * ensures that the target database is left in a safe, consistent state (triggers/FKs enabled,
- * sequences resynchronised, partially loaded data truncated).
+ * Compensating transaction handler. When a pipeline fails mid-execution, this handler ensures that
+ * the target database is left in a safe, consistent state (triggers/FKs enabled, sequences
+ * resynchronised, partially loaded data truncated).
  */
 public final class IncognitoCleanUpHandler {
 
-    private IncognitoCleanUpHandler() {}
+  private IncognitoCleanUpHandler() {}
 
-    private static final System.Logger LOG = System.getLogger(IncognitoCleanUpHandler.class.getName());
+  private static final System.Logger LOG =
+      System.getLogger(IncognitoCleanUpHandler.class.getName());
 
-    /**
-     * Logs a coarse WARNING that a best-effort compensation step failed, so a target left inconsistent
-     * (triggers disabled, partial data, unsynced sequences) is not silently invisible to the operator.
-     * Deliberately records only the operation, table and SQLState - never the exception message, which
-     * must never carry a field value (SPEC §7.3).
-     */
-    private static void warnCompensation(String operation, String table, SQLException e) {
-        LOG.log(System.Logger.Level.WARNING,
-            "compensation step [{0}] failed on table {1} (SQLState {2}); target may be left inconsistent",
-            operation, table, e.getSQLState());
+  /**
+   * Logs a coarse WARNING that a best-effort compensation step failed, so a target left
+   * inconsistent (triggers disabled, partial data, unsynced sequences) is not silently invisible to
+   * the operator. Deliberately records only the operation, table and SQLState - never the exception
+   * message, which must never carry a field value (SPEC §7.3).
+   */
+  private static void warnCompensation(String operation, String table, SQLException e) {
+    LOG.log(
+        System.Logger.Level.WARNING,
+        "compensation step [{0}] failed on table {1} (SQLState {2}); target may be left "
+            + "inconsistent",
+        operation,
+        table,
+        e.getSQLState());
+  }
+
+  /**
+   * Compensates a failed run: re-enables triggers, truncates partially loaded tables, and resyncs
+   * sequences. Best-effort - guaranteed never to throw, so it can never replace/mask the original
+   * failure that triggered it (its caller is inside that failure's {@code catch} block, with no
+   * surrounding try/catch of its own).
+   *
+   * @param context the pipeline context of the failed run
+   */
+  public static void compensate(PipelineContext context) {
+    try {
+      doCompensate(context);
+    } catch (RuntimeException e) {
+      // e.g. a ClassCastException from an unexpectedly-typed context attribute - never let an
+      // internal compensation bug propagate and hide the real pipeline failure that called us.
+      LOG.log(
+          System.Logger.Level.WARNING,
+          "compensation failed unexpectedly ({0}); target may be left inconsistent",
+          e.toString());
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private static void doCompensate(PipelineContext context) {
+    // Nothing to undo if TableTransformLoadStage never genuinely began - a failure any earlier
+    // (schema discovery, the non-empty-target guard, SPEC §7.2's fail-closed checks) never wrote
+    // or dropped anything. Skipping in that case matters beyond avoiding wasted work: the delete
+    // loop below is unconditional per table, so running it against a target that was never
+    // touched would destroy any pre-existing data that was never Incognito's to delete.
+    if (!Boolean.TRUE.equals(context.attributes().get(TableTransformLoadStage.ATTR_LOAD_STARTED))) {
+      return;
     }
 
-    /**
-     * Compensates a failed run: re-enables triggers, truncates partially loaded tables, and resyncs
-     * sequences. Best-effort - guaranteed never to throw, so it can never replace/mask the original
-     * failure that triggered it (its caller is inside that failure's {@code catch} block, with no
-     * surrounding try/catch of its own).
-     *
-     * @param context the pipeline context of the failed run
-     */
-    public static void compensate(PipelineContext context) {
-        try {
-            doCompensate(context);
-        } catch (RuntimeException e) {
-            // e.g. a ClassCastException from an unexpectedly-typed context attribute - never let an
-            // internal compensation bug propagate and hide the real pipeline failure that called us.
-            LOG.log(System.Logger.Level.WARNING,
-                "compensation failed unexpectedly ({0}); target may be left inconsistent",
-                e.toString());
-        }
+    Object planObj = context.attributes().get("incognito.schema.executionPlan");
+    if (planObj == null) {
+      return;
+    }
+    TableDependencyGraph.TopologicalExecutionPlan plan =
+        (TableDependencyGraph.TopologicalExecutionPlan) planObj;
+
+    Map<String, SchemaInspector.TableMetadata> metadataByName = Collections.emptyMap();
+    Object metaObj = context.attributes().get("incognito.schema.tableMetadata");
+    if (metaObj != null) {
+      // Re-build map from List
+      List<SchemaInspector.TableMetadata> metaList = (List<SchemaInspector.TableMetadata>) metaObj;
+      metadataByName =
+          metaList.stream()
+              .collect(
+                  java.util.stream.Collectors.toMap(
+                      SchemaInspector.TableMetadata::tableName, m -> m));
     }
 
-    @SuppressWarnings("unchecked")
-    private static void doCompensate(PipelineContext context) {
-        // Nothing to undo if TableTransformLoadStage never genuinely began - a failure any earlier
-        // (schema discovery, the non-empty-target guard, SPEC §7.2's fail-closed checks) never wrote
-        // or dropped anything. Skipping in that case matters beyond avoiding wasted work: the delete
-        // loop below is unconditional per table, so running it against a target that was never
-        // touched would destroy any pre-existing data that was never Incognito's to delete.
-        if (!Boolean.TRUE.equals(context.attributes().get(TableTransformLoadStage.ATTR_LOAD_STARTED))) {
-            return;
-        }
+    try (Connection targetConn = context.target().getConnection()) {
+      DialectHandler dialect = getDialectHandler(targetConn);
 
-        Object planObj = context.attributes().get("incognito.schema.executionPlan");
-        if (planObj == null) return;
-        TableDependencyGraph.TopologicalExecutionPlan plan =
-            (TableDependencyGraph.TopologicalExecutionPlan) planObj;
+      // Clean up in reverse topological order (children before parents).
+      List<String> tables = new ArrayList<>(plan.sequentialTableOrder());
+      Collections.reverse(tables);
 
-        Map<String, SchemaInspector.TableMetadata> metadataByName = Collections.emptyMap();
-        Object metaObj = context.attributes().get("incognito.schema.tableMetadata");
-        if (metaObj != null) {
-            // Re-build map from List
-            List<SchemaInspector.TableMetadata> metaList = (List<SchemaInspector.TableMetadata>) metaObj;
-            metadataByName = metaList.stream()
-                .collect(java.util.stream.Collectors.toMap(SchemaInspector.TableMetadata::tableName, m -> m));
-        }
-
-        try (Connection targetConn = context.target().getConnection()) {
-            DialectHandler dialect = getDialectHandler(targetConn);
-
-            // Clean up in reverse topological order (children before parents).
-            List<String> tables = new ArrayList<>(plan.sequentialTableOrder());
-            Collections.reverse(tables);
-
-            for (String tableName : tables) {
-                // 1. Truncate partially loaded data
-                try (Statement stmt = targetConn.createStatement()) {
-                    // Truncate to wipe out partially loaded data
-                    stmt.execute("DELETE FROM " + tableName);
-                } catch (SQLException e) {
-                    warnCompensation("truncate partially loaded data", tableName, e);
-                }
-
-                // 2. Re-enable triggers and FKs (safe to call even if they weren't disabled)
-                try {
-                    dialect.postLoadTable(targetConn, tableName);
-                } catch (SQLException e) {
-                    warnCompensation("re-enable triggers/FKs", tableName, e);
-                }
-
-                // 3. Resync sequences
-                SchemaInspector.TableMetadata meta = metadataByName.get(tableName);
-                if (meta != null && !meta.primaryKeyColumns().isEmpty()) {
-                    try {
-                        dialect.resyncSequence(targetConn, tableName, meta.primaryKeyColumns().getFirst());
-                    } catch (SQLException e) {
-                        warnCompensation("resync sequence", tableName, e);
-                    }
-                }
-            }
-
-            // Recreate any FK constraints dropped for an owner-mode cyclic load (SPEC §9). The tables
-            // were just emptied, so the constraints validate trivially - leaving them dropped would be
-            // a silent schema regression.
-            Object droppedObj = context.attributes().get("incognito.droppedForeignKeys");
-            if (droppedObj instanceof List<?> droppedList && !droppedList.isEmpty()) {
-                try {
-                    List<DialectHandler.DroppedForeignKey> dropped =
-                        (List<DialectHandler.DroppedForeignKey>) droppedList;
-                    dialect.recreateForeignKeys(targetConn, dropped);
-                } catch (SQLException e) {
-                    warnCompensation("recreate dropped foreign keys", "(schema)", e);
-                }
-            }
+      for (String tableName : tables) {
+        // 1. Truncate partially loaded data
+        try (Statement stmt = targetConn.createStatement()) {
+          // Truncate to wipe out partially loaded data
+          stmt.execute("DELETE FROM " + tableName);
         } catch (SQLException e) {
-            LOG.log(System.Logger.Level.WARNING,
-                "compensation could not connect to the target database (SQLState {0}); no clean-up performed",
-                e.getSQLState());
+          warnCompensation("truncate partially loaded data", tableName, e);
         }
-    }
 
-    private static DialectHandler getDialectHandler(Connection conn) throws SQLException {
-        String dbName = conn.getMetaData().getDatabaseProductName();
-        if (dbName != null && dbName.toLowerCase().contains("postgresql")) {
-            return new PostgresDialectHandler();
+        // 2. Re-enable triggers and FKs (safe to call even if they weren't disabled)
+        try {
+          dialect.postLoadTable(targetConn, tableName);
+        } catch (SQLException e) {
+          warnCompensation("re-enable triggers/FKs", tableName, e);
         }
-        return new GenericDialectHandler();
+
+        // 3. Resync sequences
+        SchemaInspector.TableMetadata meta = metadataByName.get(tableName);
+        if (meta != null && !meta.primaryKeyColumns().isEmpty()) {
+          try {
+            dialect.resyncSequence(targetConn, tableName, meta.primaryKeyColumns().getFirst());
+          } catch (SQLException e) {
+            warnCompensation("resync sequence", tableName, e);
+          }
+        }
+      }
+
+      // Recreate any FK constraints dropped for an owner-mode cyclic load (SPEC §9). The tables
+      // were just emptied, so the constraints validate trivially - leaving them dropped would be
+      // a silent schema regression.
+      Object droppedObj = context.attributes().get("incognito.droppedForeignKeys");
+      if (droppedObj instanceof List<?> droppedList && !droppedList.isEmpty()) {
+        try {
+          List<DialectHandler.DroppedForeignKey> dropped =
+              (List<DialectHandler.DroppedForeignKey>) droppedList;
+          dialect.recreateForeignKeys(targetConn, dropped);
+        } catch (SQLException e) {
+          warnCompensation("recreate dropped foreign keys", "(schema)", e);
+        }
+      }
+    } catch (SQLException e) {
+      LOG.log(
+          System.Logger.Level.WARNING,
+          "compensation could not connect to the target database (SQLState {0}); no clean-up "
+              + "performed",
+          e.getSQLState());
     }
+  }
+
+  private static DialectHandler getDialectHandler(Connection conn) throws SQLException {
+    String dbName = conn.getMetaData().getDatabaseProductName();
+    if (dbName != null && dbName.toLowerCase().contains("postgresql")) {
+      return new PostgresDialectHandler();
+    }
+    return new GenericDialectHandler();
+  }
 }

@@ -45,7 +45,8 @@ class FileStoreUniquenessIntegrationTest {
         String output = t.apply(input);
 
         // Assert that every mapping, including collision resolutions, is identical
-        assertEquals(firstRunOutputs.get(input), output, "Mapping for " + input + " changed across runs!");
+        assertEquals(
+            firstRunOutputs.get(input), output, "Mapping for " + input + " changed across runs!");
       }
     }
   }

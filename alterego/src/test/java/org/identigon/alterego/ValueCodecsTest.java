@@ -119,7 +119,8 @@ class ValueCodecsTest {
   @Test
   void unsupportedTypeThrowsNamingTypeAndSupportedSet() {
     AlterEgoConfigException ex =
-        assertThrows(AlterEgoConfigException.class, () -> ValueCodecs.requireSupported(Double.class));
+        assertThrows(
+            AlterEgoConfigException.class, () -> ValueCodecs.requireSupported(Double.class));
     assertTrue(ex.getMessage().contains("Double"));
     assertTrue(ex.getMessage().contains("String"));
     assertTrue(ex.getMessage().contains("enum"));
@@ -138,13 +139,15 @@ class ValueCodecsTest {
   @Test
   void decodeRejectsCorruptedEnumConstant() {
     AlterEgoStoreException ex =
-        assertThrows(AlterEgoStoreException.class, () -> ValueCodecs.decode("ATLANTIS", UkNation.class));
+        assertThrows(
+            AlterEgoStoreException.class, () -> ValueCodecs.decode("ATLANTIS", UkNation.class));
     assertFalse(ex.getMessage().isBlank());
   }
 
   @Test
   void decodeRejectsCorruptedNumber() {
-    assertThrows(AlterEgoStoreException.class, () -> ValueCodecs.decode("not-a-number", Integer.class));
+    assertThrows(
+        AlterEgoStoreException.class, () -> ValueCodecs.decode("not-a-number", Integer.class));
   }
 
   @Test

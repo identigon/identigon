@@ -3,7 +3,9 @@ package org.identigon.alterego;
 import java.util.List;
 import java.util.Map;
 
-/** The postcode-area tags of every town in {@code dictionaries/GB/towns.txt}, for coherence tests. */
+/**
+ * The postcode-area tags of every town in {@code dictionaries/GB/towns.txt}, for coherence tests.
+ */
 final class GbTownAreas {
 
   private GbTownAreas() {}

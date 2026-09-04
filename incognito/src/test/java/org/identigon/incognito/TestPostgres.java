@@ -6,8 +6,8 @@ package org.identigon.incognito;
  */
 public final class TestPostgres {
 
-    private TestPostgres() {}
+  private TestPostgres() {}
 
-    /** The Testcontainers {@code PostgreSQLContainer} image tag used by every integration test. */
-    public static final String IMAGE = "postgres:18-alpine";
+  /** The Testcontainers {@code PostgreSQLContainer} image tag used by every integration test. */
+  public static final String IMAGE = "postgres:18-alpine";
 }

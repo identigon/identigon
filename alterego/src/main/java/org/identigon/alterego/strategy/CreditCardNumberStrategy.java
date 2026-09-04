@@ -25,7 +25,9 @@ public final class CreditCardNumberStrategy implements Strategy<String> {
       int v = payload[14 - i];
       if (i % 2 == 0) {
         v = 2 * v;
-        if (v > 9) v = v - 9;
+        if (v > 9) {
+          v = v - 9;
+        }
       }
       sum += v;
     }
@@ -33,7 +35,9 @@ public final class CreditCardNumberStrategy implements Strategy<String> {
 
     StringBuilder sb = new StringBuilder(19);
     for (int i = 0; i < 15; i++) {
-      if (i > 0 && i % 4 == 0) sb.append(' ');
+      if (i > 0 && i % 4 == 0) {
+        sb.append(' ');
+      }
       sb.append(payload[i]);
     }
     sb.append(c);

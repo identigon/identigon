@@ -18,10 +18,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Reusable {@link MappingStore} SPI contract (docs/spec/alterego.md section 5.1, section 10): any
- * implementation - the in-memory one shipped in M4, or a future external one (JDBC, file-backed)
- * - can subclass this and inherit the same tests. Covers {@code get}/{@code putIfAbsent}
- * semantics, {@code putIfAbsentUnique}'s three outcomes, namespace isolation, and the atomicity
- * of {@code putIfAbsentUnique} under concurrent callers.
+ * implementation - the in-memory one shipped in M4, or a future external one (JDBC, file-backed) -
+ * can subclass this and inherit the same tests. Covers {@code get}/{@code putIfAbsent} semantics,
+ * {@code putIfAbsentUnique}'s three outcomes, namespace isolation, and the atomicity of {@code
+ * putIfAbsentUnique} under concurrent callers.
  */
 public abstract class MappingStoreContractTest {
 
@@ -86,7 +86,8 @@ public abstract class MappingStoreContractTest {
   }
 
   @Test
-  void concurrentPutIfAbsentUniqueNeverProducesDuplicateValuesOrLosesMappings() throws InterruptedException {
+  void concurrentPutIfAbsentUniqueNeverProducesDuplicateValuesOrLosesMappings()
+      throws InterruptedException {
     ConcurrencyCheckResult result = runConcurrencyCheck(createStore(), 64);
     assertTrue(result.noDuplicateValues(), "duplicate value detected: " + result);
     assertTrue(result.noLostKeys(), "lost key detected: " + result);
@@ -97,11 +98,12 @@ public abstract class MappingStoreContractTest {
    * initially-contested shared value with distinct keys (exactly one should win it), then each
    * loser retrying with its own guaranteed-distinct fallback value (simulating {@code unique()}'s
    * collision-escape retry at the raw-store level). A correct, atomic implementation always ends
-   * with every key mapped and every mapped value distinct. Exposed (not private) so a test can
-   * run it against a deliberately non-atomic fake store and confirm the check actually detects
-   * the violation, rather than passing vacuously.
+   * with every key mapped and every mapped value distinct. Exposed (not private) so a test can run
+   * it against a deliberately non-atomic fake store and confirm the check actually detects the
+   * violation, rather than passing vacuously.
    */
-  static ConcurrencyCheckResult runConcurrencyCheck(MappingStore store, int threadCount) throws InterruptedException {
+  static ConcurrencyCheckResult runConcurrencyCheck(MappingStore store, int threadCount)
+      throws InterruptedException {
     String namespace = "concurrency-check";
     String sharedValue = "contested-value";
     CountDownLatch start = new CountDownLatch(1);
@@ -115,7 +117,8 @@ public abstract class MappingStoreContractTest {
                           () -> {
                             awaitUninterruptibly(start);
                             String key = "key-" + i;
-                            PutUniqueResult first = store.putIfAbsentUnique(namespace, key, sharedValue);
+                            PutUniqueResult first =
+                                store.putIfAbsentUnique(namespace, key, sharedValue);
                             if (!(first instanceof PutUniqueResult.Stored)) {
                               store.putIfAbsentUnique(namespace, key, "fallback-value-" + i);
                             }
@@ -150,5 +153,6 @@ public abstract class MappingStoreContractTest {
     }
   }
 
-  record ConcurrencyCheckResult(boolean noDuplicateValues, boolean noLostKeys, List<String> mappedValues) {}
+  record ConcurrencyCheckResult(
+      boolean noDuplicateValues, boolean noLostKeys, List<String> mappedValues) {}
 }

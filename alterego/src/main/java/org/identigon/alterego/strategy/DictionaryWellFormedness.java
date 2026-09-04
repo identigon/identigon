@@ -8,14 +8,14 @@ import org.identigon.alterego.AlterEgoConfigException;
 import org.identigon.alterego.UkNation;
 
 /**
- * Structural checks beyond what {@link DictionaryParser} already enforces during parsing
- * (a valid provenance header with every required field): non-empty, no duplicate entries,
- * sorted, and the cited licence has committed text under {@code dictionaries/LICENCES/}.
+ * Structural checks beyond what {@link DictionaryParser} already enforces during parsing (a valid
+ * provenance header with every required field): non-empty, no duplicate entries, sorted, and the
+ * cited licence has committed text under {@code dictionaries/LICENCES/}.
  *
- * <p>"No duplicate entries" means no duplicate (value, tags) pair, not no duplicate value: a
- * tagged dictionary may legitimately repeat a value under different tags (e.g. London spans
- * several postcode areas, so it appears once per area with the area as part of the tag) -
- * only an exact repeated row is rejected.
+ * <p>"No duplicate entries" means no duplicate (value, tags) pair, not no duplicate value: a tagged
+ * dictionary may legitimately repeat a value under different tags (e.g. London spans several
+ * postcode areas, so it appears once per area with the area as part of the tag) - only an exact
+ * repeated row is rejected.
  */
 final class DictionaryWellFormedness {
 
@@ -67,14 +67,14 @@ final class DictionaryWellFormedness {
 
   /**
    * Validates the two-tag (display template, place) convention for the phone-ranges resource
-   * (docs/spec/alterego.md section 4.1, section 4.4, section 6.3;
-   * {@code docs/research/0003-alterego-phone-ranges.md}): each
-   * entry's value is an 8-digit fixed prefix, its first tag is that same prefix in Ofcom's own
-   * digit-grouping with the 3 freely-varying trailing digits marked {@code XXX} (stripping the
-   * template's spaces and {@code XXX} must reconstruct the value exactly), and its second tag is
-   * either a 1-2 uppercase-letter postcode area (for record-coherence matching against {@code
-   * UK_POSTCODE_AREA}), {@code NONE} (the designated geography-neutral fallback range), or
-   * {@code MOBILE} (never a coherence match target or the neutral fallback).
+   * (docs/spec/alterego.md section 4.1, section 4.4, section 6.3; {@code
+   * docs/research/0003-alterego-phone-ranges.md}): each entry's value is an 8-digit fixed prefix,
+   * its first tag is that same prefix in Ofcom's own digit-grouping with the 3 freely-varying
+   * trailing digits marked {@code XXX} (stripping the template's spaces and {@code XXX} must
+   * reconstruct the value exactly), and its second tag is either a 1-2 uppercase-letter postcode
+   * area (for record-coherence matching against {@code UK_POSTCODE_AREA}), {@code NONE} (the
+   * designated geography-neutral fallback range), or {@code MOBILE} (never a coherence match target
+   * or the neutral fallback).
    */
   static void validatePhoneRangeTags(Dictionary dictionary, String resourceName) {
     Pattern valuePattern = Pattern.compile("[0-9]{8}");
@@ -95,7 +95,9 @@ final class DictionaryWellFormedness {
       String template = entry.tags().get(0);
       if (!template.endsWith("XXX") || template.indexOf("XXX") != template.length() - 3) {
         throw new AlterEgoConfigException(
-            resourceName + ": phone-range template must end in exactly one 'XXX', got: " + template);
+            resourceName
+                + ": phone-range template must end in exactly one 'XXX', got: "
+                + template);
       }
       String reconstructed = template.replace(" ", "").replace("XXX", "");
       if (!reconstructed.equals(value)) {
@@ -120,7 +122,8 @@ final class DictionaryWellFormedness {
             resourceName
                 + ": phone-range entry '"
                 + value
-                + "' has invalid place tag (must be NONE, MOBILE, FREEPHONE, PREMIUM, UK_WIDE, or 1-2 uppercase letters): "
+                + "' has invalid place tag (must be NONE, MOBILE, FREEPHONE, PREMIUM, UK_WIDE, or "
+                + "1-2 uppercase letters): "
                 + place);
       }
     }
@@ -140,14 +143,22 @@ final class DictionaryWellFormedness {
       String area = entry.tags().get(0);
       if (!POSTCODE_AREA.matcher(area).matches()) {
         throw new AlterEgoConfigException(
-            resourceName + ": town entry '" + entry.value() + "' has invalid postcode area tag: " + area);
+            resourceName
+                + ": town entry '"
+                + entry.value()
+                + "' has invalid postcode area tag: "
+                + area);
       }
       String nation = entry.tags().get(1);
       try {
         UkNation.valueOf(nation);
       } catch (IllegalArgumentException e) {
         throw new AlterEgoConfigException(
-            resourceName + ": town entry '" + entry.value() + "' has invalid nation tag: " + nation);
+            resourceName
+                + ": town entry '"
+                + entry.value()
+                + "' has invalid nation tag: "
+                + nation);
       }
     }
   }
@@ -168,7 +179,12 @@ final class DictionaryWellFormedness {
     for (int i = 1; i < values.size(); i++) {
       if (values.get(i - 1).compareTo(values.get(i)) > 0) {
         throw new AlterEgoConfigException(
-            resourceName + ": entries not sorted: '" + values.get(i - 1) + "' before '" + values.get(i) + "'");
+            resourceName
+                + ": entries not sorted: '"
+                + values.get(i - 1)
+                + "' before '"
+                + values.get(i)
+                + "'");
       }
     }
   }

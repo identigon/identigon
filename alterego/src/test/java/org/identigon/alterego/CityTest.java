@@ -15,9 +15,11 @@ import org.junit.jupiter.api.Test;
  */
 class CityTest {
 
-  private static final byte[] SALT = "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
+  private static final byte[] SALT =
+      "test-salt-at-least-16-bytes!!".getBytes(StandardCharsets.UTF_8);
   private static final Locale ZZ = Locale.of("en", "ZZ");
-  private static final List<String> FIXTURE_TOWNS = List.of("Fixtureburgh", "Sampletown", "Testford");
+  private static final List<String> FIXTURE_TOWNS =
+      List.of("Fixtureburgh", "Sampletown", "Testford");
 
   private static AlterEgo alterego() {
     return AlterEgo.builder().salt(SALT).locale(ZZ).build();

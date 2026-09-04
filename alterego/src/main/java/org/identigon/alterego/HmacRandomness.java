@@ -5,8 +5,8 @@ import java.util.List;
 
 /**
  * Appendix A.2/A.3: an HMAC-SHA256 counter-mode byte stream over a derived key, with the
- * rejection-sampling primitives layered on top. Stateful and single-threaded: each call
- * consumes the next bytes of the stream.
+ * rejection-sampling primitives layered on top. Stateful and single-threaded: each call consumes
+ * the next bytes of the stream.
  */
 final class HmacRandomness implements Randomness {
 

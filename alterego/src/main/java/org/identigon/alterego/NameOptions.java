@@ -21,8 +21,8 @@ public final class NameOptions {
   }
 
   /**
-   * The output starts with the same letter as the input. If the dictionary has no entry with
-   * that initial, this is ignored for that input (unconstrained pick, still deterministic).
+   * The output starts with the same letter as the input. If the dictionary has no entry with that
+   * initial, this is ignored for that input (unconstrained pick, still deterministic).
    *
    * @return options that preserve the input's initial letter
    */

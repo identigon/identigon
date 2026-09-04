@@ -12,7 +12,8 @@ public final class PostcodeOptions {
   }
 
   /**
-   * The fictionality guarantee applies: the inward code ends in a letter never used ({@code C I K M O V}).
+   * The fictionality guarantee applies: the inward code ends in a letter never used ({@code C I K M
+   * O V}).
    *
    * @return the default options
    */
@@ -21,8 +22,8 @@ public final class PostcodeOptions {
   }
 
   /**
-   * Opts out of the fictionality guarantee (ADR 0005): the inward code's last letter is drawn
-   * from the full alphabet, so the output may coincide with a real, deliverable postcode.
+   * Opts out of the fictionality guarantee (ADR 0005): the inward code's last letter is drawn from
+   * the full alphabet, so the output may coincide with a real, deliverable postcode.
    *
    * @return options that opt out of the fictionality guarantee
    */

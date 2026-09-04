@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Every code sample in {@code README.md}, compiled and run here so a breaking change to the
- * public API fails a test before it ever reaches a release, rather than silently rotting the
+ * Every code sample in {@code README.md}, compiled and run here so a breaking change to the public
+ * API fails a test before it ever reaches a release, rather than silently rotting the
  * documentation. Each test method mirrors one README section, in order.
  */
 class ReadmeExamplesTest {
@@ -64,10 +64,15 @@ class ReadmeExamplesTest {
   @Test
   void uniqueCustomerId() {
     AlterEgo alterego =
-        AlterEgo.builder().salt(loadSecretSaltFromSomewhereSafe()).mappingStore(new InMemoryMappingStore()).build();
-    Strategy<String> customerIdStrategy = (in, ctx) -> ctx.random().pick(List.of("C1", "C2", "C3", "C4", "C5"));
+        AlterEgo.builder()
+            .salt(loadSecretSaltFromSomewhereSafe())
+            .mappingStore(new InMemoryMappingStore())
+            .build();
+    Strategy<String> customerIdStrategy =
+        (in, ctx) -> ctx.random().pick(List.of("C1", "C2", "C3", "C4", "C5"));
 
-    Transformation<String> uniqueCustomerId = alterego.bind("myapp:customer-id", customerIdStrategy).unique();
+    Transformation<String> uniqueCustomerId =
+        alterego.bind("myapp:customer-id", customerIdStrategy).unique();
 
     String first = uniqueCustomerId.apply("alice@example.com");
     String second = uniqueCustomerId.apply("bob@example.com");
@@ -86,7 +91,8 @@ class ReadmeExamplesTest {
     }
   }
 
-  // --- Record coherence ----------------------------------------------------------------------------
+  // --- Record coherence
+  // ----------------------------------------------------------------------------
 
   private static final class Row {
     String town;
@@ -110,7 +116,9 @@ class ReadmeExamplesTest {
     }
 
     assertNotNull(outputRow.town);
-    assertTrue(outputRow.postcode.contains(" "), "expected an outward/inward code split: " + outputRow.postcode);
+    assertTrue(
+        outputRow.postcode.contains(" "),
+        "expected an outward/inward code split: " + outputRow.postcode);
     assertNotNull(outputRow.phone);
   }
 
@@ -127,10 +135,14 @@ class ReadmeExamplesTest {
   @Test
   void customStrategyExtension() {
     AlterEgo alterego =
-        AlterEgo.builder().salt(loadSecretSaltFromSomewhereSafe()).mappingStore(new InMemoryMappingStore()).build();
+        AlterEgo.builder()
+            .salt(loadSecretSaltFromSomewhereSafe())
+            .mappingStore(new InMemoryMappingStore())
+            .build();
     Strategy<String> employeeIdStrategy = (input, context) -> generateEmployeeId(context.random());
 
-    Transformation<String> employeeId = alterego.bind("myapp:employee-id", employeeIdStrategy).unique();
+    Transformation<String> employeeId =
+        alterego.bind("myapp:employee-id", employeeIdStrategy).unique();
 
     String result = employeeId.apply("1234567890");
     assertEquals(10, result.length());

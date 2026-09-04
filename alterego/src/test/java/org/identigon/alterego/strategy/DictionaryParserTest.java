@@ -59,7 +59,8 @@ class DictionaryParserTest {
         """;
     AlterEgoConfigException ex =
         assertThrows(
-            AlterEgoConfigException.class, () -> DictionaryParser.parse(incompleteHeader + "Alice\n", "test"));
+            AlterEgoConfigException.class,
+            () -> DictionaryParser.parse(incompleteHeader + "Alice\n", "test"));
     assertTrue(ex.getMessage().contains("licence-url"));
   }
 

@@ -6,7 +6,8 @@ import org.identigon.alterego.Strategy;
 import org.identigon.alterego.TransformationContext;
 
 /**
- * Generates a fictional domain name drawn from RFC 2606 reserved domains or subdomains of RFC 2606 reserved TLDs.
+ * Generates a fictional domain name drawn from RFC 2606 reserved domains or subdomains of RFC 2606
+ * reserved TLDs.
  */
 public final class DomainNameStrategy implements Strategy<String> {
 
@@ -14,7 +15,8 @@ public final class DomainNameStrategy implements Strategy<String> {
   public static final DomainNameStrategy INSTANCE = new DomainNameStrategy();
 
   private static final List<String> RESERVED_TLDS = List.of("test", "example", "invalid");
-  private static final List<String> RESERVED_DOMAINS = List.of("example.com", "example.net", "example.org");
+  private static final List<String> RESERVED_DOMAINS =
+      List.of("example.com", "example.net", "example.org");
 
   private DomainNameStrategy() {}
 

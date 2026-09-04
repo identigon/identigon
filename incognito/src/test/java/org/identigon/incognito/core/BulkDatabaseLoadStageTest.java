@@ -24,104 +24,140 @@ import org.junit.jupiter.api.Test;
  */
 class BulkDatabaseLoadStageTest {
 
-    private static final SQLException BATCH_FAILURE =
-        new SQLException("duplicate key value violates unique constraint", "23505");
-    private static final SQLException CLOSE_FAILURE =
-        new SQLException("connection already closed", "08003");
+  private static final SQLException BATCH_FAILURE =
+      new SQLException("duplicate key value violates unique constraint", "23505");
+  private static final SQLException CLOSE_FAILURE =
+      new SQLException("connection already closed", "08003");
 
-    /** A no-op dialect handler: never touches the connection, so the fake below stays minimal. */
-    private static final DialectHandler NOOP_DIALECT = new DialectHandler() {
-        @Override public void preLoadTable(Connection c, String t) {}
-        @Override public String buildInsertSql(String t, List<String> cols, boolean identity) { return "INSERT"; }
-        @Override public void postLoadTable(Connection c, String t) {}
-        @Override public void resyncSequence(Connection c, String t, String pk) {}
-    };
+  /** A no-op dialect handler: never touches the connection, so the fake below stays minimal. */
+  private static final DialectHandler NOOP_DIALECT =
+      new DialectHandler() {
+        @Override
+        public void preLoadTable(Connection c, String t) {}
 
-    @Test
-    void batchFailureIsPrimaryAndCloseFailureIsSuppressedNotLost() throws Exception {
-        PreparedStatement fakeStmt = fakePreparedStatement();
-        Connection fakeConn = fakeConnection(fakeStmt);
+        @Override
+        public String buildInsertSql(String t, List<String> cols, boolean identity) {
+          return "INSERT";
+        }
 
-        BulkDatabaseLoadStage stage = new BulkDatabaseLoadStage(
-            NOOP_DIALECT, fakeConn, "t", List.of("col"), false, null);
-        stage.insertRow(new Object[] {"x"}); // batchCount > 0, so close() actually calls executeBatch()
+        @Override
+        public void postLoadTable(Connection c, String t) {}
 
-        SQLException thrown = assertThrows(SQLException.class, stage::close,
+        @Override
+        public void resyncSequence(Connection c, String t, String pk) {}
+      };
+
+  @Test
+  void batchFailureIsPrimaryAndCloseFailureIsSuppressedNotLost() throws Exception {
+    PreparedStatement fakeStmt = fakePreparedStatement();
+    Connection fakeConn = fakeConnection(fakeStmt);
+
+    BulkDatabaseLoadStage stage =
+        new BulkDatabaseLoadStage(NOOP_DIALECT, fakeConn, "t", List.of("col"), false, null);
+    stage.insertRow(new Object[] {"x"}); // batchCount > 0, so close() actually calls executeBatch()
+
+    SQLException thrown =
+        assertThrows(
+            SQLException.class,
+            stage::close,
             "close() must propagate the batch failure, not swallow it");
 
-        assertEquals("23505", thrown.getSQLState(), "the batch failure must be the PRIMARY exception");
-        assertTrue(java.util.Arrays.stream(thrown.getSuppressed())
-                .anyMatch(s -> s instanceof SQLException se && "08003".equals(se.getSQLState())),
-            "the statement-close failure must be kept as a suppressed exception, not discarded");
-    }
+    assertEquals("23505", thrown.getSQLState(), "the batch failure must be the PRIMARY exception");
+    assertTrue(
+        java.util.Arrays.stream(thrown.getSuppressed())
+            .anyMatch(s -> s instanceof SQLException se && "08003".equals(se.getSQLState())),
+        "the statement-close failure must be kept as a suppressed exception, not discarded");
+  }
 
-    /**
-     * {@code insertRow} must delegate every value bind to {@code DialectHandler.bindValue} rather
-     * than hardcoding one engine's coercion rule itself (the {@code Types.OTHER}-for-{@code String}
-     * fix) - proven here with a dialect whose {@code bindValue} never touches the statement at all,
-     * so a passing test can only mean {@code insertRow} called it, not that it happened to produce
-     * the same JDBC calls by coincidence.
-     */
-    @Test
-    void insertRowDelegatesEveryBindToTheDialectHandler() throws Exception {
-        List<String> calls = new java.util.ArrayList<>();
-        DialectHandler recordingDialect = new DialectHandler() {
-            @Override public void preLoadTable(Connection c, String t) {}
-            @Override public String buildInsertSql(String t, List<String> cols, boolean identity) { return "INSERT"; }
-            @Override public void postLoadTable(Connection c, String t) {}
-            @Override public void resyncSequence(Connection c, String t, String pk) {}
-            @Override public void bindValue(PreparedStatement stmt, int index, Object value) {
-                calls.add(index + "=" + value);
-            }
+  /**
+   * {@code insertRow} must delegate every value bind to {@code DialectHandler.bindValue} rather
+   * than hardcoding one engine's coercion rule itself (the {@code Types.OTHER}-for-{@code String}
+   * fix) - proven here with a dialect whose {@code bindValue} never touches the statement at all,
+   * so a passing test can only mean {@code insertRow} called it, not that it happened to produce
+   * the same JDBC calls by coincidence.
+   */
+  @Test
+  void insertRowDelegatesEveryBindToTheDialectHandler() throws Exception {
+    List<String> calls = new java.util.ArrayList<>();
+    DialectHandler recordingDialect =
+        new DialectHandler() {
+          @Override
+          public void preLoadTable(Connection c, String t) {}
+
+          @Override
+          public String buildInsertSql(String t, List<String> cols, boolean identity) {
+            return "INSERT";
+          }
+
+          @Override
+          public void postLoadTable(Connection c, String t) {}
+
+          @Override
+          public void resyncSequence(Connection c, String t, String pk) {}
+
+          @Override
+          public void bindValue(PreparedStatement stmt, int index, Object value) {
+            calls.add(index + "=" + value);
+          }
         };
-        PreparedStatement fakeStmt = fakePreparedStatement();
-        Connection fakeConn = fakeConnection(fakeStmt);
+    PreparedStatement fakeStmt = fakePreparedStatement();
+    Connection fakeConn = fakeConnection(fakeStmt);
 
-        BulkDatabaseLoadStage stage = new BulkDatabaseLoadStage(
-            recordingDialect, fakeConn, "t", List.of("a", "b"), false, null);
-        stage.insertRow(new Object[] {"x", 42});
-        assertEquals(List.of("1=x", "2=42"), calls);
+    BulkDatabaseLoadStage stage =
+        new BulkDatabaseLoadStage(recordingDialect, fakeConn, "t", List.of("a", "b"), false, null);
+    stage.insertRow(new Object[] {"x", 42});
+    assertEquals(List.of("1=x", "2=42"), calls);
 
-        // fakePreparedStatement()'s executeBatch always throws BATCH_FAILURE (for the other test
-        // above) - irrelevant here, this test only cares that bindValue was delegated to before
-        // that point, so swallow it purely to release the resource cleanly. Not try-with-resources:
-        // that would let this expected close() failure propagate and fail the test.
-        try {
-            stage.close();
-        } catch (SQLException expected) {
-            // ignored - see above
-        }
+    // fakePreparedStatement()'s executeBatch always throws BATCH_FAILURE (for the other test
+    // above) - irrelevant here, this test only cares that bindValue was delegated to before
+    // that point, so swallow it purely to release the resource cleanly. Not try-with-resources:
+    // that would let this expected close() failure propagate and fail the test.
+    try {
+      stage.close();
+    } catch (SQLException expected) {
+      // ignored - see above
     }
+  }
 
-    // == is the correct implementation of Object.equals() semantics for a proxy with no identity
-    // of its own; and the test's own classloader is the right (and simplest) choice to resolve the
-    // JDK interfaces below -- both PMD.CompareObjectsWithEquals and PMD.UseProperClassLoader are
-    // false positives on this idiom.
-    @SuppressWarnings({"PMD.CompareObjectsWithEquals", "PMD.UseProperClassLoader"})
-    private static PreparedStatement fakePreparedStatement() {
-        InvocationHandler handler = (proxy, method, args) -> switch (method.getName()) {
-            case "executeBatch" -> throw BATCH_FAILURE;
-            case "close" -> throw CLOSE_FAILURE;
-            case "addBatch", "setObject" -> null;
-            case "equals" -> proxy == args[0];
-            case "hashCode" -> System.identityHashCode(proxy);
-            case "toString" -> "FakePreparedStatement";
-            default -> null;
-        };
-        return (PreparedStatement) Proxy.newProxyInstance(
-            BulkDatabaseLoadStageTest.class.getClassLoader(), new Class<?>[] {PreparedStatement.class}, handler);
-    }
+  // == is the correct implementation of Object.equals() semantics for a proxy with no identity
+  // of its own; and the test's own classloader is the right (and simplest) choice to resolve the
+  // JDK interfaces below -- both PMD.CompareObjectsWithEquals and PMD.UseProperClassLoader are
+  // false positives on this idiom.
+  @SuppressWarnings({"PMD.CompareObjectsWithEquals", "PMD.UseProperClassLoader"})
+  private static PreparedStatement fakePreparedStatement() {
+    InvocationHandler handler =
+        (proxy, method, args) ->
+            switch (method.getName()) {
+              case "executeBatch" -> throw BATCH_FAILURE;
+              case "close" -> throw CLOSE_FAILURE;
+              case "addBatch", "setObject" -> null;
+              case "equals" -> proxy == args[0];
+              case "hashCode" -> System.identityHashCode(proxy);
+              case "toString" -> "FakePreparedStatement";
+              default -> null;
+            };
+    return (PreparedStatement)
+        Proxy.newProxyInstance(
+            BulkDatabaseLoadStageTest.class.getClassLoader(),
+            new Class<?>[] {PreparedStatement.class},
+            handler);
+  }
 
-    @SuppressWarnings({"PMD.CompareObjectsWithEquals", "PMD.UseProperClassLoader"})
-    private static Connection fakeConnection(PreparedStatement stmt) {
-        InvocationHandler handler = (proxy, method, args) -> switch (method.getName()) {
-            case "prepareStatement" -> stmt;
-            case "equals" -> proxy == args[0];
-            case "hashCode" -> System.identityHashCode(proxy);
-            case "toString" -> "FakeConnection";
-            default -> null;
-        };
-        return (Connection) Proxy.newProxyInstance(
-            BulkDatabaseLoadStageTest.class.getClassLoader(), new Class<?>[] {Connection.class}, handler);
-    }
+  @SuppressWarnings({"PMD.CompareObjectsWithEquals", "PMD.UseProperClassLoader"})
+  private static Connection fakeConnection(PreparedStatement stmt) {
+    InvocationHandler handler =
+        (proxy, method, args) ->
+            switch (method.getName()) {
+              case "prepareStatement" -> stmt;
+              case "equals" -> proxy == args[0];
+              case "hashCode" -> System.identityHashCode(proxy);
+              case "toString" -> "FakeConnection";
+              default -> null;
+            };
+    return (Connection)
+        Proxy.newProxyInstance(
+            BulkDatabaseLoadStageTest.class.getClassLoader(),
+            new Class<?>[] {Connection.class},
+            handler);
+  }
 }
