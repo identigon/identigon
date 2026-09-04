@@ -28,19 +28,23 @@ val isExactlyTagged = providers.exec {
 
 version = if (isExactlyTagged) baseVersion else "$baseVersion-SNAPSHOT"
 
-// Whether a Docker daemon is actually reachable here - not the same question as "is this
-// windows-latest CI", which was the first (wrong) version of this check: a dev machine running
-// Docker Desktop on Windows gets full coverage from incognito's Testcontainers PostgreSQL E2Es
-// same as Linux does, so gating on OS alone would silently weaken the coverage-verification
-// threshold below on exactly the machine most day-to-day development happens on. `docker info`
-// exits 0 only when a daemon actually answers; both "docker isn't installed" (command not found)
-// and "docker is installed but the daemon isn't running" are caught and treated the same as
-// "unavailable" -- computed once here, not once per subproject, since it shells out.
+// Whether a Docker daemon that can actually run incognito's Testcontainers PostgreSQL E2Es is
+// reachable here - not the same question as "is this windows-latest CI" (the first, wrong version
+// of this check: a dev machine running Docker Desktop on Windows gets full coverage same as Linux
+// does), and not just "does a daemon answer" either (the second, still-wrong version: confirmed
+// against a real failing windows-latest run that `docker info` exits 0 there too - GitHub's hosted
+// Windows runners ship Docker preinstalled for Windows containers, so a daemon genuinely answers,
+// it just can't run the Linux `postgres` image Testcontainers needs). `docker info`'s own OSType
+// field is what actually distinguishes those two "a daemon answered" cases; both "docker isn't
+// installed" and "the daemon isn't running" are caught by the same try/catch and treated as
+// unavailable too - computed once here, not once per subproject, since it shells out.
 val dockerAvailable = try {
-    providers.exec {
-        commandLine("docker", "info")
+    val info = providers.exec {
+        commandLine("docker", "info", "--format", "{{.OSType}}")
         isIgnoreExitValue = true
-    }.result.get().exitValue == 0
+    }
+    info.result.get().exitValue == 0
+        && info.standardOutput.asText.get().trim().equals("linux", ignoreCase = true)
 } catch (e: Exception) {
     false
 }
