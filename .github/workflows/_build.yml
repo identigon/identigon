@@ -43,6 +43,7 @@ jobs:
             */build/test-results/test/
             */build/reports/tests/test/
             */build/reports/jacoco/test/
+            */build/reports/checkstyle/
             */build/reports/pmd/
             */build/reports/spotbugs/
           if-no-files-found: warn

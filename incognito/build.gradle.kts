@@ -2,10 +2,12 @@ plugins {
     `java-library`
     `maven-publish`
     // Code hygiene, kept in step with the sibling subprojects (alterego, effigies) -- see the
-    // root build.gradle.kts's `subprojects { }` block for the shared Spotless/SpotBugs/PMD config.
+    // root build.gradle.kts's `subprojects { }` block for the shared
+    // Spotless/SpotBugs/PMD/Checkstyle config.
     alias(libs.plugins.spotless) // version pinned at the root
     alias(libs.plugins.spotbugs) // version pinned at the root
     id("pmd")
+    id("checkstyle")
     id("jacoco")
 }
 

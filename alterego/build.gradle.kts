@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.spotless) // version pinned at the root
     alias(libs.plugins.spotbugs) // version pinned at the root
     id("pmd")
+    id("checkstyle")
     id("jacoco")
 }
 
@@ -20,8 +21,8 @@ java {
     withJavadocJar()
 }
 
-// Spotless, SpotBugs (toolVersion/ignoreFailures/report shape), and PMD are configured for every
-// subproject from the root build.gradle.kts's `subprojects { }` block. Only the SpotBugs
+// Spotless, SpotBugs (toolVersion/ignoreFailures/report shape), PMD, and Checkstyle are configured
+// for every subproject from the root build.gradle.kts's `subprojects { }` block. Only the SpotBugs
 // excludeFilter is genuinely per-subproject.
 spotbugs {
     excludeFilter.set(rootProject.file("config/spotbugs/exclude-alterego.xml"))

@@ -52,17 +52,29 @@ val dockerAvailable = try {
 subprojects {
     version = rootProject.version
 
-    // Spotless: identical tidy-only config for every subproject that applies it -- imports,
-    // whitespace, EOF newline only, never a full reflow (which would fight the hand-maintained
-    // style). Declared once here instead of copy-pasted per subproject.
+    // Spotless: identical full-reflow config for every subproject that applies it --
+    // googleJavaFormat(), same as play-bazlang's own build.gradle.kts. Paired with Checkstyle
+    // below, which enforces the Google style rules a formatter alone doesn't (naming, unused
+    // imports, brace placement, etc.) rather than just its layout. Declared once here instead of
+    // copy-pasted per subproject.
     plugins.withId("com.diffplug.spotless") {
         configure<com.diffplug.gradle.spotless.SpotlessExtension> {
             java {
-                importOrder()
-                removeUnusedImports()
-                trimTrailingWhitespace()
-                endWithNewline()
+                googleJavaFormat()
             }
+        }
+    }
+
+    // Checkstyle: fully identical everywhere -- one shared ruleset
+    // (config/checkstyle/checkstyle.xml, ported from play-bazlang's own copy), nothing left to
+    // differ per subproject. No Javadoc module in that ruleset: javac's own doclint
+    // (-Xdoclint:all -Xwerror, configured below) already enforces doc-comment completeness on
+    // every public element, so a Checkstyle Javadoc check would be redundant.
+    plugins.withId("checkstyle") {
+        configure<org.gradle.api.plugins.quality.CheckstyleExtension> {
+            toolVersion = libs.versions.checkstyleTool.get()
+            configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+            isIgnoreFailures = false
         }
     }
 
