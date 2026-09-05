@@ -1,15 +1,10 @@
 plugins {
     application
     `maven-publish`
-    // Code hygiene, kept in step with the sibling subprojects (incognito, alterego) -- see the
-    // root build.gradle.kts's `subprojects { }` block for the shared
-    // Spotless/SpotBugs/PMD/Checkstyle config.
-    alias(libs.plugins.spotless) // version pinned at the root
-    alias(libs.plugins.spotbugs) // version pinned at the root
-    id("pmd")
-    id("checkstyle")
-    id("jacoco")
 }
+
+// Code hygiene (Spotless/SpotBugs/PMD/Checkstyle/JaCoCo) is applied and configured for every
+// subproject from the root build.gradle.kts's `subprojects { }` block -- nothing to declare here.
 
 group = "org.identigon"
 // version comes from the root project -- lockstep versioning across the monorepo, see docs/adr/.
@@ -188,6 +183,10 @@ publishing {
     }
 }
 
-spotbugs {
-    excludeFilter = rootProject.file("config/spotbugs/exclude-effigies.xml")
+// Deferred to afterEvaluate, and configured by type rather than via the `spotbugs { }` accessor:
+// see alterego/build.gradle.kts's own excludeFilter block for why.
+afterEvaluate {
+    configure<com.github.spotbugs.snom.SpotBugsExtension> {
+        excludeFilter = rootProject.file("config/spotbugs/exclude-effigies.xml")
+    }
 }

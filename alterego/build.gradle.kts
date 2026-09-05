@@ -2,11 +2,6 @@ plugins {
     `java-library`
     `maven-publish`
     signing
-    alias(libs.plugins.spotless) // version pinned at the root
-    alias(libs.plugins.spotbugs) // version pinned at the root
-    id("pmd")
-    id("checkstyle")
-    id("jacoco")
 }
 
 group = "org.identigon"
@@ -21,11 +16,19 @@ java {
     withJavadocJar()
 }
 
-// Spotless, SpotBugs (toolVersion/ignoreFailures/report shape), PMD, and Checkstyle are configured
-// for every subproject from the root build.gradle.kts's `subprojects { }` block. Only the SpotBugs
-// excludeFilter is genuinely per-subproject.
-spotbugs {
-    excludeFilter.set(rootProject.file("config/spotbugs/exclude-alterego.xml"))
+// Spotless, SpotBugs (toolVersion/ignoreFailures/report shape), PMD, and Checkstyle are applied
+// and configured for every subproject from the root build.gradle.kts's `subprojects { }` block --
+// nothing to declare here. Only the SpotBugs excludeFilter is genuinely per-subproject.
+//
+// Deferred to afterEvaluate, and configured by type rather than via the `spotbugs { }`
+// accessor: that accessor is generated only for a script that declares the SpotBugs plugin in its
+// own `plugins { }` block, which this one no longer does now that the plugin is applied centrally
+// from the root. afterEvaluate also ensures the root's own afterEvaluate block -- which applies
+// the plugin in the first place -- has already run by the time this configures it.
+afterEvaluate {
+    configure<com.github.spotbugs.snom.SpotBugsExtension> {
+        excludeFilter.set(rootProject.file("config/spotbugs/exclude-alterego.xml"))
+    }
 }
 
 // JaCoCo's report shape and check-task wiring are shared with every subproject that applies the
