@@ -53,10 +53,9 @@ subprojects {
     version = rootProject.version
 
     // Spotless: identical full-reflow config for every subproject that applies it --
-    // googleJavaFormat(), same as play-bazlang's own build.gradle.kts. Paired with Checkstyle
-    // below, which enforces the Google style rules a formatter alone doesn't (naming, unused
-    // imports, brace placement, etc.) rather than just its layout. Declared once here instead of
-    // copy-pasted per subproject.
+    // googleJavaFormat(). Paired with Checkstyle below, which enforces the Google style rules a
+    // formatter alone doesn't (naming, unused imports, brace placement, etc.) rather than just
+    // its layout. Declared once here instead of copy-pasted per subproject.
     plugins.withId("com.diffplug.spotless") {
         configure<com.diffplug.gradle.spotless.SpotlessExtension> {
             java {
@@ -66,8 +65,8 @@ subprojects {
     }
 
     // Checkstyle: fully identical everywhere -- one shared ruleset
-    // (config/checkstyle/checkstyle.xml, ported from play-bazlang's own copy), nothing left to
-    // differ per subproject. No Javadoc module in that ruleset: javac's own doclint
+    // (config/checkstyle/checkstyle.xml), nothing left to differ per subproject. No Javadoc
+    // module in that ruleset: javac's own doclint
     // (-Xdoclint:all -Xwerror, configured below) already enforces doc-comment completeness on
     // every public element, so a Checkstyle Javadoc check would be redundant.
     plugins.withId("checkstyle") {
@@ -158,8 +157,7 @@ subprojects {
         // ~94.9%, incognito ~90.4%, effigies ~77.9%, measured via `./gradlew jacocoTestReport` and
         // summing INSTRUCTION_MISSED/INSTRUCTION_COVERED from each module's jacocoTestReport.csv),
         // so normal fluctuation doesn't fail a build - the point is to catch a regression, not to
-        // ratchet coverage upward automatically. Same pattern as play-bazlang's own
-        // build.gradle.kts, which found this worth having per-module rather than repo-wide.
+        // ratchet coverage upward automatically.
         //
         // incognito is the one module this can't be a single cross-platform number for: its
         // Testcontainers-backed PostgreSQL E2E tests need a Docker daemon, and skip gracefully
@@ -167,10 +165,8 @@ subprojects {
         // one - a real, deterministic difference in what's achievable, not flakiness to paper over.
         // Gating on `dockerAvailable` (not OS - see its own comment above) is what keeps this
         // meaningful on a Windows dev machine running Docker Desktop, which gets full coverage same
-        // as Linux CI does. windows-latest CI has no Docker daemon and landed at 60% instruction
-        // coverage the first time this ran there - confirmed via the actual failing run (`gh run
-        // view <id> --log-failed`), not assumed; a single minimum could only ever be as strict as
-        // that weaker case allows, which would make it toothless everywhere Docker IS available.
+        // as Linux CI does. A single minimum could only ever be as strict as the no-Docker case
+        // allows, which would make it toothless everywhere Docker IS available.
         val minInstructionCoverage =
             when (project.name) {
                 "alterego" -> 0.92

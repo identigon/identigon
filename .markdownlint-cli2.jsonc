@@ -1,19 +1,21 @@
 {
-  // Full default rule set, audited and enabled deliberately (see PLAN.md history / git log for the
-  // sweep that got the existing docs compliant). "default" is omitted -- true is markdownlint's own
-  // default, so stating it would be redundant. MD013 keeps the same 100-column prose convention
-  // (AGENTS.md's Code style section) with tables and code blocks exempt because there's no sensible
-  // way to "wrap" either without corrupting them, and headings exempt because a heading is one line
-  // by construction -- there's no wrap to apply, only a rename, which isn't this tool's job.
-  // `stern` closes most of the gap non-strict mode leaves open (an ordinary prose line with one
-  // long trailing word is otherwise silently forgiven) while still exempting a line that is
-  // *purely* one unbreakable token -- a bare URL on its own line, most commonly. Unlike `strict`,
-  // it does not flag those: it only stops forgiving a long token that shares a line with other
-  // prose. Long links that aren't alone on their own line still needed a manual reflow to match.
+  // Full default rule set, enabled deliberately rather than left at a narrower starting point.
+  // "default" is stated explicitly here rather than left implicit - a reader shouldn't have to
+  // know that omission-means-true rule to see the ruleset.
+  //
+  // MD013: matches the 100-column prose convention in AGENTS.md's Code style section. printWidth
+  // in .prettierrc.json MUST match this line_length - change one, change both. Tables and code
+  // blocks are exempt because there's no sensible way to "wrap" either without corrupting them,
+  // and headings are exempt because a heading is one line by construction. `stern` closes most of
+  // the gap non-strict mode leaves open (an ordinary prose line with one long trailing word is
+  // otherwise silently forgiven) while still exempting a line that is *purely* one unbreakable
+  // token - a bare URL on its own line, most commonly.
+  //
   // MD024 (no-duplicate-heading) uses `siblings_only` because CHANGELOG.md legitimately repeats
   // "Added"/"Fixed"/etc. headings once per version entry (Keep a Changelog convention);
   // `siblings_only` only flags duplicates within the same parent section, not document-wide.
   "config": {
+    "default": true,
     "MD013": {
       "line_length": 100,
       "code_blocks": false,

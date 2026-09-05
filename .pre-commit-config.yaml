@@ -1,9 +1,8 @@
-# Minimal code-hygiene hooks. Run with `prek` (no Python needed for the native hooks) or `pre-commit`.
-# Kept deliberately small to start; SpotBugs + find-sec-bugs runs in CI, not on commit.
+# Minimal code-hygiene hooks. Run with `prek` (no Python needed for the native hooks) or
+# `pre-commit`.
 #
-# `prek install` (and `pre-commit install`) wire only the pre-commit hook type unless told
-# otherwise, which would leave the commit-msg hook below installed but never invoked. Declaring the
-# types here means a plain `prek install` is enough - nobody has to remember `--hook-type`.
+# `prek install` / `pre-commit install` wire only the pre-commit hook type unless told otherwise,
+# which would leave the commit-msg hook below installed but never invoked.
 default_install_hook_types: [pre-commit, commit-msg]
 
 repos:
@@ -25,28 +24,20 @@ repos:
 
       # SpotBugs and the test suite are intentionally omitted - too slow for a commit hook; run in CI.
 
-      # Formatter, not linter - complements markdownlint-cli2 below rather than replacing it
-      # (Prettier doesn't catch MD024/MD032/MD060 and friends; markdownlint-cli2's MD013 has no
-      # auto-fix in any implementation - see the comment on that hook). `local`, not the
-      # `pre-commit/mirrors-prettier` repo: that mirror is stale (its newest stable tag is v3.1.0,
-      # several minor versions behind), so pinning the exact version via npx here instead - same
-      # pattern as `npx --yes markdownlint-cli2@<version>` used throughout this repo's own tooling
-      # invocations. `*emphasis*` becomes `_emphasis_` on first run and forever after - Prettier's
-      # markdown printer has no config option for this, confirmed empirically; see
-      # docs/adr/0036-adopt-prettier-for-markdown-alongside-markdownlint-cli2.md.
-      # All actual options - proseWrap/printWidth/embeddedLanguageFormatting - live in
-      # .prettierrc.json, not flags here (mirrors identigon.github.io's own .prettierrc.json).
-      # proseWrap: "always" is the load-bearing one: Prettier's own default (proseWrap: "preserve")
-      # never rewraps prose at all, so without a config file this hook silently did nothing about
-      # the MD013 line-wrapping it was adopted to automate - confirmed empirically (an unwrapped
-      # >100-column test line survived this exact command untouched with no config present) after
-      # a site-review comparison against identigon.github.io caught the gap. printWidth: 100 matches
-      # MD013's own line_length in .markdownlint-cli2.jsonc. embeddedLanguageFormatting: "off" is
-      # separately load-bearing: Prettier's default ("auto") tries to reformat recognised-language
-      # content INSIDE fenced code blocks too, and on this repo's YAML policy examples that
-      # corrupted them - dropped keys, emptied `{ }` blocks - found and reverted during the initial
-      # bulk reformat, confirmed fixed by diffing every fenced code block's content byte-for-byte
-      # before/after with this flag set.
+      # Formatter, not linter - complements markdownlint-cli2 below (Prettier doesn't catch
+      # MD024/MD032/MD060 and friends; markdownlint-cli2's MD013 has no auto-fix). `local`, not
+      # `pre-commit/mirrors-prettier`: that mirror is stale (v3.1.0), so pinning the exact version
+      # via npx instead.
+      #
+      # Config lives in .prettierrc.json, not flags here. printWidth there MUST match MD013's own
+      # line_length in .markdownlint-cli2.jsonc - change one, change both. proseWrap: "always" is
+      # load-bearing: Prettier's default (proseWrap: "preserve") never rewraps prose at all.
+      # embeddedLanguageFormatting: "off" is separately load-bearing: Prettier's default ("auto")
+      # reformats recognised-language content inside fenced code blocks too, which corrupts this
+      # repo's YAML policy examples (dropped keys, emptied `{ }` blocks).
+      #
+      # `*emphasis*` becomes `_emphasis_` on first run and forever after - no config option to
+      # avoid it.
       - id: prettier-markdown
         name: Prettier (auto-format Markdown)
         language: system
@@ -55,14 +46,12 @@ repos:
         types: [markdown]
 
   # Secret scanning - apt for a privacy pipeline (alterego/incognito) and its authoring CLI
-  # (effigies), where a salt or connection string must never be committed.
+  # (effigies).
   #
   # gitleaks-system, not the default gitleaks, which builds the binary from source with Go on
   # first run: that produces an unsigned, reputation-less executable in AppData, which Windows
-  # Smart App Control blocks outright (os error 4551). A packaged release carries enough download
-  # reputation to run even with Smart App Control enforced. Needs gitleaks on PATH (confirmed
-  # present via `scoop install gitleaks` in this environment) - same reasoning as doc-kit's and
-  # play-bazlang's own .pre-commit-config.yaml.
+  # Smart App Control blocks outright (os error 4551). Needs gitleaks on PATH (`scoop install
+  # gitleaks`, `brew install gitleaks`, or a release binary).
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.1
     hooks:
@@ -77,8 +66,7 @@ repos:
       # Frozen test vectors and vendored third-party fixtures must stay byte-identical to what was
       # generated/fetched -- AGENTS.md's hard invariant for the vectors, and SOURCES.md's recorded
       # SHA-256 provenance for the fixtures both depend on it. Auto-fixing whitespace/EOF in either
-      # would silently violate that (found the hard way: a first `--all-files` run trimmed trailing
-      # spaces and normalized EOF newlines across both before this exclude existed).
+      # would silently violate that.
       - id: trailing-whitespace
         exclude: &vendored-fixtures |
           (?x)^(
@@ -92,22 +80,15 @@ repos:
       - id: check-added-large-files  # guards the "fetch, don't vendor" discipline for large fixtures
       - id: check-merge-conflict
       # This repo deliberately uses the British spelling (LICENCE) - a near miss with LICENSE that
-      # would collide silently on Windows/macOS's case-insensitive filesystems, same reasoning as
-      # doc-kit's own use of this hook.
+      # would collide silently on Windows/macOS's case-insensitive filesystems.
       - id: check-case-conflict
       # quickstart/run-quickstart.sh is committed 100755 today; this guards against a future re-add
       # losing that bit (harmless on Windows, but `./run-quickstart.sh` then fails on Linux/macOS).
       - id: check-shebang-scripts-are-executable
       # .gitattributes already pins eol=lf; this guards against that being weakened rather than
-      # being the fix for it. Same vendored-fixtures paths as trailing-whitespace/end-of-file-fixer
-      # above (fixing a frozen fixture's line endings would be the same kind of silent byte-level
-      # drift they're already excluded from), plus *.bat: .gitattributes separately pins
-      # `*.bat text eol=crlf` (gradlew.bat needs CRLF to run on Windows), and an unexcluded
-      # mixed-line-ending hook rewrites it to LF on its first run -- hit for real in play-bazlang's
-      # own .pre-commit-config.yaml before its `\.bat$` exclude existed. Written out rather than
-      # reusing the vendored-fixtures anchor via alias, since trailing-whitespace/end-of-file-fixer
-      # deliberately do NOT get the .bat exclude (nothing about a trailing newline or trailing
-      # whitespace check is CRLF-unsafe the way --fix=lf is).
+      # being the fix for it. Also excludes *.bat: .gitattributes separately pins `*.bat text
+      # eol=crlf` (gradlew.bat needs CRLF to run on Windows), and an unexcluded --fix=lf would
+      # rewrite it to LF, breaking it.
       - id: mixed-line-ending
         args: [--fix=lf]
         exclude: |
@@ -118,40 +99,32 @@ repos:
             .*\.bat$
           )
 
-  # Line-length gate only (see .markdownlint-cli2.jsonc) -- catches >100-column Markdown, doesn't
-  # fix it; MD013 has no auto-fix in any markdownlint implementation (checked directly: neither
-  # this, the npm markdownlint-cli, nor the Ruby mdl gem rewrap a line). Pure prek/Node dependency,
-  # no footprint in this repo (same pattern as gitleaks above) -- note this specifically needs the
-  # Node-language hook, not the Ruby mdl gem: prek's Ruby support has no Windows auto-install path
-  # (confirmed), while its Node support works cross-platform including Windows (also confirmed).
+  # Line-length gate only (see .markdownlint-cli2.jsonc) - catches >100-column Markdown, doesn't
+  # fix it; MD013 has no auto-fix in any markdownlint implementation. Needs the Node-language hook
+  # specifically, not the Ruby mdl gem: prek's Ruby support has no Windows auto-install path.
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.23.2
     hooks:
       - id: markdownlint-cli2
 
-  # The checker script (quickstart/run-quickstart.sh) is POSIX shell authored on Windows, without
-  # Linux/macOS testing - shellcheck catches the GNU-isms that would fail there. Python-packaged
-  # (shellcheck-py), not the Docker variant - same reasoning as gitleaks above, no separate binary
-  # install needed. Verified clean against the current script before adding this hook.
+  # quickstart/run-quickstart.sh is POSIX shell authored on Windows without Linux/macOS testing -
+  # shellcheck catches the GNU-isms that would fail there. Python-packaged (shellcheck-py), not
+  # the Docker variant - no separate binary install needed.
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
-        # gradlew has the same #!/bin/sh shebang as run-quickstart.sh, so pre-commit's file-type
-        # detection picks it up too -- but it's Gradle-vendored boilerplate, not ours to fix
-        # shellcheck findings in. Same exclude, same reasoning, as play-bazlang's own
-        # .pre-commit-config.yaml.
+        # gradlew has the same #!/bin/sh shebang, but it's Gradle-vendored boilerplate, not ours
+        # to fix shellcheck findings in.
         exclude: ^gradlew$
 
   # Link rot, on demand only: `prek run --hook-stage manual lychee` (or `pre-commit run
   # --hook-stage manual lychee`). Deliberately NOT on commit - external hosts fail for reasons
-  # unrelated to the change under review, and a hook that blocks a commit because someone else's
-  # server is down is a hook that gets bypassed. Worth having now that docs/research/*.md and
-  # docs/adr/ cite external references (17 URLs, checked). Ported from doc-kit's and
-  # play-bazlang's own .pre-commit-config.yaml.
-  # --method get, not the default HEAD: some hosts answer HEAD with an error and GET with 200, so
-  # a HEAD-based sweep can report false failures. Needs lychee on PATH (confirmed present via
-  # `scoop install lychee` in this environment).
+  # unrelated to the change under review, and a hook that blocks a commit over someone else's
+  # downed server just gets bypassed.
+  #
+  # --method get, not the default HEAD: some hosts answer HEAD with an error and GET with 200.
+  # Needs lychee on PATH (`scoop install lychee`, `brew install lychee`, or a release binary).
   - repo: https://github.com/lycheeverse/lychee
     rev: lychee-v0.24.2
     hooks:
@@ -162,11 +135,8 @@ repos:
   # Drift guards, not formatting - markdownlint-cli2 above catches structural rules, these catch a
   # narrower semantic one: an ADR's status casing/shape drifting from the MADR convention every
   # record here already follows (lowercase `status:` values, no Nygard-style "## Status" section).
-  # Ported from doc-kit's own .pre-commit-config.yaml, which found this exact drift risk worth
-  # guarding after status casing survived several manual reviews there. `language: pygrep` is
-  # built into pre-commit/prek - a cross-platform grep whose `entry` is a Python regex, failing
-  # when a file MATCHES (case-sensitive by default). Verified against every ADR here first: no
-  # existing file matches either pattern (all already lowercase, no "## Status" heading anywhere).
+  # `language: pygrep` is built into pre-commit/prek - a cross-platform grep whose `entry` is a
+  # Python regex, failing when a file MATCHES (case-sensitive by default).
   - repo: local
     hooks:
       - id: lowercase-adr-status
@@ -181,21 +151,13 @@ repos:
         entry: '^## Status$'
         files: ^docs/adr/
 
-  # Automates a Conventional Commits discipline already followed by hand throughout this repo's
-  # history. Ported from doc-kit's own pre-commit config (Python rather than the Node commitlint
-  # hook: no config file, no additional_dependencies, and nothing compiled - matters on Windows,
-  # where Smart App Control blocks locally built binaries).
+  # Conventional Commits, on the commit-msg stage. Python rather than the Node commitlint hook: no
+  # config file, no additional_dependencies, and nothing compiled - matters on Windows, where
+  # Smart App Control blocks locally built binaries.
   #
-  # The allowed types are this repo's own, not doc-kit's - checked against the real history
-  # (`git log --format=%s`): `build`/`ci`/`docs`/`feat`/`fix`/`refactor`/`test` are the settled
-  # vocabulary every commit since the monorepo consolidation (2026-08-10) has actually used.
-  # `infra`/`release` appear only before that date - abandoned, not current convention
-  # (`chore: Release v0.4.0` became `build: Release v3.2.0`, not a distinct thing kept alongside
-  # it) - and `style` (in doc-kit's own list) has never been used here at all. `chore` shows the
-  # same pre-2026-08-10-only pattern but is allowed back in regardless, by request. `perf` has
-  # never been used here either, but is allowed too, by request - same type play-bazlang's own
-  # list already carries, for a monorepo where a subproject's hot path (alterego's KDF, say) can
-  # get a commit that's purely a performance change.
+  # No `args:` - left at the hook's own built-in default type list (build, chore, ci, docs, feat,
+  # fix, perf, refactor, revert, style, test), shared across every pre-commit-managed repo in this
+  # workspace rather than a repo-specific subset: one fewer list to keep in sync.
   #
   # This checks the *shape* of a subject, not whether the type is the right one: `docs:` on a
   # change to alterego/ passes and is still wrong. It also accepts `Feat:` - there is no
@@ -205,4 +167,3 @@ repos:
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
-        args: [build, chore, ci, docs, feat, fix, perf, refactor, test]

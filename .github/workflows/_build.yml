@@ -5,37 +5,53 @@ on:
 
 jobs:
   build:
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        # One Gradle build for all three subprojects, run on both:
-        # - windows-latest: alterego treats Windows as a first-class target (FileMappingStore
-        #   relies on FileChannel locking, whose semantics differ from POSIX).
-        # - ubuntu-latest: ships with Docker, so incognito's Testcontainers PostgreSQL E2Es run for
-        #   real here. They skip gracefully on windows-latest, which has no Docker daemon.
-        os: [ubuntu-latest, windows-latest]
+        # incognito's Testcontainers E2Es only run where a Docker daemon answers (dockerAvailable
+        # check in build.gradle.kts) - windows-latest and macos-latest fall back to a lower minimum.
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Full history + tags: the root build.gradle.kts derives SNAPSHOT-vs-release from
-          # `git describe --tags --exact-match`, which needs tags present to find anything.
-          fetch-depth: 0
+          fetch-depth: 0 # build.gradle.kts derives SNAPSHOT-vs-release from `git describe --tags`
+
       - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
           distribution: temurin
           java-version: 25
+
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
       - name: Build
         run: ./gradlew build
-      # Downloadable from the run's Summary page even when the build step above fails (the usual
-      # time someone actually wants them) -- !cancelled() runs on success/failure but skips a
-      # cancelled run, unlike always(). One glob per report kind covers all three subprojects
-      # without naming them, and stays correct if a fourth is ever added. SpotBugs XML is off
-      # (root build.gradle.kts), so only its HTML is picked up here.
+
+      - name: Coverage summary
+        if: matrix.os == 'ubuntu-latest' # one canonical summary per run, not once per OS
+        shell: bash
+        continue-on-error: true # never let a formatting hiccup here fail the build
+        run: |
+          {
+            echo "## Test coverage"
+            echo
+            echo "| Module | Instructions | Branches |"
+            echo "| --- | --- | --- |"
+            for module in alterego incognito effigies; do
+              report="$module/build/reports/jacoco/test/html/index.html"
+              row=$(grep -oP '(?<=<tfoot><tr>).*?(?=</tr></tfoot>)' "$report" || true)
+              pcts=$(printf '%s' "$row" | grep -oP '(?<=class="ctr2">)\d+%' || true)
+              instructions=$(printf '%s' "$pcts" | sed -n 1p)
+              branches=$(printf '%s' "$pcts" | sed -n 2p)
+              echo "| $module | ${instructions:-n/a} | ${branches:-n/a} |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload build reports
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() }} # keep reports from a failed run too, unlike always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: build-reports-${{ matrix.os }}
