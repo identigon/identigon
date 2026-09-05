@@ -5,7 +5,7 @@
 # just via a catalog entry instead of a literal string, so a future second consumer costs one line.
 
 [versions]
-spotless = "8.10.0"
+spotless = "8.10.1"
 spotbugsPlugin = "6.5.11"
 spotbugsTool = "4.10.4"
 findsecbugs = "1.14.0"
