@@ -163,6 +163,15 @@ public final class VerificationStage implements PipelineStage {
    */
   private static final double SURVIVAL_FAILURE_RATIO = 0.20;
 
+  /**
+   * Minimum survivor count before the {@link #SURVIVAL_FAILURE_RATIO} ratio can trigger a hard
+   * failure. Below this, a single coincidental collision on a small/low-cardinality sample (e.g. 1
+   * of 4 distinct values, 25%) would otherwise breach the ratio on its own - contradicting the
+   * "never fails a healthy run over a low-cardinality identifier" guarantee documented on {@link
+   * #verifySurvival}.
+   */
+  private static final long SURVIVAL_FAILURE_MIN_SURVIVORS = 2;
+
   @Override
   @SuppressWarnings("unchecked")
   public StageResult process(PipelineContext context) throws IncognitoException {
@@ -1100,7 +1109,8 @@ public final class VerificationStage implements PipelineStage {
           return;
         }
         double ratio = (double) survived / sourceValues.size();
-        boolean hardFailure = ratio >= SURVIVAL_FAILURE_RATIO;
+        boolean hardFailure =
+            ratio >= SURVIVAL_FAILURE_RATIO && survived >= SURVIVAL_FAILURE_MIN_SURVIVORS;
         survivalFindings.add(
             new org.identigon.incognito.api.AnonymisationReport.SurvivalFinding(
                 tableName, columnName, sourceValues.size(), survived, hardFailure));
