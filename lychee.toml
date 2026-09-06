@@ -1,0 +1,6 @@
+# Links that are live (verified manually) but return 403 to GitHub Actions runner
+# IPs due to bot/WAF protection, so lychee can never pass them from CI.
+exclude = [
+  '^https://digital\.nhs\.uk/services/e-referral-service/document-library/synthetic-data-in-live-environments$',
+  '^https://www\.ofcom\.org\.uk/phones-and-broadband/phone-numbers/numbers-for-drama$',
+]
