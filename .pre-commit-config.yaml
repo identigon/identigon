@@ -151,6 +151,17 @@ repos:
         entry: '^## Status$'
         files: ^docs/adr/
 
+      # quickstart/run-quickstart.sh declares #!/bin/sh precisely so shellcheck (above) checks it
+      # against POSIX rules - a bash-only construct slipped in under that same shebang would defeat
+      # the whole point silently, since shellcheck itself just trusts whatever dialect the shebang
+      # claims. A script that genuinely needs bash is free to exist; it just has to be named .bash
+      # instead, so shellcheck checks it against the rules its name actually promises.
+      - id: sh-scripts-are-posix
+        name: ".sh scripts must not declare a bash shebang (use .bash for bash-specific scripts)"
+        language: pygrep
+        entry: '^#!.*\bbash\b'
+        files: \.sh$
+
   # Conventional Commits, on the commit-msg stage. Python rather than the Node commitlint hook: no
   # config file, no additional_dependencies, and nothing compiled - matters on Windows, where
   # Smart App Control blocks locally built binaries.
