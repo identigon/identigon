@@ -81,8 +81,11 @@ You need two empty PostgreSQL databases: `quickstart_source` and `quickstart_tar
 Postgres works; if you don't have one handy, a throwaway container is the fastest way to get one:
 
 ```sh
-docker run --rm -d --name identigon-quickstart -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:18-alpine
+docker run --rm -d --name identigon-quickstart -e POSTGRES_PASSWORD=postgres -p 127.0.0.1:5432:5432 postgres:18-alpine
 ```
+
+`127.0.0.1:` keeps the container reachable from this machine only - with a well-known password,
+publishing it on every network interface would let anyone on the same network log in.
 
 Then create the two databases and load the schema:
 

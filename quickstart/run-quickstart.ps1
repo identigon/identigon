@@ -121,8 +121,9 @@ function Invoke-PsqlInContainer {
 function Start-FreshContainer {
     Write-Step "Starting a throwaway PostgreSQL container ($ContainerName, port $PgPort)"
     docker rm -f $ContainerName *> $null
+    # Loopback only: the password is a well-known default, so never publish on other interfaces.
     Invoke-Checked docker run --rm -d --name $ContainerName `
-        -e "POSTGRES_PASSWORD=$PgPassword" -p "${PgPort}:5432" $PgImage | Out-Null
+        -e "POSTGRES_PASSWORD=$PgPassword" -p "127.0.0.1:${PgPort}:5432" $PgImage | Out-Null
 
     Write-Step "Waiting for PostgreSQL to accept connections"
     # Requires TWO consecutive successful checks, not one: the official image briefly starts a

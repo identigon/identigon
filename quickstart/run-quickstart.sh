@@ -79,8 +79,9 @@ psql_in_container() { docker exec -i "$CONTAINER_NAME" psql -v ON_ERROR_STOP=1 -
 start_fresh_container() {
     log "Starting a throwaway PostgreSQL container ($CONTAINER_NAME, port $PG_PORT)"
     docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+    # Loopback only: the password is a well-known default, so never publish on other interfaces.
     docker run --rm -d --name "$CONTAINER_NAME" \
-        -e POSTGRES_PASSWORD="$PG_PASSWORD" -p "$PG_PORT:5432" "$PG_IMAGE" >/dev/null
+        -e POSTGRES_PASSWORD="$PG_PASSWORD" -p "127.0.0.1:$PG_PORT:5432" "$PG_IMAGE" >/dev/null
 
     log "Waiting for PostgreSQL to accept connections"
     # Requires TWO consecutive successful checks, not one: the official image briefly starts a
