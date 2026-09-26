@@ -92,6 +92,25 @@ deferred _composite-FK_ resolution into a cyclic table (a composite-PK table can
 if a composite FK references it, which hits a separate guard first). See
 `docs/tasks/incognito-composite-pk-cyclic-fk.md` for the full analysis and handoff.
 
+## Move narrative comments to the documents they belong in
+
+**Type:** debt - **Importance:** low - **Effort:** medium
+
+Many comments recount history ("X used to ..."), weigh alternatives an ADR already records, or park
+TODOs - facts `DOC-MAP.md` files in `CHANGELOG.md`, `docs/adr/` or here. Main code and the Gradle
+scripts are done; test code (21 comments across 18 classes), `.pre-commit-config.yaml`, the
+workflows and long rationale blocks remain. See
+`docs/tasks/move-narrative-comments-to-their-documents.md`.
+
+## Split YAML policy parsing into an `incognito-yaml` module
+
+**Type:** debt - **Importance:** low - **Effort:** medium **Project:** incognito
+
+`YamlPolicyParser` pulls SnakeYAML into incognito's core as an `implementation` dependency, so every
+consumer of the programmatic API carries a YAML parser it may never use. Moving it to its own module
+(effigies depending on both) keeps the core dependency-lean, as `docs/spec/incognito.md` §10
+intends.
+
 ## `ServiceLoader`-based strategy/dictionary packs for additional countries
 
 **Type:** feature - **Importance:** low - **Effort:** high **Project:** alterego
