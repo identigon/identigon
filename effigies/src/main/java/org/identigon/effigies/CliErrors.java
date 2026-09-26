@@ -6,11 +6,9 @@ import java.util.Set;
 
 /**
  * Formats a full {@code Throwable} cause chain for CLI error output. A bare {@code e.toString()} or
- * {@code e.getMessage()} - the pattern every subcommand's catch block used to reach for - only ever
- * shows the outermost exception; when that is a generic wrapper around a genuinely unexpected
- * failure (e.g. {@code DefaultIncognitoPipeline}'s {@code IncognitoException("Pipeline execution
- * failed", e)}), the actual diagnostic sits in the cause and never reached the user (v3.1.0
- * tutorial-feedback finding).
+ * {@code e.getMessage()} shows only the outermost exception; when that is a generic wrapper (e.g.
+ * {@code DefaultIncognitoPipeline}'s {@code IncognitoException("Pipeline execution failed", e)}),
+ * the actual diagnostic sits in the cause.
  */
 final class CliErrors {
 

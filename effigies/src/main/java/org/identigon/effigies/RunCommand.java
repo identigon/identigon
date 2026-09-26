@@ -66,14 +66,9 @@ class RunCommand {
       return 1;
     }
 
-    // Parsed here (not just to peek saltMode) so a malformed or schema-invalid policy file
-    // fails fast, before either database connection is opened - run() below parses the same
-    // path again to actually build the pipeline, but both parses go through the same
-    // schema-validated YamlPolicyParser now, so they can never disagree about what
-    // `saltMode: persistent` means (previously this peeked the raw YAML by hand because
-    // YamlPolicyParser didn't recognise the key at all, which meant a policy file that
-    // actually declared saltMode always failed later in run() with "Unrecognised policy
-    // key(s): 'saltMode'").
+    // Parsed in full here, not just to read saltMode, so a malformed or schema-invalid policy
+    // fails before either database connection is opened. run() parses it again through the same
+    // YamlPolicyParser, so the two parses cannot disagree.
     String saltMode;
     try {
       AnonymisationPolicy policy = new YamlPolicyParser().parse(policyPath);

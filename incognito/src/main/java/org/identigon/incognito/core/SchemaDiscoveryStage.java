@@ -29,12 +29,10 @@ public final class SchemaDiscoveryStage implements PipelineStage {
 
   /**
    * Key used to store the auto-inference role suggestions in the pipeline context attributes.
-   * <b>Always empty.</b> incognito's own inference (the {@code autoInfer} flag and {@code
-   * PolicyInferrer}) was removed at v2.0.0 - inference now lives entirely in {@code effigies}' own
-   * {@code PolicyInferrer} (ADR 23), which incognito cannot reach (it would invert the dependency
-   * direction). Retained only so {@link
-   * org.identigon.incognito.api.AnonymisationReport.TableReport#inferSuggestions()} still has
-   * something to read; nothing populates it any more.
+   * <b>Always empty.</b> Role inference lives in {@code effigies}' {@code PolicyInferrer} (ADR 23),
+   * which incognito cannot reach without inverting the dependency direction. Kept so {@link
+   * org.identigon.incognito.api.AnonymisationReport.TableReport#inferSuggestions()} has something
+   * to read; nothing populates it.
    */
   public static final String ATTR_INFER_SUGGESTIONS = "incognito.schema.inferSuggestions";
 
@@ -236,11 +234,11 @@ public final class SchemaDiscoveryStage implements PipelineStage {
    * Fail-closed guard for a {@code FOREIGN_KEY} with no declared {@code references} (SPEC §7.2,
    * §4.1). A <em>single-column</em> FK is resolved at load time via the policy-declared {@code
    * referencedTable}/{@code referencedColumn} ({@code TableTransformLoadStage.buildFkTransformer}),
-   * not structurally - a missing block used to reach {@code run} as a raw {@code
-   * NullPointerException} from the key-translation store instead of failing here. A composite FK is
-   * resolved purely structurally from the discovered constraint and consults no policy field, so it
-   * is exempt - checking {@link SchemaInspector.ForeignKeyConstraint#isComposite} the same way
-   * {@code buildFkTransformer} does keeps this check and that resolution logic in lock-step.
+   * not structurally, so without this check a missing block surfaces only as a {@code
+   * NullPointerException} from the key-translation store mid-load. A composite FK is resolved
+   * purely structurally from the discovered constraint and consults no policy field, so it is
+   * exempt - checking {@link SchemaInspector.ForeignKeyConstraint#isComposite} the same way {@code
+   * buildFkTransformer} does keeps this check and that resolution logic in lock-step.
    */
   private void validateForeignKeyReferences(
       SchemaInspector.TableMetadata table,

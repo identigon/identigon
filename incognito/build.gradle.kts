@@ -28,9 +28,7 @@ dependencies {
     // is `api`, not `implementation` - consumers writing custom stages compile against its types.
     api(project(":alterego"))
 
-    // Declarative YAML policy parser - an internal detail. TODO: move to a separate incognito-yaml
-    // module so the core stays dependency-lean (docs/spec/incognito.md §1); currently bundled in
-    // core.
+    // Declarative YAML policy parser - an internal detail (see PLAN.md for splitting it out).
     implementation(libs.snakeyaml)
 
     // Testing dependencies

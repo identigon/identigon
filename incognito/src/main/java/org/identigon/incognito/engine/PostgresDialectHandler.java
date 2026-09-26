@@ -123,8 +123,8 @@ public final class PostgresDialectHandler implements DialectHandler {
   public void resyncSequence(Connection targetConn, String tableName, String pkCol)
       throws SQLException {
     try (Statement stmt = targetConn.createStatement()) {
-      // pg_get_serial_sequence's two arguments are NOT symmetric, confirmed empirically (this
-      // isn't clearly documented): the table argument's *content* is parsed the same way an
+      // pg_get_serial_sequence's two arguments are NOT symmetric (not clearly documented, but
+      // observed): the table argument's *content* is parsed the same way an
       // identifier would be -- an unquoted name inside the string gets folded to lowercase, so
       // a case-sensitive/reserved-word table name needs the double-quotes embedded in the
       // literal's content (quoteLiteral(quoteIdent(...))). The column argument, by contrast, is

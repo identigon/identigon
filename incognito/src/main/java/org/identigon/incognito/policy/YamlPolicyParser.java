@@ -23,7 +23,7 @@ public class YamlPolicyParser {
   // Every key this parser reads at each nesting level, plus RETIRED_ROOT_KEYS below - anything
   // else is a fail-closed error (SPEC §6), not a silent no-op: an unrecognised *required* key's
   // absence is already caught downstream (e.g. a column with no `role`), but an unrecognised
-  // *optional* key (a typo like `jitterdays` for `jitterDays`) previously vanished with no
+  // *optional* key (a typo like `jitterdays` for `jitterDays`) would otherwise vanish with no
   // signal, changing the run's behaviour without changing what the author wrote or was told.
   private static final Set<String> KNOWN_ROOT_KEYS =
       Set.of(
@@ -107,10 +107,8 @@ public class YamlPolicyParser {
         }
       }
 
-      // A policy.yaml written before v2.0.0 may still carry `autoInfer: false` (or `true`) -
-      // silently ignored (RETIRED_ROOT_KEYS above), unlike any other unrecognised key: the key
-      // no longer means anything (AnonymisationPolicy.Builder#autoInfer was removed), but a
-      // leftover no-op key in an otherwise-valid file shouldn't fail the parse.
+      // RETIRED_ROOT_KEYS (`autoInfer`) are ignored rather than rejected: they mean nothing, but a
+      // leftover no-op key in an otherwise-valid pre-v2.0.0 file shouldn't fail the parse.
       if (root.containsKey("maxCategoricalCardinality")) {
         builder.maxCategoricalCardinality((Integer) root.get("maxCategoricalCardinality"));
       }
@@ -167,9 +165,8 @@ public class YamlPolicyParser {
                 // colNode.get("X") != null, not containsKey("X"): `scaffold` always emits every
                 // key with a blank value (e.g. "role:" with nothing after the colon - a YAML
                 // null, present but unset), specifically so a human/agent fills it in. containsKey
-                // is true for that blank entry too, so ColumnRole.valueOf(String.valueOf(null))
-                // used to evaluate ColumnRole.valueOf("NULL") and throw a cryptic
-                // IllegalArgumentException instead of leaving the field null for the existing
+                // is true for that blank entry too, and ColumnRole.valueOf("NULL") would throw a
+                // cryptic IllegalArgumentException instead of leaving the field null for the
                 // fail-closed validation (SPEC §7.2) to report clearly.
                 if (colNode.get("role") != null) {
                   colBuilder.role(
