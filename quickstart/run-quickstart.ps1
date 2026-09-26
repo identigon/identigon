@@ -50,7 +50,8 @@ $RepoRoot = (Resolve-Path (Join-Path $ScriptDir '..')).Path
 $WorkDir = Join-Path $ScriptDir '.quickstart-work'
 
 $ContainerName = 'identigon-quickstart'
-$PgImage = 'postgres:18-alpine'
+# Shared with incognito's tests.
+$PgImage = (Select-String -Path (Join-Path $ScriptDir 'postgres/Dockerfile') -Pattern '^FROM (.+)$').Matches[0].Groups[1].Value.Trim()
 $PgPassword = 'postgres'
 $PgPort = 55432   # non-default, to avoid colliding with a Postgres you may already have on 5432
 $SourceDb = 'quickstart_source'

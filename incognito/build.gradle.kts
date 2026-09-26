@@ -50,6 +50,10 @@ dependencies {
 }
 
 tasks.test {
+    // The PostgreSQL image tag, shared with the quickstart and bumped there by dependabot.
+    val postgresDockerfile = rootProject.file("quickstart/postgres/Dockerfile")
+    inputs.file(postgresDockerfile)
+    systemProperty("identigon.postgresDockerfile", postgresDockerfile.absolutePath)
     useJUnitPlatform {
         includeEngines("junit-jupiter")
     }

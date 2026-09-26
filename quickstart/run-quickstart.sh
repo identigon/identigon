@@ -34,7 +34,7 @@ REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 WORK_DIR="$SCRIPT_DIR/.quickstart-work"
 
 CONTAINER_NAME=identigon-quickstart
-PG_IMAGE=postgres:18-alpine
+PG_IMAGE="$(sed -n 's/^FROM //p' "$SCRIPT_DIR/postgres/Dockerfile")"   # shared with incognito's tests
 PG_PASSWORD=postgres
 PG_PORT=55432   # non-default, to avoid colliding with a Postgres you may already have on 5432
 SOURCE_DB=quickstart_source

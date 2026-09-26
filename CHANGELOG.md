@@ -25,6 +25,11 @@ restating them here too would be the same fact in two places.
 
 ### Changed
 
+- The PostgreSQL image the quickstart and incognito's Testcontainers tests run now lives in one
+  place, `quickstart/postgres/Dockerfile`, which dependabot's `docker` ecosystem watches. The
+  scripts and tests read its tag from there, and a test fails a bump until the quickstart README's
+  copy-paste command matches. Previously the tag was a plain string in four places dependabot could
+  not see.
 - CI now runs the `.pre-commit-config.yaml` hooks on every pull request and push to `main`
   (markdownlint, Prettier, shellcheck, the NUL-byte and ADR-shape guards and the rest), scans the
   change's commits with gitleaks, and checks each pull-request commit message against Conventional

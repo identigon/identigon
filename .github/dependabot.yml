@@ -11,6 +11,15 @@ updates:
       time: "20:05"
       timezone: "Europe/London"
 
+  # The PostgreSQL image tag shared by the quickstart scripts and incognito's Testcontainers tests.
+  - package-ecosystem: "docker"
+    directory: "/quickstart/postgres"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "20:05"
+      timezone: "Europe/London"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
