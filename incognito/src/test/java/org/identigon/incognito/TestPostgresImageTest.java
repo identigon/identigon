@@ -20,7 +20,7 @@ class TestPostgresImageTest {
 
   @Test
   void quickstartReadmeNamesTheSameImage() throws Exception {
-    Path readme = TestPostgres.DOCKERFILE.getParent().getParent().resolve("README.md");
+    Path readme = TestPostgres.DOCKERFILE.resolveSibling("../README.md");
     assertTrue(
         Files.readString(readme).contains(" " + TestPostgres.IMAGE + "\n"),
         "quickstart/README.md must name " + TestPostgres.IMAGE + " to match the Dockerfile");
