@@ -17,8 +17,8 @@ Pointed at a live database, that goes wrong in two ways:
 
 - **The run aborts.** A child row committed after its parent table was read carries an FK value with
   no key translation. `buildFkTransformer` fails closed
-  (`No key translation found for FK value ...`), and the compensation handler then empties the
-  target. Nothing is corrupted, but a busy source may never clone successfully.
+  (`No key translation for a value of FOREIGN_KEY column ...`), and the compensation handler then
+  empties the target. Nothing is corrupted, but a busy source may never clone successfully.
 - **Verification compares different moments.** Volume and survival checks read the source again
   after the load, so rows written in between show up as spurious drift - or mask real drift.
 
