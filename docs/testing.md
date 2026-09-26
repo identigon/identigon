@@ -45,8 +45,9 @@ grown one.
 - **File store**: beyond the contract test - mappings and `unique()` collision resolutions survive
   `close()`/`open()`; a torn final line is ignored and safely overwritten; a malformed interior
   line, duplicate key, or wrong header fails `open` with `AlterEgoStoreException`; a second
-  concurrent `open` of the same file fails; operations after `close()` fail; the file gains exactly
-  one line per newly stored mapping and none for hits/rejections.
+  concurrent `open` of the same file fails; operations after `close()` fail; a write that fails
+  halfway closes the store and the file still reopens; the file gains exactly one line per newly
+  stored mapping and none for hits/rejections.
 - **Dictionary coverage**: each shipped dictionary is non-empty, well-formed, its tag fields valid,
   and its provenance header present with a licence name matching a committed file under
   `dictionaries/LICENCES/`. Deduplicated means no duplicate (value, tags) row, not no duplicate

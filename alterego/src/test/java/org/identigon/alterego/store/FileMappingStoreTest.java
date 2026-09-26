@@ -107,6 +107,29 @@ class FileMappingStoreTest {
   }
 
   @Test
+  void failedWriteClosesTheStoreSoTheFileStillReopens(@TempDir Path tempDir) {
+    Path file = tempDir.resolve("store.txt");
+    HalfWriteFailingChannel[] channel = new HalfWriteFailingChannel[1];
+    FileMappingStore store =
+        FileMappingStore.open(file, c -> channel[0] = new HalfWriteFailingChannel(c));
+    store.putIfAbsent("ns", "k1", "v1");
+
+    channel[0].arm();
+    assertThrows(AlterEgoStoreException.class, () -> store.putIfAbsent("ns", "k2", "v2"));
+    // Closed, so nothing can be appended after the half-written line and bury it mid-file.
+    assertThrows(AlterEgoStoreException.class, () -> store.putIfAbsent("ns", "k3", "v3"));
+
+    try (FileMappingStore reopened = FileMappingStore.open(file)) {
+      assertEquals("v1", reopened.get("ns", "k1").orElse(null));
+      assertTrue(reopened.get("ns", "k2").isEmpty(), "the half-written mapping is discarded");
+      reopened.putIfAbsent("ns", "k4", "v4");
+    }
+    try (FileMappingStore reopened = FileMappingStore.open(file)) {
+      assertEquals("v4", reopened.get("ns", "k4").orElse(null));
+    }
+  }
+
+  @Test
   void tornHeaderIsRecoveredNotJustOverwrittenLater(@TempDir Path tempDir) throws IOException {
     Path file = tempDir.resolve("store.txt");
 

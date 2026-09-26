@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.UnaryOperator;
 import org.identigon.alterego.AlterEgoStoreException;
 
 /**
@@ -19,8 +20,9 @@ import org.identigon.alterego.AlterEgoStoreException;
  *
  * <p>This store is single-process: an exclusive file lock prevents sharing across processes. It
  * grows by exactly one line per distinct stored mapping, and provides durability against process
- * crashes. One instance can be safely shared by multiple threads or {@code AlterEgo} instances in
- * the same process.
+ * crashes (not against power loss or an operating-system crash: writes are not forced to disk). A
+ * failed write closes the store, so the file still reopens. One instance can be safely shared by
+ * multiple threads or {@code AlterEgo} instances in the same process.
  */
 public final class FileMappingStore implements MappingStore, AutoCloseable {
 
@@ -56,12 +58,21 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
    *     is malformed
    */
   public static FileMappingStore open(Path file) {
+    return open(file, UnaryOperator.identity());
+  }
+
+  /** As {@link #open(Path)}, with the file channel passed through {@code channelWrapper} first. */
+  static FileMappingStore open(Path file, UnaryOperator<FileChannel> channelWrapper) {
     FileChannel channel = null;
     FileLock lock = null;
     try {
       channel =
-          FileChannel.open(
-              file, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
+          channelWrapper.apply(
+              FileChannel.open(
+                  file,
+                  StandardOpenOption.CREATE,
+                  StandardOpenOption.READ,
+                  StandardOpenOption.WRITE));
       try {
         lock = channel.tryLock();
       } catch (java.nio.channels.OverlappingFileLockException e) {
@@ -266,7 +277,10 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
           channel.write(buffer);
         }
       } catch (IOException e) {
-        throw new AlterEgoStoreException("Failed to write to file " + file, e);
+        // Part of the line may already be on disk. Appending after it would bury it mid-file,
+        // where open() rejects it as corruption; closing leaves it a torn tail open() discards.
+        close();
+        throw new AlterEgoStoreException("Failed to write to file " + file + "; store closed", e);
       }
     }
   }

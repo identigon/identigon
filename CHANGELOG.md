@@ -44,6 +44,10 @@ restating them here too would be the same fact in two places.
 
 ### Fixed
 
+- **alterego:** A `FileMappingStore` write that failed partway (e.g. a full disk) left the store
+  open, so the next append landed after the partial record and buried it mid-file, where `open`
+  rejects it as corruption - the file could never be reopened. A failed write now closes the store,
+  leaving the partial record as a torn tail that `open` discards.
 - **effigies:** `run` now exits `1`, with the error on standard error, when the clone completes but
   a DPIA artefact cannot be written. It previously printed the failure to standard output and exited
   `0`.

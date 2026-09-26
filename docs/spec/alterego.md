@@ -801,6 +801,9 @@ public final class FileMappingStore implements MappingStore, AutoCloseable {
   returns success. There is no fsync: an OS-level crash can lose the final record(s), which the
   torn-tail rule below makes safe; a process crash cannot, because success is only reported after
   the write.
+- A failed append (an I/O error mid-write, e.g. a full disk) closes the store and throws
+  `AlterEgoStoreException`. Part of the record may already be on disk; appending nothing after it
+  keeps it a torn tail, so the file still opens.
 - The file only grows, by one line per distinct stored mapping - the same asymptotic footprint as
   the in-memory store, and no compaction is needed because records are never superseded (mappings
   are permanent by contract).
