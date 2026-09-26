@@ -1,7 +1,7 @@
 ---
-status: "proposed"
+status: "accepted"
 date: 2026-09-26
-decision-makers: {who decided - required once the status is not "proposed"}
+decision-makers: David Conneely
 ---
 
 # 37. Publish effigies with sources and javadoc jars like the other modules
