@@ -35,6 +35,9 @@ restating them here too would be the same fact in two places.
 
 ### Fixed
 
+- **effigies:** `run` now exits `1`, with the error on standard error, when the clone completes but
+  a DPIA artefact cannot be written. It previously printed the failure to standard output and exited
+  `0`.
 - **incognito:** Case conversion and `String.format` no longer follow the JVM's default locale.
   Under a Turkish locale, a lowercase `policy.yaml` enum value containing `i` (`quasi_id`,
   `alterego_city`) failed to parse, and PostgreSQL targets fell back to the generic dialect handler.

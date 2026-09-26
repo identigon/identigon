@@ -129,6 +129,26 @@ class RunCommand {
       boolean force,
       PrintStream out,
       PrintStream err) {
+    return run(
+        sourceDs, targetDs, policyPath, saltMode, salt, seed, force, Paths.get("."), out, err);
+  }
+
+  /**
+   * As {@link #run(DataSource, DataSource, Path, String, byte[], Long, boolean, PrintStream,
+   * PrintStream)}, writing the DPIA artefacts into {@code reportDir} instead of the working
+   * directory.
+   */
+  static int run(
+      DataSource sourceDs,
+      DataSource targetDs,
+      Path policyPath,
+      String saltMode,
+      byte[] salt,
+      Long seed,
+      boolean force,
+      Path reportDir,
+      PrintStream out,
+      PrintStream err) {
     // AlterEgo's builder enforces this same minimum, but only once construction reaches it -
     // deep inside IncognitoPipeline.Builder#build(), after both connections have already been
     // opened. Catching a too-short salt here, before either DataSource is touched, gives the
@@ -174,19 +194,22 @@ class RunCommand {
       // The engine's own emitter produces the accountability artefact - salt-mode disclosure,
       // survival/lint/structural findings, illustrative sample rows. Dumping the raw
       // AnonymisationReport record graph would throw all of that away, so delegate.
-      Path dpiaHtml = Paths.get("./dpia-report.html");
-      Path dpiaJson = Paths.get("./dpia-report.json");
-      Path dpiaMarkdown = Paths.get("./dpia-report.md");
+      Path dpiaHtml = reportDir.resolve("dpia-report.html");
+      Path dpiaJson = reportDir.resolve("dpia-report.json");
+      Path dpiaMarkdown = reportDir.resolve("dpia-report.md");
       try {
         DpiaArtefactEmitter.emitHtml(result.report(), dpiaHtml);
         DpiaArtefactEmitter.emitJson(result.report(), dpiaJson);
         DpiaArtefactEmitter.emitMarkdown(result.report(), dpiaMarkdown);
-        out.println(
-            "DPIA artefact written to " + dpiaHtml + ", " + dpiaJson + " and " + dpiaMarkdown);
       } catch (Exception e) {
-        out.println("Failed to write DPIA artefact: " + e.getMessage());
+        // The clone exists, but without its accountability record the run is not a success.
+        err.println(
+            "Error: the clone completed but the DPIA artefact could not be written: "
+                + CliErrors.causeChain(e));
+        return 1;
       }
-
+      out.println(
+          "DPIA artefact written to " + dpiaHtml + ", " + dpiaJson + " and " + dpiaMarkdown);
       return 0;
     } catch (Exception e) {
       err.println("Error executing pipeline: " + CliErrors.causeChain(e));

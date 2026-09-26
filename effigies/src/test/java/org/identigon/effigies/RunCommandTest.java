@@ -1,6 +1,7 @@
 package org.identigon.effigies;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -116,6 +117,51 @@ class RunCommandTest {
     Files.deleteIfExists(Path.of("./dpia-report.html"));
     Files.deleteIfExists(Path.of("./dpia-report.json"));
     Files.deleteIfExists(Path.of("./dpia-report.md"));
+  }
+
+  @Test
+  void failureToWriteTheDpiaArtefactExitsNonZero(@TempDir Path tempDir) throws Exception {
+    String sourceUrl = "jdbc:h2:mem:" + UUID.randomUUID() + ";DB_CLOSE_DELAY=-1";
+    String targetUrl = "jdbc:h2:mem:" + UUID.randomUUID() + ";DB_CLOSE_DELAY=-1";
+    for (String url : new String[] {sourceUrl, targetUrl}) {
+      try (Connection conn = DriverManager.getConnection(url, "sa", "");
+          Statement stmt = conn.createStatement()) {
+        stmt.execute("CREATE TABLE person (id BIGINT PRIMARY KEY)");
+      }
+    }
+    Path policy = tempDir.resolve("policy.yaml");
+    Files.writeString(
+        policy,
+        """
+            tables:
+              PERSON:
+                columns:
+                  ID:
+                    role: PRIMARY_KEY
+                    surrogateStrategy: SEQUENTIAL_LONG
+            """);
+    // A regular file where the report directory should be: every artefact write fails.
+    Path notADirectory = Files.createFile(tempDir.resolve("not-a-directory"));
+
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    ByteArrayOutputStream err = new ByteArrayOutputStream();
+    int code =
+        RunCommand.run(
+            new SimpleDataSource(sourceUrl, "sa", ""),
+            new SimpleDataSource(targetUrl, "sa", ""),
+            policy,
+            "ephemeral",
+            null,
+            null,
+            false,
+            notADirectory,
+            new PrintStream(out, true, StandardCharsets.UTF_8),
+            new PrintStream(err, true, StandardCharsets.UTF_8));
+
+    String errStr = err.toString(StandardCharsets.UTF_8);
+    assertEquals(1, code, errStr);
+    assertTrue(errStr.contains("DPIA artefact could not be written"), errStr);
+    assertFalse(out.toString(StandardCharsets.UTF_8).contains("DPIA artefact written to"));
   }
 
   /**

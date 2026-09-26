@@ -73,7 +73,9 @@ default policy file.
   declares the salt **mode**; the salt **bytes** for fixed-salt modes come from out-of-band input.
   Refuses to start if any target table it would load into already has rows - a failed run's
   compensation deletes existing rows during clean-up, not only the ones this run itself inserted -
-  unless `--force` is given.
+  unless `--force` is given. If the clone completes but any DPIA artefact cannot be written, `run`
+  reports the failure on standard error and exits `1`: a clone without its accountability record is
+  not a successful run.
 - **`version`**, **`help`** - self-explanatory.
 
 Exit codes: `0` success; `2` unknown command / bad usage; `3` a declared-but-unimplemented command.
