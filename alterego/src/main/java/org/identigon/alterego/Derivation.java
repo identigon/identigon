@@ -79,14 +79,39 @@ final class Derivation {
 
   /** HMAC-SHA256(key, message); the single primitive Appendix A.1 and A.2 both build on. */
   static byte[] hmac(byte[] key, byte[] message) {
+    return newMac(key).doFinal(message);
+  }
+
+  /**
+   * A fresh HMAC-SHA256 instance keyed with {@code key}, cloned from a per-thread prototype rather
+   * than looked up through {@link Mac#getInstance} (the dominant cost of a one-shot HMAC). The
+   * prototype only ever holds {@link #PROTOTYPE_KEY}, never a salt or derived key, so no secret
+   * outlives the returned instance.
+   */
+  static Mac newMac(byte[] key) {
     try {
-      Mac mac = Mac.getInstance(HMAC_ALGORITHM);
+      Mac mac = (Mac) PROTOTYPE.get().clone();
       mac.init(new SecretKeySpec(key, HMAC_ALGORITHM));
-      return mac.doFinal(message);
-    } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+      return mac;
+    } catch (CloneNotSupportedException | InvalidKeyException e) {
       throw new IllegalStateException(HMAC_ALGORITHM + " unavailable", e);
     }
   }
+
+  /** A fixed, non-secret key: initialising the prototype pins its provider before cloning. */
+  private static final byte[] PROTOTYPE_KEY = {0};
+
+  private static final ThreadLocal<Mac> PROTOTYPE =
+      ThreadLocal.withInitial(
+          () -> {
+            try {
+              Mac mac = Mac.getInstance(HMAC_ALGORITHM);
+              mac.init(new SecretKeySpec(PROTOTYPE_KEY, HMAC_ALGORITHM));
+              return mac;
+            } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+              throw new IllegalStateException(HMAC_ALGORITHM + " unavailable", e);
+            }
+          });
 
   /** Converts a {@code char[]} salt to bytes via UTF-8 without materialising a {@code String}. */
   static byte[] charsToUtf8(char[] chars) {

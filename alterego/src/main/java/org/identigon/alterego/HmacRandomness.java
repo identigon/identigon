@@ -2,6 +2,7 @@ package org.identigon.alterego;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import javax.crypto.Mac;
 
 /**
  * Appendix A.2/A.3: an HMAC-SHA256 counter-mode byte stream over a derived key, with the
@@ -11,6 +12,8 @@ import java.util.List;
 final class HmacRandomness implements Randomness {
 
   private final byte[] key;
+  // Keyed once on the first block, then reused: doFinal resets it for the next counter.
+  private Mac mac;
   private int blockIndex;
   private byte[] currentBlock = new byte[0];
   private int posInBlock;
@@ -22,7 +25,10 @@ final class HmacRandomness implements Randomness {
   private byte[] nextBlock() {
     byte[] counterBytes = ByteBuffer.allocate(4).putInt(blockIndex).array();
     blockIndex++;
-    return Derivation.hmac(key, counterBytes);
+    if (mac == null) {
+      mac = Derivation.newMac(key);
+    }
+    return mac.doFinal(counterBytes);
   }
 
   private long next8() {

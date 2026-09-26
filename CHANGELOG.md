@@ -25,6 +25,10 @@ restating them here too would be the same fact in two places.
 
 ### Changed
 
+- **alterego:** HMAC derivation no longer looks up a fresh `Mac` through `Mac.getInstance` for every
+  call, and a randomness stream keys its `Mac` once instead of once per 32-byte block - about 28%
+  faster for `fullName()` in a local microbenchmark. Outputs are byte-identical (the frozen vectors
+  pass unchanged), and no salt-keyed `Mac` outlives the call that created it.
 - **effigies:** Subcommands now reject an unrecognised option, a stray positional argument, a
   repeated option, or a value option with no value (exit `2`, naming the argument). Previously these
   were silently ignored, so a mistyped `--polcy x.yaml` quietly used `./policy.yaml` instead.

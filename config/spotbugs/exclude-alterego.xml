@@ -14,4 +14,11 @@
     <Match>
         <Bug pattern="CNT_ROUGH_CONSTANT_VALUE"/>
     </Match>
+
+    <!-- Derivation's Mac prototype is keyed with a fixed, public byte only to pin its provider
+         before cloning; every clone is re-keyed before use, so it never protects anything. -->
+    <Match>
+        <Class name="org.identigon.alterego.Derivation"/>
+        <Bug pattern="HARD_CODE_KEY"/>
+    </Match>
 </FindBugsFilter>
