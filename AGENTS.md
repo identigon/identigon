@@ -144,7 +144,8 @@ Before you edit:
    jitter delta derives from `alterego`'s salt-keyed HMAC stream (SPEC §5.1, and the matching ADR).
 3. **The salt and row values are never logged**, and the salt is destroyed on completion. The
    library performs no logging today; if it ever does, use the JDK `System.Logger` facade and emit
-   only coarse operational events - never the salt, never a field value (SPEC §5.1/§7.3).
+   only coarse operational events - never the salt, never a field value (SPEC §5.1/§7.3). Exception
+   messages are held to the same rule: name the table and column, never the value.
 4. **Session settings on the insert connection only.** `session_replication_role='replica'` (and any
    per-session state) is set on the same connection that performs the inserts (SPEC §9).
 5. **No `shiftDate(YEAR)` for a strongly-identifying date** (e.g. `dob`) - use wide jitter or

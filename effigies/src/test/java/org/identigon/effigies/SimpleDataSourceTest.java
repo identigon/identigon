@@ -4,10 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.Properties;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -36,6 +40,29 @@ class SimpleDataSourceTest {
   void getConnectionFailsForAnUnroutableUrl() {
     SimpleDataSource ds = new SimpleDataSource("jdbc:no-such-dialect://nowhere", "u", "p");
     assertThrows(SQLException.class, ds::getConnection);
+  }
+
+  @Test
+  void postgresConnectionsSuppressServerErrorDetail() throws SQLException {
+    String url = "jdbc:postgresql://localhost/db";
+    Properties props = SimpleDataSource.connectionProperties(url, "u", "p");
+    assertEquals("false", props.getProperty("logServerErrorDetail"));
+    assertEquals("u", props.getProperty("user"));
+    assertEquals("p", props.getProperty("password"));
+
+    // The property name must be one the PostgreSQL driver actually recognises, or setting it
+    // silently does nothing.
+    boolean recognised = false;
+    for (DriverPropertyInfo info : DriverManager.getDriver(url).getPropertyInfo(url, props)) {
+      recognised |= "logServerErrorDetail".equals(info.name);
+    }
+    assertTrue(recognised, "the PostgreSQL driver must recognise logServerErrorDetail");
+  }
+
+  @Test
+  void otherDriversGetNoPostgresOnlyProperty() {
+    Properties props = SimpleDataSource.connectionProperties("jdbc:h2:mem:x", "sa", "");
+    assertNull(props.getProperty("logServerErrorDetail"));
   }
 
   @Test

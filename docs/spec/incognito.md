@@ -863,7 +863,11 @@ any is a defect regardless of passing tests:
   source/target rows are PII-shaped, so a logger is a leakage channel. If operational logging is
   ever added it must use the JDK `System.Logger` facade (zero-dependency, pluggable to the host app)
   and emit only **coarse operational events** (stage boundaries, cleanup steps, otherwise-swallowed
-  failures) - never the salt and never any source or transformed field value.
+  failures) - never the salt and never any source or transformed field value. The same holds for the
+  exceptions Incognito raises, since callers print and log them: a failure caused by a particular
+  row names its table and column, never the row's value. A JDBC driver's own exception text, carried
+  as a cause, is outside Incognito's control - the PostgreSQL driver quotes row values from the
+  server's error detail unless the caller's connections set `logServerErrorDetail=false`.
 
 ---
 

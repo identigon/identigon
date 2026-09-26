@@ -535,10 +535,13 @@ public final class TableTransformLoadStage implements PipelineStage {
         if (cyclicTables.contains(referencedTable)) {
           throw new CyclicFkException(referencedTable, value);
         }
+        // Name the column, never the value: a key can be PII (SPEC §7.3).
         throw new IncognitoException.ConstraintException(
-            "No key translation found for FK value '"
-                + value
-                + "' referencing table '"
+            "No key translation for a value of FOREIGN_KEY column '"
+                + columnName
+                + "' in table '"
+                + tableMeta.tableName()
+                + "': no row with that key was loaded into referenced table '"
                 + referencedTable
                 + "'");
       };
@@ -624,9 +627,11 @@ public final class TableTransformLoadStage implements PipelineStage {
                 + "' - composite + cyclic FKs are not yet supported (SPEC §5.2).");
       }
       throw new IncognitoException.ConstraintException(
-          "No key translation for composite FK "
-              + lookup
-              + " referencing table '"
+          "No key translation for a value of composite FOREIGN_KEY "
+              + orderedChildCols
+              + " in table '"
+              + meta.tableName()
+              + "': no row with that key was loaded into referenced table '"
               + parentTable
               + "'");
     };
@@ -1062,9 +1067,7 @@ public final class TableTransformLoadStage implements PipelineStage {
                         + targetTable
                         + '.'
                         + targetColumn
-                        + "' for id '"
-                        + ancestorId
-                        + "' was not published - is '"
+                        + "' was not published for the row's ancestor - is '"
                         + targetTable
                         + "' loaded before its descendants and its column classified? (SPEC"
                         + " §6.1)."));

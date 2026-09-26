@@ -205,9 +205,11 @@ public final class BulkDatabaseLoadStage implements AutoCloseable {
                 context.keyStore().get(update.referencedTable(), update.sourceFkValue());
             if (mapped.isEmpty()) {
               throw new org.identigon.incognito.api.IncognitoException.ConstraintException(
-                  "Deferred cyclic FK: no key translation found for FK value '"
-                      + update.sourceFkValue()
-                      + "' referencing table '"
+                  "Deferred cyclic FK: no key translation for a value of FOREIGN_KEY column '"
+                      + update.fkColumn()
+                      + "' in table '"
+                      + update.tableName()
+                      + "': no row with that key was loaded into referenced table '"
                       + update.referencedTable()
                       + "'");
             }

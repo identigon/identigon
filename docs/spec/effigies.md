@@ -30,7 +30,9 @@ respect incognito's own contract.
 1. **Metadata only, never data.** Discovery and every artifact Effigies emits carry schema
    _metadata_ - table/column names, SQL types, the primary-/foreign-key graph, unique constraints.
    Effigies must **never** `SELECT` row values into a file, a log, or an artifact handed to a human
-   or an agent. Authoring reasons about the schema, not the data.
+   or an agent. Authoring reasons about the schema, not the data. Its error output follows suit: it
+   connects to PostgreSQL with the driver's `logServerErrorDetail` turned off, so a database error
+   cannot quote row values onto the terminal.
 2. **Fail-closed is preserved.** Effigies **suggests** roles; it never assigns one. A scaffolded
    policy leaves every column to be classified, and an unclassified column still aborts the
    incognito run (that engine's fail-closed contract). Effigies must not emit a "runnable" policy

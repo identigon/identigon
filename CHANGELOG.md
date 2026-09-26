@@ -70,6 +70,16 @@ restating them here too would be the same fact in two places.
   (every fenced code block byte-identical before/after, `markdownlint-cli2` clean across all 60
   files, per-file word-count sanity check).
 
+### Security
+
+- **incognito:** Exception messages no longer include a row's key value. A foreign-key value with no
+  matching parent (single-column, composite, or a deferred cyclic FK) and an inherited attribute's
+  missing ancestor were reported with the source key in the message - PII when the key is natural,
+  such as an e-mail address. The messages now name the table and column instead.
+- **effigies:** PostgreSQL connections now set the driver's `logServerErrorDetail=false`, so a
+  database error (e.g. `Key (email)=(...) already exists`) can no longer print row values to the
+  terminal.
+
 ## [3.2.0] - 2026-09-03
 
 ### Added
