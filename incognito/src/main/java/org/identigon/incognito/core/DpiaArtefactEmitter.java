@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import org.identigon.incognito.api.AnonymisationReport;
 import org.identigon.incognito.api.IncognitoException;
 import org.identigon.incognito.api.PipelineStage;
@@ -410,6 +411,7 @@ public final class DpiaArtefactEmitter {
 
       writer.write(
           String.format(
+              Locale.ROOT,
               "**Salt mode:** `%s` - %s%n%n",
               report.saltMode() == null ? "unknown" : report.saltMode().name(),
               saltModeNote(report.saltMode())));
@@ -431,6 +433,7 @@ public final class DpiaArtefactEmitter {
         for (AnonymisationReport.SurvivalFinding sf : report.survivalFindings()) {
           writer.write(
               String.format(
+                  Locale.ROOT,
                   "| %s | %s | %d | %d | %s |%n",
                   sf.table(),
                   sf.column(),
@@ -451,8 +454,12 @@ public final class DpiaArtefactEmitter {
         for (AnonymisationReport.LintFinding lf : report.lintFindings()) {
           writer.write(
               String.format(
+                  Locale.ROOT,
                   "| %s | %s | %d | %d |%n",
-                  lf.table(), lf.column(), lf.distinctValues(), lf.threshold()));
+                  lf.table(),
+                  lf.column(),
+                  lf.distinctValues(),
+                  lf.threshold()));
         }
         writer.write("\n");
       }
@@ -468,6 +475,7 @@ public final class DpiaArtefactEmitter {
         for (AnonymisationReport.StructuralUniquenessFinding suf : report.structuralFindings()) {
           writer.write(
               String.format(
+                  Locale.ROOT,
                   "| %s | %s | %s | %d | %d | %d | %d | %d |%n",
                   suf.parentTable(),
                   suf.childTable(),
@@ -485,8 +493,12 @@ public final class DpiaArtefactEmitter {
       for (PipelineStage.StageResult sr : report.stageResults()) {
         writer.write(
             String.format(
+                Locale.ROOT,
                 "- **%s**: %s (Processed: %d, Success: %b)\n",
-                sr.stageName(), sr.message(), sr.processedCount(), sr.success()));
+                sr.stageName(),
+                sr.message(),
+                sr.processedCount(),
+                sr.success()));
       }
       writer.write("\n");
 
@@ -496,10 +508,11 @@ public final class DpiaArtefactEmitter {
       }
 
       for (AnonymisationReport.TableReport tr : report.tables()) {
-        writer.write(String.format("### Table: `%s`\n\n", tr.table()));
-        writer.write(String.format("- Rows Processed: %d\n", tr.rowsProcessed()));
+        writer.write(String.format(Locale.ROOT, "### Table: `%s`\n\n", tr.table()));
+        writer.write(String.format(Locale.ROOT, "- Rows Processed: %d\n", tr.rowsProcessed()));
         writer.write(
             String.format(
+                Locale.ROOT,
                 "- Fictionality Verified: %b (table-level - no verification failure found; see"
                     + " each column's own Fictionality Verified below for which columns actually"
                     + " carry a checked guarantee)\n\n",
@@ -515,6 +528,7 @@ public final class DpiaArtefactEmitter {
         for (AnonymisationReport.ColumnAction ca : tr.columns()) {
           writer.write(
               String.format(
+                  Locale.ROOT,
                   "| %s | %s | %s | %s |\n",
                   ca.column(),
                   ca.role(),
@@ -560,7 +574,11 @@ public final class DpiaArtefactEmitter {
           for (AnonymisationReport.InferSuggestion is : tr.inferSuggestions()) {
             writer.write(
                 String.format(
-                    "| %s | %s | %s |\n", is.column(), is.suggestedRole(), is.matchedHeuristic()));
+                    Locale.ROOT,
+                    "| %s | %s | %s |\n",
+                    is.column(),
+                    is.suggestedRole(),
+                    is.matchedHeuristic()));
           }
           writer.write("\n");
         }
@@ -575,7 +593,8 @@ public final class DpiaArtefactEmitter {
                         """);
           for (AnonymisationReport.PassthroughFlag pf : tr.passthroughFlags()) {
             writer.write(
-                String.format("| %s | %s | %s |\n", pf.column(), pf.jdbcType(), pf.reason()));
+                String.format(
+                    Locale.ROOT, "| %s | %s | %s |\n", pf.column(), pf.jdbcType(), pf.reason()));
           }
           writer.write("\n");
         }

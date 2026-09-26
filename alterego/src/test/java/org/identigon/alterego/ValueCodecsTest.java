@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.util.Locale;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -106,7 +107,7 @@ class ValueCodecsTest {
   void uuidRoundTripsAndIsLowerCase() {
     UUID value = UUID.randomUUID();
     String encoded = ValueCodecs.encode(value, UUID.class);
-    assertEquals(encoded, encoded.toLowerCase());
+    assertEquals(encoded, encoded.toLowerCase(Locale.ROOT));
     assertRoundTrip(value, UUID.class);
   }
 

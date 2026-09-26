@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -1125,7 +1126,7 @@ public final class VerificationStage implements PipelineStage {
                   + " of "
                   + sourceValues.size()
                   + " sampled distinct source values surviving in the target ("
-                  + String.format("%.0f%%", ratio * 100)
+                  + String.format(Locale.ROOT, "%.0f%%", ratio * 100)
                   + ") - fabrication may not have been applied");
           failedTables.add(tableName);
         } else {
@@ -1139,7 +1140,7 @@ public final class VerificationStage implements PipelineStage {
                   + " of "
                   + sourceValues.size()
                   + " sampled distinct source values matching in the target - below the "
-                  + String.format("%.0f%%", SURVIVAL_FAILURE_RATIO * 100)
+                  + String.format(Locale.ROOT, "%.0f%%", SURVIVAL_FAILURE_RATIO * 100)
                   + " failure threshold");
         }
       }

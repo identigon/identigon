@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.identigon.incognito.api.ColumnRole;
@@ -116,12 +117,12 @@ public class YamlPolicyParser {
       if (root.containsKey("distinguishingLint")) {
         builder.distinguishingLint(
             org.identigon.incognito.api.DistinguishingLint.valueOf(
-                String.valueOf(root.get("distinguishingLint")).toUpperCase()));
+                String.valueOf(root.get("distinguishingLint")).toUpperCase(Locale.ROOT)));
       }
       if (root.containsKey("structuralUniqueness")) {
         builder.structuralUniqueness(
             org.identigon.incognito.api.StructuralUniquenessMode.valueOf(
-                String.valueOf(root.get("structuralUniqueness")).toUpperCase()));
+                String.valueOf(root.get("structuralUniqueness")).toUpperCase(Locale.ROOT)));
       }
       if (root.containsKey("structuralRarenessK")) {
         builder.structuralRarenessK((Integer) root.get("structuralRarenessK"));
@@ -129,7 +130,7 @@ public class YamlPolicyParser {
       if (root.containsKey("saltMode")) {
         builder.saltMode(
             org.identigon.incognito.api.SaltMode.valueOf(
-                String.valueOf(root.get("saltMode")).toUpperCase()));
+                String.valueOf(root.get("saltMode")).toUpperCase(Locale.ROOT)));
       }
 
       if (root.containsKey("tables")) {
@@ -172,27 +173,31 @@ public class YamlPolicyParser {
                 // fail-closed validation (SPEC §7.2) to report clearly.
                 if (colNode.get("role") != null) {
                   colBuilder.role(
-                      ColumnRole.valueOf(String.valueOf(colNode.get("role")).toUpperCase()));
+                      ColumnRole.valueOf(
+                          String.valueOf(colNode.get("role")).toUpperCase(Locale.ROOT)));
                 }
                 if (colNode.get("surrogateStrategy") != null) {
                   colBuilder.surrogateStrategy(
                       SurrogateStrategy.valueOf(
-                          String.valueOf(colNode.get("surrogateStrategy")).toUpperCase()));
+                          String.valueOf(colNode.get("surrogateStrategy"))
+                              .toUpperCase(Locale.ROOT)));
                 }
                 if (colNode.get("directIdStrategy") != null) {
                   colBuilder.directIdStrategy(
                       DirectIdStrategy.valueOf(
-                          String.valueOf(colNode.get("directIdStrategy")).toUpperCase()));
+                          String.valueOf(colNode.get("directIdStrategy"))
+                              .toUpperCase(Locale.ROOT)));
                 }
                 if (colNode.get("quasiIdStrategy") != null) {
                   colBuilder.quasiIdStrategy(
                       QuasiIdStrategy.valueOf(
-                          String.valueOf(colNode.get("quasiIdStrategy")).toUpperCase()));
+                          String.valueOf(colNode.get("quasiIdStrategy")).toUpperCase(Locale.ROOT)));
                 }
                 if (colNode.get("redactionStrategy") != null) {
                   colBuilder.redactionStrategy(
                       RedactionStrategy.valueOf(
-                          String.valueOf(colNode.get("redactionStrategy")).toUpperCase()));
+                          String.valueOf(colNode.get("redactionStrategy"))
+                              .toUpperCase(Locale.ROOT)));
                 }
                 if (colNode.get("redactionConstant") != null) {
                   colBuilder.redactionConstant(String.valueOf(colNode.get("redactionConstant")));

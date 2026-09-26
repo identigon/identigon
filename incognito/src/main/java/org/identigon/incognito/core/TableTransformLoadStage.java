@@ -1087,7 +1087,8 @@ public final class TableTransformLoadStage implements PipelineStage {
     for (int i = 0; i < width; i++) {
       mod *= 10L;
     }
-    String digits = String.format("%0" + width + "d", Math.floorMod(seq, mod));
+    String digits =
+        String.format(java.util.Locale.ROOT, "%0" + width + "d", Math.floorMod(seq, mod));
     return base.substring(0, n - width) + digits;
   }
 
@@ -1127,7 +1128,7 @@ public final class TableTransformLoadStage implements PipelineStage {
   private org.identigon.incognito.engine.DialectHandler getDialectHandler(Connection conn)
       throws SQLException {
     String dbName = conn.getMetaData().getDatabaseProductName();
-    if (dbName != null && dbName.toLowerCase().contains("postgresql")) {
+    if (dbName != null && dbName.toLowerCase(java.util.Locale.ROOT).contains("postgresql")) {
       return new org.identigon.incognito.engine.PostgresDialectHandler();
     }
     return new org.identigon.incognito.engine.GenericDialectHandler();

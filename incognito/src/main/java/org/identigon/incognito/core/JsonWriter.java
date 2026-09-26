@@ -2,6 +2,7 @@ package org.identigon.incognito.core;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Locale;
 
 /**
  * Minimal, dependency-free JSON serialiser for the DPIA artefact. Owns comma placement,
@@ -117,7 +118,7 @@ final class JsonWriter {
         case '\t' -> b.append("\\t");
         default -> {
           if (c < 0x20) {
-            b.append(String.format("\\u%04x", (int) c));
+            b.append(String.format(Locale.ROOT, "\\u%04x", (int) c));
           } else {
             b.append(c);
           }

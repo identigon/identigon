@@ -13,9 +13,12 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
+import java.util.Map;
 import org.identigon.incognito.api.ColumnRole;
 import org.identigon.incognito.api.DirectIdStrategy;
 import org.identigon.incognito.api.IncognitoException;
+import org.identigon.incognito.api.QuasiIdStrategy;
 import org.identigon.incognito.api.SaltMode;
 import org.identigon.incognito.api.StructuralUniquenessMode;
 import org.junit.jupiter.api.Test;
@@ -298,6 +301,39 @@ class YamlConfigTest {
     AnonymisationPolicy policy = new YamlPolicyParser().parse(inputStream);
 
     assertEquals(SaltMode.PERSISTENT, policy.saltMode());
+  }
+
+  @Test
+  void lowercaseEnumValuesParseUnderATurkishDefaultLocale() {
+    // Turkish upper-cases 'i' to dotted 'İ', so a locale-sensitive toUpperCase() turns
+    // `quasi_id` into `QUASİ_ID` and valueOf fails.
+    String yamlString =
+        """
+            tables:
+              users:
+                columns:
+                  dob:
+                    role: quasi_id
+                    quasiIdStrategy: synthesise
+                  town:
+                    role: direct_id
+                    directIdStrategy: alterego_city
+            """;
+
+    Locale original = Locale.getDefault();
+    Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+    try {
+      InputStream inputStream =
+          new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
+      AnonymisationPolicy policy = new YamlPolicyParser().parse(inputStream);
+
+      Map<String, ColumnPolicy> columns = policy.tables().get("users").columns();
+      assertEquals(ColumnRole.QUASI_ID, columns.get("dob").role());
+      assertEquals(QuasiIdStrategy.SYNTHESISE, columns.get("dob").quasiIdStrategy());
+      assertEquals(DirectIdStrategy.ALTEREGO_CITY, columns.get("town").directIdStrategy());
+    } finally {
+      Locale.setDefault(original);
+    }
   }
 
   @Test

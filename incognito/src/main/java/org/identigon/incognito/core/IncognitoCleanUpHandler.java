@@ -6,6 +6,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.identigon.incognito.api.PipelineContext;
 import org.identigon.incognito.engine.DialectHandler;
@@ -151,7 +152,7 @@ public final class IncognitoCleanUpHandler {
 
   private static DialectHandler getDialectHandler(Connection conn) throws SQLException {
     String dbName = conn.getMetaData().getDatabaseProductName();
-    if (dbName != null && dbName.toLowerCase().contains("postgresql")) {
+    if (dbName != null && dbName.toLowerCase(Locale.ROOT).contains("postgresql")) {
       return new PostgresDialectHandler();
     }
     return new GenericDialectHandler();

@@ -31,6 +31,10 @@ restating them here too would be the same fact in two places.
 
 ### Fixed
 
+- **incognito:** Case conversion and `String.format` no longer follow the JVM's default locale.
+  Under a Turkish locale, a lowercase `policy.yaml` enum value containing `i` (`quasi_id`,
+  `alterego_city`) failed to parse, and PostgreSQL targets fell back to the generic dialect handler.
+  PMD's `UseLocaleWithCaseConversions` rule is now enforced to keep it that way.
 - `release.yml`'s "Publish to GitHub Packages" step now tolerates the publish-ordering race
   `docs/adr/0028-publish-effigies-runnable-jar.md`'s Consequences already named as a known risk (and
   which actually happened for v3.2.0): if `main.yml`'s own run for the version-bump commit wins the
