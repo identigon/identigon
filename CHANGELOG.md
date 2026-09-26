@@ -25,6 +25,10 @@ restating them here too would be the same fact in two places.
 
 ### Changed
 
+- **effigies:** Subcommands now reject an unrecognised option, a stray positional argument, a
+  repeated option, or a value option with no value (exit `2`, naming the argument). Previously these
+  were silently ignored, so a mistyped `--polcy x.yaml` quietly used `./policy.yaml` instead.
+
 - `DOC-MAP.md` and `docs/research/0000-template.md` now say a research note's Finding, Evidence and
   Dead ends are the current answer, not a narrative of how it was reached - ported from `doc-kit`
   after a research note there drifted into a process diary.

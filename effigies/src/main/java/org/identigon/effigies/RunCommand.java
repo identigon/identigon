@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.Set;
 import javax.sql.DataSource;
 import org.identigon.incognito.api.IncognitoPipeline;
 import org.identigon.incognito.api.PipelineResult;
@@ -23,28 +24,24 @@ class RunCommand {
       return 0;
     }
 
-    String policyFile = "./policy.yaml";
-    String srcUrl = null;
-    String srcUser = null;
-    String tgtUrl = null;
-    String tgtUser = null;
-    boolean force = false;
-
-    for (int i = 0; i < args.length; i++) {
-      if ("--policy".equals(args[i]) && i + 1 < args.length) {
-        policyFile = args[++i];
-      } else if ("--source-url".equals(args[i]) && i + 1 < args.length) {
-        srcUrl = args[++i];
-      } else if ("--source-user".equals(args[i]) && i + 1 < args.length) {
-        srcUser = args[++i];
-      } else if ("--target-url".equals(args[i]) && i + 1 < args.length) {
-        tgtUrl = args[++i];
-      } else if ("--target-user".equals(args[i]) && i + 1 < args.length) {
-        tgtUser = args[++i];
-      } else if ("--force".equals(args[i])) {
-        force = true;
-      }
+    CliArgs.Parsed parsed;
+    try {
+      parsed =
+          CliArgs.parse(
+              args,
+              Set.of("--source-url", "--source-user", "--target-url", "--target-user", "--policy"),
+              Set.of("--force"));
+    } catch (CliArgs.UsageException e) {
+      err.println("Error: " + e.getMessage());
+      err.println(USAGE);
+      return EffigiesCli.EXIT_USAGE;
     }
+    String srcUrl = parsed.value("--source-url").orElse(null);
+    String srcUser = parsed.value("--source-user").orElse(null);
+    String tgtUrl = parsed.value("--target-url").orElse(null);
+    String tgtUser = parsed.value("--target-user").orElse(null);
+    String policyFile = parsed.value("--policy").orElse("./policy.yaml");
+    boolean force = parsed.has("--force");
 
     if (srcUrl == null || srcUser == null || tgtUrl == null || tgtUser == null) {
       err.println(USAGE);

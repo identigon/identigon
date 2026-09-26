@@ -2,6 +2,7 @@ package org.identigon.effigies;
 
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Set;
 import javax.sql.DataSource;
 import org.identigon.incognito.engine.SchemaInspector;
 
@@ -14,15 +15,16 @@ class DiscoverCommand {
       return 0;
     }
 
-    String url = null;
-    String user = null;
-    for (int i = 0; i < args.length; i++) {
-      if ("--source-url".equals(args[i]) && i + 1 < args.length) {
-        url = args[++i];
-      } else if ("--source-user".equals(args[i]) && i + 1 < args.length) {
-        user = args[++i];
-      }
+    CliArgs.Parsed parsed;
+    try {
+      parsed = CliArgs.parse(args, Set.of("--source-url", "--source-user"), Set.of());
+    } catch (CliArgs.UsageException e) {
+      err.println("Error: " + e.getMessage());
+      err.println(USAGE);
+      return EffigiesCli.EXIT_USAGE;
     }
+    String url = parsed.value("--source-url").orElse(null);
+    String user = parsed.value("--source-user").orElse(null);
     if (url == null || user == null) {
       err.println(USAGE);
       return EffigiesCli.EXIT_USAGE;

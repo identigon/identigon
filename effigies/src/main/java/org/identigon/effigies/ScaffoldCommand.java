@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.sql.DataSource;
 import org.identigon.incognito.api.ColumnRole;
 import org.identigon.incognito.api.DirectIdStrategy;
@@ -25,21 +26,19 @@ class ScaffoldCommand {
       return 0;
     }
 
-    String url = null;
-    String user = null;
-    String outFile = "./policy.scaffold.yaml";
-    boolean force = false;
-    for (int i = 0; i < args.length; i++) {
-      if ("--source-url".equals(args[i]) && i + 1 < args.length) {
-        url = args[++i];
-      } else if ("--source-user".equals(args[i]) && i + 1 < args.length) {
-        user = args[++i];
-      } else if ("--out".equals(args[i]) && i + 1 < args.length) {
-        outFile = args[++i];
-      } else if ("--force".equals(args[i])) {
-        force = true;
-      }
+    CliArgs.Parsed parsed;
+    try {
+      parsed =
+          CliArgs.parse(args, Set.of("--source-url", "--source-user", "--out"), Set.of("--force"));
+    } catch (CliArgs.UsageException e) {
+      err.println("Error: " + e.getMessage());
+      err.println(USAGE);
+      return EffigiesCli.EXIT_USAGE;
     }
+    String url = parsed.value("--source-url").orElse(null);
+    String user = parsed.value("--source-user").orElse(null);
+    String outFile = parsed.value("--out").orElse("./policy.scaffold.yaml");
+    boolean force = parsed.has("--force");
     if (url == null || user == null) {
       err.println(USAGE);
       return EffigiesCli.EXIT_USAGE;

@@ -62,6 +62,16 @@ class EffigiesCliTest {
   }
 
   @Test
+  void everySubcommandRejectsAnUnknownOption() {
+    for (String cmd : new String[] {"discover", "scaffold", "validate", "run"}) {
+      Result r = invoke(cmd, "--source-url", "jdbc:h2:mem:unused", "--polcy", "p.yaml");
+      assertEquals(EffigiesCli.EXIT_USAGE, r.code(), cmd + " exit code");
+      assertTrue(r.err().contains("Unknown option: '--polcy'"), cmd + " names the bad option");
+      assertTrue(r.err().contains("Usage: " + cmd), cmd + " usage message");
+    }
+  }
+
+  @Test
   void unknownCommandFailsWithUsage() {
     Result r = invoke("frobnicate");
     assertEquals(EffigiesCli.EXIT_USAGE, r.code());

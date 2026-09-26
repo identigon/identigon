@@ -2,6 +2,7 @@ package org.identigon.effigies;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * Command-line entry point for <b>Effigies</b> - a thin authoring and orchestration front-end above
@@ -56,16 +57,16 @@ public final class EffigiesCli {
         yield 0;
       }
       case "discover" -> {
-        yield DiscoverCommand.execute(args, out, err);
+        yield DiscoverCommand.execute(subcommandArgs(args), out, err);
       }
       case "scaffold" -> {
-        yield ScaffoldCommand.execute(args, out, err);
+        yield ScaffoldCommand.execute(subcommandArgs(args), out, err);
       }
       case "validate" -> {
-        yield ValidateCommand.execute(args, out, err);
+        yield ValidateCommand.execute(subcommandArgs(args), out, err);
       }
       case "run" -> {
-        yield RunCommand.execute(args, out, err);
+        yield RunCommand.execute(subcommandArgs(args), out, err);
       }
       default -> {
         err.println("Unknown command: '" + command + "'");
@@ -73,6 +74,11 @@ public final class EffigiesCli {
         yield EXIT_USAGE;
       }
     };
+  }
+
+  /** A subcommand's own arguments: everything after the subcommand name. */
+  private static String[] subcommandArgs(String[] args) {
+    return Arrays.copyOfRange(args, 1, args.length);
   }
 
   private static void printUsage(PrintStream w) {

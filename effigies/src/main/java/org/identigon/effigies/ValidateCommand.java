@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 import javax.sql.DataSource;
 import org.identigon.incognito.api.IncognitoException;
 import org.identigon.incognito.core.SchemaDiscoveryStage;
@@ -28,18 +29,17 @@ class ValidateCommand {
       return 0;
     }
 
-    String policyFile = "./policy.yaml";
-    String url = null;
-    String user = null;
-    for (int i = 0; i < args.length; i++) {
-      if ("--source-url".equals(args[i]) && i + 1 < args.length) {
-        url = args[++i];
-      } else if ("--source-user".equals(args[i]) && i + 1 < args.length) {
-        user = args[++i];
-      } else if ("--policy".equals(args[i]) && i + 1 < args.length) {
-        policyFile = args[++i];
-      }
+    CliArgs.Parsed parsed;
+    try {
+      parsed = CliArgs.parse(args, Set.of("--source-url", "--source-user", "--policy"), Set.of());
+    } catch (CliArgs.UsageException e) {
+      err.println("Error: " + e.getMessage());
+      err.println(USAGE);
+      return EffigiesCli.EXIT_USAGE;
     }
+    String url = parsed.value("--source-url").orElse(null);
+    String user = parsed.value("--source-user").orElse(null);
+    String policyFile = parsed.value("--policy").orElse("./policy.yaml");
     if (url == null || user == null) {
       err.println(USAGE);
       return EffigiesCli.EXIT_USAGE;

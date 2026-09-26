@@ -48,7 +48,10 @@ respect incognito's own contract.
 The CLI is `java -jar identigon.jar <command> [options]`. `discover`, `scaffold`, `validate`, `run`,
 `version`, and `help` are implemented; a bad or unknown invocation returns exit code 2. Every
 subcommand also recognises `--help`/`-h` anywhere in its own arguments, printing its usage line and
-exiting `0`.
+exiting `0`. Subcommand arguments are parsed strictly: an unrecognised option, a stray positional
+argument, an option given twice, or a value option with no value is bad usage (exit `2`, naming the
+offending argument) - never silently ignored, so a mistyped `--polcy` cannot fall back to the
+default policy file.
 
 - **`discover`** - inspect a source database and describe its schema (metadata only). Produces a
   human-readable summary and a machine-readable form for the later phases. Requires read access to
