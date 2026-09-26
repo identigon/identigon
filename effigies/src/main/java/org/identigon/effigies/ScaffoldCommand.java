@@ -8,9 +8,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.sql.DataSource;
 import org.identigon.incognito.api.ColumnRole;
 import org.identigon.incognito.api.DirectIdStrategy;
@@ -100,7 +102,7 @@ class ScaffoldCommand {
               + "says.\n");
       writer.write("tables:\n");
       for (SchemaInspector.TableMetadata table : tables) {
-        writer.write("  " + table.tableName() + ":\n");
+        writer.write("  " + yamlName(table.tableName()) + ":\n");
         writer.write("    columns:\n");
         for (String col : table.columns()) {
           if (table.generatedColumns().contains(col)) {
@@ -108,7 +110,7 @@ class ScaffoldCommand {
           }
           writer.write(
               "      "
-                  + col
+                  + yamlName(col)
                   + ":            # "
                   + ColumnMetadataFormatter.format(table, col)
                   + "\n");
@@ -116,6 +118,37 @@ class ScaffoldCommand {
         }
       }
     }
+  }
+
+  /** Names YAML can take as written: an identifier-like word that is not a YAML 1.1 keyword. */
+  private static final Pattern PLAIN_NAME = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
+
+  /** Words YAML 1.1 (SnakeYAML's dialect) reads as a boolean or null, whatever their case. */
+  private static final Set<String> YAML_KEYWORDS =
+      Set.of("true", "false", "yes", "no", "on", "off", "y", "n", "null");
+
+  /**
+   * {@code name} as a YAML scalar that loads back as exactly that string: as written when that is
+   * safe, otherwise double-quoted. Unquoted, a column named {@code on} would load as the boolean
+   * {@code true}, {@code 2024} as a number, and a name containing {@code :} or {@code #} would not
+   * parse at all.
+   */
+  static String yamlName(String name) {
+    if (PLAIN_NAME.matcher(name).matches()
+        && !YAML_KEYWORDS.contains(name.toLowerCase(Locale.ROOT))) {
+      return name;
+    }
+    StringBuilder sb = new StringBuilder("\"");
+    for (char c : name.toCharArray()) {
+      if (c == '"' || c == '\\') {
+        sb.append('\\').append(c);
+      } else if (c < 0x20) {
+        sb.append(String.format(Locale.ROOT, "\\u%04x", (int) c));
+      } else {
+        sb.append(c);
+      }
+    }
+    return sb.append('"').toString();
   }
 
   /**
@@ -144,9 +177,9 @@ class ScaffoldCommand {
       if (parent != null && parent.primaryKeyColumns().size() == 1) {
         writer.write(
             "        references:        # TODO if FOREIGN_KEY (Suggestion: {table: "
-                + parentTable
+                + yamlName(parentTable)
                 + ", column: "
-                + parent.primaryKeyColumns().get(0)
+                + yamlName(parent.primaryKeyColumns().get(0))
                 + "})\n");
       } else {
         writer.write(

@@ -49,9 +49,10 @@ quoting.
 
 ## 4. effigies
 
-`discover` -> `scaffold` -> `validate` -> `run` over scenario A's schema: the scaffolded
-`policy.yaml` keys must round-trip awkward names exactly (YAML-quoted where needed), so a classified
-scaffold runs without hand-editing names. Once `schema:` lands, the same for scenario B.
+`discover` -> `scaffold` -> `validate` -> `run` over scenario A's schema, so a classified scaffold
+runs without hand-editing names. `scaffold` already quotes names YAML would misread, and
+`ScaffoldCommandTest` covers the YAML round trip; what is missing is the end-to-end run. Once
+`schema:` lands, the same for scenario B.
 
 ## 5. When done
 

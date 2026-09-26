@@ -13,6 +13,8 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 import org.identigon.incognito.engine.SchemaInspector;
+import org.identigon.incognito.policy.AnonymisationPolicy;
+import org.identigon.incognito.policy.YamlPolicyParser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -141,6 +143,45 @@ class ScaffoldCommandTest {
 
     assertTrue(content.contains("  orders:"));
     assertTrue(content.contains("      user_id:            # type: INTEGER, fk -> users"));
+  }
+
+  @Test
+  void awkwardNamesRoundTripThroughThePolicyParser(@TempDir File tempDir) throws Exception {
+    // Each of these loads as something other than its own text if written unquoted: a boolean,
+    // a number, null, or a parse error.
+    List<String> columns =
+        List.of("id", "on", "Yes", "null", "2024", "a:b", "x # y", "say \"hi\"", "back\\slash");
+    Map<String, Integer> types = new java.util.LinkedHashMap<>();
+    columns.forEach(c -> types.put(c, Types.VARCHAR));
+    SchemaInspector.TableMetadata table =
+        new SchemaInspector.TableMetadata(
+            "order line",
+            List.of("id"),
+            Map.of(),
+            List.of(),
+            columns,
+            List.of(),
+            List.of(),
+            types,
+            List.of());
+    File file = new File(tempDir, "policy.scaffold.yaml");
+
+    ScaffoldCommand.writeScaffold(file, List.of(table));
+    AnonymisationPolicy policy = new YamlPolicyParser().parse(file.toPath());
+
+    assertEquals(
+        java.util.Set.copyOf(columns),
+        policy.tables().get("order line").columns().keySet(),
+        Files.readString(file.toPath()));
+  }
+
+  @Test
+  void plainNamesAreWrittenAsIsAndOthersQuoted() {
+    assertEquals("user_id", ScaffoldCommand.yamlName("user_id"));
+    assertEquals("\"on\"", ScaffoldCommand.yamlName("on"));
+    assertEquals("\"NO\"", ScaffoldCommand.yamlName("NO"));
+    assertEquals("\"2024\"", ScaffoldCommand.yamlName("2024"));
+    assertEquals("\"say \\\"hi\\\"\"", ScaffoldCommand.yamlName("say \"hi\""));
   }
 
   @Test

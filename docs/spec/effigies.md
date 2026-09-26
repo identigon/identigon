@@ -63,8 +63,10 @@ default policy file.
   identical to what the DDL says.
 - **`scaffold`** - emit a starter `policy.yaml`: every discovered column listed, discovered metadata
   as comments (including the same JDBC type names `discover` reports), **every column left
-  unclassified** (fail-closed). A draft, not a runnable config. Refuses to overwrite an existing
-  output file unless `--force` is given.
+  unclassified** (fail-closed). A draft, not a runnable config. Every table and column name loads
+  back as exactly its own text: a name YAML would otherwise read as a boolean, number or null (`on`,
+  `yes`, `2024`), or could not parse (`a:b`), is written double-quoted. Refuses to overwrite an
+  existing output file unless `--force` is given.
 - **`validate`** - check a `policy.yaml` against a source schema: the same fail-closed diagnostics
   `run` would raise, without a target connection or any data movement. Requires only source
   connection details (`--source-url`, `--source-user`, `IDENTIGON_SOURCE_PASSWORD`) - cheaper to

@@ -337,6 +337,26 @@ class YamlConfigTest {
   }
 
   @Test
+  void anUnquotedColumnNameYamlReadsAsABooleanFailsWithAQuotingHint() {
+    String yamlString =
+        """
+            tables:
+              users:
+                columns:
+                  on:
+                    role: PAYLOAD
+            """;
+
+    InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
+    IncognitoException.ConfigException ex =
+        assertThrows(
+            IncognitoException.ConfigException.class,
+            () -> new YamlPolicyParser().parse(inputStream));
+    assertTrue(ex.getMessage().contains("Boolean"), ex.getMessage());
+    assertTrue(ex.getMessage().contains("quote the name"), ex.getMessage());
+  }
+
+  @Test
   void invalidSaltModeValueFailsClosed() {
     // A typo'd/invalid saltMode (e.g. `personal` for `persistent`) must fail closed, not
     // silently fall through to EPHEMERAL - the same fail-closed treatment every other

@@ -44,6 +44,12 @@ restating them here too would be the same fact in two places.
 
 ### Fixed
 
+- **effigies:** `scaffold` now double-quotes any table or column name YAML would misread. Written
+  bare, a column named `on` or `yes` loaded back as a boolean, `2024` as a number and `null` as
+  null, and a name containing `:` or `#` did not parse, so the scaffold for such a schema was
+  unusable.
+- **incognito:** A policy table or column name that YAML reads as a boolean, number or null now
+  fails with a message saying to quote it, instead of a generic parse error.
 - **alterego:** A `FileMappingStore` write that failed partway (e.g. a full disk) left the store
   open, so the next append landed after the partial record and buried it mid-file, where `open`
   rejects it as corruption - the file could never be reopened. A failed write now closes the store,

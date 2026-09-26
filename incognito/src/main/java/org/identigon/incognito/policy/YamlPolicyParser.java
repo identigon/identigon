@@ -135,7 +135,7 @@ public class YamlPolicyParser {
         Map<String, Map<String, Object>> tables =
             (Map<String, Map<String, Object>>) root.get("tables");
         for (Map.Entry<String, Map<String, Object>> tableEntry : tables.entrySet()) {
-          String tableName = tableEntry.getKey();
+          String tableName = requireStringName(tableEntry, "table");
           Map<String, Object> tableNode = tableEntry.getValue();
 
           if (tableNode != null) {
@@ -151,7 +151,7 @@ public class YamlPolicyParser {
             Map<String, Map<String, Object>> columns =
                 (Map<String, Map<String, Object>>) tableNode.get("columns");
             for (Map.Entry<String, Map<String, Object>> colEntry : columns.entrySet()) {
-              String colName = colEntry.getKey();
+              String colName = requireStringName(colEntry, "column in table '" + tableName + "'");
               Map<String, Object> colNode = colEntry.getValue();
 
               ColumnPolicy.Builder colBuilder = ColumnPolicy.builder(colName);
@@ -239,5 +239,23 @@ public class YamlPolicyParser {
     } catch (Exception e) {
       throw new IncognitoException.ConfigException("Failed to parse YAML policy", e);
     }
+  }
+
+  /**
+   * The entry's key as a table or column name. YAML 1.1 reads an unquoted {@code on}, {@code yes}
+   * or {@code 2024} as a boolean or number rather than text, so such a name must be quoted.
+   */
+  private static String requireStringName(Map.Entry<?, ?> entry, String what)
+      throws IncognitoException.ConfigException {
+    Object key = entry.getKey();
+    if (key instanceof String name) {
+      return name;
+    }
+    throw new IncognitoException.ConfigException(
+        "A "
+            + what
+            + " name was read as "
+            + (key == null ? "null" : "a " + key.getClass().getSimpleName() + " (" + key + ")")
+            + ", not text - quote the name in the policy, e.g. \"on\": or \"2024\":");
   }
 }
