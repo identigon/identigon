@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write   # to publish alterego and incognito
+      packages: write   # to publish alterego, incognito and effigies
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -26,7 +26,7 @@ jobs:
           distribution: temurin
           java-version: 25
       - name: Publish to GitHub Packages
-        run: ./gradlew publish # no-op for effigies - it has no publishing {} block
+        run: ./gradlew publish
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

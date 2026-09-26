@@ -143,4 +143,80 @@ subprojects {
             dependsOn(tasks.withType<JacocoCoverageVerification>())
         }
     }
+
+    // A subproject's own LICENCE (alterego's adds an Open Government Licence clause for its
+    // dictionary data) wins over the root's plain MIT text, and its NOTICE travels with it. Most
+    // consumers receive only the jar, so both go inside it as well as into the POM.
+    val licence = project.file("LICENCE").takeIf { it.exists() } ?: rootProject.file("LICENCE")
+    val notice = project.file("NOTICE").takeIf { it.exists() }
+    val repoUrl = "https://github.com/identigon/identigon"
+
+    pluginManager.withPlugin("java") {
+        tasks.named<Jar>("jar") {
+            from(licence) { into("META-INF") }
+            notice?.let { from(it) { into("META-INF") } }
+        }
+    }
+
+    // Every published subproject has the same shape: binary, sources and javadoc jars (Maven
+    // Central requires all three), one POM identity, the GitHub Packages repository, and signing.
+    // Each subproject's own script declares only its publication, artifactId, name and description.
+    pluginManager.withPlugin("maven-publish") {
+        apply(plugin = "signing")
+
+        configure<JavaPluginExtension> {
+            withSourcesJar()
+            withJavadocJar()
+        }
+
+        val publishing = the<PublishingExtension>()
+        publishing.publications.withType<MavenPublication>().configureEach {
+            pom {
+                url = "$repoUrl/tree/main/${project.name}"
+                licenses {
+                    license {
+                        name = "MIT License"
+                        url = "$repoUrl/blob/main/${licence.relativeTo(rootDir).invariantSeparatorsPath}"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "identigon"
+                        name = "Identigon"
+                    }
+                }
+                scm {
+                    connection = "scm:git:$repoUrl.git"
+                    developerConnection = "scm:git:$repoUrl.git"
+                    url = "$repoUrl/tree/main/${project.name}"
+                }
+            }
+        }
+
+        // Credentials come from the environment only (CI sets them); locally `publish` has
+        // nowhere authenticated to push unless GITHUB_ACTOR/GITHUB_TOKEN are set.
+        publishing.repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/identigon/identigon")
+                credentials {
+                    username = providers.environmentVariable("GITHUB_ACTOR").orNull
+                    password = providers.environmentVariable("GITHUB_TOKEN").orNull
+                }
+            }
+        }
+
+        // Signing activates only when an ASCII-armored key is supplied in SIGNING_KEY (optional
+        // passphrase in SIGNING_PASSWORD), so builds without one are unaffected. Which Maven
+        // Central staging endpoint to publish through is still an open decision.
+        val signingKey = providers.environmentVariable("SIGNING_KEY").orNull
+        val signingPassword = providers.environmentVariable("SIGNING_PASSWORD").orNull
+        configure<SigningExtension> {
+            isRequired = signingKey != null
+            if (signingKey != null) {
+                useInMemoryPgpKeys(signingKey, signingPassword)
+                sign(publishing.publications)
+            }
+        }
+    }
 }

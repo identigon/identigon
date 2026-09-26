@@ -25,6 +25,11 @@ restating them here too would be the same fact in two places.
 
 ### Changed
 
+- All three modules now publish the same shape from one root definition: binary, sources and javadoc
+  jars, a `LICENCE` inside every jar, the same POM developer identity (`identigon`), and PGP signing
+  when `SIGNING_KEY` is set. `effigies` previously published no sources or javadoc jar, its thin jar
+  carried no `LICENCE`, and only `alterego` was signed (see the proposed
+  `docs/adr/0037-publish-effigies-sources-and-javadoc-jars.md`).
 - **alterego:** HMAC derivation no longer looks up a fresh `Mac` through `Mac.getInstance` for every
   call, and a randomness stream keys its `Mac` once instead of once per 32-byte block - about 28%
   faster for `fullName()` in a local microbenchmark. Outputs are byte-identical (the frozen vectors

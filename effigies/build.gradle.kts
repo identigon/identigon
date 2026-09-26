@@ -3,11 +3,11 @@ plugins {
     `maven-publish`
 }
 
-// Code hygiene (Spotless/SpotBugs/PMD/Checkstyle/JaCoCo) is applied and configured for every
-// subproject from the root build.gradle.kts's `subprojects { }` block -- nothing to declare here.
+// Quality plugins, jar LICENCE packaging, and the shared publishing setup (sources/javadoc jars,
+// POM, repository, signing) come from the root build.gradle.kts. Version is lockstep, also from the
+// root (docs/adr/0024-lockstep-versioning.md).
 
 group = "org.identigon"
-// version comes from the root project -- lockstep versioning across the monorepo, see docs/adr/.
 
 java {
     toolchain {
@@ -132,52 +132,16 @@ publishing {
         create<MavenPublication>("maven") {
             from(components["java"])
             artifactId = "effigies"
-            // The standalone-runnable fat jar, also published here under this same coordinate
-            // (a `-standalone` classifier, not the primary artifact) rather than as its own
-            // separate GAV - the usual way to offer a shaded jar alongside a real one without a
-            // dependency resolver ever selecting it by accident, since a classified artifact is
-            // never chosen unless asked for by name. See the `identigonJar` task above.
+            // The standalone fat jar rides along under a `standalone` classifier rather than as the
+            // primary artifact, so a dependency resolver never selects it unless asked for by name
+            // (docs/adr/0028-publish-effigies-runnable-jar.md).
             artifact(tasks.named("identigonJar")) {
                 classifier = "standalone"
             }
-
             pom {
                 name = "Effigies"
                 description = "A Java CLI that discovers database schemas, scaffolds declarative " +
                     "policy.yaml files, and drives Incognito to anonymise databases."
-                url = "https://github.com/identigon/identigon/tree/main/effigies"
-                licenses {
-                    license {
-                        name = "MIT License"
-                        url = "https://github.com/identigon/identigon/blob/main/LICENCE"
-                    }
-                }
-                developers {
-                    developer {
-                        id = "identigon"
-                        name = "Identigon"
-                    }
-                }
-                scm {
-                    connection = "scm:git:https://github.com/identigon/identigon.git"
-                    developerConnection = "scm:git:https://github.com/identigon/identigon.git"
-                    url = "https://github.com/identigon/identigon/tree/main/effigies"
-                }
-            }
-        }
-    }
-    // Publish to this repository's GitHub Packages Maven registry. `./gradlew publish` pushes here;
-    // credentials come from the environment only (GITHUB_ACTOR/GITHUB_TOKEN), never committed - so
-    // locally `publish` has nowhere authenticated to push unless those are set. Mirrors
-    // alterego/incognito. Unlike them, no `withSourcesJar()`/`withJavadocJar()`: effigies is a CLI,
-    // not a library anyone is meant to browse the source/API docs of via a dependency manager.
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/identigon/identigon")
-            credentials {
-                username = providers.environmentVariable("GITHUB_ACTOR").orNull
-                password = providers.environmentVariable("GITHUB_TOKEN").orNull
             }
         }
     }
