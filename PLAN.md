@@ -9,6 +9,48 @@ optionally a `**Project:**` tag (`alterego` / `incognito` / `effigies` / `identi
 work scoped to one subproject or repository; an untagged entry is cross-cutting or applies to no
 single one. See the root `CHANGELOG.md` for what's already shipped.
 
+## Quote every SQL identifier incognito builds
+
+**Type:** bug - **Importance:** high - **Effort:** medium **Project:** incognito
+
+The dialect handlers quote table and column names, but the stages above them concatenate raw catalog
+names - the source `SELECT`, the deferred cyclic-FK `UPDATE`, the non-empty-target guard, the
+compensation `DELETE`, and every verification query - so a mixed-case or reserved-word name
+(`"Customer"`, `order`) fails the run at the first source read. The `pg_stats` lookup also splices
+names into string literals. Call sites and approach in `docs/tasks/incognito-identifier-quoting.md`.
+
+## Make incognito schema-aware instead of relying on `search_path`
+
+**Type:** bug - **Importance:** high - **Effort:** high **Project:** incognito
+
+Tables are identified by bare name and every statement resolves through each connection's
+`search_path`: discovery sees only the source's current schema, other schemas are silently absent
+from the clone, and the owner-mode FK drop/recreate matches `pg_constraint` by bare name across all
+namespaces, so a same-named table in another target schema can have its constraints dropped and
+recreated. Start with one explicit, fully qualified schema; multiple schemas later. See
+`docs/tasks/incognito-schema-qualified-names.md`.
+
+## Read the whole source from one consistent snapshot
+
+**Type:** bug - **Importance:** medium - **Effort:** medium **Project:** incognito
+
+The spec assumes an offline snapshot (§1.3) but nothing provides one: each table and each
+verification query opens its own READ COMMITTED source connection, so against a live database a
+child row committed after its parent table was read aborts the run (no key translation), and
+source-versus-target verification compares different moments. Needs an ADR choosing between one
+shared `REPEATABLE READ` connection and an exported snapshot. See
+`docs/tasks/incognito-consistent-source-snapshot.md`.
+
+## Full-pipeline tests for awkward identifiers and multi-schema databases
+
+**Type:** debt - **Importance:** medium - **Effort:** medium **Project:** incognito
+
+Quoting and schema handling are tested only inside the dialect handler; no test runs discovery,
+load, deferred cyclic-FK update, verification and compensation over mixed-case or reserved-word
+names, or against a target with a decoy schema of same-named tables. These are the acceptance tests
+for the two entries above and land with them. Scenarios in
+`docs/tasks/incognito-identifier-and-schema-e2e-tests.md`.
+
 ## Revisit excluding `effigies.jar` from the GitHub Release assets
 
 **Type:** feature - **Importance:** low - **Effort:** low **Project:** effigies
