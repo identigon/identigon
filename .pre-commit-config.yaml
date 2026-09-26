@@ -44,6 +44,9 @@ repos:
         entry: npx --yes prettier@3.9.6 --write
         pass_filenames: true
         types: [markdown]
+        # One npx at a time: parallel batches racing to fill a cold npx cache left Prettier's own
+        # index.mjs truncated in CI ("SyntaxError: Unexpected end of input").
+        require_serial: true
 
   # Secret scanning - apt for a privacy pipeline (alterego/incognito) and its authoring CLI
   # (effigies).
