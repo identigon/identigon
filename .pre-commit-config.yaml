@@ -156,6 +156,14 @@ repos:
       # the whole point silently, since shellcheck itself just trusts whatever dialect the shebang
       # claims. A script that genuinely needs bash is free to exist; it just has to be named .bash
       # instead, so shellcheck checks it against the rules its name actually promises.
+      # A literal NUL byte makes git classify a source file as binary, hiding every later diff of
+      # it from review. Write "\0" instead.
+      - id: no-nul-bytes-in-source
+        name: "Source and docs contain no literal NUL bytes"
+        language: pygrep
+        entry: '\x00'
+        files: \.(java|kts|toml|md|ya?ml|sql|py|sh|ps1)$
+
       - id: sh-scripts-are-posix
         name: ".sh scripts must not declare a bash shebang (use .bash for bash-specific scripts)"
         language: pygrep
