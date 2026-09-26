@@ -51,6 +51,18 @@ names, or against a target with a decoy schema of same-named tables. These are t
 for the two entries above and land with them. Scenarios in
 `docs/tasks/incognito-identifier-and-schema-e2e-tests.md`.
 
+## Accept an encoded, high-entropy `IDENTIGON_SALT`
+
+**Type:** feature - **Importance:** medium - **Effort:** low **Project:** effigies
+
+effigies takes `IDENTIGON_SALT`'s raw UTF-8 bytes and only checks for 16 of them, so a guessable
+passphrase - like the README's own `my-secret-salt-bytes` - weakens every persistent or reproducible
+run. Accept `hex:`- and `base64:`-prefixed values (32 random bytes recommended, e.g.
+`openssl rand -hex 32`); keep a bare value as raw UTF-8 so existing salts reproduce the same output,
+but print a warning for it; switch the README, quickstart and spec to the encoded form. The one
+incompatibility: an existing bare salt that itself begins `hex:` or `base64:` would change meaning -
+call that out in the changelog.
+
 ## Break up `TableTransformLoadStage` and `VerificationStage`
 
 **Type:** debt - **Importance:** medium - **Effort:** high **Project:** incognito
