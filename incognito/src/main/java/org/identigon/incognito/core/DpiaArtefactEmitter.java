@@ -412,7 +412,7 @@ public final class DpiaArtefactEmitter {
       writer.write(
           String.format(
               Locale.ROOT,
-              "**Salt mode:** `%s` - %s%n%n",
+              "**Salt mode:** `%s` - %s\n\n",
               report.saltMode() == null ? "unknown" : report.saltMode().name(),
               saltModeNote(report.saltMode())));
 
@@ -434,7 +434,7 @@ public final class DpiaArtefactEmitter {
           writer.write(
               String.format(
                   Locale.ROOT,
-                  "| %s | %s | %d | %d | %s |%n",
+                  "| %s | %s | %d | %d | %s |\n",
                   sf.table(),
                   sf.column(),
                   sf.sampledDistinct(),
@@ -455,7 +455,7 @@ public final class DpiaArtefactEmitter {
           writer.write(
               String.format(
                   Locale.ROOT,
-                  "| %s | %s | %d | %d |%n",
+                  "| %s | %s | %d | %d |\n",
                   lf.table(),
                   lf.column(),
                   lf.distinctValues(),
@@ -476,7 +476,7 @@ public final class DpiaArtefactEmitter {
           writer.write(
               String.format(
                   Locale.ROOT,
-                  "| %s | %s | %s | %d | %d | %d | %d | %d |%n",
+                  "| %s | %s | %s | %d | %d | %d | %d | %d |\n",
                   suf.parentTable(),
                   suf.childTable(),
                   String.join(", ", suf.childColumns()),

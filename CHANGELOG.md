@@ -53,6 +53,9 @@ restating them here too would be the same fact in two places.
 
 ### Fixed
 
+- **incognito:** The Markdown DPIA report mixed line endings on Windows: most lines ended in LF, but
+  the salt-mode line and the findings-table rows used the platform separator (CRLF on Windows). It
+  is now LF throughout, like the HTML and JSON reports.
 - **effigies:** `scaffold` now double-quotes any table or column name YAML would misread. Written
   bare, a column named `on` or `yes` loaded back as a boolean, `2024` as a number and `null` as
   null, and a name containing `:` or `#` did not parse, so the scaffold for such a schema was

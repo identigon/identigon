@@ -1,6 +1,7 @@
 package org.identigon.incognito.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
@@ -146,6 +147,7 @@ class DpiaArtefactEmitterTest {
         md.contains("Fictionality Verified |"), "per-column fictionality-verified header rendered");
     assertTrue(md.contains("| ALTEREGO_EMAIL | yes |"), "checked column rendered as verified");
     assertTrue(md.contains("| KEEP | — |"), "unchecked column rendered with no claim");
+    assertFalse(md.contains("\r"), "LF line endings only, whatever the platform");
   }
 
   private static long count(String s, char c) {
