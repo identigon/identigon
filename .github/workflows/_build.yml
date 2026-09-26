@@ -4,6 +4,73 @@ on:
   workflow_call:
 
 jobs:
+  # The .pre-commit-config.yaml hooks, so a change made without prek installed (dependabot's
+  # included) is held to them too. Spotless and compilation are skipped: the build job covers both.
+  hooks:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # the secret scan and commit-message check walk this change's commits
+
+      - name: Install prek and gitleaks
+        env:
+          # Keep GITLEAKS_VERSION in step with the gitleaks rev in .pre-commit-config.yaml.
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          pipx install prek==0.5.3
+          curl -fsSLo "$RUNNER_TEMP/gitleaks.tar.gz" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/bin"
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/bin" gitleaks
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Work out this change's commit range
+        id: range
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          if [ -n "$PR_BASE" ]; then
+            range="$PR_BASE..$PR_HEAD"
+          elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            range="$PUSH_BEFORE..$GITHUB_SHA"
+          else
+            range="$GITHUB_SHA~1..$GITHUB_SHA" # manual dispatch: the tip commit only
+          fi
+          echo "range=$range" >> "$GITHUB_OUTPUT"
+
+      # gitleaks-system scans staged changes only, which is nothing in CI, so it is skipped from the
+      # hook run and gitleaks scans the change's commits directly instead. Not the whole history:
+      # alterego's frozen test vectors are public hex values that trip generic-api-key.
+      - name: Hooks (all files)
+        env:
+          SKIP: spotless-apply,compile,gitleaks-system
+        run: prek run --all-files --show-diff-on-failure
+
+      - name: Secret scan (this change's commits)
+        run: gitleaks git --no-banner --redact --log-opts="${{ steps.range.outputs.range }}" .
+
+      - name: Conventional Commits (this change's commits)
+        if: github.event_name == 'pull_request'
+        run: |
+          status=0
+          for sha in $(git rev-list --no-merges "${{ steps.range.outputs.range }}"); do
+            git log -1 --format=%B "$sha" > .git/COMMIT_MSG_CHECK
+            if ! prek run conventional-pre-commit --hook-stage commit-msg \
+                --commit-msg-filename .git/COMMIT_MSG_CHECK; then
+              echo "::error::Commit $sha does not follow Conventional Commits"
+              status=1
+            fi
+          done
+          exit $status
+
   build:
     timeout-minutes: 60
     strategy:

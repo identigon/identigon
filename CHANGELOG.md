@@ -25,6 +25,10 @@ restating them here too would be the same fact in two places.
 
 ### Changed
 
+- CI now runs the `.pre-commit-config.yaml` hooks on every pull request and push to `main`
+  (markdownlint, Prettier, shellcheck, the NUL-byte and ADR-shape guards and the rest), scans the
+  change's commits with gitleaks, and checks each pull-request commit message against Conventional
+  Commits. Previously these ran only on machines with prek installed.
 - All three modules now publish the same shape from one root definition: binary, sources and javadoc
   jars, a `LICENCE` inside every jar, the same POM developer identity (`identigon`), and PGP signing
   when `SIGNING_KEY` is set. `effigies` previously published no sources or javadoc jar, its thin jar
