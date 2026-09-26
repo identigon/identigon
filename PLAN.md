@@ -51,6 +51,16 @@ names, or against a target with a decoy schema of same-named tables. These are t
 for the two entries above and land with them. Scenarios in
 `docs/tasks/incognito-identifier-and-schema-e2e-tests.md`.
 
+## Break up `TableTransformLoadStage` and `VerificationStage`
+
+**Type:** debt - **Importance:** medium - **Effort:** high **Project:** incognito
+
+Both are about 1,200 lines, held under PMD only by excluding its size and complexity rules.
+`VerificationStage.process` alone runs six independent checks in ~470 lines, nine fictionality
+checks are near-copies of one query, and every column transformer takes eight parameters. The
+quoting, schema and snapshot work above touches nearly every SQL statement in both, so splitting
+them first shrinks those changes. Proposed split in `docs/tasks/incognito-split-large-stages.md`.
+
 ## Revisit excluding `effigies.jar` from the GitHub Release assets
 
 **Type:** feature - **Importance:** low - **Effort:** low **Project:** effigies
@@ -110,6 +120,45 @@ workflows and long rationale blocks remain. See
 consumer of the programmatic API carries a YAML parser it may never use. Moving it to its own module
 (effigies depending on both) keeps the core dependency-lean, as `docs/spec/incognito.md` §10
 intends.
+
+## Let `run` write its DPIA reports somewhere other than the working directory
+
+**Type:** feature - **Importance:** low - **Effort:** low **Project:** effigies
+
+`run` always writes `dpia-report.html`/`.json`/`.md` into the current directory, overwriting any
+from an earlier run, with no option to put them elsewhere - awkward in CI and when running several
+policies from one directory. A `--report-dir <dir>` option (default: the working directory, as
+today) would close this; `RunCommand.run` already takes a report directory internally.
+
+## Handle `saltMode` as the `SaltMode` enum in effigies' `run`
+
+**Type:** debt - **Importance:** low - **Effort:** low **Project:** effigies
+
+`RunCommand` parses the policy into a typed `SaltMode`, then lower-cases it to a string and compares
+against `"persistent"`/`"reproducible"` literals in several places. Passing the enum through and
+switching on it removes the string round-trip and lets the compiler catch a new mode that isn't
+handled.
+
+## Enable Gradle's configuration cache
+
+**Type:** debt - **Importance:** low - **Effort:** medium
+
+Every invocation, even `./gradlew :alterego:test`, reconfigures all three subprojects from scratch
+and shells out to `git describe` and `docker info` from the root build script. The configuration
+cache would reuse the configuration between runs, but the two `providers.exec` probes are its inputs
+and still run each time to validate it - so the Docker probe (needed only by incognito's coverage
+minimum) should move out of configuration, e.g. into the coverage-verification task itself. Needs
+`org.gradle.configuration-cache=true` plus a pass over the build scripts and plugins (SpotBugs,
+Spotless) for compatibility problems.
+
+## Pass `release.yml`'s `tag` input to shell through `env:`
+
+**Type:** bug - **Importance:** low - **Effort:** low
+
+The "Derive the release version" step interpolates `${{ inputs.tag }}` straight into its script, so
+a crafted tag value would run as shell. Only users with write access can dispatch the workflow,
+which limits the risk, but GitHub's hardening guidance is to pass inputs through `env:` and quote
+the variable.
 
 ## `ServiceLoader`-based strategy/dictionary packs for additional countries
 
