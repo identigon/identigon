@@ -182,11 +182,3 @@ publishing {
         }
     }
 }
-
-// Deferred to afterEvaluate, and configured by type rather than via the `spotbugs { }` accessor:
-// see alterego/build.gradle.kts's own excludeFilter block for why.
-afterEvaluate {
-    configure<com.github.spotbugs.snom.SpotBugsExtension> {
-        excludeFilter = rootProject.file("config/spotbugs/exclude-effigies.xml")
-    }
-}
