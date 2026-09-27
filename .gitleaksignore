@@ -1,0 +1,22 @@
+# Reviewed false positives from a full-history `gitleaks git` scan, one fingerprint per line.
+# - alterego/src/test/resources/vectors/*.json: keyHex values derived from fixed test inputs in
+#   the frozen conformance vectors (never edited - see AGENTS.md).
+# - "alterego/1/mapkey": a key-derivation domain string, not a key.
+
+02173f02c2adf90d595536053ee9ec8ef27ffd1f:alterego/SPECIFICATION.md:generic-api-key:1097
+7124e8b8027e7dcd217820397541e216055cd746:alterego/SPECIFICATION.md:generic-api-key:782
+a84955ebc96a2b61fad1083575c0ad1b646772d5:alterego/src/main/java/io/github/dconneely/alterego/Derivation.java:generic-api-key:18
+a84955ebc96a2b61fad1083575c0ad1b646772d5:alterego/src/test/resources/vectors/derivation.json:generic-api-key:1
+a84955ebc96a2b61fad1083575c0ad1b646772d5:alterego/src/test/resources/vectors/mapkey.json:generic-api-key:1
+a84955ebc96a2b61fad1083575c0ad1b646772d5:alterego/src/test/resources/vectors/sampling.json:generic-api-key:1
+a84955ebc96a2b61fad1083575c0ad1b646772d5:alterego/src/test/resources/vectors/stream.json:generic-api-key:1
+a84955ebc96a2b61fad1083575c0ad1b646772d5:alterego/tools/verify_vectors.py:generic-api-key:24
+
+# The same findings in the current tree, for `gitleaks dir` and staged scans (no commit hash).
+alterego/src/main/java/org/identigon/alterego/Derivation.java:generic-api-key:19
+alterego/src/test/resources/vectors/derivation.json:generic-api-key:1
+alterego/src/test/resources/vectors/mapkey.json:generic-api-key:1
+alterego/src/test/resources/vectors/sampling.json:generic-api-key:1
+alterego/src/test/resources/vectors/stream.json:generic-api-key:1
+alterego/tools/verify_vectors.py:generic-api-key:24
+docs/spec/alterego.md:generic-api-key:1058
