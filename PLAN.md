@@ -30,6 +30,63 @@ namespaces, so a same-named table in another target schema can have its constrai
 recreated. Start with one explicit, fully qualified schema; multiple schemas later. See
 `docs/tasks/incognito-schema-qualified-names.md`.
 
+## Prove fail-closed holds when the schema drifts after approval
+
+**Type:** debt - **Importance:** high - **Effort:** medium **Project:** incognito
+
+Fail-closed is the property the privacy argument rests on, but it is only tested against a static
+schema. Nothing approves a policy and then applies the changes a migration would - a new PII column,
+a rename, a type change, a new or dropped FK, a new constraint, a database-specific type - before
+the next `validate`/`run`. The property to prove is that no path lets an unclassified or
+wrongly-typed source value reach the target unnoticed. Scenarios, and the spec gaps they expose, in
+`docs/tasks/incognito-schema-drift-tests.md`.
+
+## Make the scaffolded draft explain itself
+
+**Type:** feature - **Importance:** high - **Effort:** medium **Project:** effigies
+
+Users find the quickstart steps easy to follow but the `scaffold` output intimidating: it doesn't
+say what a role or a strategy is, which other settings a column needs, what values each one allows,
+which combinations are valid, or what to do next. Its only pointers are a spec section and a Javadoc
+page. Start the file with what to do and a legend of roles, list the allowed values next to each
+setting, give reasons instead of heuristic names, end with a summary and the next command, and have
+`validate` report what is still missing per column. See
+`docs/tasks/effigies-self-explaining-scaffold.md`.
+
+## Present Identigon as one command-line tool
+
+**Type:** docs - **Importance:** high - **Effort:** medium
+
+Users want to run `identigon`, not learn that it is built from `alterego`, `incognito` and
+`effigies`, yet those names meet them everywhere: the README's first screen, the quickstart's
+`../effigies/build/libs` jar path, `help` and `version` output, scaffold comments, `ConfigException`
+messages that cite `SPEC §4.1`/`ADR 31` and Java type names, and an agent skill that runs a
+non-existent `effigies` command. Keep the component names for library users and contributors, and
+take them off the CLI user's path. Inventory in `docs/tasks/one-tool-user-surface.md`.
+
+## Write a column-classification guide for policy authors
+
+**Type:** docs - **Importance:** high - **Effort:** medium **Project:** identigon.github.io
+
+The only complete description of roles, strategies and their valid combinations is
+`docs/spec/incognito.md` §4.1, §6 and Appendix B - a contract for implementers, not a guide for
+someone classifying columns. Write one page for policy authors: what each role means for the data
+("replaced with a fictional value", "kept as-is"), a short decision path per column ("does this
+identify a person on its own?"), every setting each role needs and allows, and worked examples. It
+needs a stable public URL for the scaffold and `validate` output to link to, so the site is its
+natural home.
+
+## Plainer names in the policy vocabulary
+
+**Type:** feature - **Importance:** medium - **Effort:** medium **Project:** incognito
+
+Every `directIdStrategy` value carries an `ALTEREGO_` prefix that names an internal library rather
+than what happens to the data, `ALTEREGO_GENERIC` hides that it carries no fictionality guarantee,
+and `directIdStrategy` also serves as the generator hint on `QUASI_ID` columns. Needs an ADR:
+unprefixed spellings, a descriptive name for the generic strategy, old spellings as deprecated
+aliases or a clean break, and whether the Java enum changes or only the YAML. See
+`docs/tasks/incognito-plainer-policy-vocabulary.md`.
+
 ## Read the whole source from one consistent snapshot
 
 **Type:** bug - **Importance:** medium - **Effort:** medium **Project:** incognito
@@ -72,6 +129,89 @@ Both are about 1,200 lines, held under PMD only by excluding its size and comple
 checks are near-copies of one query, and every column transformer takes eight parameters. The
 quoting, schema and snapshot work above touches nearly every SQL statement in both, so splitting
 them first shrinks those changes. Proposed split in `docs/tasks/incognito-split-large-stages.md`.
+
+## Say what a run guarantees: de-identification, not proven anonymity
+
+**Type:** docs - **Importance:** medium - **Effort:** medium
+
+The README opens with "Identigon anonymises databases", and the DPIA report can read as evidence
+that a DPIA is satisfied. Replacing direct identifiers does not by itself make a dataset anonymous,
+and the structural-uniqueness analysis scores one FK edge at a time. State the guarantee as
+de-identification with fictional data. Present the report as evidence that supports a DPIA, have it
+separate direct identifiers, quasi-identifiers, structural uniqueness and residual risk, and have it
+state what its re-identification analysis does not cover. Changing the project's own terminology may
+need an ADR.
+
+## Define and test what an interrupted run leaves behind
+
+**Type:** debt - **Importance:** medium - **Effort:** medium **Project:** incognito
+
+A production-sized clone can run for hours, but nothing tests a kill, a lost source or target
+connection, or a database failure partway through a load. Pin what happens to the target (the
+compensation `DELETE` of spec §8.1, or a partial load), say whether a run can be resumed or must be
+restarted from an emptied target, and make sure a partial target can never be mistaken for a
+finished clone - e.g. no DPIA report, and a non-zero exit code a scheduler can't miss.
+
+## Measure memory and throughput on a large database
+
+**Type:** debt - **Importance:** medium - **Effort:** medium **Project:** incognito
+
+Key translation is held in memory and the benchmarks are small sample databases, so there is no
+evidence of how memory grows with row count, how fast a large clone runs, or where it runs out of
+heap. Add a generated large-volume benchmark (tens of millions of rows, wide FK fan-out) that
+records peak heap and rows per second, and publish the numbers with a sizing rule of thumb. This is
+the evidence the persisted `RedisKeyTranslationStore` entry needs before it moves up.
+
+## Make human review of agent-drafted policies explicit
+
+**Type:** docs - **Importance:** medium - **Effort:** low
+
+The `identigon-policy-author` skill already never assigns a role without confirmation, but the docs
+don't say where the trust boundary is. Say plainly in the quickstart, the skill and the site that an
+agent only helps draft `policy.yaml`: a person reviews and owns every classification, and safety
+comes from the deterministic parts - the checked-in policy, `validate`, fail-closed `run`, and the
+source-value survival checks - never from the agent. A plausible wrong classification has privacy
+consequences.
+
+## Record-level cross-field coherence in policies
+
+**Type:** feature - **Importance:** medium - **Effort:** high **Project:** incognito
+
+Policies get coherence only for UK region (city/postcode/phone within a row) and for jittered dates
+sharing a `coherenceGroup`. Realistic test data often needs more: title agreeing with first name,
+address lines agreeing with each other, ordering constraints between dates without a shared jitter,
+identifiers derived from other fields. `alterego`'s `RecordScope` (ADR 8/9) already provides the
+mechanism; what's missing is a way for a policy to declare it. This is the `RecordScope` item the
+quickstart/Agent Skill revisit entry refers to.
+
+## Stop implying generic JDBC support
+
+**Type:** docs - **Importance:** medium - **Effort:** low
+
+The engine is built on JDBC with a `GenericDialectHandler`, but only PostgreSQL is tested and tuned.
+Metadata, identifier handling, generated keys, constraints, temporal types and DDL all differ
+between engines, which is exactly where a schema-cloning tool breaks. Say in the README, the site
+and the spec that PostgreSQL is the one supported database, and treat any other engine as untested
+until an entry like the one below proves it.
+
+## Prove a second database engine against a realistic schema
+
+**Type:** feature - **Importance:** medium - **Effort:** high **Project:** incognito
+
+Oracle is the likeliest candidate for organisations with older estates, then SQL Server. Needs a
+dialect handler, a Testcontainers fixture with a realistic schema (not a clean sample),
+engine-specific type mapping for `SYNTHESISE`/jitter, and the full verification suite passing on
+that engine. Until this lands, portability is not a claim the project makes.
+
+## Ship `identigon` as a self-contained executable
+
+**Type:** feature - **Importance:** medium - **Effort:** high **Project:** effigies
+
+Running the CLI today means installing Java 25 and calling `java -jar identigon.jar`, or building
+the repository for the quickstart. A `jlink`/`jpackage` bundle per platform (or a native image, if
+the JDBC drivers and SnakeYAML allow) would give users an `identigon` command with no runtime to
+install. That matches the one-tool presentation above and removes the Java 25 barrier for
+organisations standardised on older runtimes.
 
 ## Revisit excluding `effigies.jar` from the GitHub Release assets
 
@@ -171,6 +311,15 @@ The "Derive the release version" step interpolates `${{ inputs.tag }}` straight 
 a crafted tag value would run as shell. Only users with write access can dispatch the workflow,
 which limits the risk, but GitHub's hardening guidance is to pass inputs through `env:` and quote
 the variable.
+
+## Record why Java 25 is the minimum runtime
+
+**Type:** docs - **Importance:** low - **Effort:** low
+
+Evaluators ask whether Java 25 is a real technical requirement or only the development baseline. The
+code relies on recent language features (records, sealed interfaces, pattern matching), but nothing
+records the choice or what an older baseline would cost. Write it down as an ADR and link it from
+the README's requirements.
 
 ## `ServiceLoader`-based strategy/dictionary packs for additional countries
 
