@@ -71,7 +71,7 @@ class PhoneNumberE2ETest {
         try (Statement stmt = conn.createStatement()) {
           stmt.execute(DDL);
           stmt.execute(
-              "INSERT INTO customer (phone) VALUES " + "('020 7946 0958'), ('07123 456789')");
+              "INSERT INTO customer (phone) VALUES " + "('020 7946 0958'), ('07700 900123')");
         }
       }
 
@@ -140,7 +140,7 @@ class PhoneNumberE2ETest {
           0,
           scalar(
               conn,
-              "SELECT COUNT(*) FROM customer WHERE phone IN ('020 7946 0958','07123 456789')"),
+              "SELECT COUNT(*) FROM customer WHERE phone IN ('020 7946 0958','07700 900123')"),
           "no source phone number survives");
       assertEquals(
           2,

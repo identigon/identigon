@@ -84,7 +84,7 @@ class RecordCoherenceE2ETest {
           // gives good odds of hitting several different areas, not just the same one by luck.
           List<String> rows = new java.util.ArrayList<>();
           for (int i = 0; i < 20; i++) {
-            rows.add("('Old Town " + i + "', 'AA1 1AA', '01632 000000')");
+            rows.add("('Old Town " + i + "', 'AA1 1AA', '01632 960000')");
           }
           stmt.execute(
               "INSERT INTO branch (city, postcode, phone) VALUES " + String.join(", ", rows));

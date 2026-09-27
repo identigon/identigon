@@ -12,7 +12,7 @@ CREATE TABLE customers (
     full_name       VARCHAR(100) NOT NULL,
     email           VARCHAR(150) NOT NULL,
     phone           VARCHAR(20)  NOT NULL,
-    nino            VARCHAR(13)  NOT NULL,  -- UK National Insurance number, "AB 12 34 56 C"
+    nino            VARCHAR(13)  NOT NULL,  -- UK National Insurance number, e.g. "QQ 12 34 56 C"
     bank_account    VARCHAR(20)  NOT NULL,  -- sort code + account number, "12-34-56 12345678"
     date_of_birth   DATE         NOT NULL,
     postcode        VARCHAR(10)  NOT NULL,

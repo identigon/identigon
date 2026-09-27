@@ -53,6 +53,9 @@ restating them here too would be the same fact in two places.
 
 ### Fixed
 
+- The quickstart's sample customers now use only fictional identifiers: every National Insurance
+  number has a prefix HMRC never allocates. The incognito NINO, phone-number and record-coherence
+  tests seed their source rows from the same fictional ranges.
 - **incognito:** The Markdown DPIA report mixed line endings on Windows: most lines ended in LF, but
   the salt-mode line and the findings-table rows used the platform separator (CRLF on Windows). It
   is now LF throughout, like the HTML and JSON reports.

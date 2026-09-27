@@ -70,7 +70,7 @@ class NinoE2ETest {
         try (Statement stmt = conn.createStatement()) {
           stmt.execute(DDL);
           stmt.execute(
-              "INSERT INTO employee (nino) VALUES " + "('AB 12 34 56 C'), ('CD 65 43 21 A')");
+              "INSERT INTO employee (nino) VALUES " + "('DF 12 34 56 C'), ('CD 65 43 21 A')");
         }
       }
 
@@ -137,7 +137,7 @@ class NinoE2ETest {
           0,
           scalar(
               conn,
-              "SELECT COUNT(*) FROM employee WHERE nino IN ('AB 12 34 56 C','CD 65 43 21 A')"),
+              "SELECT COUNT(*) FROM employee WHERE nino IN ('DF 12 34 56 C','CD 65 43 21 A')"),
           "no source NINO survives");
       assertEquals(
           2,

@@ -3,16 +3,18 @@
 -- README.md in this directory for the full walkthrough.
 --
 -- Every value below is already fictional/placeholder data - Identigon anonymising it further just
--- demonstrates the mechanics, it isn't standing in for anything real.
+-- demonstrates the mechanics, it isn't standing in for anything real. Phone numbers are in Ofcom's
+-- drama range (020 7946 0xxx); every NI number prefix uses a letter HMRC never allocates (D, F, I,
+-- Q, U or V), but not QQ, so the fabricated QQ values in the target stand out from the source.
 
 INSERT INTO customers
     (full_name, email, phone, nino, bank_account, date_of_birth, postcode, marketing_opt_in, signed_up_on)
 VALUES
-    ('Alice Whitfield',   'alice.whitfield@mailbox.test',  '020 7946 0958', 'AB 12 34 56 C', '12-34-56 12345678', '1987-03-14', 'SW1A 1AA', true,  '2021-06-01'),
+    ('Alice Whitfield',   'alice.whitfield@mailbox.test',  '020 7946 0958', 'DF 12 34 56 C', '12-34-56 12345678', '1987-03-14', 'SW1A 1AA', true,  '2021-06-01'),
     ('Ben Okafor',        'ben.okafor@mailbox.test',       '020 7946 0112', 'CD 65 43 21 A', '20-11-88 87654321', '1991-11-02', 'EC1A 1BB', false, '2022-01-17'),
     ('Charlotte Nguyen',  'charlotte.nguyen@mailbox.test', '020 7946 0733', 'EF 98 76 54 B', '40-55-19 11223344', '1979-07-23', 'W1D 3QU',  true,  '2020-09-30'),
-    ('Dominic Farrell',   'dominic.farrell@mailbox.test',  '020 7946 0284', 'GH 11 22 33 D', '60-02-71 99887766', '1995-02-11', 'M1 1AE',   false, '2023-03-08'),
-    ('Elena Petrov',      'elena.petrov@mailbox.test',     '020 7946 0501', 'JK 44 55 66 A', '30-90-08 55667788', '1983-12-30', 'B1 1HQ',   true,  '2021-11-22');
+    ('Dominic Farrell',   'dominic.farrell@mailbox.test',  '020 7946 0284', 'UV 11 22 33 D', '60-02-71 99887766', '1995-02-11', 'M1 1AE',   false, '2023-03-08'),
+    ('Elena Petrov',      'elena.petrov@mailbox.test',     '020 7946 0501', 'VI 44 55 66 A', '30-90-08 55667788', '1983-12-30', 'B1 1HQ',   true,  '2021-11-22');
 
 INSERT INTO orders (customer_id, ordered_on, shipped_on, total_amount, status) VALUES
     (1, '2024-01-05', '2024-01-07', 49.99,  'delivered'),
