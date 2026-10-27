@@ -79,15 +79,14 @@ Before you edit:
 ./gradlew test                # tests only, all subprojects
 ./gradlew :alterego:build     # scope any task to a single subproject with :name:
 ./gradlew :incognito:test
-./gradlew javadoc             # alterego and incognito only; must complete without warnings
-./gradlew publishToMavenLocal # alterego/incognito binary + sources + javadoc jars and a
-                               # complete POM, for external Maven consumers
+./gradlew javadoc             # all three subprojects; must complete without warnings
+./gradlew publishToMavenLocal # binary + sources + javadoc jars and a complete POM for each
+                               # subproject, for external Maven consumers
 ```
 
-- `alterego` and `incognito` are sibling Gradle subprojects here (`project(":alterego")` /
-  `project(":incognito")`), not external Maven coordinates - a plain `./gradlew build` at the root
-  builds them in dependency order automatically; no separate `publishToMavenLocal` round-trip is
-  needed for local development.
+- All three subprojects are sibling Gradle projects here (`effigies` -> `incognito` -> `alterego`),
+  not external Maven coordinates - a plain `./gradlew build` at the root builds them in dependency
+  order automatically; no separate `publishToMavenLocal` round-trip is needed for local development.
 - `incognito`'s integration tests use Testcontainers and **require Docker**; they skip gracefully
   where Docker is unavailable. On Docker Engine 29.x set `TESTCONTAINERS_RYUK_DISABLED=true`.
 
@@ -181,5 +180,7 @@ Before you edit:
 
 ## Git
 
-- Never run `git commit` or `git push` unless explicitly asked. Present the changes and a suggested
-  commit message, then wait.
+- Never run `git commit` unless explicitly asked. Present the changes and a suggested commit
+  message, then wait.
+- Never run `git push`, in any repository. The user always pushes. When work is committed and ready,
+  say so and leave the push to them.
