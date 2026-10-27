@@ -473,3 +473,13 @@ page today. Worth a page each once there's more to say than that summary.
 
 VitePress has built-in local search support; not worth turning on until there's enough content on
 the site to search.
+
+## Remove temporary Guava dependency constraint once Checkstyle updates upstream
+
+**Type:** debt - **Importance:** low - **Effort:** low
+
+Checkstyle 13.11.0 transitively pulls in Guava 33.6.0-jre, which is vulnerable to CVE-2026-102554
+(GHSA-xxph-c9ww-hj94 / Dependabot alert #7). `gradle/temporary-dependency-overrides.gradle.kts`
+temporarily constrains Checkstyle's Guava dependency to 33.7.2-jre. Remove this constraint once
+Checkstyle releases a version bundling Guava 33.7.2 or newer upstream and `checkstyleTool` is
+bumped.

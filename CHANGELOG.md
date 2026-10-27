@@ -97,6 +97,9 @@ restating them here too would be the same fact in two places.
 
 ### Security
 
+- Constrain Checkstyle's transitive `com.google.guava:guava` dependency to `33.7.2-jre` via
+  `gradle/temporary-dependency-overrides.gradle.kts` to patch CVE-2026-102554 (GHSA-xxph-c9ww-hj94 /
+  Dependabot alert #7) until Checkstyle releases an upstream update bundling Guava 33.7.2+.
 - **incognito:** Exception messages no longer include a row's key value. A foreign-key value with no
   matching parent (single-column, composite, or a deferred cyclic FK) and an inherited attribute's
   missing ancestor were reported with the source key in the message - PII when the key is natural,

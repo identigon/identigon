@@ -220,3 +220,5 @@ subprojects {
         }
     }
 }
+
+apply(from = "gradle/temporary-dependency-overrides.gradle.kts")
