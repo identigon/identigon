@@ -79,6 +79,6 @@ removal remains the trigger for the _next_ major once it lands; this ADR does no
   by `effigies --version` and the release tag.
 
 <!-- Merged from three near-identical companion records - alterego's ADR-0015, incognito's ADR
-     0008, effigies' ADR-0002 - during the doc-kit consolidation migration
-     (docs/plan/consolidate-subproject-docs.md). All three recorded the same decision, on the same
-     date, from each subproject's own vantage point; this is the single merged record. -->
+     0008, effigies' ADR-0002 - during the doc-kit consolidation migration. All three recorded the
+     same decision, on the same date, from each subproject's own vantage point; this is the single
+     merged record. -->

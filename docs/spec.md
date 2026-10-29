@@ -23,15 +23,15 @@ Three, one per subproject - each is the _only_ place its subproject's behaviour 
 live under `docs/spec/`, the one place in `docs/` you can glob for "is this part of the contract"
 (`docs/spec/*.md`) without reading this file at all:
 
-- **[`docs/spec/alterego.md`](docs/spec/alterego.md)** - the deterministic pseudonymisation library:
-  the transformation API, the built-in strategies and their fictionality guarantees, the determinism
+- **[`docs/spec/alterego.md`](spec/alterego.md)** - the deterministic pseudonymisation library: the
+  transformation API, the built-in strategies and their fictionality guarantees, the determinism
   model, and the frozen Appendix A algorithms. Audience: consumers of `alterego` directly, and
   `incognito`'s own implementers.
-- **[`docs/spec/incognito.md`](docs/spec/incognito.md)** - the database-cloning and anonymisation
-  engine: the privacy model, column roles and transformation strategies, fail-closed classification,
-  and the §7.3 must-not-regress invariants. Audience: consumers of `incognito` directly, and
-  `effigies`' own implementers.
-- **[`docs/spec/effigies.md`](docs/spec/effigies.md)** - the authoring and orchestration CLI: its
+- **[`docs/spec/incognito.md`](spec/incognito.md)** - the database-cloning and anonymisation engine:
+  the privacy model, column roles and transformation strategies, fail-closed classification, and the
+  §7.3 must-not-regress invariants. Audience: consumers of `incognito` directly, and `effigies`' own
+  implementers.
+- **[`docs/spec/effigies.md`](spec/effigies.md)** - the authoring and orchestration CLI: its
   commands, its hard invariants (metadata-only discovery, fail-closed preserved, no model in the
   engine path), and its relationship to `incognito`. Audience: CLI users.
 

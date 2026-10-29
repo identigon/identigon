@@ -14,7 +14,7 @@ heading, a tag line, then one paragraph:
 One paragraph on what and why. If it needs more than that, it needs an ADR.
 ```
 
-The entry carries a `**Type:**`/`**Importance:**`/`**Effort:**` line, and optionally a
+Each entry carries a `**Type:**`/`**Importance:**`/`**Effort:**` line, and optionally a
 `**Project:**` tag (`alterego` / `incognito` / `effigies` / `identigon.github.io`) for work scoped
 to one subproject or repository; an untagged entry is cross-cutting or applies to no single one.
 Working notes for an entry live in `docs/plan/`; copy `0000-template.md` for the optional shape. See

@@ -8,7 +8,7 @@ belong to incognito (and, beneath it, alterego).
 
 This document is the authoritative behavioural contract. Where the code and this document disagree,
 this document is intended to win - flag the gap rather than encode new behaviour. It is a skeleton
-and will grow as the phases in `docs/plan.md` land.
+and will grow as the work in `docs/plan.md` lands.
 
 ---
 

@@ -61,7 +61,7 @@ shape-preserving fabrication.
   strategy instead; the `VerificationStage` source-value survival check is a probabilistic net over
   this, not a guarantee.
 - Neutral: ADR-0015's own Consequences named this as tracked debt; that characterisation is
-  superseded by this record, not corrected in place (ADR-0015 is `accepted` and immutable).
+  superseded by this record, not corrected in place.
 
 <!-- Originally drafted as incognito's own ADR-0009; renumbered during the doc-kit consolidation
      migration. Mined from the former incognito plan's "Phase 4 follow-up" section, which had

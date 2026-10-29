@@ -9,12 +9,12 @@ approval: accepted
 
 ## Context and Problem Statement
 
-The repository has a pre-0.5.0 doc-kit shape: `SPECIFICATION.md` indexes `docs/spec/`, `PLAN.md`
-holds the backlog, decisions live in `docs/adr/`, and task notes live in `docs/tasks/`. doc-kit
+The repository had a pre-0.5.0 doc-kit shape: `SPECIFICATION.md` indexed `docs/spec/`, `PLAN.md`
+held the backlog, decisions lived in `docs/adr/`, and task notes lived in `docs/tasks/`. doc-kit
 0.5.0 moved those paths to `docs/spec.md`, `docs/plan.md`, `docs/decisions/` and `docs/plan/`, made
 the map's property sets closed, and made accepted decision records amendable by the owner. The old
-map and templates no longer match the kit's current structure, and the old `AGENTS.md` rule that
-accepted records are immutable conflicts with the new record rules.
+map and templates no longer matched the kit's current structure, and the old `AGENTS.md` rule that
+accepted records are immutable conflicted with the new record rules.
 
 The structure comes from doc-kit at commit `5312a15` (v0.6.0). Its decision records, which give the
 reasons for each rule, are at `https://github.com/dconneely/doc-kit/tree/5312a15/docs/decisions`.
