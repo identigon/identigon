@@ -143,8 +143,8 @@ along - it only _looked_ statistical while k-anonymity was still in scope.
 >
 > This is a design rule, not a claim about the current code: some interim value logic still lives in
 > Incognito in violation of it (e.g. the shape-preserving character substitution behind
-> `ALTEREGO_GENERIC`). Such code is a **bug to be migrated**, tracked in the PLAN, not a sanctioned
-> exception.
+> `ALTEREGO_GENERIC`). Such code is a **bug to be migrated**, tracked in `docs/plan.md`, not a
+> sanctioned exception.
 
 ---
 
@@ -404,10 +404,10 @@ sources so they cannot be mistaken for real data:
 
 `VerificationStage` asserts these on the target, skipping `NULL` cells during verification, for
 every `DIRECT_ID` column and every `QUASI_ID SYNTHESISE` column carrying the same `directIdStrategy`
-hint (Appendix B, ADR 31) - both route through the identical typed generator, so both get the
+hint (Appendix B, ADR-0031) - both route through the identical typed generator, so both get the
 identical check. The phone check is GB-specific and multi-valued rather than a single fixed prefix:
 it accepts any of the reserved Ofcom drama-number ranges (`GB/phone-ranges.txt`), matching
-`PhoneNumberStrategy`'s own default-options guarantee (ADR 0005, alterego) - it does not hold under
+`PhoneNumberStrategy`'s own default-options guarantee (ADR-0005, alterego) - it does not hold under
 `PhoneOptions.realistic()`, which `incognito` never uses. It also runs a **source-value survival**
 net over every non-reserved `DIRECT_ID` column: any real source value that reappears in the target
 is captured as a structured `AnonymisationReport.SurvivalFinding` (sampled distinct count, survived
@@ -419,7 +419,7 @@ log line.
 **What "verified" means in the report.** `AnonymisationReport.ColumnAction.fictionalityVerified()`
 is `true` only for a column with a typed check above that actually ran and passed - `false` for
 every other column, including a deliberately-chosen `ALTEREGO_GENERIC` strategy (a legitimate
-choice, ADR 21/29, but one with no fictionality guarantee to verify).
+choice, ADR-0021 and ADR-0029, but one with no fictionality guarantee to verify).
 `TableReport.fictionalityVerified()` is coarser: it means no verification failure was found anywhere
 in the table (referential integrity, a fictionality check, or a hard survival failure), not that
 every column's transformation carries a guarantee - a table can report `true` while holding an
@@ -830,9 +830,9 @@ to check a policy without committing to a full `run`.
 **Inference lives in `effigies` only.** incognito's own `autoInfer` flag and `PolicyInferrer` were
 removed at v2.0.0 - inference is authoring, not execution, and fail-closed classification meant it
 never affected engine output even while it was here. `effigies`' own `PolicyInferrer` is what
-actually interviews users during authoring now; see `docs/adr/0023-authoring-above-the-engine.md`
-for the reasoning and `docs/adr/0024-lockstep-versioning.md` for why that removal was this major's
-trigger.
+actually interviews users during authoring now; see
+`docs/decisions/0023-authoring-above-the-engine.md` for the reasoning and
+`docs/decisions/0024-lockstep-versioning.md` for why that removal was this major's trigger.
 
 A `PAYLOAD` (or kept `SENSITIVE`) column whose JDBC type is complex/opaque and untransformable in
 v1.0 (geometry, `JSONB`, array, `INET`, BLOB) is flagged in the report as _"untransformed
@@ -929,9 +929,10 @@ v1.0 targets **PostgreSQL** only; `GenericDialectHandler` is an uncertified ANSI
 - **Licence: MIT**, in a root file named `LICENCE` (UK spelling for the filename). Incognito bundles
   **no third-party data** in the JAR; the benchmark fixtures under `src/test/resources/benchmarks/`
   are test-only, with their own provenance and licences (`SOURCES.md`, `NOTICE`, `LICENCES/`).
-- **Documents:** this `docs/spec/incognito.md` (the authoritative contract), `PLAN.md` (phases,
-  follow-ups, deferrals), `docs/adr/` (decisions with their reasons - do not revisit, supersede),
-  `CHANGELOG.md`, and `AGENTS.md` (agent instructions and the §7.3 must-not-regress invariants).
+- **Documents:** this `docs/spec/incognito.md` (the authoritative contract), `docs/plan.md` (phases,
+  follow-ups, deferrals), `docs/decisions/` (decisions with their reasons - do not revisit,
+  supersede), `CHANGELOG.md`, and `AGENTS.md` (agent instructions and the §7.3 must-not-regress
+  invariants).
 
 ---
 
@@ -967,9 +968,9 @@ String fake = email.apply(sourceEmail);              // per row; deterministic i
 
 **Strategy -> AlterEgo call:** | Incognito strategy | AlterEgo call | | :--- | :--- | |
 `DirectIdStrategy.ALTEREGO_NAME` | `ae.fullName()` | | `ALTEREGO_FIRST_NAME` | `ae.firstName()` | |
-`ALTEREGO_LAST_NAME` | `ae.lastName()` - authored, obviously-fictional surnames (ADR 0010) | |
+`ALTEREGO_LAST_NAME` | `ae.lastName()` - authored, obviously-fictional surnames (ADR-0010) | |
 `ALTEREGO_ORGANISATION` | `ae.organisationName()` | | `ALTEREGO_CITY` | `ae.city()` | |
-`ALTEREGO_STREET_ADDRESS` | `ae.streetAddress()` - authored, obviously-fictional streets (ADR 0010)
+`ALTEREGO_STREET_ADDRESS` | `ae.streetAddress()` - authored, obviously-fictional streets (ADR-0010)
 | | `ALTEREGO_POSTCODE` | `ae.postcode()` - GB format only; alterego ships no other country's
 postcode table yet, the same GB-only reality every other typed generator already has (only GB
 dictionaries are bundled) | | `ALTEREGO_EMAIL` | `ae.emailAddress()` - RFC 2606 reserved domain by
@@ -1029,21 +1030,21 @@ unaffected either way.
 
 `SYNTHESISE` has no single generator - it depends on the column's type. **A `QUASI_ID` whose type
 has no built-in _fictional_ mapping below and no typed hint fails fail-closed with `ConfigException`
-at discovery - never a silent passthrough or shape-fabrication (ADR 31).** The type-specific
+at discovery - never a silent passthrough or shape-fabrication (ADR-0031).** The type-specific
 `VARCHAR` rows (postcode/city/street/organisation) are **author-declared**, not auto-detected (ADR
 17): the author adds a `directIdStrategy` hint to the `QUASI_ID` column (e.g. `ALTEREGO_POSTCODE`),
 and Incognito routes the value through that typed, guaranteed-fictional generator. A temporal type
 has a type-matched shift primitive and needs no hint; a character type only shape-preserves absent
 one, which carries no fictionality guarantee, so it - like every other type - always needs one:
 `ALTEREGO_GENERIC` remains available as an explicit, declared choice when no typed generator fits
-(ADR 31, mirroring ADR 29's treatment of `DIRECT_ID`).
+(ADR-0031, mirroring ADR-0029's treatment of `DIRECT_ID`).
 
 | Source SQL/Java type                   | `SYNTHESISE` generator                                                                                                                                                                                                                                                       |
 | :------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DATE` / `LocalDate` (e.g. `dob`)      | `ae.shiftDate(wideWindowDays)` with a window wide enough to destroy the identifying part (e.g. ±1825 days =~ ±5 y for `dob`, so the year no longer pins age). _Not_ `shiftDate(YEAR)` for `dob` (keeps the real year). No hint needed.                                       |
 | `TIMESTAMP` / `LocalDateTime`          | `ae.shiftDateTime(...)` (day + time components). No hint needed.                                                                                                                                                                                                             |
 | `VARCHAR` + `directIdStrategy` hint    | the hinted typed generator - `ae.postcode()` / `ae.city()` / `ae.streetAddress()` / `ae.organisationName()` / ... (guaranteed-fictional; author-declared, never auto-detected), or `ae.fabricateShapePreserving()` for the explicit, no-guarantee `ALTEREGO_GENERIC` choice. |
-| `VARCHAR` with no hint                 | **no built-in fictional generator** -> `ConfigException` (ADR 31). Shape-preserving fabrication is never chosen silently; declare a `directIdStrategy` hint, even `ALTEREGO_GENERIC`, to make the guarantee level explicit.                                                  |
+| `VARCHAR` with no hint                 | **no built-in fictional generator** -> `ConfigException` (ADR-0031). Shape-preserving fabrication is never chosen silently; declare a `directIdStrategy` hint, even `ALTEREGO_GENERIC`, to make the guarantee level explicit.                                                |
 | numeric (`INT`/`DECIMAL`, e.g. salary) | **no built-in** -> require a `directIdStrategy` hint or an explicit custom `Strategy` via `bind(...)`, else `ConfigException`. Do not passthrough or shape-fabricate a real number.                                                                                          |
 | `boolean` / tiny enum                  | no built-in -> needs a hint or custom strategy, else `ConfigException` (usually operational, not a QI)                                                                                                                                                                       |
 

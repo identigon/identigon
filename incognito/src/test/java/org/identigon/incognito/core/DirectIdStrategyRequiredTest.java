@@ -21,9 +21,9 @@ import org.junit.jupiter.api.Test;
 
 /**
  * A {@code DIRECT_ID} column with no declared {@code directIdStrategy} fails closed at
- * schema-discovery time (ADR 29), the same way an undeclared SENSITIVE {@code distinguishing} flag
- * already does. H2 in-memory, no Docker/Testcontainers needed - this is config validation in {@link
- * SchemaDiscoveryStage}, before any row is read.
+ * schema-discovery time (ADR-0029), the same way an undeclared SENSITIVE {@code distinguishing}
+ * flag already does. H2 in-memory, no Docker/Testcontainers needed - this is config validation in
+ * {@link SchemaDiscoveryStage}, before any row is read.
  */
 class DirectIdStrategyRequiredTest {
 

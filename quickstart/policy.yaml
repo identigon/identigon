@@ -17,7 +17,7 @@ tables:
         role: PRIMARY_KEY
         surrogateStrategy: SEQUENTIAL_LONG
 
-      # --- Direct identifiers: always fabricated, never generalised (SPEC §2.3, ADR 14) ---------
+      # --- Direct identifiers: always fabricated, never generalised (SPEC §2.3, ADR-0014) ---------
       full_name:
         role: DIRECT_ID
         directIdStrategy: ALTEREGO_NAME
@@ -32,7 +32,7 @@ tables:
         directIdStrategy: ALTEREGO_NINO  # guaranteed-fictional "QQ" prefix
       bank_account:
         role: DIRECT_ID
-        # No typed bank-account generator exists in alterego yet (tracked in incognito/PLAN.md), so
+        # No typed bank-account generator exists in alterego yet (tracked in docs/plan.md), so
         # this falls back to the generic shape-preserving strategy: same length and digit/letter
         # classes as the source value, but - unlike every strategy above - carries NO fictionality
         # guarantee. Good enough to sever the link to the real account; don't rely on the *output*
@@ -69,7 +69,7 @@ tables:
         references: { table: customers, column: id }
 
       # Coherent jitter: both dates share one salt-keyed delta per order, so `shipped_on` never
-      # moves ahead of `ordered_on` and the gap between them survives (SPEC §4.2, ADR 18).
+      # moves ahead of `ordered_on` and the gap between them survives (SPEC §4.2, ADR-0018).
       ordered_on:
         role: QUASI_ID
         quasiIdStrategy: JITTER_DAYS

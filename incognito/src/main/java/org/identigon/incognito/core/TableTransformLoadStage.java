@@ -642,7 +642,7 @@ public final class TableTransformLoadStage implements PipelineStage {
     DirectIdStrategy strategy = colPolicy.directIdStrategy();
     // Only reachable null for UNIQUE_CANDIDATE_KEY, which shares this method: a DIRECT_ID
     // column with a null strategy fails closed in SchemaDiscoveryStage.validateTablePolicy
-    // (ADR 29) before TableTransformLoadStage ever runs.
+    // (ADR-0029) before TableTransformLoadStage ever runs.
     if (strategy == null) {
       strategy = DirectIdStrategy.ALTEREGO_GENERIC;
     }
@@ -938,7 +938,7 @@ public final class TableTransformLoadStage implements PipelineStage {
         // Author-declared typed routing (SPEC Appendix B): a QUASI_ID SYNTHESISE column may
         // name a DirectIdStrategy to synthesise a guaranteed-fictional typed value (postcode,
         // city, street, ...) instead of a shape-preserving scramble. The routing is explicit,
-        // never auto-detected (ADR 17). Delegating to the DIRECT_ID transformer reuses the
+        // never auto-detected (ADR-0017). Delegating to the DIRECT_ID transformer reuses the
         // single strategy->primitive switch, so the two can never diverge.
         if (colPolicy.directIdStrategy() != null) {
           yield buildDirectIdTransformer(colPolicy, alterEgo, tableName);

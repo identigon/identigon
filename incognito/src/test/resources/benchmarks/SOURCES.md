@@ -43,7 +43,7 @@ All URLs retrieved **2026-07-31**.
   `https://raw.githubusercontent.com/devrimgunduz/pagila/refs/tags/pagila-v3.0.0/pagila-insert-data.sql`.
   SHA-256 at vendor time (2026-08-03):
   `136f3105263a1338a9805da4c06b6b37b60f1abc15ce7dbc8d6f5501f506aa22` (a provenance record, not
-  re-checked at test time - see PLAN.md Phase 7 for why). INSERT format (not the COPY-format
+  re-checked at test time - see docs/plan.md Phase 7 for why). INSERT format (not the COPY-format
   `pagila-data.sql`) so it loads through a plain JDBC statement stream.
 - **Test note:** the benchmark clones the 15 non-partitioned Sakila core tables and excludes the
   partitioned `payment` (+ its 7 partitions). `OWNER TO postgres` statements are stripped at load

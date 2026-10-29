@@ -10,7 +10,7 @@ references something real.
 
 See [`docs/spec/alterego.md`](../docs/spec/alterego.md) for the full behavioural contract, the root
 [`CHANGELOG.md`](../CHANGELOG.md) (`alterego-*` entries for pre-1.0.0 history, then every shared
-release) for what's changed between versions, and the root [`PLAN.md`](../PLAN.md)
+release) for what's changed between versions, and the root [`docs/plan.md`](../docs/plan.md)
 (`**Project:** alterego` entries) for the deferred backlog.
 
 Every code sample below is compiled and run as part of the test suite
@@ -104,7 +104,7 @@ Transformation<String> cc = alterego.creditCardNumber();
 
 `lastName()` and `streetAddress()` use a different mechanism: there's no officially reserved
 "fictional surname" or "fictional street" space to draw from, so their vocabulary is authored rather
-than sourced from real UK data, and reviewed to avoid coinciding with a known real name (ADR 0010) -
+than sourced from real UK data, and reviewed to avoid coinciding with a known real name (ADR-0010) -
 a curation-time guarantee, not a structural one. `firstName()` and `city()` are unaffected and keep
 drawing from real data; the surname alone is enough to make a full name unmistakably not a real
 person's.

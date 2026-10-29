@@ -27,7 +27,7 @@ tables:
       address:       { role: DIRECT_ID,   directIdStrategy: ALTEREGO_STREET_ADDRESS }
       city:          { role: QUASI_ID, quasiIdStrategy: SYNTHESISE, directIdStrategy: ALTEREGO_CITY }
       # No typed region generator exists; ALTEREGO_GENERIC is the declared, no-guarantee choice a
-      # hint-less character-type SYNTHESISE would otherwise make silently (ADR 31).
+      # hint-less character-type SYNTHESISE would otherwise make silently (ADR-0031).
       region:        { role: QUASI_ID, quasiIdStrategy: SYNTHESISE, directIdStrategy: ALTEREGO_GENERIC }
       postal_code:   { role: DIRECT_ID,   directIdStrategy: ALTEREGO_POSTCODE }
       country:       { role: PAYLOAD }

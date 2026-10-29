@@ -64,9 +64,9 @@ public record AnonymisationReport(
    *     they correspond to no real subject and are not this run's actual data
    * @param fictionalityVerified {@code true} only if this specific column's transformation has a
    *     typed SPEC §4.3 fictionality check (a DIRECT_ID, or a QUASI_ID SYNTHESISE carrying the same
-   *     {@code directIdStrategy} hint, ADR 31) and that check ran and passed against the target.
+   *     {@code directIdStrategy} hint, ADR-0031) and that check ran and passed against the target.
    *     {@code false} for every other column, including a deliberately-chosen {@code
-   *     ALTEREGO_GENERIC} strategy - that fabrication is legitimate (ADR 21/29) but carries no
+   *     ALTEREGO_GENERIC} strategy - that fabrication is legitimate (ADR-0021/29) but carries no
    *     fictionality guarantee to verify, so it is never reported as one
    */
   public record ColumnAction(
@@ -117,7 +117,7 @@ public record AnonymisationReport(
    * A {@code SENSITIVE distinguishing: false} column whose real distinct-value count exceeds the
    * categorical-cardinality threshold (SPEC §4.1) - a candidate misdeclaration: the column was kept
    * opaque as low-cardinality categorical data but looks high-cardinality enough to be
-   * quasi-identifying. This is a safety net, never the privacy gate (ADR 16) - the {@code
+   * quasi-identifying. This is a safety net, never the privacy gate (ADR-0016) - the {@code
    * distinguishing} declaration alone decides keep-vs-fabricate.
    *
    * @param table the table name

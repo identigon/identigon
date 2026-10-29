@@ -85,7 +85,7 @@
         <exclude name="AvoidUncheckedExceptionsInSignatures"/>
         <!-- Matches the existing CognitiveComplexity/CyclomaticComplexity/NPathComplexity/GodClass
              exclusions above: a streaming per-table pipeline method is kept together deliberately
-             rather than split for its own sake (see incognito PLAN.md). -->
+             rather than split for its own sake (see the plan entry in docs/plan.md). -->
         <exclude name="NcssCount"/>
         <!-- `throws Exception` on a @Test method is the standard JUnit convention; the test body
              calls varied checked-exception-throwing JDBC/IO APIs without needing to enumerate them. -->

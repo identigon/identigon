@@ -54,7 +54,7 @@ def write_tagged(name: str, source: str, data_url: str, rows: list[tuple[str, ..
 
 
 # --- Surnames --------------------------------------------------------------------------------
-# Authored, not sourced (ADR 10, docs/research/0001-alterego-dictionaries.md "Surnames"):
+# Authored, not sourced (ADR-0010, docs/research/0001-alterego-dictionaries.md "Surnames"):
 # deliberately obviously
 # fictional surnames, not generated from any real dataset. src/main/resources/dictionaries/GB/
 # surnames.txt is maintained directly, not by this script.
@@ -121,7 +121,7 @@ FIRST_NAMES_DATA_URL = (
 
 # --- Towns/cities + postcode area + nation -------------------------------------------------
 # Curated top-20 UK-wide population ranking (all four nations). London spans 8 postcode areas
-# and is listed once per area (see ADR 25 and docs/research/0001-alterego-dictionaries.md's
+# and is listed once per area (see ADR-0025 and docs/research/0001-alterego-dictionaries.md's
 # well-formedness exception for this).
 
 TOWNS = [
@@ -166,7 +166,7 @@ TOWNS_DATA_URL = (
 )
 
 # --- Street themes -----------------------------------------------------------------------------
-# Authored, not sourced (ADR 10, docs/research/0001-alterego-dictionaries.md "Street names"):
+# Authored, not sourced (ADR-0010, docs/research/0001-alterego-dictionaries.md "Street names"):
 # deliberately obviously
 # fictional theme words, not generated from real UK street-name frequency data.
 # src/main/resources/dictionaries/GB/street-themes.txt is maintained directly, not by this script.
@@ -192,7 +192,7 @@ STREET_TYPES_DATA_URL = "https://ideal-postcodes.co.uk/guides/thoroughfare-descr
 # mining/filtering method and tools/data-cache/org-components-candidates.tsv for the complete
 # 133,424-token candidate list this is drawn from.
 #
-# Tagged MODIFIER/NOUN (ADR 26 has the generation-algorithm reasoning;
+# Tagged MODIFIER/NOUN (ADR-0026 has the generation-algorithm reasoning;
 # docs/research/0001-alterego-dictionaries.md has the mining/curation detail): a name composes as
 # [MODIFIER-or-NOUN] + NOUN + NOUN, each word
 # distinct, so two MODIFIER-flavoured words (both place-like) can never land next to each other

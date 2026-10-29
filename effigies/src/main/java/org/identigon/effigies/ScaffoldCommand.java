@@ -234,7 +234,7 @@ class ScaffoldCommand {
       // Only heuristics with a known typed generator (POSTCODE_PATTERN today) get a stub - a
       // QUASI_ID inferred from a temporal heuristic (DOB_PATTERN) needs no hint (SPEC Appendix
       // B): the default SYNTHESISE shift is already type-matched, unlike a character type's
-      // default shape-preserving fallback, which carries no fictionality guarantee (ADR 31).
+      // default shape-preserving fallback, which carries no fictionality guarantee (ADR-0031).
       Optional<DirectIdStrategy> strategy = inferrer.suggestedDirectIdStrategy(role.heuristic());
       if (strategy.isPresent()) {
         writer.write(

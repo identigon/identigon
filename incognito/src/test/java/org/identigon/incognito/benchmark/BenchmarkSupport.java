@@ -139,10 +139,11 @@ final class BenchmarkSupport {
   }
 
   /**
-   * Demonstrates the DPIA artefact-emission path (opt-in per the library's design; see PLAN.md)
-   * against a real, full-scale report from an actual pipeline run - not just the synthetic
-   * single-table sample in {@code DpiaArtefactEmitterTest}. Writes JSON, HTML and Markdown under
-   * {@code build/dpia-reports/<benchmarkName>/} and asserts each file was actually written.
+   * Demonstrates the DPIA artefact-emission path (opt-in per the library's design; see
+   * docs/plan.md) against a real, full-scale report from an actual pipeline run - not just the
+   * synthetic single-table sample in {@code DpiaArtefactEmitterTest}. Writes JSON, HTML and
+   * Markdown under {@code build/dpia-reports/<benchmarkName>/} and asserts each file was actually
+   * written.
    *
    * @param report the pipeline's typed accountability report
    * @param benchmarkName the benchmark's name, used as the output subdirectory

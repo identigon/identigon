@@ -55,7 +55,7 @@ jobs:
             exit 0
           fi
           # A 409 Conflict here can mean main.yml's own publish job won the race for this same
-          # commit/version already (see docs/adr/0028-publish-effigies-runnable-jar.md) - not a
+          # commit/version already (see docs/decisions/0028-publish-effigies-runnable-jar.md) - not a
           # real failure. Distinguish the two by checking every module's jar is actually present.
           echo "::warning::'./gradlew publish' failed - checking whether every module's jar is" \
             "already present at this exact version (the known tag/main.yml publish race) before" \
@@ -74,7 +74,7 @@ jobs:
             exit 1
           fi
           echo "Every module's $version jar is already present on GitHub Packages - continuing" \
-            "(see docs/adr/0028-publish-effigies-runnable-jar.md)."
+            "(see docs/decisions/0028-publish-effigies-runnable-jar.md)."
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

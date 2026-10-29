@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.spotbugs) apply false
 }
 
-// Lockstep versioning (docs/adr/0024-lockstep-versioning.md): one version for the whole monorepo,
+// Lockstep versioning (docs/decisions/0024-lockstep-versioning.md): one version for the whole monorepo,
 // bumped by hand here for a release. Whether a build is that release or a SNAPSHOT of it is derived
 // from whether HEAD is exactly a tagged commit, so an ordinary push to main can never overwrite an
 // immutable release coordinate.

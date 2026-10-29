@@ -20,7 +20,7 @@ public enum DirectIdStrategy {
   ALTEREGO_CITY,
   /**
    * Street-address generator ({@code AlterEgo.streetAddress()}) - authored, obviously-fictional
-   * streets (ADR 0010).
+   * streets (ADR-0010).
    */
   ALTEREGO_STREET_ADDRESS,
   /**

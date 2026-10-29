@@ -20,7 +20,7 @@ grown one.
   accidental algorithm/dictionary drift between releases.
 - **Determinism**: property tests asserting `t.apply(x)` is stable across calls, across stream order
   permutations, and between sequential and parallel streams. Property-style tests are plain JUnit
-  loops over deterministically enumerated inputs, not a property-based-testing framework (ADR 13).
+  loops over deterministically enumerated inputs, not a property-based-testing framework (ADR-0013).
 - **Fictionality**: property tests assert every generated email uses a reserved domain, every UK
   phone number falls inside a published Ofcom drama range, every UK postcode violates the
   inward-code letter rules, and every surname/street-theme word is drawn from the authored fictional
@@ -52,7 +52,7 @@ grown one.
   and its provenance header present with a licence name matching a committed file under
   `dictionaries/LICENCES/`. Deduplicated means no duplicate (value, tags) row, not no duplicate
   value: a tagged dictionary may legitimately repeat a value under different tags (e.g. London spans
-  several UK postcode areas - ADR 25) - only an exact repeated row is rejected.
+  several UK postcode areas - ADR-0025) - only an exact repeated row is rejected.
 - **Null/edge cases**: null, empty string, single-character, and non-ASCII inputs for every
   built-in.
 
@@ -107,9 +107,9 @@ grown one.
   per item.
 - **Composite PK + cyclic FK on the same table** (each supported alone) - fails closed with a clear
   message rather than corrupting data, but the combination itself has no passing test, because it
-  has no implementation yet. Tracked in root `PLAN.md`
-  (`docs/tasks/incognito-composite-pk-cyclic-fk.md`).
-- **`alterego`'s post-v1 deferred items** (root `PLAN.md`, `**Project:** alterego` entries) -
+  has no implementation yet. Tracked in root `docs/plan.md`
+  (`docs/plan/incognito-composite-pk-cyclic-fk.md`).
+- **`alterego`'s post-v1 deferred items** (root `docs/plan.md`, `**Project:** alterego` entries) -
   `ServiceLoader` strategy packs, language-sensitive generation, pattern-language extensions,
   external `MappingStore` modules, a public codec SPI, and further fictional-value ranges are all
   untested because unimplemented, not because coverage was skipped.

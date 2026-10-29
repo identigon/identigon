@@ -5,7 +5,7 @@ plugins {
 
 // Quality plugins, jar LICENCE/NOTICE packaging, and the shared publishing setup (sources/javadoc
 // jars, POM, repository, signing) come from the root build.gradle.kts. Version is lockstep, also
-// from the root (docs/adr/0024-lockstep-versioning.md).
+// from the root (docs/decisions/0024-lockstep-versioning.md).
 
 group = "org.identigon"
 

@@ -30,7 +30,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * SYNTHESISE-by-type routing (SPEC Appendix B, ADR 31). A {@code QUASI_ID SYNTHESISE} column may
+ * SYNTHESISE-by-type routing (SPEC Appendix B, ADR-0031). A {@code QUASI_ID SYNTHESISE} column may
  * carry an author-declared {@code directIdStrategy} hint to synthesise a guaranteed-fictional typed
  * value (here {@code ALTEREGO_CITY}); a SYNTHESISE column whose source type has no built-in
  * fictional mapping and no hint - an entirely unmapped type (here an {@code INTEGER}), or a
@@ -163,8 +163,8 @@ class SynthesiseByTypeE2ETest {
         freshDatabases("postcode", ddl, "INSERT INTO addresses (postcode) VALUES ('SW1A 1AA')");
 
     // A character-type QUASI_ID SYNTHESISE with no directIdStrategy hint would otherwise fall
-    // back to shape-preserving fabrication, which carries no fictionality guarantee (ADR 31) -
-    // abort, the same way the DIRECT_ID equivalent (ADR 29) already does.
+    // back to shape-preserving fabrication, which carries no fictionality guarantee (ADR-0031) -
+    // abort, the same way the DIRECT_ID equivalent (ADR-0029) already does.
     AnonymisationPolicy policy =
         AnonymisationPolicy.builder()
             .table(

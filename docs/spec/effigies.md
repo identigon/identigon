@@ -8,7 +8,7 @@ belong to incognito (and, beneath it, alterego).
 
 This document is the authoritative behavioural contract. Where the code and this document disagree,
 this document is intended to win - flag the gap rather than encode new behaviour. It is a skeleton
-and will grow as the phases in `PLAN.md` land.
+and will grow as the phases in `docs/plan.md` land.
 
 ---
 
@@ -20,7 +20,8 @@ incognito produced from it."
 
 The engine below Effigies stays **deterministic and model-free**. All judgment - inferring what a
 column is, scaffolding a starting policy, packaging a schema for an agent to reason about - lives in
-Effigies. The reasoning for this split is in [ADR 23](../adr/0023-authoring-above-the-engine.md).
+Effigies. The reasoning for this split is in
+[ADR-0023](../decisions/0023-authoring-above-the-engine.md).
 
 ## 2. Hard invariants - never violate
 

@@ -1,10 +1,19 @@
 # Question being investigated
 
 <!--
-Copy to NNNN-descriptive-filename.md, four-digit zero-padded, numbered across the whole monorepo
-(not per subproject) - the same convention as docs/adr/. Keep this file as 0000; it is the
-template. Confidence levels and what counts as research are in DOC-MAP.md. Delete this comment in
-the copy.
+Copy to a descriptive filename. Keep this file as 0000; it is the template.
+
+Confidence is one of:
+- high - verified directly against the thing itself: the source, the running system, a normative
+  specification.
+- medium - sources agree, but not verified directly.
+- low - inferred, or resting on a single unverified source.
+Revise it in place as evidence changes.
+
+An unsourced note is not research: it is specification if it states behaviour, an ADR if it states
+a choice.
+
+Delete this comment in the copy.
 -->
 
 **Confidence:** high | medium | low

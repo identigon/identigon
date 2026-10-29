@@ -29,16 +29,16 @@ Two boundaries are deliberate and load-bearing:
   YAML is the durable, checked-in, reviewable artifact; Effigies helps you write it, then gets out
   of the way.
 - **Fail-closed survives.** Effigies never assigns a column role behind your back. It _suggests_; an
-  unclassified column still aborts the run (incognito's fail-closed contract, ADR 17). The DPIA
+  unclassified column still aborts the run (incognito's fail-closed contract, ADR-0017). The DPIA
   report incognito emits - source-value survival, misdeclaration lint, structural findings, and the
   illustrative sample rows - is the safety net that catches a bad classification.
 - **Metadata only.** Schema discovery and any artifact Effigies produces for a human or an agent
   carry schema _metadata_ (names, types, the FK graph) - never sampled real values. Authoring works
   from the schema, not the data.
 
-See [ADR 23](../docs/adr/0023-authoring-above-the-engine.md) for the reasoning,
+See [ADR-0023](../docs/decisions/0023-authoring-above-the-engine.md) for the reasoning,
 [`docs/spec/effigies.md`](../docs/spec/effigies.md) for the behavioural contract, and the root
-[`PLAN.md`](../PLAN.md) (`**Project:** effigies` entries) for the backlog.
+[`docs/plan.md`](../docs/plan.md) (`**Project:** effigies` entries) for the backlog.
 
 ## Status
 

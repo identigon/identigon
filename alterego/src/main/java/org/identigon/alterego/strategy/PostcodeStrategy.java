@@ -12,7 +12,7 @@ import org.identigon.alterego.TransformationContext;
  * outward code (one of the common shapes {@code A9}, {@code A99}, {@code AA9}, {@code AA99}) and an
  * inward code (one digit, two letters). By default the inward code's last letter is drawn only from
  * {@code C I K M O V} - letters Royal Mail never uses there - so the output is guaranteed to never
- * be a real, deliverable postcode (ADR 0005). {@code realistic} opts out, drawing that letter from
+ * be a real, deliverable postcode (ADR-0005). {@code realistic} opts out, drawing that letter from
  * the full alphabet instead.
  *
  * <p>v1 does not generate the rarer outward shapes with a trailing district letter (e.g. {@code

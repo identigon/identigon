@@ -18,7 +18,8 @@ header.
 `phoneNumber()`'s default pool ships 17 of Ofcom's 20 published drama/test ranges - the 14
 geographic ranges, the generic no-area fallback, and the mobile range - excluding freephone,
 premium-rate, and UK-wide non-geographic ranges. See
-[ADR 27](../adr/0027-phone-pool-excludes-special-service-ranges.md) for that scoping decision.
+[ADR-0027](../decisions/0027-phone-pool-excludes-special-service-ranges.md) for that scoping
+decision.
 
 ## Evidence
 
@@ -96,10 +97,11 @@ no-area range (the designated geography-neutral fallback when a fixed area match
 `MOBILE` for the mobile range (never a coherence match target or the neutral fallback - reachable
 only via the unconstrained pool, same as before M5). London's single range gets one row per postcode
 area it spans (E, EC, N, NW, SE, SW, W, WC), exactly as `towns.txt` already lists London itself -
-same "list once per area" precedent ([ADR 25](../adr/0025-london-listed-once-per-postcode-area.md)),
-same well-formedness rule (not a duplicate row, since the tags differ per row). Reading's range
-(`RG`) has no matching town in `towns.txt`'s curated 20 towns - documented, not a bug: still
-reachable via an explicit `.with(UK_POSTCODE_AREA, "RG")` pre-seed.
+same "list once per area" precedent
+([ADR-0025](../decisions/0025-london-listed-once-per-postcode-area.md)), same well-formedness rule
+(not a duplicate row, since the tags differ per row). Reading's range (`RG`) has no matching town in
+`towns.txt`'s curated 20 towns - documented, not a bug: still reachable via an explicit
+`.with(UK_POSTCODE_AREA, "RG")` pre-seed.
 
 The unconstrained ("no area fixed") pool must stay exactly the same 17 distinct choices it was in
 M3, not 24 rows - `PhoneNumberStrategy` de-duplicates by template before picking, so London's 8-way

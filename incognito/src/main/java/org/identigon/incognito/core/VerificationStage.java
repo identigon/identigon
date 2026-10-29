@@ -29,7 +29,7 @@ import org.identigon.incognito.policy.TablePolicy;
  * <ul>
  *   <li>Referential integrity: no dangling FK references.
  *   <li>Fictionality: a DIRECT_ID (or QUASI_ID SYNTHESISE carrying the same {@code
- *       directIdStrategy} hint, ADR 31) column is checked per its typed strategy - email columns
+ *       directIdStrategy} hint, ADR-0031) column is checked per its typed strategy - email columns
  *       use RFC 2606 reserved domains; postcode columns use the guaranteed-fictional inward-code
  *       letter; domain/URL columns use RFC 2606 reserved domains/TLDs; National Insurance number
  *       (NINO) columns use the guaranteed-fictional QQ prefix; NHS number columns use the reserved
@@ -78,7 +78,7 @@ public final class VerificationStage implements PipelineStage {
           + "[a-z]+\\.(test|example|invalid))(/.*)?$";
 
   /**
-   * {@code PostcodeStrategy}'s default (non-{@code realistic}) guarantee (ADR 0005, alterego): the
+   * {@code PostcodeStrategy}'s default (non-{@code realistic}) guarantee (ADR-0005, alterego): the
    * inward code's last letter is drawn only from these - letters Royal Mail never uses there - so
    * the output can never coincide with a real, deliverable postcode.
    */
@@ -273,7 +273,7 @@ public final class VerificationStage implements PipelineStage {
 
       // 2. Verify fictionality of every column routed through a typed generator on the target -
       //    a DIRECT_ID with that directIdStrategy, or a QUASI_ID SYNTHESISE column carrying the
-      //    same hint (SPEC Appendix B, ADR 31): TableTransformLoadStage routes both through the
+      //    same hint (SPEC Appendix B, ADR-0031): TableTransformLoadStage routes both through the
       //    identical buildDirectIdTransformer, so both get the identical guarantee to verify.
       for (String tableName : plan.sequentialTableOrder()) {
         Optional<TablePolicy> tablePolicyOpt = policy.table(tableName);

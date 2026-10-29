@@ -5,7 +5,7 @@ plugins {
 
 // Quality plugins, jar LICENCE packaging, and the shared publishing setup (sources/javadoc jars,
 // POM, repository, signing) come from the root build.gradle.kts. Version is lockstep, also from the
-// root (docs/adr/0024-lockstep-versioning.md).
+// root (docs/decisions/0024-lockstep-versioning.md).
 
 group = "org.identigon"
 
@@ -17,7 +17,7 @@ java {
 
 application {
     // The CLI entry point. Effigies is a thin authoring/orchestration front-end above incognito;
-    // see ADR 23 and docs/spec/effigies.md for the boundary.
+    // see ADR-0023 and docs/spec/effigies.md for the boundary.
     mainClass = "org.identigon.effigies.EffigiesCli"
 }
 
@@ -35,7 +35,7 @@ tasks.withType<JavaCompile>().configureEach {
 dependencies {
     // The orchestration engine. Effigies depends ONLY on incognito (alterego arrives transitively
     // and is not called directly). It moves to a 2.0.x incognito once that lands (which removes the
-    // inference that migrates here - ADR 23).
+    // inference that migrates here - ADR-0023).
     implementation(project(":incognito"))
 
     // Reads/writes the declarative policy YAML that incognito consumes.
@@ -78,8 +78,8 @@ tasks.test {
 // plain Maven coordinate (as `jar`'s own output) would be wrong regardless of which task builds
 // it: a consumer resolving `org.identigon:effigies` transitively would get incognito/alterego/
 // SnakeYAML/the Postgres driver twice - once embedded in the jar, once again from this POM's own
-// resolved dependencies. See docs/adr/0028-publish-effigies-runnable-jar.md for that reasoning and
-// docs/adr/0030-standalone-jar-assembly-back-in-effigies.md for why `identigonJar` itself lives
+// resolved dependencies. See docs/decisions/0028-publish-effigies-runnable-jar.md for that reasoning and
+// docs/decisions/0030-standalone-jar-assembly-back-in-effigies.md for why `identigonJar` itself lives
 // here rather than at the root (it did, briefly).
 tasks.register<Jar>("identigonJar") {
     // A stable, unversioned filename so `java -jar effigies/build/libs/identigon.jar` always
@@ -134,7 +134,7 @@ publishing {
             artifactId = "effigies"
             // The standalone fat jar rides along under a `standalone` classifier rather than as the
             // primary artifact, so a dependency resolver never selects it unless asked for by name
-            // (docs/adr/0028-publish-effigies-runnable-jar.md).
+            // (docs/decisions/0028-publish-effigies-runnable-jar.md).
             artifact(tasks.named("identigonJar")) {
                 classifier = "standalone"
             }

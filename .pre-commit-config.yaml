@@ -146,13 +146,13 @@ repos:
         name: "ADR statuses are lowercase (MADR spelling)"
         language: pygrep
         entry: 'Superseded by ADR-|`(Accepted|Proposed|Rejected)`'
-        files: ^docs/adr/
+        files: ^docs/decisions/
 
       - id: no-nygard-status-section
         name: "Records use MADR front-matter, not a Status section"
         language: pygrep
         entry: '^## Status$'
-        files: ^docs/adr/
+        files: ^docs/decisions/
 
       # quickstart/run-quickstart.sh declares #!/bin/sh precisely so shellcheck (above) checks it
       # against POSIX rules - a bash-only construct slipped in under that same shebang would defeat

@@ -29,10 +29,10 @@ public final class SchemaDiscoveryStage implements PipelineStage {
 
   /**
    * Key used to store the auto-inference role suggestions in the pipeline context attributes.
-   * <b>Always empty.</b> Role inference lives in {@code effigies}' {@code PolicyInferrer} (ADR 23),
-   * which incognito cannot reach without inverting the dependency direction. Kept so {@link
-   * org.identigon.incognito.api.AnonymisationReport.TableReport#inferSuggestions()} has something
-   * to read; nothing populates it.
+   * <b>Always empty.</b> Role inference lives in {@code effigies}' {@code PolicyInferrer}
+   * (ADR-0023), which incognito cannot reach without inverting the dependency direction. Kept so
+   * {@link org.identigon.incognito.api.AnonymisationReport.TableReport#inferSuggestions()} has
+   * something to read; nothing populates it.
    */
   public static final String ATTR_INFER_SUGGESTIONS = "incognito.schema.inferSuggestions";
 
@@ -168,7 +168,7 @@ public final class SchemaDiscoveryStage implements PipelineStage {
       if (declared.isEmpty() || declared.get().role() == null) {
         // An unclassified column ALWAYS fails closed (SPEC §7.2) - it must never pass
         // through as real data. incognito itself makes no guess at what it might be;
-        // effigies' scaffold/validate commands are where a suggestion comes from (ADR 23).
+        // effigies' scaffold/validate commands are where a suggestion comes from (ADR-0023).
         unclassifiedMessages.add("'" + column + "'");
       } else {
         ColumnPolicy colPol = declared.get();
@@ -193,7 +193,7 @@ public final class SchemaDiscoveryStage implements PipelineStage {
                     + "QuasiIdStrategy (SPEC §4.1).");
           }
         } else if (colPol.role() == ColumnRole.DIRECT_ID) {
-          // No implicit ALTEREGO_GENERIC default (ADR 29): a DIRECT_ID with no declared
+          // No implicit ALTEREGO_GENERIC default (ADR-0029): a DIRECT_ID with no declared
           // strategy is an unmade decision, not a default, the same principle already
           // applied to SENSITIVE/distinguishing above. UNIQUE_CANDIDATE_KEY shares
           // buildDirectIdTransformer but is deliberately not covered here - it was never
@@ -290,15 +290,16 @@ public final class SchemaDiscoveryStage implements PipelineStage {
   }
 
   /**
-   * Fail-closed guard for {@code SYNTHESISE}-by-type (SPEC Appendix B, ADR 31): a {@code QUASI_ID}
-   * that is synthesised (its strategy is {@code SYNTHESISE}, or absent - the default) from a source
-   * type with no built-in <em>fictional</em> generator, and with no typed {@code directIdStrategy}
-   * hint, would silently fall back to shape-preserving fabrication with no fictionality guarantee -
-   * the same unmade-decision problem ADR 29 already closed for {@code DIRECT_ID}. That is
-   * forbidden; the issue is appended to {@code failures} rather than thrown immediately - see
-   * {@link #validateTablePolicy}. A temporal type ({@link #isTemporalType}) has a type-matched
-   * shift primitive and needs no hint; a character type ({@link #isCharacterType}) shape-preserves
-   * only, so it always needs one; anything else has no mapping at all and always needs one.
+   * Fail-closed guard for {@code SYNTHESISE}-by-type (SPEC Appendix B, ADR-0031): a {@code
+   * QUASI_ID} that is synthesised (its strategy is {@code SYNTHESISE}, or absent - the default)
+   * from a source type with no built-in <em>fictional</em> generator, and with no typed {@code
+   * directIdStrategy} hint, would silently fall back to shape-preserving fabrication with no
+   * fictionality guarantee - the same unmade-decision problem ADR-0029 already closed for {@code
+   * DIRECT_ID}. That is forbidden; the issue is appended to {@code failures} rather than thrown
+   * immediately - see {@link #validateTablePolicy}. A temporal type ({@link #isTemporalType}) has a
+   * type-matched shift primitive and needs no hint; a character type ({@link #isCharacterType})
+   * shape-preserves only, so it always needs one; anything else has no mapping at all and always
+   * needs one.
    */
   private void validateSynthesiseType(
       SchemaInspector.TableMetadata table,
@@ -324,7 +325,7 @@ public final class SchemaDiscoveryStage implements PipelineStage {
               + jdbcTypeName(sqlType)
               + ") with no"
               + " directIdStrategy hint. Shape-preserving fabrication carries no fictionality"
-              + " guarantee (SPEC Appendix B, ADR 31) - declare a directIdStrategy hint (e.g."
+              + " guarantee (SPEC Appendix B, ADR-0031) - declare a directIdStrategy hint (e.g."
               + " ALTEREGO_POSTCODE), or ALTEREGO_GENERIC if that lack of guarantee is a"
               + " deliberate choice.");
     } else {
@@ -357,7 +358,7 @@ public final class SchemaDiscoveryStage implements PipelineStage {
   /**
    * Whether a source SQL type only has shape-preserving (format-preserving, not fictional) {@code
    * SYNTHESISE} fabrication (SPEC Appendix B) absent a {@code directIdStrategy} hint - so a hint is
-   * always required (ADR 31).
+   * always required (ADR-0031).
    */
   private static boolean isCharacterType(int sqlType) {
     return switch (sqlType) {

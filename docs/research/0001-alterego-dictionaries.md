@@ -70,11 +70,11 @@ below changes.
 
 ## Surnames
 
-**Status: decided for v1 - authored, not sourced (ADR 10).**
+**Status: decided for v1 - authored, not sourced (ADR-0010).**
 
 `lastName()` draws from a deliberately obviously-fictional, authored word list rather than real
 population data, so a pseudonymised full name is unmistakably not a real person's regardless of the
-(real) first name it's paired with (`firstName()` is unaffected - see ADR 10 for why only the
+(real) first name it's paired with (`firstName()` is unaffected - see ADR-0010 for why only the
 surname needs this). The three-part sourcing gate (provenance/licensing/data-processing) that
 applies to sourced dictionaries doesn't apply the same way here, since there is no third-party
 source to cite; instead, the bar is: every entry reviewed to confirm it does not coincide with a
@@ -155,15 +155,16 @@ and Lisburn all fall just below the cutoff).
 
 London spans 8 postcode areas, so it is listed once per major postcode area (8 rows) rather than
 picking one inaccurate representative area or excluding the UK's largest city entirely - see
-[ADR 25](../adr/0025-london-listed-once-per-postcode-area.md) for the decision and its consequences.
+[ADR-0025](../decisions/0025-london-listed-once-per-postcode-area.md) for the decision and its
+consequences.
 
 The 20-town, 27-row (with London's 8 areas) list, and the script that produces it, are tracked
 against `alterego/tools/curate_dictionaries.py` alongside the first-names curation (see above).
 
 ## Street names
 
-**Status: decided for v1 - Compositional (theme word + type word); theme words authored per ADR 10,
-type words still real.**
+**Status: decided for v1 - Compositional (theme word + type word); theme words authored per
+ADR-0010, type words still real.**
 
 **Decision**: two small composed word lists - `street-themes.txt` (descriptive words) and
 `street-types.txt` (road-type words: "Road", "Avenue", "Close"...), combined at generation time
@@ -183,7 +184,7 @@ Street theme words (24): Artificial, Bluff, Bogus, Counterfeit, Demo, Dummy, Exa
 Fake, Fictional, Hypothetical, Imaginary, Invented, Madeup, Nonexistent, Notreal, Phony,
 Placeholder, Pretend, Sample, Somewhere, Specimen, Synthetic, Unreal.
 
-Authored, not sourced (ADR 10): deliberately obvious placeholder-style words, reviewed to confirm
+Authored, not sourced (ADR-0010): deliberately obvious placeholder-style words, reviewed to confirm
 none coincides with a real UK street-name theme word and that every theme+type combination (e.g.
 "Example Road") reads as unmistakably fictional. Licensed under this project's own MIT licence as
 original content (`alterego/src/main/resources/dictionaries/LICENCES/MIT.txt`), not a third-party
@@ -224,8 +225,8 @@ curated top-20s used for `first-names.txt`) and every surname in NRS's "Surnames
 tokens from the candidate list.
 
 Names are generated as three tagged words (`MODIFIER-or-NOUN` + `NOUN` + `NOUN`), not a flat pool -
-see [ADR 26](../adr/0026-organisation-name-three-word-tagged-composition.md) for the decision, the
-rejected alternatives, and the combination-count reasoning.
+see [ADR-0026](../decisions/0026-organisation-name-three-word-tagged-composition.md) for the
+decision, the rejected alternatives, and the combination-count reasoning.
 
 **NOUN (44 entries)**: the original top-50-by-frequency cut from the candidate list, minus "Sons"
 (dropped: it grammatically wants a personal surname before it, e.g. "Smith & Sons", which this

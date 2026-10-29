@@ -43,7 +43,7 @@ class PolicyInferrer {
   // no single strategy is a safe suggestion -- the stub still appears, just with no guessed value.
   // POSTCODE_PATTERN infers QUASI_ID, not DIRECT_ID, but is included here too: incognito routes a
   // QUASI_ID SYNTHESISE column through a directIdStrategy hint exactly like a DIRECT_ID column does
-  // (SPEC Appendix B), and a hint-less character-type QUASI_ID now fails closed (ADR 31) - so the
+  // (SPEC Appendix B), and a hint-less character-type QUASI_ID now fails closed (ADR-0031) - so the
   // suggestion belongs here just as much.
   private static final Map<String, DirectIdStrategy> STRATEGY_BY_HEURISTIC =
       Map.of(

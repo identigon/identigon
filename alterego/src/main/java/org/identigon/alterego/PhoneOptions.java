@@ -23,7 +23,7 @@ public final class PhoneOptions {
   }
 
   /**
-   * Opts out of the fictionality guarantee (ADR 0005): every digit is replaced independently, so
+   * Opts out of the fictionality guarantee (ADR-0005): every digit is replaced independently, so
    * the output may coincide with a real, connectable phone number.
    *
    * @return options that opt out of the fictionality guarantee

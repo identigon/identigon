@@ -13,10 +13,10 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
 /**
- * Property-style tests backing the PLAN.md M1 "done when" criterion: {@code t.apply(x)} is stable
- * across repeated calls, input-order permutations, and sequential vs parallel streams (section
- * 3.1's order-independence guarantee). Inputs are enumerated deterministically so a failure always
- * reproduces.
+ * Property-style tests backing the docs/plan.md M1 "done when" criterion: {@code t.apply(x)} is
+ * stable across repeated calls, input-order permutations, and sequential vs parallel streams
+ * (section 3.1's order-independence guarantee). Inputs are enumerated deterministically so a
+ * failure always reproduces.
  */
 class PatternDeterminismPropertyTest {
 

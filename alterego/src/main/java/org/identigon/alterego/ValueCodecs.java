@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * Canonical text encoding and decoding for the fixed value-type set (section 2.6): {@code String},
  * {@code Integer}, {@code Long}, {@code Boolean}, {@code LocalDate}, {@code LocalDateTime}, {@code
- * Instant}, {@code UUID}, and any enum. There is no public codec SPI (ADR 0003); this registry is
+ * Instant}, {@code UUID}, and any enum. There is no public codec SPI (ADR-0003); this registry is
  * the whole of it.
  */
 final class ValueCodecs {

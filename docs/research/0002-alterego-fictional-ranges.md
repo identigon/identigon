@@ -121,7 +121,7 @@ they are allocated sequentially from 1.
   project's no-time-dependence invariant regardless.
 - There is no reserved or invalid range in between.
 
-Revisit if a reserved/never-issued range comes to light - tracked in root `PLAN.md`
+Revisit if a reserved/never-issued range comes to light - tracked in root `docs/plan.md`
 (`**Project:** alterego - companyNumber()`). Format facts (for the regional element, should it
 return): England & Wales are 8 digits with no distinguishing prefix; Scotland is `SC` + 6 digits;
 Northern Ireland is `NI` + 6 digits; always 8 characters total. Source: gov.uk / Companies House;

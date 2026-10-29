@@ -1,8 +1,8 @@
 # Identigon - Instructions for Implementation Agents
 
 **Read [`DOC-MAP.md`](DOC-MAP.md) before writing anything down.** It says which file a given fact
-belongs in - root `SPECIFICATION.md` indexes `docs/spec/`, decisions live in `docs/adr/`, and so on.
-This page is behavioural rules; the map decides where facts go.
+belongs in - root `docs/spec.md` indexes `docs/spec/`, decisions live in `docs/decisions/`, and so
+on. This page is behavioural rules; the map decides where facts go.
 
 Identigon is a monorepo of three subprojects forming a pipeline, each a sibling Gradle project of
 the others (`effigies` -> `incognito` -> `alterego`, via `project(...)` dependencies):
@@ -15,7 +15,7 @@ the others (`effigies` -> `incognito` -> `alterego`, via `project(...)` dependen
   discovers schemas, scaffolds declarative `policy.yaml` files, and drives the engine to anonymise
   databases.
 
-The root `PLAN.md` tracks the whole monorepo's backlog (each entry optionally tagged
+The root `docs/plan.md` tracks the whole monorepo's backlog (each entry optionally tagged
 `**Project:**`); root `CHANGELOG.md` covers every release, pre-1.0.0 history included
 (project-prefixed version tags for each subproject's own past releases, then every shared release
 from `1.0.0` onward, entries tagged by subproject under Keep a Changelog's own categories). Each
@@ -23,16 +23,16 @@ subproject's specification now lives under root `docs/spec/` - read the relevant
 writing any code, for whichever subproject(s) you're touching:
 
 **This also covers `identigon.github.io`**, the separate repository holding the project's public
-site: its decisions live in this repo's `docs/adr/`, and its backlog in this `PLAN.md` (tagged
-`identigon.github.io`), rather than in a documentation structure of its own - see
-`docs/adr/0033-extend-documentation-coverage-to-identigon-github-io.md`. Working in that repo? Its
-own `AGENTS.md` there covers site-specific hazards only and routes back here for the rest.
+site: its decisions live in this repo's `docs/decisions/`, and its backlog in this `docs/plan.md`
+(tagged `identigon.github.io`), rather than in a documentation structure of its own - see
+`docs/decisions/0033-extend-documentation-coverage-to-identigon-github-io.md`. Working in that repo?
+Its own `AGENTS.md` there covers site-specific hazards only and routes back here for the rest.
 
 ## alterego/
 
 - `docs/spec/alterego.md` - the behavioural contract, including the normative Appendix A. Every
   observable behaviour is defined there; if you find a gap, flag it - do not invent behaviour.
-- `docs/tasks/alterego-M<n>.md` - if present, the ordered checklist for the current milestone. Work
+- `docs/plan/alterego-M<n>.md` - if present, the ordered checklist for the current milestone. Work
   top to bottom, ticking items off as you complete them, and delete the file once the milestone
   ships - its history lives in git, not as a lingering doc.
 
@@ -47,27 +47,35 @@ own `AGENTS.md` there covers site-specific hazards only and routes back here for
 - `docs/spec/effigies.md` - the behavioural contract. Every observable behaviour is defined there;
   if you find a gap, flag it - do not invent behaviour.
 
-Decisions for all three subprojects live together in root `docs/adr/` (numbered across the whole
-monorepo, not per subproject) - decisions already made, with reasons. Do not revisit or "improve"
-one; supersede with a new ADR if one genuinely changes.
+Decisions for all three subprojects live together in root `docs/decisions/` (numbered across the
+whole monorepo, not per subproject) - decisions already made, with reasons. Only `accepted` records
+bind. The rules for changing one are in `docs/decisions/0000-template.md`.
 
 ## Documentation
 
-When documents disagree, tense settles it:
+`DOC-MAP.md` says which file a fact belongs in. Read it first.
 
-- `docs/spec/<subproject>.md` - present tense, authoritative about what that subproject does now
-  (indexed from root `SPECIFICATION.md`).
-- `CHANGELOG.md` - past tense. What changed, never what is true today.
-- `PLAN.md` - intent. Nothing described in it exists yet.
-- `docs/adr/` - why. Only `accepted` records bind; check the status before relying on one.
+Tense settles disagreements:
+
+- `docs/spec.md` - present tense: what the system does now.
+- `CHANGELOG.md` - past tense: what changed, never what's true today.
+- `docs/plan.md` - intent: nothing in it exists yet.
+- `docs/decisions.md` - why: index of decision records; only `accepted` records bind.
 
 Before you edit:
 
-- A specification member follows the work. Change it because behaviour changed, not because it would
-  read better. Its purpose and scope are not yours to revise.
-- Never change an ADR's `status`, and never edit one that says `accepted`. Drafting a record is
-  yours; deciding one is not - leave `decision-makers` as the template's placeholder too.
-- Delete completed `PLAN.md` entries rather than marking them done.
+- Change the specification because behaviour changed, never because it'd read better. Purpose and
+  scope aren't yours to revise.
+- You may create a decision record as `proposed`, copying `docs/decisions/0000-template.md` rather
+  than an existing record, and change a `proposed` one. **Accepting, rejecting, reopening
+  (`accepted` to `proposed`), deprecating and deleting a record each need the owner's explicit
+  permission, asked for first.** This is absolute.
+- On accepting, set `decision-makers`, `approval` (the owner's words) and `date`, then commit. A
+  rejected change to a reopened record is undone by restoring its accepted version.
+- Cite records as `ADR-NNNN`, and fix every citation a change makes untrue in the same commit.
+- Delete finished `docs/plan.md` entries; don't mark them done.
+- **Write the least that is true.** No history or account of how you got there, in documents or code
+  comments - the map says where those go.
 - Adding a document means updating `DOC-MAP.md` in the same commit.
 
 ## Build and test

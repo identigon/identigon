@@ -201,13 +201,13 @@ restating them here too would be the same fact in two places.
 - **incognito:** `AnonymisationReport.ColumnAction` gains a `fictionalityVerified` field - `true`
   only when a typed SPEC §4.3 fictionality check actually ran and passed for that specific column;
   `false` for every other column, including a deliberately-chosen `ALTEREGO_GENERIC` strategy, which
-  is a legitimate choice (ADR 21/29) but carries no guarantee to verify. Previously only
+  is a legitimate choice (ADR-0021 and ADR-0029) but carries no guarantee to verify. Previously only
   `TableReport.fictionalityVerified` existed, a table-level "no verification failure found" signal
   that could read `true` for a table holding an unguaranteed column. `VerificationStage`'s
   fictionality checks also now cover a `QUASI_ID SYNTHESISE` column carrying a `directIdStrategy`
-  hint, not just `DIRECT_ID` - both route through the same typed generator (ADR 31), so both get the
-  same check. All three DPIA formats (JSON/HTML/Markdown) surface the new per-column field, and the
-  table-level one is now labelled to make clear what it does and doesn't cover.
+  hint, not just `DIRECT_ID` - both route through the same typed generator (ADR-0031), so both get
+  the same check. All three DPIA formats (JSON/HTML/Markdown) surface the new per-column field, and
+  the table-level one is now labelled to make clear what it does and doesn't cover.
 - **effigies:** `scaffold` now suggests a `directIdStrategy` hint for an inferred `QUASI_ID` column
   that has one (`postcode` via `POSTCODE_PATTERN` today), mirroring the existing `DIRECT_ID` stub -
   closes the gap where a scaffolded policy could land on incognito's new QUASI_ID fail-closed guard
@@ -223,9 +223,9 @@ restating them here too would be the same fact in two places.
 
 - **incognito:** a character-type `QUASI_ID` using `SYNTHESISE` now requires an explicit
   `directIdStrategy` hint. Previously a `QUASI_ID` on a `VARCHAR`-family column with no hint
-  silently fell back to shape-preserving fabrication (no fictionality guarantee, ADR 21) even with
+  silently fell back to shape-preserving fabrication (no fictionality guarantee, ADR-0021) even with
   the default `SYNTHESISE` strategy; it now fails closed at schema-discovery time instead, the same
-  treatment ADR 29 already gave `DIRECT_ID`. `ALTEREGO_GENERIC` remains fully valid as an explicit
+  treatment ADR-0029 already gave `DIRECT_ID`. `ALTEREGO_GENERIC` remains fully valid as an explicit
   choice; temporal `SYNTHESISE` columns (`DATE`/`TIMESTAMP`) are unaffected - they keep their
   type-matched shift primitive and need no hint. See
   `docs/adr/0031-declared-direct-id-strategy-for-quasi-id-synthesise.md`.
@@ -296,9 +296,9 @@ restating them here too would be the same fact in two places.
 
 - **incognito:** a `DIRECT_ID` column now requires an explicit `directIdStrategy`. **Breaking.**
   Previously a `DIRECT_ID` with no declared strategy silently fell back to `ALTEREGO_GENERIC`
-  (shape-preserving fabrication with no fictionality guarantee, ADR 21); it now fails closed at
+  (shape-preserving fabrication with no fictionality guarantee, ADR-0021); it now fails closed at
   schema-discovery time instead, the same way an undeclared `SENSITIVE` `distinguishing` flag
-  already does (ADR 16). `ALTEREGO_GENERIC` remains fully valid as an explicit choice;
+  already does (ADR-0016). `ALTEREGO_GENERIC` remains fully valid as an explicit choice;
   `UNIQUE_CANDIDATE_KEY` is unaffected. See `docs/adr/0029-declared-direct-id-strategy.md`.
 - **incognito:** fail-closed schema validation now reports every issue across the whole schema in
   one run, not one table (or one issue) at a time. `SchemaDiscoveryStage` previously threw on the
@@ -367,7 +367,7 @@ restating them here too would be the same fact in two places.
 
 - **incognito:** `PolicyInferrer` and `AnonymisationPolicy.Builder.autoInfer(boolean)` are removed.
   **Breaking.** Both were `@Deprecated(forRemoval = true)` since inference migrated to `effigies`'
-  own `PolicyInferrer` (ADR 23); this was always going to be incognito's next major version (ADR
+  own `PolicyInferrer` (ADR-0023); this was always going to be incognito's next major version (ADR
   24), and it lands here. `AnonymisationPolicy.autoInfer` (the record component) is gone too -
   nothing else in the engine ever read it. `YamlPolicyParser` now silently ignores a leftover
   `autoInfer:` key in an old `policy.yaml` rather than acting on it, the same as any other key it
@@ -382,7 +382,7 @@ restating them here too would be the same fact in two places.
 
 - **incognito:** `DirectIdStrategy.ALTEREGO_NINO`, `.ALTEREGO_NHS_NUMBER`,
   `.ALTEREGO_PASSPORT_NUMBER`, and `.ALTEREGO_DRIVING_LICENCE_NUMBER` added, wiring all four
-  remaining `alterego` GB identifier generators (already present, unwired - ADR 0012) through to
+  remaining `alterego` GB identifier generators (already present, unwired - ADR-0012) through to
   `TableTransformLoadStage` (fabrication), `AnonymisationReportBuilder` (illustrative DPIA samples),
   and `VerificationStage` (new fictionality checks: every fabricated value must carry its
   guaranteed-fictional prefix - `QQ` / `999` / `ZZ` / `99999` respectively - alongside the existing
@@ -582,7 +582,7 @@ Initial implementation, milestones M0-M6 of `alterego/PLAN.md` (now deleted; see
   dictionaries (`docs/research/0001-alterego-dictionaries.md`). `lastName()` and `streetAddress()`'s
   theme words go further: authored, deliberately fictional vocabulary rather than real data, so a
   pseudonymised name or street address reads as unmistakably fictional, not merely a real one
-  attached to the wrong person (ADR 0010).
+  attached to the wrong person (ADR-0010).
 - Temporal jitter: `shiftDate(...)`/`shiftDateTime(...)`, sixteen methods across eight jitter
   strategies, with inclusive `JitterOptions` clamping.
 - Fictional-by-default contact details: `emailAddress()` (RFC 2606 reserved domains) and
@@ -630,16 +630,16 @@ Pre-1.0 development. v1.0 scope: PostgreSQL only; in-memory key/cascade stores; 
   ordering; fail-closed classification with advisory `PolicyInferrer` suggestions.
 - **Fabrication engine** (Phase 4): streaming transform+load; `DIRECT_ID` / `UNIQUE_CANDIDATE_KEY`
   via `alterego` with a length-preserving collision fallback; `QUASI_ID` temporal jitter, including
-  one salt-keyed delta per coherence group inherited by descendants (ADR 18); declared
-  `distinguishing` handling for `SENSITIVE` columns (ADR 16); root-ancestor `INHERITED_ATTRIBUTE`
-  resolution (ADR 20); primary-key surrogates and foreign-key rewriting.
+  one salt-keyed delta per coherence group inherited by descendants (ADR-0018); declared
+  `distinguishing` handling for `SENSITIVE` columns (ADR-0016); root-ancestor `INHERITED_ATTRIBUTE`
+  resolution (ADR-0020); primary-key surrogates and foreign-key rewriting.
 - **Key & cascade stores** (Phase 5): `InMemoryKeyTranslationStore` and
   `InMemoryAttributeCascadeStore` (published attributes, FK linkage, and group-scoped jitter
   deltas). Single-column **and** composite (`CompositeKey`) keys.
 - **Loader, cyclic FKs, clean-up & verification** (Phase 6): `PostgresDialectHandler` (+ generic
   ANSI fallback) with `session_replication_role` trigger isolation, `OVERRIDING SYSTEM VALUE`, and
   sequence resync; cyclic / self-referential foreign keys via Tarjan SCC plus a placeholder and a
-  second-pass `UPDATE` (ADR 19); `IncognitoCleanUpHandler` compensation on failure with salt
+  second-pass `UPDATE` (ADR-0019); `IncognitoCleanUpHandler` compensation on failure with salt
   destruction; `VerificationStage` (referential integrity, e-mail fictionality, per-period volume
   tolerances, the default-on misdeclaration lint, and a source-value survival net);
   `AnonymisationReportBuilder` (with the §7.2 opaque-type passthrough audit) and a
@@ -721,7 +721,7 @@ lockstep-versioning ADR) - that `1.1.0` release's own changes were never recorde
   incognito and alterego from GitHub Packages.
 - `EffigiesCli` dispatch skeleton (`discover` / `scaffold` / `run` declared; `help` / `version`
   live), covered by `EffigiesCliTest`.
-- Base docs: `README.md`, `SPECIFICATION.md`, `PLAN.md`, `docs/adr/` (ADR 23 - authoring above the
+- Base docs: `README.md`, `SPECIFICATION.md`, `PLAN.md`, `docs/adr/` (ADR-0023 - authoring above the
   engine), and an initial `docs/tasks/` handoff for schema discovery + scaffold.
 
 ## [1.0.0] - 2026-08-10

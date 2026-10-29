@@ -17,7 +17,7 @@ public enum ColumnRole {
   /**
    * Quasi-identifier attribute (DOB, Postcode, Age, Salary) - fabricated via {@code
    * QuasiIdStrategy} (synthesised or jittered), not generalised/suppressed under a k-anonymity
-   * model, which this library deliberately does not implement (SPEC §2.3, ADR 14).
+   * model, which this library deliberately does not implement (SPEC §2.3, ADR-0014).
    */
   QUASI_ID,
 
@@ -30,7 +30,7 @@ public enum ColumnRole {
   /**
    * Sensitive payload attribute, kept real or fabricated/redacted per the declared {@code
    * distinguishing} flag (SPEC §2.2/§4.1) - not protected via l-diversity, which this library
-   * deliberately does not implement (SPEC §2.3, ADR 14).
+   * deliberately does not implement (SPEC §2.3, ADR-0014).
    */
   SENSITIVE,
 

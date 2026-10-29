@@ -12,10 +12,10 @@ independently usable, sharing one repository-wide documentation set:
 | [`effigies/`](effigies)   | A CLI that discovers a schema, authors (and helps infer) the declarative policy `incognito` runs from, and drives the engine to produce the clone.                                                               | `incognito` |
 
 Each subproject's behavioural contract lives under root [`docs/spec/`](docs/spec/); design decisions
-for all three are in root [`docs/adr/`](docs/adr/), numbered across the whole monorepo; the single
-root [`PLAN.md`](PLAN.md) tracks the whole backlog (optionally tagged by subproject) - see
-[`DOC-MAP.md`](DOC-MAP.md) for the full map, and the subproject's own README for what it does and
-how to use it. Release history is split at the point the three merged: the root
+for all three are in root [`docs/decisions/`](docs/decisions/), numbered across the whole monorepo;
+the single root [`docs/plan.md`](docs/plan.md) tracks the whole backlog (optionally tagged by
+subproject) - see [`DOC-MAP.md`](DOC-MAP.md) for the full map, and the subproject's own README for
+what it does and how to use it. Release history is split at the point the three merged: the root
 [`CHANGELOG.md`](CHANGELOG.md) covers pre-1.0.0 history too (project-prefixed version tags), as well
 as every shared release from 1.0.0 onward.
 
@@ -50,7 +50,7 @@ task to a single subproject with `:name:`, e.g. `./gradlew :incognito:test`.
 
 The three subprojects version together, not independently - a version bump anywhere in the monorepo
 bumps the shared number for all three. See the
-["lockstep versioning" ADR](docs/adr/0024-lockstep-versioning.md) for why.
+["lockstep versioning" ADR](docs/decisions/0024-lockstep-versioning.md) for why.
 
 ## Licence
 

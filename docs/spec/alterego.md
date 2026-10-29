@@ -209,7 +209,7 @@ AlterEgo alterego = AlterEgo.builder()
   built from it is done being used.
 - **Locale**: defaults to the fixed constant `Locale.UK` (`en-GB`) - this library's primary
   deployment. A _fixed_ default is deterministic on every machine; what remains banned is
-  `Locale.getDefault()`, which would tie output to machine configuration (ADR 0006). Non-UK users
+  `Locale.getDefault()`, which would tie output to machine configuration (ADR-0006). Non-UK users
   configure explicitly; an unshipped country fails fast (section 4). v1 built-ins consult only the
   locale's **country**; the language component steers nothing yet.
 - **`rawMappingKeys`**: applies to every `stored()`/`unique()`/`context.mappings()` use from this
@@ -403,7 +403,7 @@ Two things follow from the mechanism and are documented plainly:
 `lastName()` and `streetAddress()` use a different mechanism from the other three: there is no
 officially reserved "fictional surname" or "fictional street" space to draw from, so their entire
 vocabulary is authored rather than sourced from real UK population/geographic data, reviewed to
-avoid coinciding with a known real name (ADR 0010). This is a curation-time guarantee, not a
+avoid coinciding with a known real name (ADR-0010). This is a curation-time guarantee, not a
 structural or regulatory one like the other three: it depends on the wordlist actually having been
 reviewed carefully, not on an external authority's own reserved-value-space rules. The policy is
 per-category, not per-locale - any future country's surname/street dictionaries are authored the
@@ -773,7 +773,7 @@ uniqueness guarantee, and the documentation says so.
 
 `FileMappingStore` is the shipped persistent `MappingStore`: one local file, one process, JDK-only
 (`java.nio`). It is what makes the cross-run stability promises of 5.2/5.3 achievable without
-writing a custom store (ADR 0011).
+writing a custom store (ADR-0011).
 
 ```java
 public final class FileMappingStore implements MappingStore, AutoCloseable {
@@ -921,7 +921,7 @@ Semantics, chosen so strategy code is identical in and out of a scope:
 
 Record attributes are **not** the `MappingStore` and deliberately do not use its SPI: the store is
 persistent, cross-record, and pluggable; attributes are ephemeral, intra-record, in-memory state
-with the scope's lifetime - nothing about them needs to be pluggable (ADR 0008).
+with the scope's lifetime - nothing about them needs to be pluggable (ADR-0008).
 
 ### 6.3 Built-in coherence
 
@@ -1003,7 +1003,7 @@ Transformation<String> t = alterego.bind("myapp:nhs-number", nhsNumber).unique()
 - **Gradle (Groovy DSL)**, `java-library` plugin, toolchain pinned to 25.
 - **No runtime dependencies.** Test dependencies: JUnit Jupiter (and AssertJ if fluent assertions
   are wanted). No property-based-testing framework - property-style tests are plain JUnit loops over
-  deterministically enumerated inputs (ADR 0013).
+  deterministically enumerated inputs (ADR-0013).
 - Dictionaries and structural-rule tables are plain-text resource files, UTF-8, under
   `src/main/resources/dictionaries/<country>/<name>.txt` (ISO 3166-1 alpha-2, e.g. `GB`) - under
   `src/main/resources`, not the repo root, since they are loaded as classpath resources at runtime
