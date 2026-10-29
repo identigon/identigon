@@ -1,8 +1,8 @@
 ---
-status: "proposed"
+status: "accepted"
 date: 2026-10-29
-decision-makers: {the owner - required once the status is not "proposed"}
-approval: {the owner's words, verbatim - required once the status is not "proposed"}
+decision-makers: David Conneely
+approval: accepted
 ---
 
 # 38. How the documentation is organised
