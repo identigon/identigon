@@ -65,7 +65,7 @@ docs/
   decisions/
     *.md                 decisions, numbered, amendable by the owner
   research/
-    *.md                 sourced findings with confidence levels
+    *.md                 sourced findings with confidence levels, numbered monorepo-wide
   testing.md             test strategy for all three subprojects, and what isn't covered
 alterego/README.md       module orientation, links outward to the root docs/ above
 incognito/README.md      module orientation, links outward to the root docs/ above
@@ -94,7 +94,7 @@ incognito/src/test/resources/benchmarks/SOURCES.md  provenance/licensing of vend
 | `docs/plan.md`                                       | Single ranked backlog. No standard; entries may carry a `Project` tag                                                                                 | future     | volatile           | owner, contributor           |
 | `docs/decisions.md`                                  | Generated index of decision records. Only `accepted` records bind                                                                                     | present    | rewritten in place | owner, contributor           |
 | `docs/decisions/*.md`                                | Why a decision was made, for any subproject or for `identigon.github.io`. **Real convention:** MADR minimal template, rules in `0000-template.md`     | past       | amendable          | owner, contributor           |
-| `docs/research/*.md`                                 | Sourced findings behind a spec guarantee, with an explicit confidence level. **No standard**                                                          | past       | append-only        | contributor                  |
+| `docs/research/*.md`                                 | Sourced findings behind a spec guarantee, with an explicit confidence level; numbered monorepo-wide, like `docs/decisions/`. **No standard**          | past       | append-only        | contributor                  |
 | `docs/testing.md`                                    | Test strategy for all three subprojects, and what is deliberately not covered                                                                         | present    | rewritten in place | contributor                  |
 | `docs/plan/*.md`                                     | Working notes for one backlog item, prefixed with the subproject name when subproject-specific. Optional                                              | future     | disposable         | contributor                  |
 | `docs/plan/0000-template.md`                         | **Template.** Task-note template. Optional                                                                                                            | present    | rewritten in place | contributor                  |
