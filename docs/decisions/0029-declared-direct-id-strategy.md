@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-08-31
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 29. Declared `directIdStrategy` for `DIRECT_ID`, not an automatic default

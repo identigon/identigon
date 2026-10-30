@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-09-01
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 28. Publish the effigies runnable jar somewhere a user can download it

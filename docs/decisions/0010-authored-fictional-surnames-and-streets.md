@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-26
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 10. Authored, obviously-fictional surnames and street names, across all countries

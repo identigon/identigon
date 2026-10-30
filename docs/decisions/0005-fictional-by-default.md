@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-12
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 5. Fictional output by default, where a reserved value space exists

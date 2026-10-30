@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-09-03
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 36. Adopt Prettier for Markdown, alongside `markdownlint-cli2`, accepting its emphasis-style rewrite

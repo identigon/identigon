@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-09-02
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 32. Consolidate documentation at the repository root, not per subproject

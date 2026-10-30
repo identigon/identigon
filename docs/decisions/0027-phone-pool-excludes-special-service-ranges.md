@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-25
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 27. phoneNumber()'s default pool excludes freephone/premium-rate/UK-wide ranges

@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-31
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 22. Reject gendered name dictionaries

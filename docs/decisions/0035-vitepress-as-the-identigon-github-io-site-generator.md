@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-08-11
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 35. VitePress as the `identigon.github.io` site generator

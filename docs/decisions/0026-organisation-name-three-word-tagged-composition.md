@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-14
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 26. Organisation names generated as three tagged words, not a flat word pool

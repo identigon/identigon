@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-09-01
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 30. Standalone jar assembly lives in effigies, not the root project

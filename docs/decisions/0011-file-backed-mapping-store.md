@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-26
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 11. File-backed mapping store in core (append-only log, single process)

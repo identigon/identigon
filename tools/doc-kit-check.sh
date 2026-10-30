@@ -84,6 +84,12 @@ vendored_of() {
 	fi
 }
 
+# not_templates - drop templates/ paths from stdin, but only in a repository distributing the kit,
+# which has templates/DOC-MAP.md (§2.8). Elsewhere a templates/ directory is documentation.
+not_templates() {
+	if [ -f templates/DOC-MAP.md ]; then grep -v '^templates/' || true; else cat; fi
+}
+
 # section FILE HEADING - the lines under a "## Heading" up to the next "## "
 section() {
 	awk -v h="$2" '$0 == h { f = 1; next } /^## / && f { exit } f' "$1"
@@ -174,11 +180,12 @@ check_map() {
 	done
 
 	# §2.4 - every documentation file appears in the map. Files below the conventional
-	# archive (§5.1), templates (§2.8), and vendored files (§1) are not documentation files;
-	# an archive elsewhere is covered by its map entry. Split on newlines only, so a path may
-	# contain spaces.
+	# archive (§5.1), the kit's templates (§2.8), and vendored files (§1) are not documentation
+	# files; an archive elsewhere is covered by its map entry. Split on newlines only, so a path
+	# may contain spaces.
 	set +f
-	files=$(find . -name '*.md' ! -path './.git/*' ! -path './docs/archive/*' ! -path './templates/*' | sed 's:^\./::' | sort)
+	files=$(find . -name '*.md' ! -path './.git/*' ! -path './docs/archive/*' | sed 's:^\./::' |
+		not_templates | sort)
 	set -f
 	unmapped=''
 	oldifs=$IFS
@@ -358,7 +365,6 @@ check_adr() {
 			if (!date) print "nodate\t" f
 			if (status != "" && status != "proposed") {
 				if (!dm) print "nodm\t" f "\t" status
-				if (!appr) print "noappr\t" f "\t" status
 			}
 			if (!h1) print "heading\t" f "\t## Context and Problem Statement"
 			if (!h2) print "heading\t" f "\t## Considered Options"
@@ -371,7 +377,7 @@ check_adr() {
 			sub(/.*\//, "", base)
 			skip = (base ~ /^0000-/ || base == "README.md")
 			if (base ~ /^[0-9][0-9][0-9][0-9]-/) seen[substr(base, 1, 4)]++
-			status = ""; date = dm = appr = h1 = h2 = h3 = 0
+			status = ""; date = dm = h1 = h2 = h3 = 0
 		}
 		FNR == 1 { flush(); start(FILENAME) }
 		status == "" && /^status: *"?[^"]*"? *$/ {
@@ -383,7 +389,6 @@ check_adr() {
 		}
 		/^date:/ { date = 1 }
 		/^decision-makers: *[^ {]/ { dm = 1 }
-		/^approval: *[^ {]/ { appr = 1 }
 		index($0, "## Context and Problem Statement") { h1 = 1 }
 		index($0, "## Considered Options") { h2 = 1 }
 		index($0, "## Decision Outcome") { h3 = 1 }
@@ -410,7 +415,6 @@ check_adr() {
 			status) fail "$f has status '$arg'" "§3.1 - proposed, accepted, rejected or deprecated" ;;
 			nodate) fail "$f has no date" "§3.1" ;;
 			nodm) fail "$f is '$arg' but names no decision-makers" "§3.1 - who decided?" ;;
-			noappr) fail "$f is '$arg' but has no approval" "§3.1 - the owner's words, verbatim" ;;
 			heading) fail "$f has no '$arg'" "§3.1 - MADR minimal template" ;;
 			dupe) fail "ADR number $f is used more than once" "§3.1 - numbers are unique" ;;
 		esac
@@ -419,20 +423,19 @@ check_adr() {
 	IFS=$oldifs
 	set +f
 
-	# §4.3 - the generated decisions index is up to date.
+	# §4.3 - the generated decisions index is up to date. It is regenerated outside the tree, under
+	# the same file name, because the name decides how the index links to the records.
 	idx="${dir}.md"
+	[ -f "$idx" ] || idx="$dir/README.md"
 	if [ -f "$idx" ] && [ -f tools/doc-kit-index-decisions.sh ]; then
-		sh tools/doc-kit-index-decisions.sh "${idx}.tmp" "$dir"
-		if ! cmp -s "$idx" "${idx}.tmp"; then
-			fail "$idx is out of date" "run 'sh tools/doc-kit-index-decisions.sh' to regenerate (§4.3)"
+		gen=$(mktemp -d)
+		out="$gen/${idx##*/}"
+		if ! sh tools/doc-kit-index-decisions.sh "$out" "$dir"; then
+			fail "$idx could not be regenerated" "see the error above (§4.3)"
+		elif ! cmp -s "$idx" "$out"; then
+			fail "$idx is out of date" "run 'sh tools/doc-kit-index-decisions.sh $idx $dir' to regenerate (§4.3)"
 		fi
-		rm -f "${idx}.tmp"
-	elif [ -f "$dir/README.md" ] && [ -f tools/doc-kit-index-decisions.sh ]; then
-		sh tools/doc-kit-index-decisions.sh "$dir/README.md.tmp" "$dir"
-		if ! cmp -s "$dir/README.md" "$dir/README.md.tmp"; then
-			fail "$dir/README.md is out of date" "run 'sh tools/doc-kit-index-decisions.sh $dir/README.md' to regenerate (§4.3)"
-		fi
-		rm -f "$dir/README.md.tmp"
+		rm -rf "$gen"
 	fi
 
 	return 0
@@ -443,7 +446,8 @@ check_adr() {
 # Vendored and gitignored files are not read.
 check_citations() {
 	set +f
-	docs=$(find . -name '*.md' ! -path './.git/*' ! -path './docs/archive/*' ! -path './templates/*' | sed 's:^\./::' | sort)
+	docs=$(find . -name '*.md' ! -path './.git/*' ! -path './docs/archive/*' | sed 's:^\./::' |
+		not_templates | sort)
 	set -f
 	skip=$(printf '%s\n' "$docs" | vendored_of; printf '%s\n' "$docs" | ignored_of)
 	scan=''

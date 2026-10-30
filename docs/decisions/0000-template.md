@@ -3,7 +3,6 @@ status: "proposed"
 # proposed | accepted | rejected | deprecated
 date: {YYYY-MM-DD, of the latest change of status}
 decision-makers: {the owner - required once the status is not "proposed"}
-approval: {the owner's words, verbatim - required once the status is not "proposed"}
 ---
 
 # 0. The question this record answers
@@ -23,11 +22,11 @@ Rules - absolute:
 - Every other change needs the owner's explicit permission, asked for first: proposed -> accepted
   (accepting), proposed -> rejected (rejecting), accepted -> proposed (reopening to change it),
   accepted -> deprecated (deprecating), and deleting a record of any status.
-- On accepting, rejecting or deprecating, set decision-makers (their name), approval (their words)
-  and date (today), then commit.
-- A correction that makes a record say what it always meant - a wrong path, command or citation -
-  fixes the text without a status change, `date` or `approval`. A change to the decision, or to what
-  confirms it, is an amendment.
+- On accepting, rejecting or deprecating, set decision-makers (their name) and date (today), then
+  commit.
+- Any change to the words of an accepted record, however small - a wrong path, command or citation
+  included - needs reopening and accepting. Only formatting applied by a tool, which alters no word,
+  is not a change.
 - If the owner rejects a change to a reopened record, restore its last accepted version instead of
   marking it rejected.
 

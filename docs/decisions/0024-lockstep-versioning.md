@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-08-10
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 24. Lockstep versioning across the identigon monorepo, starting at 1.0.0

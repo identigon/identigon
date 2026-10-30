@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-26
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 9. Thread-local scope activation; isActive() lets any built-in establish place

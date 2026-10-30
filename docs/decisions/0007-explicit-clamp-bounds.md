@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-13
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 7. Explicit clamp bounds; the library never reads the clock

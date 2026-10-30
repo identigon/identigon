@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-09-02
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 33. Extend this repo's documentation coverage to `identigon.github.io`

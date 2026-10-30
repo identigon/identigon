@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-09-26
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 37. Publish effigies with sources and javadoc jars like the other modules

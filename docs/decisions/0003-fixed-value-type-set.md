@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-12
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 3. Fixed value-type set instead of a public codec SPI

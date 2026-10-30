@@ -44,7 +44,7 @@ Index of decision records. Only **accepted** records bind.
 | [ADR-0035](decisions/0035-vitepress-as-the-identigon-github-io-site-generator.md)     | 2026-08-11 | David Conneely | VitePress as the `identigon.github.io` site generator                                            | -                                                            |
 | [ADR-0036](decisions/0036-adopt-prettier-for-markdown-alongside-markdownlint-cli2.md) | 2026-09-03 | David Conneely | Adopt Prettier for Markdown, alongside `markdownlint-cli2`, accepting its emphasis-style rewrite | -                                                            |
 | [ADR-0037](decisions/0037-publish-effigies-sources-and-javadoc-jars.md)               | 2026-09-26 | David Conneely | Publish effigies with sources and javadoc jars like the other modules                            | -                                                            |
-| [ADR-0038](decisions/0038-how-the-documentation-is-organised.md)                      | 2026-10-29 | David Conneely | How the documentation is organised                                                               | `sh tools/doc-kit-check.sh passes from the repository root.` |
+| [ADR-0038](decisions/0038-how-the-documentation-is-organised.md)                      | 2026-10-30 | David Conneely | How the documentation is organised                                                               | `sh tools/doc-kit-check.sh passes from the repository root.` |
 
 ## Non-binding
 

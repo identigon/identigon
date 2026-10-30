@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-30
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 19. Cyclic foreign keys via Tarjan SCC + placeholder + 2-pass UPDATE

@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-08-31
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 21. Shape-preserving fabrication stays in Incognito, via AlterEgo's extension API

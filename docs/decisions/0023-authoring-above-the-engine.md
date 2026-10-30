@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-08-09
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 23. Authoring (and inference) lives in Effigies, above a deterministic engine

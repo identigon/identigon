@@ -1,8 +1,7 @@
 ---
 status: "accepted"
-date: 2026-10-29
+date: 2026-10-30
 decision-makers: David Conneely
-approval: accepted
 ---
 
 # 38. How the documentation is organised
@@ -53,8 +52,13 @@ Deviations from the kit:
 - The moves were ordinary file moves, not `git mv`, because Git operations belong to the owner; the
   commit records them as renames.
 - The generated decision index is `docs/decisions.md`, outside the record directory.
-- The 36 accepted records keep their historical `date` values; their `approval` field records the
-  owner's migration permission, `Migrate all 37`, rather than a new status change.
+- The `approval` field is not used. Acceptance is recorded by `status`, `decision-makers` and
+  `date`; any change to the words of an accepted record, including a path or citation, reopens and
+  re-accepts it, and only formatting applied by a tool is exempt.
+- The 36 accepted records keep their historical `date` values; the migration normalised the two
+  refined statuses to `accepted` without changing those dates.
+- The local checker and index generator are modified to drop the `approval` check and to handle
+  templates, empty record sets and POSIX awk portability.
 
 ### Consequences
 
@@ -63,6 +67,9 @@ Deviations from the kit:
   cannot drift in.
 - Good, because accepted records are current answers that can be amended, rather than immutable
   documents that force a second record for every correction.
+- Good, because acceptance is recorded by the record's own status, decision-makers and date; there
+  is no separate approval text to keep in sync.
+- Bad, because the owner's words at acceptance are not recorded.
 - Good, because the paths match doc-kit 0.6.0, so its checker and index generator apply directly.
 - Bad, because the map must name every documentation file, and someone has to keep it so.
 - Bad, because the site repository's README and AGENTS still link to the old paths until that

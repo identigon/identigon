@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-12
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 4. Atomic putIfAbsentUnique instead of reserve-then-put

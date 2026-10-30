@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-14
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 25. London listed once per postcode area in the towns dictionary, not as one row

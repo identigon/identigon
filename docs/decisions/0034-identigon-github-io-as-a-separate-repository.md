@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-08-11
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 34. `identigon.github.io` as a separate repository, not a subdirectory of this one

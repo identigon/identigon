@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-13
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 6. Fixed default locale (Locale.UK), never Locale.getDefault()

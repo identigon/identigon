@@ -2,7 +2,6 @@
 status: "accepted"
 date: 2026-07-12
 decision-makers: David Conneely
-approval: Migrate all 37
 ---
 
 # 2. Library-owned Randomness interface over an HMAC counter-mode stream
