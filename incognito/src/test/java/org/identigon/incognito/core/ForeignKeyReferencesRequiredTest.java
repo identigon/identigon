@@ -47,9 +47,9 @@ class ForeignKeyReferencesRequiredTest {
       throws SQLException {
     String ddl =
         """
-            CREATE TABLE CUSTOMERS (ID BIGINT PRIMARY KEY);
-            CREATE TABLE ORDERS (ID BIGINT PRIMARY KEY, CUSTOMER_ID BIGINT NOT NULL);
-            """;
+        CREATE TABLE CUSTOMERS (ID BIGINT PRIMARY KEY);
+        CREATE TABLE ORDERS (ID BIGINT PRIMARY KEY, CUSTOMER_ID BIGINT NOT NULL);
+        """;
     DataSource src = freshDb(ddl);
     DataSource tgt = freshDb(ddl);
     try (Connection conn = src.getConnection();

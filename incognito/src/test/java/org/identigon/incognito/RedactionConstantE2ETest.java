@@ -43,12 +43,12 @@ class RedactionConstantE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE payment_method (
-            id            SERIAL PRIMARY KEY,
-            card_number   VARCHAR(19) NOT NULL,
-            amount        INTEGER NOT NULL
-        );
-        """;
+      CREATE TABLE payment_method (
+          id            SERIAL PRIMARY KEY,
+          card_number   VARCHAR(19) NOT NULL,
+          amount        INTEGER NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

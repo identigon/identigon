@@ -57,11 +57,11 @@ class DirectIdStrategyRequiredTest {
     // convention for H2-backed tests).
     String ddl =
         """
-            CREATE TABLE CUSTOMERS (
-                ID    BIGINT PRIMARY KEY,
-                EMAIL VARCHAR(255) NOT NULL
-            );
-            """;
+        CREATE TABLE CUSTOMERS (
+            ID    BIGINT PRIMARY KEY,
+            EMAIL VARCHAR(255) NOT NULL
+        );
+        """;
     DataSource src = freshDb(ddl);
     DataSource tgt = freshDb(ddl);
 
@@ -85,11 +85,11 @@ class DirectIdStrategyRequiredTest {
   void directIdWithExplicitAlteregoGenericPasses() throws SQLException {
     String ddl =
         """
-            CREATE TABLE CUSTOMERS (
-                ID           BIGINT PRIMARY KEY,
-                BANK_ACCOUNT VARCHAR(20) NOT NULL
-            );
-            """;
+        CREATE TABLE CUSTOMERS (
+            ID           BIGINT PRIMARY KEY,
+            BANK_ACCOUNT VARCHAR(20) NOT NULL
+        );
+        """;
     DataSource src = freshDb(ddl);
     DataSource tgt = freshDb(ddl);
     try (Connection conn = src.getConnection();

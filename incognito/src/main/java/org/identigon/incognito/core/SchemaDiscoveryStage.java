@@ -114,9 +114,8 @@ public final class SchemaDiscoveryStage implements PipelineStage {
     for (SchemaInspector.TableMetadata table : metadata) {
       policy
           .table(table.tableName())
-          .ifPresent(
-              tablePolicy ->
-                  validateTablePolicy(table, tablePolicy, metadataByName, suggestions, failures));
+          .ifPresent(tablePolicy ->
+              validateTablePolicy(table, tablePolicy, metadataByName, suggestions, failures));
     }
     if (!failures.isEmpty()) {
       throw new IncognitoException.ConfigException(

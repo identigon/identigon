@@ -34,9 +34,9 @@ class RowValuesNeverInMessagesTest {
     // same state a live source produces when a child row lands after its parent table was read.
     String ddl =
         """
-            CREATE TABLE CUSTOMERS (ID BIGINT PRIMARY KEY);
-            CREATE TABLE ORDERS (ID BIGINT PRIMARY KEY, CUSTOMER_ID BIGINT);
-            """;
+        CREATE TABLE CUSTOMERS (ID BIGINT PRIMARY KEY);
+        CREATE TABLE ORDERS (ID BIGINT PRIMARY KEY, CUSTOMER_ID BIGINT);
+        """;
     DataSource src = freshDb(ddl);
     DataSource tgt = freshDb(ddl);
     try (Connection conn = src.getConnection();

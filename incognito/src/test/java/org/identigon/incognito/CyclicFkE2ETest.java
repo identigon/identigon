@@ -51,12 +51,12 @@ class CyclicFkE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE employee (
-            id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            name      VARCHAR(100) NOT NULL,
-            buddy_id  BIGINT REFERENCES employee(id)
-        );
-        """;
+      CREATE TABLE employee (
+          id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          name      VARCHAR(100) NOT NULL,
+          buddy_id  BIGINT REFERENCES employee(id)
+      );
+      """;
 
   @BeforeAll
   void setUp() {

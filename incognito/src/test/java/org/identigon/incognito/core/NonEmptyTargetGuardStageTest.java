@@ -77,15 +77,14 @@ class NonEmptyTargetGuardStageTest {
     DataSource src = freshDb(false);
     DataSource tgt = freshDb(false);
 
-    assertDoesNotThrow(
-        () ->
-            IncognitoPipeline.builder()
-                .source(src)
-                .target(tgt)
-                .ephemeralSalt()
-                .policy(policy())
-                .build()
-                .execute());
+    assertDoesNotThrow(() ->
+        IncognitoPipeline.builder()
+            .source(src)
+            .target(tgt)
+            .ephemeralSalt()
+            .policy(policy())
+            .build()
+            .execute());
   }
 
   @Test

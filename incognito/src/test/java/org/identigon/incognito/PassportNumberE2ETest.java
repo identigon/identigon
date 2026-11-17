@@ -40,11 +40,11 @@ class PassportNumberE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE traveller (
-            id                SERIAL PRIMARY KEY,
-            passport_number   VARCHAR(9) NOT NULL
-        );
-        """;
+      CREATE TABLE traveller (
+          id                SERIAL PRIMARY KEY,
+          passport_number   VARCHAR(9) NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

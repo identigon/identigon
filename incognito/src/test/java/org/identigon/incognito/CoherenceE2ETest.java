@@ -59,24 +59,24 @@ class CoherenceE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE firm (
-            id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            name  VARCHAR(100) NOT NULL
-        );
-        CREATE TABLE contract (
-            id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            firm_id     BIGINT NOT NULL REFERENCES firm(id),
-            firm_name   VARCHAR(100) NOT NULL,
-            start_date  DATE NOT NULL,
-            notes       VARCHAR(50) NOT NULL
-        );
-        CREATE TABLE schedule (
-            id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            contract_id  BIGINT NOT NULL REFERENCES contract(id),
-            firm_name    VARCHAR(100) NOT NULL,
-            due_date     DATE NOT NULL
-        );
-        """;
+      CREATE TABLE firm (
+          id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          name  VARCHAR(100) NOT NULL
+      );
+      CREATE TABLE contract (
+          id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          firm_id     BIGINT NOT NULL REFERENCES firm(id),
+          firm_name   VARCHAR(100) NOT NULL,
+          start_date  DATE NOT NULL,
+          notes       VARCHAR(50) NOT NULL
+      );
+      CREATE TABLE schedule (
+          id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          contract_id  BIGINT NOT NULL REFERENCES contract(id),
+          firm_name    VARCHAR(100) NOT NULL,
+          due_date     DATE NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

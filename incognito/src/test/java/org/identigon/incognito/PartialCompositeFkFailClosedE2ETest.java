@@ -45,21 +45,21 @@ class PartialCompositeFkFailClosedE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE authorship (
-            author_id  BIGINT NOT NULL,
-            book_id    BIGINT NOT NULL,
-            edition    INT NOT NULL DEFAULT 1,
-            PRIMARY KEY (author_id, book_id, edition),
-            UNIQUE (author_id, book_id)
-        );
-        CREATE TABLE chapter (
-            author_id   BIGINT NOT NULL,
-            book_id     BIGINT NOT NULL,
-            chapter_no  INT NOT NULL,
-            PRIMARY KEY (author_id, book_id, chapter_no),
-            FOREIGN KEY (author_id, book_id) REFERENCES authorship(author_id, book_id)
-        );
-        """;
+      CREATE TABLE authorship (
+          author_id  BIGINT NOT NULL,
+          book_id    BIGINT NOT NULL,
+          edition    INT NOT NULL DEFAULT 1,
+          PRIMARY KEY (author_id, book_id, edition),
+          UNIQUE (author_id, book_id)
+      );
+      CREATE TABLE chapter (
+          author_id   BIGINT NOT NULL,
+          book_id     BIGINT NOT NULL,
+          chapter_no  INT NOT NULL,
+          PRIMARY KEY (author_id, book_id, chapter_no),
+          FOREIGN KEY (author_id, book_id) REFERENCES authorship(author_id, book_id)
+      );
+      """;
 
   @BeforeAll
   void setUp() {

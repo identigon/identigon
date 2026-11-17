@@ -40,11 +40,11 @@ class NhsNumberE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE patient (
-            id          SERIAL PRIMARY KEY,
-            nhs_number  VARCHAR(14) NOT NULL
-        );
-        """;
+      CREATE TABLE patient (
+          id          SERIAL PRIMARY KEY,
+          nhs_number  VARCHAR(14) NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

@@ -49,13 +49,13 @@ class RecordCoherenceE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE branch (
-            id        SERIAL PRIMARY KEY,
-            city      VARCHAR(60) NOT NULL,
-            postcode  VARCHAR(10) NOT NULL,
-            phone     VARCHAR(20) NOT NULL
-        );
-        """;
+      CREATE TABLE branch (
+          id        SERIAL PRIMARY KEY,
+          city      VARCHAR(60) NOT NULL,
+          postcode  VARCHAR(10) NOT NULL,
+          phone     VARCHAR(20) NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

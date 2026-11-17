@@ -28,13 +28,12 @@ class FileMappingStoreContractTest extends MappingStoreContractTest {
     if (tempDir != null && Files.exists(tempDir)) {
       try (Stream<Path> walk = Files.walk(tempDir)) {
         walk.sorted(Comparator.reverseOrder())
-            .forEach(
-                p -> {
-                  try {
-                    Files.delete(p);
-                  } catch (IOException ignored) {
-                  }
-                });
+            .forEach(p -> {
+              try {
+                Files.delete(p);
+              } catch (IOException ignored) {
+              }
+            });
       }
     }
   }

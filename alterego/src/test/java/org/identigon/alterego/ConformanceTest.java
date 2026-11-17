@@ -46,76 +46,72 @@ class ConformanceTest {
   @TestFactory
   Stream<DynamicTest> derivationVectors() {
     return loadVectorFile("derivation.json").stream()
-        .map(
-            v ->
-                dynamicTest(
-                    (String) v.get("name"),
-                    () -> {
-                      byte[] salt = hex(v, "saltHex");
-                      byte[] expected = hex(v, "keyHex");
-                      byte[] actual =
-                          Derivation.deriveKey(
-                              salt,
-                              (String) v.get("purpose"),
-                              (String) v.get("domain"),
-                              (String) v.get("canonical"),
-                              asInt(v.get("counter")));
-                      assertEquals(HEX.formatHex(expected), HEX.formatHex(actual));
-                    }));
+        .map(v ->
+            dynamicTest(
+                (String) v.get("name"),
+                () -> {
+                  byte[] salt = hex(v, "saltHex");
+                  byte[] expected = hex(v, "keyHex");
+                  byte[] actual =
+                      Derivation.deriveKey(
+                          salt,
+                          (String) v.get("purpose"),
+                          (String) v.get("domain"),
+                          (String) v.get("canonical"),
+                          asInt(v.get("counter")));
+                  assertEquals(HEX.formatHex(expected), HEX.formatHex(actual));
+                }));
   }
 
   @TestFactory
   Stream<DynamicTest> streamVectors() {
     return loadVectorFile("stream.json").stream()
-        .map(
-            v ->
-                dynamicTest(
-                    (String) v.get("name"),
-                    () -> {
-                      byte[] key = hex(v, "keyHex");
-                      byte[] expected = hex(v, "streamHex");
-                      byte[] actual = RawStream.firstBytes(key, expected.length);
-                      assertEquals(HEX.formatHex(expected), HEX.formatHex(actual));
-                    }));
+        .map(v ->
+            dynamicTest(
+                (String) v.get("name"),
+                () -> {
+                  byte[] key = hex(v, "keyHex");
+                  byte[] expected = hex(v, "streamHex");
+                  byte[] actual = RawStream.firstBytes(key, expected.length);
+                  assertEquals(HEX.formatHex(expected), HEX.formatHex(actual));
+                }));
   }
 
   @TestFactory
   Stream<DynamicTest> mapkeyVectors() {
     return loadVectorFile("mapkey.json").stream()
-        .map(
-            v ->
-                dynamicTest(
-                    (String) v.get("name"),
-                    () -> {
-                      byte[] salt = hex(v, "saltHex");
-                      byte[] expected = hex(v, "keyHex");
-                      byte[] actual =
-                          Derivation.deriveKey(
-                              salt,
-                              Derivation.PURPOSE_MAPKEY,
-                              (String) v.get("domain"),
-                              (String) v.get("canonical"),
-                              0);
-                      assertEquals(HEX.formatHex(expected), HEX.formatHex(actual));
-                    }));
+        .map(v ->
+            dynamicTest(
+                (String) v.get("name"),
+                () -> {
+                  byte[] salt = hex(v, "saltHex");
+                  byte[] expected = hex(v, "keyHex");
+                  byte[] actual =
+                      Derivation.deriveKey(
+                          salt,
+                          Derivation.PURPOSE_MAPKEY,
+                          (String) v.get("domain"),
+                          (String) v.get("canonical"),
+                          0);
+                  assertEquals(HEX.formatHex(expected), HEX.formatHex(actual));
+                }));
   }
 
   @TestFactory
   Stream<DynamicTest> samplingVectors() {
     return loadVectorFile("sampling.json").stream()
-        .map(
-            v ->
-                dynamicTest(
-                    (String) v.get("name"),
-                    () -> {
-                      Randomness rand = new HmacRandomness(hex(v, "keyHex"));
-                      @SuppressWarnings("unchecked")
-                      List<Map<String, Object>> calls =
-                          (List<Map<String, Object>>) (List<?>) v.get("calls");
-                      for (Map<String, Object> call : calls) {
-                        assertCall(rand, call);
-                      }
-                    }));
+        .map(v ->
+            dynamicTest(
+                (String) v.get("name"),
+                () -> {
+                  Randomness rand = new HmacRandomness(hex(v, "keyHex"));
+                  @SuppressWarnings("unchecked")
+                  List<Map<String, Object>> calls =
+                      (List<Map<String, Object>>) (List<?>) v.get("calls");
+                  for (Map<String, Object> call : calls) {
+                    assertCall(rand, call);
+                  }
+                }));
   }
 
   private static void assertCall(Randomness rand, Map<String, Object> call) {

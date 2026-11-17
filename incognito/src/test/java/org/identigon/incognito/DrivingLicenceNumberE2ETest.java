@@ -41,11 +41,11 @@ class DrivingLicenceNumberE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE driver (
-            id                       SERIAL PRIMARY KEY,
-            driving_licence_number   VARCHAR(16) NOT NULL
-        );
-        """;
+      CREATE TABLE driver (
+          id                       SERIAL PRIMARY KEY,
+          driving_licence_number   VARCHAR(16) NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

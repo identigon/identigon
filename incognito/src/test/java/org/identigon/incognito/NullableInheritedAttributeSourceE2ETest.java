@@ -50,16 +50,16 @@ class NullableInheritedAttributeSourceE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE firm (
-            id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            name  VARCHAR(100)
-        );
-        CREATE TABLE contract (
-            id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            firm_id     BIGINT NOT NULL REFERENCES firm(id),
-            firm_name   VARCHAR(100)
-        );
-        """;
+      CREATE TABLE firm (
+          id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          name  VARCHAR(100)
+      );
+      CREATE TABLE contract (
+          id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          firm_id     BIGINT NOT NULL REFERENCES firm(id),
+          firm_name   VARCHAR(100)
+      );
+      """;
 
   @BeforeAll
   void setUp() {

@@ -75,15 +75,15 @@ class RunCommandTest {
     Files.writeString(
         policy,
         """
-            tables:
-              PERSON:
-                columns:
-                  ID:
-                    role: PRIMARY_KEY
-                    surrogateStrategy: SEQUENTIAL_LONG
-                  NAME:
-                    role: PAYLOAD
-            """);
+        tables:
+          PERSON:
+            columns:
+              ID:
+                role: PRIMARY_KEY
+                surrogateStrategy: SEQUENTIAL_LONG
+              NAME:
+                role: PAYLOAD
+        """);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     ByteArrayOutputStream err = new ByteArrayOutputStream();
@@ -133,13 +133,13 @@ class RunCommandTest {
     Files.writeString(
         policy,
         """
-            tables:
-              PERSON:
-                columns:
-                  ID:
-                    role: PRIMARY_KEY
-                    surrogateStrategy: SEQUENTIAL_LONG
-            """);
+        tables:
+          PERSON:
+            columns:
+              ID:
+                role: PRIMARY_KEY
+                surrogateStrategy: SEQUENTIAL_LONG
+        """);
     // A regular file where the report directory should be: every artefact write fails.
     Path notADirectory = Files.createFile(tempDir.resolve("not-a-directory"));
 
@@ -191,16 +191,16 @@ class RunCommandTest {
     Files.writeString(
         policy,
         """
-            saltMode: persistent
-            tables:
-              PERSON:
-                columns:
-                  ID:
-                    role: PRIMARY_KEY
-                    surrogateStrategy: SEQUENTIAL_LONG
-                  NAME:
-                    role: PAYLOAD
-            """);
+        saltMode: persistent
+        tables:
+          PERSON:
+            columns:
+              ID:
+                role: PRIMARY_KEY
+                surrogateStrategy: SEQUENTIAL_LONG
+              NAME:
+                role: PAYLOAD
+        """);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     ByteArrayOutputStream err = new ByteArrayOutputStream();
@@ -232,13 +232,13 @@ class RunCommandTest {
     Files.writeString(
         policy,
         """
-            tables:
-              PERSON:
-                columns:
-                  ID:
-                    role: PRIMARY_KEY
-                    surrogateStrategy: SEQUENTIAL_LONG
-            """);
+        tables:
+          PERSON:
+            columns:
+              ID:
+                role: PRIMARY_KEY
+                surrogateStrategy: SEQUENTIAL_LONG
+        """);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     ByteArrayOutputStream err = new ByteArrayOutputStream();
@@ -269,13 +269,13 @@ class RunCommandTest {
     Files.writeString(
         policy,
         """
-            tables:
-              PERSON:
-                columns:
-                  ID:
-                    role: PRIMARY_KEY
-                    surrogateStrategy: SEQUENTIAL_LONG
-            """);
+        tables:
+          PERSON:
+            columns:
+              ID:
+                role: PRIMARY_KEY
+                surrogateStrategy: SEQUENTIAL_LONG
+        """);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     ByteArrayOutputStream err = new ByteArrayOutputStream();
@@ -334,15 +334,15 @@ class RunCommandTest {
     Files.writeString(
         policy,
         """
-            tables:
-              PERSON:
-                columns:
-                  ID:
-                    role: PRIMARY_KEY
-                    surrogateStrategy: SEQUENTIAL_LONG
-                  NAME:
-                    role: PAYLOAD
-            """);
+        tables:
+          PERSON:
+            columns:
+              ID:
+                role: PRIMARY_KEY
+                surrogateStrategy: SEQUENTIAL_LONG
+              NAME:
+                role: PAYLOAD
+        """);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     ByteArrayOutputStream err = new ByteArrayOutputStream();

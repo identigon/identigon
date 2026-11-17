@@ -46,29 +46,29 @@ class CompositeKeyE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE author (
-            id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            name  VARCHAR(100) NOT NULL
-        );
-        CREATE TABLE book (
-            id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            title  VARCHAR(100) NOT NULL
-        );
-        CREATE TABLE authorship (
-            author_id  BIGINT NOT NULL REFERENCES author(id),
-            book_id    BIGINT NOT NULL REFERENCES book(id),
-            royalty    INT NOT NULL,
-            PRIMARY KEY (author_id, book_id)
-        );
-        CREATE TABLE chapter (
-            author_id   BIGINT NOT NULL,
-            book_id     BIGINT NOT NULL,
-            chapter_no  INT NOT NULL,
-            title       VARCHAR(100) NOT NULL,
-            PRIMARY KEY (author_id, book_id, chapter_no),
-            FOREIGN KEY (author_id, book_id) REFERENCES authorship(author_id, book_id)
-        );
-        """;
+      CREATE TABLE author (
+          id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          name  VARCHAR(100) NOT NULL
+      );
+      CREATE TABLE book (
+          id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          title  VARCHAR(100) NOT NULL
+      );
+      CREATE TABLE authorship (
+          author_id  BIGINT NOT NULL REFERENCES author(id),
+          book_id    BIGINT NOT NULL REFERENCES book(id),
+          royalty    INT NOT NULL,
+          PRIMARY KEY (author_id, book_id)
+      );
+      CREATE TABLE chapter (
+          author_id   BIGINT NOT NULL,
+          book_id     BIGINT NOT NULL,
+          chapter_no  INT NOT NULL,
+          title       VARCHAR(100) NOT NULL,
+          PRIMARY KEY (author_id, book_id, chapter_no),
+          FOREIGN KEY (author_id, book_id) REFERENCES authorship(author_id, book_id)
+      );
+      """;
 
   @BeforeAll
   void setUp() {

@@ -148,92 +148,81 @@ public final class AnonymisationReportBuilder {
 
         tablePolicy
             .column(colName)
-            .ifPresent(
-                colPol -> {
-                  // Does the column keep its real value (a passthrough), or is it transformed?
-                  boolean keptReal =
-                      colPol.role() == ColumnRole.PAYLOAD
-                          || (colPol.role() == ColumnRole.SENSITIVE
-                              && Boolean.FALSE.equals(colPol.distinguishing()));
+            .ifPresent(colPol -> {
+              // Does the column keep its real value (a passthrough), or is it transformed?
+              boolean keptReal =
+                  colPol.role() == ColumnRole.PAYLOAD
+                      || (colPol.role() == ColumnRole.SENSITIVE
+                          && Boolean.FALSE.equals(colPol.distinguishing()));
 
-                  String transformation;
-                  if (colPol.role() == ColumnRole.SENSITIVE) {
-                    if (Boolean.FALSE.equals(colPol.distinguishing())) {
-                      transformation = "KEEP";
-                    } else if (colPol.redactionStrategy() != null) {
-                      transformation = colPol.redactionStrategy().toString();
-                    } else if (colPol.quasiIdStrategy() != null) {
-                      transformation = colPol.quasiIdStrategy().toString();
-                    } else {
-                      transformation = "REDACT";
-                    }
-                  } else if (colPol.role() == ColumnRole.INHERITED_ATTRIBUTE) {
-                    transformation =
-                        "INHERIT from "
-                            + colPol.derivedFromTable()
-                            + "."
-                            + colPol.derivedFromColumn();
-                  } else if (colPol.role() == ColumnRole.FOREIGN_KEY) {
-                    transformation = "LINK to " + colPol.referencedTable();
-                  } else {
-                    transformation =
-                        switch (colPol.role()) {
-                          case PRIMARY_KEY ->
-                              colPol.surrogateStrategy() != null
-                                  ? colPol.surrogateStrategy().toString()
-                                  : "SURROGATE";
-                          case DIRECT_ID ->
-                              colPol.directIdStrategy() != null
+              String transformation;
+              if (colPol.role() == ColumnRole.SENSITIVE) {
+                if (Boolean.FALSE.equals(colPol.distinguishing())) {
+                  transformation = "KEEP";
+                } else if (colPol.redactionStrategy() != null) {
+                  transformation = colPol.redactionStrategy().toString();
+                } else if (colPol.quasiIdStrategy() != null) {
+                  transformation = colPol.quasiIdStrategy().toString();
+                } else {
+                  transformation = "REDACT";
+                }
+              } else if (colPol.role() == ColumnRole.INHERITED_ATTRIBUTE) {
+                transformation =
+                    "INHERIT from " + colPol.derivedFromTable() + "." + colPol.derivedFromColumn();
+              } else if (colPol.role() == ColumnRole.FOREIGN_KEY) {
+                transformation = "LINK to " + colPol.referencedTable();
+              } else {
+                transformation =
+                    switch (colPol.role()) {
+                      case PRIMARY_KEY ->
+                          colPol.surrogateStrategy() != null
+                              ? colPol.surrogateStrategy().toString()
+                              : "SURROGATE";
+                      case DIRECT_ID ->
+                          colPol.directIdStrategy() != null
+                              ? colPol.directIdStrategy().toString()
+                              : "FABRICATE";
+                      case UNIQUE_CANDIDATE_KEY ->
+                          (colPol.directIdStrategy() != null
                                   ? colPol.directIdStrategy().toString()
-                                  : "FABRICATE";
-                          case UNIQUE_CANDIDATE_KEY ->
-                              (colPol.directIdStrategy() != null
-                                      ? colPol.directIdStrategy().toString()
-                                      : "FABRICATE")
-                                  + " (unique)";
-                          case QUASI_ID ->
-                              colPol.quasiIdStrategy() != null
-                                  ? colPol.quasiIdStrategy().toString()
-                                  : "SYNTHESISE";
-                          default -> "KEEP"; // PAYLOAD, GENERATED_COLUMN
-                        };
-                  }
-                  Integer columnSqlType =
-                      tableMeta.columnTypes() == null ? null : tableMeta.columnTypes().get(colName);
-                  List<String> examples = new ArrayList<>();
-                  for (int i = 0; i < SEEDS.size(); i++) {
-                    examples.add(
-                        exampleCell(exampleAlterEgo, colPol, columnSqlType, SEEDS.get(i), i));
-                  }
-                  boolean colFictionalityVerified =
-                      fictionalityVerifiedColumns.contains(tableName + "." + colName);
-                  columnActions.add(
-                      new AnonymisationReport.ColumnAction(
-                          colName,
-                          colPol.role(),
-                          transformation,
-                          examples,
-                          colFictionalityVerified));
+                                  : "FABRICATE")
+                              + " (unique)";
+                      case QUASI_ID ->
+                          colPol.quasiIdStrategy() != null
+                              ? colPol.quasiIdStrategy().toString()
+                              : "SYNTHESISE";
+                      default -> "KEEP"; // PAYLOAD, GENERATED_COLUMN
+                    };
+              }
+              Integer columnSqlType =
+                  tableMeta.columnTypes() == null ? null : tableMeta.columnTypes().get(colName);
+              List<String> examples = new ArrayList<>();
+              for (int i = 0; i < SEEDS.size(); i++) {
+                examples.add(exampleCell(exampleAlterEgo, colPol, columnSqlType, SEEDS.get(i), i));
+              }
+              boolean colFictionalityVerified =
+                  fictionalityVerifiedColumns.contains(tableName + "." + colName);
+              columnActions.add(
+                  new AnonymisationReport.ColumnAction(
+                      colName, colPol.role(), transformation, examples, colFictionalityVerified));
 
-                  // Opaque-type audit (SPEC §7.2): a KEPT column of a complex/untransformable JDBC
-                  // type is surfaced in the DPIA report so a retained potentially-identifying value
-                  // (JSONB, array, geometry, INET, BLOB, ...) is visible, never silently passed
-                  // through.
-                  if (keptReal) {
-                    Integer sqlType =
-                        tableMeta.columnTypes() == null
-                            ? null
-                            : tableMeta.columnTypes().get(colName);
-                    String opaque = opaqueTypeName(sqlType);
-                    if (opaque != null) {
-                      passthroughFlags.add(
-                          new AnonymisationReport.PassthroughFlag(
-                              colName,
-                              opaque,
-                              "untransformed potentially-identifying type kept as-is (SPEC §7.2)"));
-                    }
-                  }
-                });
+              // Opaque-type audit (SPEC §7.2): a KEPT column of a complex/untransformable JDBC
+              // type is surfaced in the DPIA report so a retained potentially-identifying value
+              // (JSONB, array, geometry, INET, BLOB, ...) is visible, never silently passed
+              // through.
+              if (keptReal) {
+                Integer sqlType =
+                    tableMeta.columnTypes() == null ? null : tableMeta.columnTypes().get(colName);
+                String opaque = opaqueTypeName(sqlType);
+                if (opaque != null) {
+                  passthroughFlags.add(
+                      new AnonymisationReport.PassthroughFlag(
+                          colName,
+                          opaque,
+                          "untransformed potentially-identifying type kept as-is (SPEC §7.2)"));
+                }
+              }
+            });
       }
 
       long rowsProcessed = rowsPerTable.getOrDefault(tableName, 0L);

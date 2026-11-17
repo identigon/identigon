@@ -42,13 +42,13 @@ class ViewExclusionE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE person (
-            id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            email  VARCHAR(255) NOT NULL
-        );
-        CREATE VIEW person_v AS SELECT id, email FROM person;
-        CREATE MATERIALIZED VIEW person_mv AS SELECT id, email FROM person;
-        """;
+      CREATE TABLE person (
+          id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          email  VARCHAR(255) NOT NULL
+      );
+      CREATE VIEW person_v AS SELECT id, email FROM person;
+      CREATE MATERIALIZED VIEW person_mv AS SELECT id, email FROM person;
+      """;
 
   @BeforeAll
   void setUp() {

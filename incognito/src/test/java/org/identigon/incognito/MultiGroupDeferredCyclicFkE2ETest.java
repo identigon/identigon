@@ -46,17 +46,17 @@ class MultiGroupDeferredCyclicFkE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE dept_a (
-            id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            name     VARCHAR(100) NOT NULL,
-            peer_id  BIGINT REFERENCES dept_a(id)
-        );
-        CREATE TABLE dept_b (
-            id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            name        VARCHAR(100) NOT NULL,
-            sibling_id  BIGINT REFERENCES dept_b(id)
-        );
-        """;
+      CREATE TABLE dept_a (
+          id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          name     VARCHAR(100) NOT NULL,
+          peer_id  BIGINT REFERENCES dept_a(id)
+      );
+      CREATE TABLE dept_b (
+          id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          name        VARCHAR(100) NOT NULL,
+          sibling_id  BIGINT REFERENCES dept_b(id)
+      );
+      """;
 
   @BeforeAll
   void setUp() {

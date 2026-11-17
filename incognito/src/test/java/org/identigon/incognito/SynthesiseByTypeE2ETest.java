@@ -74,11 +74,11 @@ class SynthesiseByTypeE2ETest {
     Assumptions.assumeTrue(pg != null, "Docker/PostgreSQL not available");
     String ddl =
         """
-            CREATE TABLE people (
-                id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                city  VARCHAR(100) NOT NULL
-            );
-            """;
+        CREATE TABLE people (
+            id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            city  VARCHAR(100) NOT NULL
+        );
+        """;
     DataSource[] ds =
         freshDatabases(
             "city",
@@ -120,11 +120,11 @@ class SynthesiseByTypeE2ETest {
     Assumptions.assumeTrue(pg != null, "Docker/PostgreSQL not available");
     String ddl =
         """
-            CREATE TABLE readings (
-                id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                score  INTEGER NOT NULL
-            );
-            """;
+        CREATE TABLE readings (
+            id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            score  INTEGER NOT NULL
+        );
+        """;
     DataSource[] ds = freshDatabases("numeric", ddl, "INSERT INTO readings (score) VALUES (42)");
 
     // A numeric QUASI_ID SYNTHESISE with no directIdStrategy hint has no built-in mapping - abort.
@@ -154,11 +154,11 @@ class SynthesiseByTypeE2ETest {
     Assumptions.assumeTrue(pg != null, "Docker/PostgreSQL not available");
     String ddl =
         """
-            CREATE TABLE addresses (
-                id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                postcode VARCHAR(10) NOT NULL
-            );
-            """;
+        CREATE TABLE addresses (
+            id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            postcode VARCHAR(10) NOT NULL
+        );
+        """;
     DataSource[] ds =
         freshDatabases("postcode", ddl, "INSERT INTO addresses (postcode) VALUES ('SW1A 1AA')");
 

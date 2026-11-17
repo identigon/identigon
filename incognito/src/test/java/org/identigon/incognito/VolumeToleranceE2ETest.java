@@ -42,11 +42,11 @@ class VolumeToleranceE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE events (
-            id  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            ts  DATE NOT NULL
-        );
-        """;
+      CREATE TABLE events (
+          id  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          ts  DATE NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

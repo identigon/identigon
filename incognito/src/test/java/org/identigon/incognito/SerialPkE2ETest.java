@@ -42,16 +42,16 @@ class SerialPkE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE account (
-            id      SERIAL PRIMARY KEY,
-            holder  VARCHAR(100) NOT NULL
-        );
-        CREATE TABLE txn (
-            id          SERIAL PRIMARY KEY,
-            account_id  INT NOT NULL REFERENCES account(id),
-            amount      NUMERIC(10,2) NOT NULL
-        );
-        """;
+      CREATE TABLE account (
+          id      SERIAL PRIMARY KEY,
+          holder  VARCHAR(100) NOT NULL
+      );
+      CREATE TABLE txn (
+          id          SERIAL PRIMARY KEY,
+          account_id  INT NOT NULL REFERENCES account(id),
+          amount      NUMERIC(10,2) NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

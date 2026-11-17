@@ -42,15 +42,15 @@ class StructuralUniquenessE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE customers (
-            customer_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            name        VARCHAR(100) NOT NULL
-        );
-        CREATE TABLE orders (
-            order_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            customer_id BIGINT NOT NULL REFERENCES customers(customer_id)
-        );
-        """;
+      CREATE TABLE customers (
+          customer_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          name        VARCHAR(100) NOT NULL
+      );
+      CREATE TABLE orders (
+          order_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          customer_id BIGINT NOT NULL REFERENCES customers(customer_id)
+      );
+      """;
 
   @BeforeAll
   void setUp() {

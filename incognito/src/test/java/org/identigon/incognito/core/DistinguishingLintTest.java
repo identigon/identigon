@@ -73,14 +73,14 @@ class DistinguishingLintTest {
         try (Statement stmt = conn.createStatement()) {
           stmt.execute(
               """
-                        CREATE TABLE customers (
-                            id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                            email   VARCHAR(255) NOT NULL,
-                            dob     DATE NOT NULL,
-                            flag    VARCHAR(10) NOT NULL,
-                            notes   VARCHAR(200) NOT NULL
-                        )
-                        """);
+              CREATE TABLE customers (
+                  id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                  email   VARCHAR(255) NOT NULL,
+                  dob     DATE NOT NULL,
+                  flag    VARCHAR(10) NOT NULL,
+                  notes   VARCHAR(200) NOT NULL
+              )
+              """);
           // Seed 100 rows: flag alternates between 2 values; notes has a distinct value
           // per row (100 distinct values >> default threshold of 64).
           StringBuilder sb =
@@ -117,14 +117,14 @@ class DistinguishingLintTest {
         try (Statement stmt = conn.createStatement()) {
           stmt.execute(
               """
-                        CREATE TABLE customers (
-                            id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                            email   VARCHAR(255) NOT NULL,
-                            dob     DATE NOT NULL,
-                            flag    VARCHAR(10) NOT NULL,
-                            notes   VARCHAR(200) NOT NULL
-                        )
-                        """);
+              CREATE TABLE customers (
+                  id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                  email   VARCHAR(255) NOT NULL,
+                  dob     DATE NOT NULL,
+                  flag    VARCHAR(10) NOT NULL,
+                  notes   VARCHAR(200) NOT NULL
+              )
+              """);
         }
       }
 

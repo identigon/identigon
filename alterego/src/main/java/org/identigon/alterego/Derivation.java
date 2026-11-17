@@ -102,16 +102,15 @@ final class Derivation {
   private static final byte[] PROTOTYPE_KEY = {0};
 
   private static final ThreadLocal<Mac> PROTOTYPE =
-      ThreadLocal.withInitial(
-          () -> {
-            try {
-              Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-              mac.init(new SecretKeySpec(PROTOTYPE_KEY, HMAC_ALGORITHM));
-              return mac;
-            } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-              throw new IllegalStateException(HMAC_ALGORITHM + " unavailable", e);
-            }
-          });
+      ThreadLocal.withInitial(() -> {
+        try {
+          Mac mac = Mac.getInstance(HMAC_ALGORITHM);
+          mac.init(new SecretKeySpec(PROTOTYPE_KEY, HMAC_ALGORITHM));
+          return mac;
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+          throw new IllegalStateException(HMAC_ALGORITHM + " unavailable", e);
+        }
+      });
 
   /** Converts a {@code char[]} salt to bytes via UTF-8 without materialising a {@code String}. */
   static byte[] charsToUtf8(char[] chars) {

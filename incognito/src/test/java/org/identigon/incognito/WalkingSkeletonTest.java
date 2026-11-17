@@ -77,22 +77,22 @@ class WalkingSkeletonTest {
         try (Statement stmt = conn.createStatement()) {
           stmt.execute(
               """
-                        CREATE TABLE users (
-                            id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                            email    VARCHAR(255) NOT NULL,
-                            dob      DATE NOT NULL,
-                            status   VARCHAR(50) NOT NULL
-                        )
-                        """);
+              CREATE TABLE users (
+                  id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                  email    VARCHAR(255) NOT NULL,
+                  dob      DATE NOT NULL,
+                  status   VARCHAR(50) NOT NULL
+              )
+              """);
           stmt.execute(
               """
-                        CREATE TABLE orders (
-                            id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                            user_id     BIGINT NOT NULL REFERENCES users(id),
-                            amount      NUMERIC(12,2) NOT NULL,
-                            order_date  DATE NOT NULL
-                        )
-                        """);
+              CREATE TABLE orders (
+                  id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                  user_id     BIGINT NOT NULL REFERENCES users(id),
+                  amount      NUMERIC(12,2) NOT NULL,
+                  order_date  DATE NOT NULL
+              )
+              """);
 
           // Seed source data.
           stmt.execute(
@@ -130,22 +130,22 @@ class WalkingSkeletonTest {
         try (Statement stmt = conn.createStatement()) {
           stmt.execute(
               """
-                        CREATE TABLE users (
-                            id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                            email    VARCHAR(255) NOT NULL,
-                            dob      DATE NOT NULL,
-                            status   VARCHAR(50) NOT NULL
-                        )
-                        """);
+              CREATE TABLE users (
+                  id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                  email    VARCHAR(255) NOT NULL,
+                  dob      DATE NOT NULL,
+                  status   VARCHAR(50) NOT NULL
+              )
+              """);
           stmt.execute(
               """
-                        CREATE TABLE orders (
-                            id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                            user_id     BIGINT NOT NULL REFERENCES users(id),
-                            amount      NUMERIC(12,2) NOT NULL,
-                            order_date  DATE NOT NULL
-                        )
-                        """);
+              CREATE TABLE orders (
+                  id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                  user_id     BIGINT NOT NULL REFERENCES users(id),
+                  amount      NUMERIC(12,2) NOT NULL,
+                  order_date  DATE NOT NULL
+              )
+              """);
         }
       }
 

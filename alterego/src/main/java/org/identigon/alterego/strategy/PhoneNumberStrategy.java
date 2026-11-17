@@ -67,16 +67,13 @@ public final class PhoneNumberStrategy implements Strategy<String> {
     // would shift purely from that duplication.
     List<String> allTemplates =
         dictionary.entries().stream()
-            .filter(
-                entry -> {
-                  String place = entry.tags().get(1);
-                  if (place.equals("FREEPHONE")
-                      || place.equals("PREMIUM")
-                      || place.equals("UK_WIDE")) {
-                    return includeNonGeographic;
-                  }
-                  return true;
-                })
+            .filter(entry -> {
+              String place = entry.tags().get(1);
+              if (place.equals("FREEPHONE") || place.equals("PREMIUM") || place.equals("UK_WIDE")) {
+                return includeNonGeographic;
+              }
+              return true;
+            })
             .map(entry -> entry.tags().get(0))
             .distinct()
             .toList();

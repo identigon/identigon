@@ -47,22 +47,22 @@ class CompositeFkWiderThanParentPkFailClosedE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE region (
-            country  VARCHAR(2) NOT NULL,
-            code     INT NOT NULL,
-            variant  INT NOT NULL DEFAULT 0,
-            PRIMARY KEY (country, code),
-            UNIQUE (country, code, variant)
-        );
-        CREATE TABLE district (
-            country     VARCHAR(2) NOT NULL,
-            code        INT NOT NULL,
-            variant     INT NOT NULL,
-            district_no INT NOT NULL,
-            PRIMARY KEY (country, code, district_no),
-            FOREIGN KEY (country, code, variant) REFERENCES region(country, code, variant)
-        );
-        """;
+      CREATE TABLE region (
+          country  VARCHAR(2) NOT NULL,
+          code     INT NOT NULL,
+          variant  INT NOT NULL DEFAULT 0,
+          PRIMARY KEY (country, code),
+          UNIQUE (country, code, variant)
+      );
+      CREATE TABLE district (
+          country     VARCHAR(2) NOT NULL,
+          code        INT NOT NULL,
+          variant     INT NOT NULL,
+          district_no INT NOT NULL,
+          PRIMARY KEY (country, code, district_no),
+          FOREIGN KEY (country, code, variant) REFERENCES region(country, code, variant)
+      );
+      """;
 
   @BeforeAll
   void setUp() {

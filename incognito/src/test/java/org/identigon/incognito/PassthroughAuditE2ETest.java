@@ -38,13 +38,13 @@ class PassthroughAuditE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE docs (
-            id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            owner  VARCHAR(100) NOT NULL,
-            meta   JSONB NOT NULL,
-            ip     INET
-        );
-        """;
+      CREATE TABLE docs (
+          id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          owner  VARCHAR(100) NOT NULL,
+          meta   JSONB NOT NULL,
+          ip     INET
+      );
+      """;
 
   @BeforeAll
   void setUp() {

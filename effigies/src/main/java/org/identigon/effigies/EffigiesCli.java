@@ -84,19 +84,20 @@ public final class EffigiesCli {
   private static void printUsage(PrintStream w) {
     w.println(
         """
-            Identigon - author and run an incognito anonymisation from a source schema.
+        Identigon - author and run an incognito anonymisation from a source schema.
 
-            Usage: java -jar identigon.jar <command> [options]
+        Usage: java -jar identigon.jar <command> [options]
 
-            Commands:
-              discover    Inspect a source database and describe its schema (metadata only,
-                          no data).
-              scaffold    Emit a starter policy.yaml (fail-closed: every column left to be
-                          classified).
-              validate    Check a policy against a source schema - no target, no data movement.
-              run         Execute incognito against a finished policy.yaml to produce the clone.
-              version     Print the version.
-              help        Show this help.""");
+        Commands:
+          discover    Inspect a source database and describe its schema (metadata only,
+                      no data).
+          scaffold    Emit a starter policy.yaml (fail-closed: every column left to be
+                      classified).
+          validate    Check a policy against a source schema - no target, no data movement.
+          run         Execute incognito against a finished policy.yaml to produce the clone.
+          version     Print the version.
+          help        Show this help.\
+        """);
   }
 
   /** The build version from the jar manifest, or {@code "dev"} when run from the classpath. */

@@ -56,11 +56,11 @@ class PostgresDialectHandlerIdentifierQuotingE2ETest {
       // lowercase, so both are only reachable when properly double-quoted.
       stmt.execute(
           """
-                CREATE TABLE "MixedCaseWidget" (
-                    "Id"   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                    "Name" TEXT
-                );
-                """);
+          CREATE TABLE "MixedCaseWidget" (
+              "Id"   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+              "Name" TEXT
+          );
+          """);
       stmt.execute("INSERT INTO \"MixedCaseWidget\" (\"Name\") VALUES ('a'), ('b')");
       // Move the sequence out of step with the data, so resyncSequence has something to fix.
       stmt.execute("SELECT setval(pg_get_serial_sequence('\"MixedCaseWidget\"', 'Id'), 1)");

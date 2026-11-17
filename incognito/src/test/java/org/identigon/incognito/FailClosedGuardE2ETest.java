@@ -126,11 +126,11 @@ class FailClosedGuardE2ETest {
 
     String ddl =
         """
-            CREATE TABLE emp (
-                id    INT PRIMARY KEY,
-                boss  INT REFERENCES emp(id)
-            );
-            """;
+        CREATE TABLE emp (
+            id    INT PRIMARY KEY,
+            boss  INT REFERENCES emp(id)
+        );
+        """;
     newPair("nosuper", ddl + "INSERT INTO emp (id, boss) VALUES (1, NULL), (2, 1);", ddl);
 
     // A real non-superuser role that can connect to the target but cannot set replica role.
@@ -176,15 +176,15 @@ class FailClosedGuardE2ETest {
     // transformed first.
     String ddl =
         """
-            CREATE TABLE tree (
-                grp   INT NOT NULL,
-                id    INT NOT NULL,
-                pgrp  INT,
-                pid   INT,
-                PRIMARY KEY (grp, id),
-                FOREIGN KEY (pgrp, pid) REFERENCES tree(grp, id) DEFERRABLE INITIALLY DEFERRED
-            );
-            """;
+        CREATE TABLE tree (
+            grp   INT NOT NULL,
+            id    INT NOT NULL,
+            pgrp  INT,
+            pid   INT,
+            PRIMARY KEY (grp, id),
+            FOREIGN KEY (pgrp, pid) REFERENCES tree(grp, id) DEFERRABLE INITIALLY DEFERRED
+        );
+        """;
     newPair(
         "comp",
         ddl + "INSERT INTO tree (grp, id, pgrp, pid) VALUES (1, 1, 1, 2), (1, 2, 1, 1);",
@@ -230,11 +230,11 @@ class FailClosedGuardE2ETest {
     // deferred pass-2 UPDATE has no PK to key on.
     String ddl =
         """
-            CREATE TABLE loops (
-                uid   INT UNIQUE NOT NULL,
-                boss  INT REFERENCES loops(uid)
-            );
-            """;
+        CREATE TABLE loops (
+            uid   INT UNIQUE NOT NULL,
+            boss  INT REFERENCES loops(uid)
+        );
+        """;
     newPair("nopk", ddl + "INSERT INTO loops (uid, boss) VALUES (1, NULL), (2, 1);", ddl);
 
     AnonymisationPolicy policy =

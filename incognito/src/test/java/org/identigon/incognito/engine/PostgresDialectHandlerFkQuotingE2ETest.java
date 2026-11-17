@@ -57,11 +57,11 @@ class PostgresDialectHandlerFkQuotingE2ETest {
       // one is only reachable when properly double-quoted everywhere.
       stmt.execute(
           """
-                CREATE TABLE "MixedCaseEmployee" (
-                    id    INT PRIMARY KEY,
-                    boss  INT REFERENCES "MixedCaseEmployee"(id)
-                );
-                """);
+          CREATE TABLE "MixedCaseEmployee" (
+              id    INT PRIMARY KEY,
+              boss  INT REFERENCES "MixedCaseEmployee"(id)
+          );
+          """);
     }
   }
 

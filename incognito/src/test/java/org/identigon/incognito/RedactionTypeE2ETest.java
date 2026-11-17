@@ -41,15 +41,15 @@ class RedactionTypeE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE record (
-            id          SERIAL PRIMARY KEY,
-            amount      INTEGER NOT NULL,
-            balance     NUMERIC(10,2) NOT NULL,
-            event_date  DATE NOT NULL,
-            active      BOOLEAN NOT NULL,
-            note        VARCHAR(20) NOT NULL
-        );
-        """;
+      CREATE TABLE record (
+          id          SERIAL PRIMARY KEY,
+          amount      INTEGER NOT NULL,
+          balance     NUMERIC(10,2) NOT NULL,
+          event_date  DATE NOT NULL,
+          active      BOOLEAN NOT NULL,
+          note        VARCHAR(20) NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

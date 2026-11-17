@@ -111,18 +111,15 @@ public abstract class MappingStoreContractTest {
     try {
       List<? extends Future<?>> futures =
           IntStream.range(0, threadCount)
-              .mapToObj(
-                  i ->
-                      pool.submit(
-                          () -> {
-                            awaitUninterruptibly(start);
-                            String key = "key-" + i;
-                            PutUniqueResult first =
-                                store.putIfAbsentUnique(namespace, key, sharedValue);
-                            if (!(first instanceof PutUniqueResult.Stored)) {
-                              store.putIfAbsentUnique(namespace, key, "fallback-value-" + i);
-                            }
-                          }))
+              .mapToObj(i ->
+                  pool.submit(() -> {
+                    awaitUninterruptibly(start);
+                    String key = "key-" + i;
+                    PutUniqueResult first = store.putIfAbsentUnique(namespace, key, sharedValue);
+                    if (!(first instanceof PutUniqueResult.Stored)) {
+                      store.putIfAbsentUnique(namespace, key, "fallback-value-" + i);
+                    }
+                  }))
               .toList();
       start.countDown();
       for (Future<?> future : futures) {

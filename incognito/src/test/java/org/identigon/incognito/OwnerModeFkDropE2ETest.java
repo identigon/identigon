@@ -38,12 +38,12 @@ class OwnerModeFkDropE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE emp (
-            id    INT PRIMARY KEY,
-            boss  INT REFERENCES emp(id),
-            ename VARCHAR(50) NOT NULL
-        );
-        """;
+      CREATE TABLE emp (
+          id    INT PRIMARY KEY,
+          boss  INT REFERENCES emp(id),
+          ename VARCHAR(50) NOT NULL
+      );
+      """;
 
   private PostgreSQLContainer pg;
   private DataSource sourceDs;

@@ -38,9 +38,9 @@ class FailClosedAccumulatesAcrossTablesTest {
   void unclassifiedColumnsInTwoTablesAreBothReportedInOneRun() throws SQLException {
     String ddl =
         """
-            CREATE TABLE CUSTOMERS (ID BIGINT PRIMARY KEY, STATUS VARCHAR(20) NOT NULL);
-            CREATE TABLE ORDERS (ID BIGINT PRIMARY KEY, TOTAL NUMERIC NOT NULL);
-            """;
+        CREATE TABLE CUSTOMERS (ID BIGINT PRIMARY KEY, STATUS VARCHAR(20) NOT NULL);
+        CREATE TABLE ORDERS (ID BIGINT PRIMARY KEY, TOTAL NUMERIC NOT NULL);
+        """;
     DataSource src = freshDb(ddl);
     DataSource tgt = freshDb(ddl);
 
@@ -82,9 +82,9 @@ class FailClosedAccumulatesAcrossTablesTest {
   void differentCheckKindsInDifferentTablesAreBothReportedInOneRun() throws SQLException {
     String ddl =
         """
-            CREATE TABLE CUSTOMERS (ID BIGINT PRIMARY KEY, EMAIL VARCHAR(255) NOT NULL);
-            CREATE TABLE ORDERS (ID BIGINT PRIMARY KEY, NOTES VARCHAR(200) NOT NULL);
-            """;
+        CREATE TABLE CUSTOMERS (ID BIGINT PRIMARY KEY, EMAIL VARCHAR(255) NOT NULL);
+        CREATE TABLE ORDERS (ID BIGINT PRIMARY KEY, NOTES VARCHAR(200) NOT NULL);
+        """;
     DataSource src = freshDb(ddl);
     DataSource tgt = freshDb(ddl);
 

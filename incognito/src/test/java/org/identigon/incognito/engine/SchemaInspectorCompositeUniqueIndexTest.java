@@ -52,14 +52,14 @@ class SchemaInspectorCompositeUniqueIndexTest {
         Statement stmt = conn.createStatement()) {
       stmt.execute(
           """
-                CREATE TABLE membership (
-                    id         INT PRIMARY KEY,
-                    email      VARCHAR(100) UNIQUE,
-                    tenant_id  INT NOT NULL,
-                    code       VARCHAR(20) NOT NULL,
-                    UNIQUE (tenant_id, code)
-                );
-                """);
+          CREATE TABLE membership (
+              id         INT PRIMARY KEY,
+              email      VARCHAR(100) UNIQUE,
+              tenant_id  INT NOT NULL,
+              code       VARCHAR(20) NOT NULL,
+              UNIQUE (tenant_id, code)
+          );
+          """);
     }
 
     dataSource = new SimpleDataSource(pg.getJdbcUrl(), "test", "test");

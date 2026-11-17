@@ -35,33 +35,33 @@ class YamlConfigTest {
     // that still declares it keeps parsing rather than failing on an unrecognised key.
     String yamlString =
         """
-            autoInfer: true
-            maxCategoricalCardinality: 100
-            tables:
-              users:
-                columns:
-                  id:
-                    role: PRIMARY_KEY
-                    surrogateStrategy: SEQUENTIAL_LONG
-                  email:
-                    role: DIRECT_ID
-                    directIdStrategy: ALTEREGO_EMAIL
-                  dob:
-                    role: QUASI_ID
-                    quasiIdStrategy: SYNTHESISE
-                  status:
-                    role: PAYLOAD
-              orders:
-                columns:
-                  id:
-                    role: PRIMARY_KEY
-                    surrogateStrategy: UUID_V4
-                  user_id:
-                    role: FOREIGN_KEY
-                    references:
-                      table: users
-                      column: id
-            """;
+        autoInfer: true
+        maxCategoricalCardinality: 100
+        tables:
+          users:
+            columns:
+              id:
+                role: PRIMARY_KEY
+                surrogateStrategy: SEQUENTIAL_LONG
+              email:
+                role: DIRECT_ID
+                directIdStrategy: ALTEREGO_EMAIL
+              dob:
+                role: QUASI_ID
+                quasiIdStrategy: SYNTHESISE
+              status:
+                role: PAYLOAD
+          orders:
+            columns:
+              id:
+                role: PRIMARY_KEY
+                surrogateStrategy: UUID_V4
+              user_id:
+                role: FOREIGN_KEY
+                references:
+                  table: users
+                  column: id
+        """;
 
     InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
     YamlPolicyParser parser = new YamlPolicyParser();
@@ -96,9 +96,9 @@ class YamlConfigTest {
   void testParseInvalidYaml() {
     String yamlString =
         """
-            autoInfer: true
-              invalid_indentation: 100
-            """;
+        autoInfer: true
+          invalid_indentation: 100
+        """;
 
     InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
     YamlPolicyParser parser = new YamlPolicyParser();
@@ -113,12 +113,12 @@ class YamlConfigTest {
     // ColumnRole.PAYLOAD - SchemaDiscoveryStage relies on role() staying null to fail closed.
     String yamlString =
         """
-            tables:
-              customers:
-                columns:
-                  ssn:
-                    directIdStrategy: ALTEREGO_GENERIC
-            """;
+        tables:
+          customers:
+            columns:
+              ssn:
+                directIdStrategy: ALTEREGO_GENERIC
+        """;
 
     InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
     AnonymisationPolicy policy = new YamlPolicyParser().parse(inputStream);
@@ -139,12 +139,12 @@ class YamlConfigTest {
     // of leaving the field null for fail-closed validation to report clearly.
     String yamlString =
         """
-            tables:
-              customers:
-                columns:
-                  ssn:
-                    role:
-            """;
+        tables:
+          customers:
+            columns:
+              ssn:
+                role:
+        """;
 
     InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
     AnonymisationPolicy policy = new YamlPolicyParser().parse(inputStream);
@@ -180,14 +180,14 @@ class YamlConfigTest {
     // diverging from what the policy says with no signal (the bug the new check closes).
     String yamlString =
         """
-            tables:
-              orders:
-                columns:
-                  ordered_on:
-                    role: QUASI_ID
-                    quasiIdStrategy: JITTER_DAYS
-                    jitterdays: 10
-            """;
+        tables:
+          orders:
+            columns:
+              ordered_on:
+                role: QUASI_ID
+                quasiIdStrategy: JITTER_DAYS
+                jitterdays: 10
+        """;
 
     InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
     YamlPolicyParser parser = new YamlPolicyParser();
@@ -205,15 +205,15 @@ class YamlConfigTest {
     // different nesting levels, all in one exception rather than one per re-run.
     String yamlString =
         """
-            maxCategoricalCardinalty: 64
-            tables:
-              customers:
-                extraTableKey: nonsense
-                columns:
-                  email:
-                    role: DIRECT_ID
-                    directIdStrategey: ALTEREGO_EMAIL
-            """;
+        maxCategoricalCardinalty: 64
+        tables:
+          customers:
+            extraTableKey: nonsense
+            columns:
+              email:
+                role: DIRECT_ID
+                directIdStrategey: ALTEREGO_EMAIL
+        """;
 
     InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
     YamlPolicyParser parser = new YamlPolicyParser();
@@ -231,13 +231,13 @@ class YamlConfigTest {
     // autoInfer must keep parsing, unlike every other unrecognised key.
     String yamlString =
         """
-            autoInfer: true
-            tables:
-              customers:
-                columns:
-                  status:
-                    role: PAYLOAD
-            """;
+        autoInfer: true
+        tables:
+          customers:
+            columns:
+              status:
+                role: PAYLOAD
+        """;
 
     InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
     AnonymisationPolicy policy = new YamlPolicyParser().parse(inputStream);
@@ -252,13 +252,13 @@ class YamlConfigTest {
     // message that discards exactly the detail (which key, where) the user needs to fix it.
     String yamlString =
         """
-            tables:
-              customers:
-                columns:
-                  email:
-                    role: DIRECT_ID
-                    directIdStrategey: ALTEREGO_EMAIL
-            """;
+        tables:
+          customers:
+            columns:
+              email:
+                role: DIRECT_ID
+                directIdStrategey: ALTEREGO_EMAIL
+        """;
     Path policyFile = tempDir.resolve("policy.yaml");
     Files.writeString(policyFile, yamlString);
 
@@ -274,9 +274,9 @@ class YamlConfigTest {
   void structuralUniquenessKeysParseFromYaml() {
     String yamlString =
         """
-            structuralUniqueness: REPORT
-            structuralRarenessK: 10
-            """;
+        structuralUniqueness: REPORT
+        structuralRarenessK: 10
+        """;
 
     InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
     AnonymisationPolicy policy = new YamlPolicyParser().parse(inputStream);
@@ -294,8 +294,8 @@ class YamlConfigTest {
     // parser) writes it - the parser upper-cases before calling SaltMode.valueOf.
     String yamlString =
         """
-            saltMode: persistent
-            """;
+        saltMode: persistent
+        """;
 
     InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
     AnonymisationPolicy policy = new YamlPolicyParser().parse(inputStream);
@@ -309,16 +309,16 @@ class YamlConfigTest {
     // `quasi_id` into `QUASİ_ID` and valueOf fails.
     String yamlString =
         """
-            tables:
-              users:
-                columns:
-                  dob:
-                    role: quasi_id
-                    quasiIdStrategy: synthesise
-                  town:
-                    role: direct_id
-                    directIdStrategy: alterego_city
-            """;
+        tables:
+          users:
+            columns:
+              dob:
+                role: quasi_id
+                quasiIdStrategy: synthesise
+              town:
+                role: direct_id
+                directIdStrategy: alterego_city
+        """;
 
     Locale original = Locale.getDefault();
     Locale.setDefault(Locale.forLanguageTag("tr-TR"));
@@ -340,12 +340,12 @@ class YamlConfigTest {
   void anUnquotedColumnNameYamlReadsAsABooleanFailsWithAQuotingHint() {
     String yamlString =
         """
-            tables:
-              users:
-                columns:
-                  on:
-                    role: PAYLOAD
-            """;
+        tables:
+          users:
+            columns:
+              on:
+                role: PAYLOAD
+        """;
 
     InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
     IncognitoException.ConfigException ex =
@@ -364,8 +364,8 @@ class YamlConfigTest {
     // and wrapped by parse(InputStream)'s generic catch, same as any other bad enum value.
     String yamlString =
         """
-            saltMode: personal
-            """;
+        saltMode: personal
+        """;
 
     InputStream inputStream = new ByteArrayInputStream(yamlString.getBytes(StandardCharsets.UTF_8));
     YamlPolicyParser parser = new YamlPolicyParser();

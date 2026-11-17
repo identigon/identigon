@@ -40,11 +40,11 @@ class NinoE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE employee (
-            id      SERIAL PRIMARY KEY,
-            nino    VARCHAR(13) NOT NULL
-        );
-        """;
+      CREATE TABLE employee (
+          id      SERIAL PRIMARY KEY,
+          nino    VARCHAR(13) NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

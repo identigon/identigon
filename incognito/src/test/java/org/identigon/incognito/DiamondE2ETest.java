@@ -49,25 +49,25 @@ class DiamondE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE firm (
-            id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            name  VARCHAR(100) NOT NULL
-        );
-        CREATE TABLE office (
-            id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            firm_id  BIGINT NOT NULL REFERENCES firm(id)
-        );
-        CREATE TABLE contract (
-            id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            firm_id  BIGINT NOT NULL REFERENCES firm(id)
-        );
-        CREATE TABLE schedule (
-            id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            office_id    BIGINT NOT NULL REFERENCES office(id),
-            contract_id  BIGINT NOT NULL REFERENCES contract(id),
-            firm_name    VARCHAR(100) NOT NULL
-        );
-        """;
+      CREATE TABLE firm (
+          id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          name  VARCHAR(100) NOT NULL
+      );
+      CREATE TABLE office (
+          id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          firm_id  BIGINT NOT NULL REFERENCES firm(id)
+      );
+      CREATE TABLE contract (
+          id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          firm_id  BIGINT NOT NULL REFERENCES firm(id)
+      );
+      CREATE TABLE schedule (
+          id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          office_id    BIGINT NOT NULL REFERENCES office(id),
+          contract_id  BIGINT NOT NULL REFERENCES contract(id),
+          firm_name    VARCHAR(100) NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

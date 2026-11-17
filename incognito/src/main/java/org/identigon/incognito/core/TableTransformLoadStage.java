@@ -231,10 +231,9 @@ public final class TableTransformLoadStage implements PipelineStage {
     // Build transformations for each column.
     List<ColumnTransformer> transformers =
         columnsToProcess.stream()
-            .map(
-                col ->
-                    buildTransformer(
-                        col, tablePolicy, tableMeta, alterEgo, metadataByName, cyclicTables))
+            .map(col ->
+                buildTransformer(
+                    col, tablePolicy, tableMeta, alterEgo, metadataByName, cyclicTables))
             .toList();
 
     // Columns of THIS table whose fabricated value a descendant will inherit (SPEC §6.1) - publish
@@ -1058,19 +1057,18 @@ public final class TableTransformLoadStage implements PipelineStage {
     Object ancestorId = ancestorIds.iterator().next();
     return ctx.cascadeStore()
         .get(targetTable, ancestorId, targetColumn)
-        .orElseThrow(
-            () ->
-                new IncognitoException.ConstraintException(
-                    "INHERITED_ATTRIBUTE '"
-                        + columnName
-                        + "': ancestor value '"
-                        + targetTable
-                        + '.'
-                        + targetColumn
-                        + "' was not published for the row's ancestor - is '"
-                        + targetTable
-                        + "' loaded before its descendants and its column classified? (SPEC"
-                        + " §6.1)."));
+        .orElseThrow(() ->
+            new IncognitoException.ConstraintException(
+                "INHERITED_ATTRIBUTE '"
+                    + columnName
+                    + "': ancestor value '"
+                    + targetTable
+                    + '.'
+                    + targetColumn
+                    + "' was not published for the row's ancestor - is '"
+                    + targetTable
+                    + "' loaded before its descendants and its column classified? (SPEC"
+                    + " §6.1)."));
   }
 
   /**

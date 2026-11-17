@@ -27,21 +27,21 @@ public final class DpiaArtefactEmitter {
   /** Static HTML scaffolding: document head, CSS, and title, up to the opening {@code <body>}. */
   private static final String HTML_HEAD =
       """
-        <!doctype html>
-        <html lang="en"><head><meta charset="utf-8">
-        <title>Incognito Anonymisation Report (DPIA Artifact)</title>
-        <style>
-        body{font-family:system-ui,sans-serif;margin:2rem;max-width:70rem}
-        table{border-collapse:collapse;margin:.5rem 0 1.5rem}
-        th,td{border:1px solid #ccc;padding:.3rem .6rem;text-align:left}
-        th{background:#f2f2f2}
-        .fail{color:#b00}
-        .ok{color:#080}
-        caption{font-weight:bold;text-align:left;padding:.3rem 0}
-        </style>
-        </head><body>
-        <h1>Incognito Anonymisation Report (DPIA Artifact)</h1>
-        """;
+      <!doctype html>
+      <html lang="en"><head><meta charset="utf-8">
+      <title>Incognito Anonymisation Report (DPIA Artifact)</title>
+      <style>
+      body{font-family:system-ui,sans-serif;margin:2rem;max-width:70rem}
+      table{border-collapse:collapse;margin:.5rem 0 1.5rem}
+      th,td{border:1px solid #ccc;padding:.3rem .6rem;text-align:left}
+      th{background:#f2f2f2}
+      .fail{color:#b00}
+      .ok{color:#080}
+      caption{font-weight:bold;text-align:left;padding:.3rem 0}
+      </style>
+      </head><body>
+      <h1>Incognito Anonymisation Report (DPIA Artifact)</h1>
+      """;
 
   // --- JSON ---------------------------------------------------------------------------------
 
@@ -425,11 +425,11 @@ public final class DpiaArtefactEmitter {
       if (!report.survivalFindings().isEmpty()) {
         writer.write(
             """
-                    ### Source-Value Survival (SPEC §4.3 - singling-out evidence)
+            ### Source-Value Survival (SPEC §4.3 - singling-out evidence)
 
-                    | Table | Column | Sampled | Survived | Verdict |
-                    |---|---|---|---|---|
-                    """);
+            | Table | Column | Sampled | Survived | Verdict |
+            |---|---|---|---|---|
+            """);
         for (AnonymisationReport.SurvivalFinding sf : report.survivalFindings()) {
           writer.write(
               String.format(
@@ -446,11 +446,11 @@ public final class DpiaArtefactEmitter {
       if (!report.lintFindings().isEmpty()) {
         writer.write(
             """
-                    ### Misdeclaration Lint (SPEC §4.1 - distinguishing:false kept opaque)
+            ### Misdeclaration Lint (SPEC §4.1 - distinguishing:false kept opaque)
 
-                    | Table | Column | Distinct Values | Threshold |
-                    |---|---|---|---|
-                    """);
+            | Table | Column | Distinct Values | Threshold |
+            |---|---|---|---|
+            """);
         for (AnonymisationReport.LintFinding lf : report.lintFindings()) {
           writer.write(
               String.format(
@@ -466,12 +466,12 @@ public final class DpiaArtefactEmitter {
       if (!report.structuralFindings().isEmpty()) {
         writer.write(
             """
-                    ### Structural Re-identification Risk (SPEC §2.4 - relational fingerprints)
+            ### Structural Re-identification Risk (SPEC §2.4 - relational fingerprints)
 
-                    | Parent Table | Child Table | FK Column(s) | Distinct Parents \
-                    | Max Child Count | Unique Fingerprints | Rare Fingerprints (<k) | k |
-                    |---|---|---|---|---|---|---|---|
-                    """);
+            | Parent Table | Child Table | FK Column(s) | Distinct Parents \
+            | Max Child Count | Unique Fingerprints | Rare Fingerprints (<k) | k |
+            |---|---|---|---|---|---|---|---|
+            """);
         for (AnonymisationReport.StructuralUniquenessFinding suf : report.structuralFindings()) {
           writer.write(
               String.format(
@@ -520,11 +520,11 @@ public final class DpiaArtefactEmitter {
 
         writer.write(
             """
-                    #### Column Actions
+            #### Column Actions
 
-                    | Column | Role | Transformation | Fictionality Verified |
-                    |---|---|---|---|
-                    """);
+            | Column | Role | Transformation | Fictionality Verified |
+            |---|---|---|---|
+            """);
         for (AnonymisationReport.ColumnAction ca : tr.columns()) {
           writer.write(
               String.format(
@@ -540,11 +540,11 @@ public final class DpiaArtefactEmitter {
         if (!tr.columns().isEmpty() && !tr.columns().get(0).examples().isEmpty()) {
           writer.write(
               """
-                        #### Sample Rows (Illustrative)
+              #### Sample Rows (Illustrative)
 
-                        *Synthetic data showing each column's transformation, not this run's rows.*
+              *Synthetic data showing each column's transformation, not this run's rows.*
 
-                        """);
+              """);
           StringBuilder header = new StringBuilder("|");
           StringBuilder separator = new StringBuilder("|");
           for (AnonymisationReport.ColumnAction ca : tr.columns()) {
@@ -566,11 +566,11 @@ public final class DpiaArtefactEmitter {
         if (!tr.inferSuggestions().isEmpty()) {
           writer.write(
               """
-                        #### Inference Suggestions (Not Auto-Applied)
+              #### Inference Suggestions (Not Auto-Applied)
 
-                        | Column | Suggested Role | Heuristic |
-                        |---|---|---|
-                        """);
+              | Column | Suggested Role | Heuristic |
+              |---|---|---|
+              """);
           for (AnonymisationReport.InferSuggestion is : tr.inferSuggestions()) {
             writer.write(
                 String.format(
@@ -586,11 +586,11 @@ public final class DpiaArtefactEmitter {
         if (!tr.passthroughFlags().isEmpty()) {
           writer.write(
               """
-                        #### Passthrough Flags (Opaque Data Types)
+              #### Passthrough Flags (Opaque Data Types)
 
-                        | Column | JDBC Type | Reason |
-                        |---|---|---|
-                        """);
+              | Column | JDBC Type | Reason |
+              |---|---|---|
+              """);
           for (AnonymisationReport.PassthroughFlag pf : tr.passthroughFlags()) {
             writer.write(
                 String.format(

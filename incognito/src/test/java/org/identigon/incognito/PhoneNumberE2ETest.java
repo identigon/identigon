@@ -41,11 +41,11 @@ class PhoneNumberE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE customer (
-            id      SERIAL PRIMARY KEY,
-            phone   VARCHAR(20) NOT NULL
-        );
-        """;
+      CREATE TABLE customer (
+          id      SERIAL PRIMARY KEY,
+          phone   VARCHAR(20) NOT NULL
+      );
+      """;
 
   @BeforeAll
   void setUp() {

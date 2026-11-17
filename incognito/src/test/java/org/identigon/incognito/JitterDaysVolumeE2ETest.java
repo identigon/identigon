@@ -41,11 +41,11 @@ class JitterDaysVolumeE2ETest {
 
   private static final String DDL =
       """
-        CREATE TABLE spikes (
-            id  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            ts  DATE NOT NULL
-        );
-        """;
+      CREATE TABLE spikes (
+          id  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          ts  DATE NOT NULL
+      );
+      """;
 
   // Fixed salt + seed so the (salt-keyed) jitter is deterministic and the test is stable.
   private static final byte[] SALT =

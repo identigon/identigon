@@ -23,39 +23,34 @@ class DictionaryWellFormednessTest {
   @Test
   void fixtureDictionariesArePresentAndWellFormed() {
     Dictionary firstNames = DictionaryLoader.load("ZZ", "first-names");
-    assertDoesNotThrow(
-        () ->
-            DictionaryWellFormedness.validate(
-                firstNames,
-                "ZZ/first-names",
-                DictionaryLoader.licenceTextExists(firstNames.header().licence())));
+    assertDoesNotThrow(() ->
+        DictionaryWellFormedness.validate(
+            firstNames,
+            "ZZ/first-names",
+            DictionaryLoader.licenceTextExists(firstNames.header().licence())));
 
     Dictionary towns = DictionaryLoader.load("ZZ", "towns");
-    assertDoesNotThrow(
-        () ->
-            DictionaryWellFormedness.validate(
-                towns, "ZZ/towns", DictionaryLoader.licenceTextExists(towns.header().licence())));
+    assertDoesNotThrow(() ->
+        DictionaryWellFormedness.validate(
+            towns, "ZZ/towns", DictionaryLoader.licenceTextExists(towns.header().licence())));
     assertDoesNotThrow(() -> DictionaryWellFormedness.validateTownTags(towns, "ZZ/towns"));
 
     Dictionary orgComponents = DictionaryLoader.load("ZZ", "organisation-components");
-    assertDoesNotThrow(
-        () ->
-            DictionaryWellFormedness.validate(
-                orgComponents,
-                "ZZ/organisation-components",
-                DictionaryLoader.licenceTextExists(orgComponents.header().licence())));
-    assertDoesNotThrow(
-        () ->
-            DictionaryWellFormedness.validateOrgComponentTags(
-                orgComponents, "ZZ/organisation-components"));
+    assertDoesNotThrow(() ->
+        DictionaryWellFormedness.validate(
+            orgComponents,
+            "ZZ/organisation-components",
+            DictionaryLoader.licenceTextExists(orgComponents.header().licence())));
+    assertDoesNotThrow(() ->
+        DictionaryWellFormedness.validateOrgComponentTags(
+            orgComponents, "ZZ/organisation-components"));
 
     Dictionary phoneRanges = DictionaryLoader.load("ZZ", "phone-ranges");
-    assertDoesNotThrow(
-        () ->
-            DictionaryWellFormedness.validate(
-                phoneRanges,
-                "ZZ/phone-ranges",
-                DictionaryLoader.licenceTextExists(phoneRanges.header().licence())));
+    assertDoesNotThrow(() ->
+        DictionaryWellFormedness.validate(
+            phoneRanges,
+            "ZZ/phone-ranges",
+            DictionaryLoader.licenceTextExists(phoneRanges.header().licence())));
     assertDoesNotThrow(
         () -> DictionaryWellFormedness.validatePhoneRangeTags(phoneRanges, "ZZ/phone-ranges"));
   }
@@ -83,10 +78,9 @@ class DictionaryWellFormednessTest {
     Dictionary towns = DictionaryLoader.load("GB", "towns");
     assertDoesNotThrow(() -> DictionaryWellFormedness.validateTownTags(towns, "GB/towns"));
     Dictionary orgComponents = DictionaryLoader.load("GB", "organisation-components");
-    assertDoesNotThrow(
-        () ->
-            DictionaryWellFormedness.validateOrgComponentTags(
-                orgComponents, "GB/organisation-components"));
+    assertDoesNotThrow(() ->
+        DictionaryWellFormedness.validateOrgComponentTags(
+            orgComponents, "GB/organisation-components"));
     Dictionary phoneRanges = DictionaryLoader.load("GB", "phone-ranges");
     assertDoesNotThrow(
         () -> DictionaryWellFormedness.validatePhoneRangeTags(phoneRanges, "GB/phone-ranges"));

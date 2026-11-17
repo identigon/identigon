@@ -81,15 +81,15 @@ class ValidateCommandTest {
     Files.writeString(
         policy,
         """
-            tables:
-              PERSON:
-                columns:
-                  ID:
-                    role: PRIMARY_KEY
-                    surrogateStrategy: SEQUENTIAL_LONG
-                  NAME:
-                    role: PAYLOAD
-            """);
+        tables:
+          PERSON:
+            columns:
+              ID:
+                role: PRIMARY_KEY
+                surrogateStrategy: SEQUENTIAL_LONG
+              NAME:
+                role: PAYLOAD
+        """);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     ByteArrayOutputStream err = new ByteArrayOutputStream();
@@ -120,13 +120,13 @@ class ValidateCommandTest {
     Files.writeString(
         policy,
         """
-            tables:
-              PERSON:
-                columns:
-                  ID:
-                    role: PRIMARY_KEY
-                    surrogateStrategy: SEQUENTIAL_LONG
-            """);
+        tables:
+          PERSON:
+            columns:
+              ID:
+                role: PRIMARY_KEY
+                surrogateStrategy: SEQUENTIAL_LONG
+        """);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     ByteArrayOutputStream err = new ByteArrayOutputStream();
@@ -149,13 +149,13 @@ class ValidateCommandTest {
     Files.writeString(
         policy,
         """
-            tables:
-              PERSON:
-                columns:
-                  ID:
-                    role: PRIMARY_KEY
-                    surrogateStrategy: SEQUENTIAL_LONG
-            """);
+        tables:
+          PERSON:
+            columns:
+              ID:
+                role: PRIMARY_KEY
+                surrogateStrategy: SEQUENTIAL_LONG
+        """);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     ByteArrayOutputStream err = new ByteArrayOutputStream();
