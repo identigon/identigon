@@ -13,7 +13,7 @@ import java.util.Arrays;
  * docs/decisions/0001-authoring-above-the-engine.md}).
  *
  * <p>The {@code discover}, {@code scaffold}, {@code validate}, and {@code run} subcommands are
- * implemented; see {@code docs/plan.md} for the roadmap.
+ * implemented; see {@code docs/plan/README.md} for the roadmap.
  */
 public final class EffigiesCli {
 

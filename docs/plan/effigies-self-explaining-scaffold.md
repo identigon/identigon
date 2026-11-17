@@ -78,8 +78,8 @@ format itself changes):
 - **Make `validate` the loop that guides the user:** for each unclassified or incomplete column, say
   what is missing and list the allowed values, rather than only reporting the failure. It already
   collects every issue before failing (§6 of the incognito spec), so one pass lists everything.
-- **Link to the column-classification guide** (its own `docs/plan.md` entry) at a stable public URL
-  for the "which one should I choose" judgement a comment can't hold.
+- **Link to the column-classification guide** (its own `docs/plan/README.md` entry) at a stable
+  public URL for the "which one should I choose" judgement a comment can't hold.
 
 ## 4. Constraints
 

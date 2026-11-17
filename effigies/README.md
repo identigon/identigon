@@ -38,7 +38,7 @@ Two boundaries are deliberate and load-bearing:
 
 See [ADR-0023](../docs/decisions/0023-authoring-above-the-engine.md) for the reasoning,
 [`docs/spec/effigies.md`](../docs/spec/effigies.md) for the behavioural contract, and the root
-[`docs/plan.md`](../docs/plan.md) (`**Project:** effigies` entries) for the backlog.
+[`docs/plan/README.md`](../docs/plan/README.md) (`**Project:** effigies` entries) for the backlog.
 
 ## Status
 

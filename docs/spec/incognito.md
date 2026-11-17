@@ -143,8 +143,8 @@ along - it only _looked_ statistical while k-anonymity was still in scope.
 >
 > This is a design rule, not a claim about the current code: some interim value logic still lives in
 > Incognito in violation of it (e.g. the shape-preserving character substitution behind
-> `ALTEREGO_GENERIC`). Such code is a **bug to be migrated**, tracked in `docs/plan.md`, not a
-> sanctioned exception.
+> `ALTEREGO_GENERIC`). Such code is a **bug to be migrated**, tracked in `docs/plan/README.md`, not
+> a sanctioned exception.
 
 ---
 
@@ -929,9 +929,10 @@ v1.0 targets **PostgreSQL** only; `GenericDialectHandler` is an uncertified ANSI
 - **Licence: MIT**, in a root file named `LICENCE` (UK spelling for the filename). Incognito bundles
   **no third-party data** in the JAR; the benchmark fixtures under `src/test/resources/benchmarks/`
   are test-only, with their own provenance and licences (`SOURCES.md`, `NOTICE`, `LICENCES/`).
-- **Documents:** this `docs/spec/incognito.md` (the authoritative contract), `docs/plan.md` (the
-  ranked backlog), `docs/decisions/` (decisions with their reasons; only `accepted` records bind),
-  `CHANGELOG.md`, and `AGENTS.md` (agent instructions and the §7.3 must-not-regress invariants).
+- **Documents:** this `docs/spec/incognito.md` (the authoritative contract), `docs/plan/README.md`
+  (the ranked backlog), `docs/decisions/` (decisions with their reasons; only `accepted` records
+  bind), `CHANGELOG.md`, and `AGENTS.md` (agent instructions and the §7.3 must-not-regress
+  invariants).
 
 ---
 

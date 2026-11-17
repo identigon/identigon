@@ -1,6 +1,6 @@
 ---
 status: "accepted"
-date: 2026-07-30
+date: 2026-11-17
 decision-makers: David Conneely
 ---
 
@@ -45,5 +45,5 @@ than leaving a dangling placeholder.
 - Bad, because composite primary/foreign keys were not supported at the time of this decision (Pass
   2 keyed on a single-column PK only); until then a cyclic table without a single-column PK
   fails-closed rather than corrupting data. (Composite PK support landed separately; the
-  composite-PK-and-cyclic-FK combination remains open - see root `docs/plan.md`.)
+  composite-PK-and-cyclic-FK combination remains open - see root `docs/plan/README.md`.)
 - Neutral: verified end-to-end by a mutual self-reference test (`CyclicFkE2ETest`).

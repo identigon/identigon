@@ -107,12 +107,12 @@ grown one.
   per item.
 - **Composite PK + cyclic FK on the same table** (each supported alone) - fails closed with a clear
   message rather than corrupting data, but the combination itself has no passing test, because it
-  has no implementation yet. Tracked in root `docs/plan.md`
+  has no implementation yet. Tracked in root `docs/plan/README.md`
   (`docs/plan/incognito-composite-pk-cyclic-fk.md`).
-- **`alterego`'s post-v1 deferred items** (root `docs/plan.md`, `**Project:** alterego` entries) -
-  `ServiceLoader` strategy packs, language-sensitive generation, pattern-language extensions,
-  external `MappingStore` modules, a public codec SPI, and further fictional-value ranges are all
-  untested because unimplemented, not because coverage was skipped.
+- **`alterego`'s post-v1 deferred items** (root `docs/plan/README.md`, `**Project:** alterego`
+  entries) - `ServiceLoader` strategy packs, language-sensitive generation, pattern-language
+  extensions, external `MappingStore` modules, a public codec SPI, and further fictional-value
+  ranges are all untested because unimplemented, not because coverage was skipped.
 
 ## Running them
 

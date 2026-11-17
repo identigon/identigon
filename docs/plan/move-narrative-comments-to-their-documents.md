@@ -12,7 +12,8 @@ subproject Gradle scripts, are done. Delete once the rest is done.
   message, and should be deleted or rewritten in present tense ("without this check, ...").
 - **"We chose X because Y, not Z"** - a decision with a rejected alternative. If a newcomer would
   question it, it belongs in an ADR; the comment keeps one line and a pointer.
-- **"TODO: do X"** - intent. It belongs in `docs/plan.md`; the comment keeps at most a pointer.
+- **"TODO: do X"** - intent. It belongs in `docs/plan/README.md`; the comment keeps at most a
+  pointer.
 
 A comment explaining a non-obvious constraint of the current code ("pg_get_serial_sequence's
 arguments are not symmetric") is correct where it is - leave it.
@@ -36,8 +37,8 @@ arguments are not symmetric") is correct where it is - leave it.
   reduce it to a pointer). Look for "rather than", "instead of", "deliberately" in comments over
   three lines.
 - **Spec intent**: `docs/spec/incognito.md` §10 says an `incognito-yaml` module split "is planned".
-  That is plan-tense in the spec; it is now a `docs/plan.md` entry, so the spec sentence can drop
-  the intent the next time that section changes for a behavioural reason (the spec follows the
+  That is plan-tense in the spec; it is now a `docs/plan/README.md` entry, so the spec sentence can
+  drop the intent the next time that section changes for a behavioural reason (the spec follows the
   work).
 
 ## 3. How

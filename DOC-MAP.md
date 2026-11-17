@@ -30,14 +30,14 @@ The tense of the sentence you are writing usually settles it:
 
 If a sentence seems to fit two places, it is usually two sentences. Split it and file each half.
 
-The specification is a set, not a file: `docs/spec.md` indexes `docs/spec/`, one member per
+The specification is a set, not a file: `docs/spec/README.md` indexes `docs/spec/`, one member per
 subproject. This repository has three Gradle modules, each independently usable, but documentation
 is consolidated at the repository root rather than split per module - see
 `docs/decisions/0032-consolidate-documentation-at-repository-root.md`.
 
 **This map also covers `identigon.github.io`**, the separate repository holding the project's public
-site - its decisions live in `docs/decisions/` here and its backlog in `docs/plan.md` here (tagged
-`identigon.github.io`), rather than in a second, separate doc-kit instance of its own. See
+site - its decisions live in `docs/decisions/` here and its backlog in `docs/plan/README.md` here
+(tagged `identigon.github.io`), rather than in a second, separate doc-kit instance of its own. See
 `docs/decisions/0033-extend-documentation-coverage-to-identigon-github-io.md`. That repository keeps
 only its own `README.md` (orientation) and `AGENTS.md` (site-specific operational hazards - custom
 domain, build/deploy); both route here for everything else, at the sibling paths
@@ -52,17 +52,17 @@ AGENTS.md                orientation for coding agents - routes here
 CLAUDE.md                one line pointing at AGENTS.md
 CHANGELOG.md             what shipped
 docs/
-  spec.md                the specification index
   spec/
+    README.md            the specification index
     alterego.md          the pseudonymisation library's contract
     incognito.md         the database-cloning/anonymisation engine's contract
     effigies.md          the authoring/orchestration CLI's contract
-  plan.md                single ranked backlog, items tagged bug/debt/feature/docs
   plan/
+    README.md            single ranked backlog, items tagged bug/debt/feature/docs
     *.md                 optional per-entry working notes
     0000-template.md     optional task-note template
-  decisions.md           index of decision records, generated
   decisions/
+    README.md            index of decision records, generated
     *.md                 decisions, numbered, amendable by the owner
   research/
     *.md                 sourced findings with confidence levels, numbered monorepo-wide
@@ -78,7 +78,7 @@ incognito/src/test/resources/benchmarks/SOURCES.md  provenance/licensing of vend
 ../identigon.github.io/AGENTS.md   separate repository - site-specific hazards, routes here
 ```
 
-## Artifacts
+## Artefacts
 
 | Artifact                                             | Purpose                                                                                                                                               | Tense      | Mutability         | Audience                     |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------ | ---------------------------- |
@@ -86,15 +86,15 @@ incognito/src/test/resources/benchmarks/SOURCES.md  provenance/licensing of vend
 | `README.md`                                          | Orients a newcomer in one screen, and links outward                                                                                                   | present    | rewritten in place | owner, contributor, consumer |
 | `AGENTS.md`                                          | Behavioural rules for coding agents: build and test, hard invariants, code style and Git rules, plus the routing into this map. Facts live in the map | present    | rewritten in place | contributor (agents)         |
 | `CLAUDE.md`                                          | **Alias** for `AGENTS.md`, existing only because some tools look for that filename                                                                    | present    | rewritten in place | contributor (agents)         |
-| `docs/spec.md`                                       | The specification index: scope and the three members below. Holds no behaviour directly                                                               | present    | rewritten in place | consumer, contributor        |
+| `docs/spec/README.md`                                | The specification index: scope and the three members below. Holds no behaviour directly                                                               | present    | rewritten in place | consumer, contributor        |
 | `docs/spec/alterego.md`                              | `alterego`'s full behavioural contract, including the normative Appendix A                                                                            | present    | rewritten in place | consumer, contributor        |
 | `docs/spec/incognito.md`                             | `incognito`'s full behavioural contract, including the §7.3 invariants                                                                                | present    | rewritten in place | consumer, contributor        |
 | `docs/spec/effigies.md`                              | `effigies`'s full behavioural contract                                                                                                                | present    | rewritten in place | consumer, contributor        |
 | `CHANGELOG.md`                                       | What shipped, user-visible, across the whole monorepo. **Real standard:** Keep a Changelog, entries tagged by subproject                              | past       | append-only        | consumer                     |
-| `docs/plan.md`                                       | Single ranked backlog. No standard; entries may carry a `Project` tag                                                                                 | future     | volatile           | owner, contributor           |
-| `docs/decisions.md`                                  | Generated index of decision records. Only `accepted` records bind                                                                                     | present    | rewritten in place | owner, contributor           |
+| `docs/plan/README.md`                                | Single ranked backlog. No standard; entries may carry a `Project` tag                                                                                 | future     | volatile           | owner, contributor           |
+| `docs/decisions/README.md`                           | Generated index of decision records. Only `accepted` records bind                                                                                     | present    | rewritten in place | owner, contributor           |
 | `docs/decisions/*.md`                                | Why a decision was made, for any subproject or for `identigon.github.io`. **Real convention:** MADR minimal template, rules in `0000-template.md`     | past       | amendable          | owner, contributor           |
-| `docs/research/*.md`                                 | Sourced findings behind a spec guarantee, with an explicit confidence level; numbered monorepo-wide, like `docs/decisions/`. **No standard**          | past       | append-only        | contributor                  |
+| `docs/research/*.md`                                 | Sourced findings behind a spec guarantee, with an explicit confidence level; numbered monorepo-wide, like `docs/decisions/`. **No standard**          | past       | rewritten in place | contributor                  |
 | `docs/testing.md`                                    | Test strategy for all three subprojects, and what is deliberately not covered                                                                         | present    | rewritten in place | contributor                  |
 | `docs/plan/*.md`                                     | Working notes for one backlog item, prefixed with the subproject name when subproject-specific. Optional                                              | future     | disposable         | contributor                  |
 | `docs/plan/0000-template.md`                         | **Template.** Task-note template. Optional                                                                                                            | present    | rewritten in place | contributor                  |
@@ -116,13 +116,13 @@ incognito/src/test/resources/benchmarks/SOURCES.md  provenance/licensing of vend
 | `README.md`                                          | project starts                                  | never                                                            |
 | `AGENTS.md`                                          | agents first work in this repository            | never                                                            |
 | `CLAUDE.md`                                          | agents first work in this repository            | never                                                            |
-| `docs/spec.md`                                       | behaviour is decided                            | never - edited forever                                           |
+| `docs/spec/README.md`                                | behaviour is decided                            | never - edited forever                                           |
 | `docs/spec/alterego.md`                              | behaviour is decided                            | never - edited forever                                           |
 | `docs/spec/incognito.md`                             | behaviour is decided                            | never - edited forever                                           |
 | `docs/spec/effigies.md`                              | behaviour is decided                            | never - edited forever                                           |
 | `CHANGELOG.md` entry                                 | at release, if user-visible                     | never                                                            |
-| `docs/plan.md` entry                                 | idea occurs - one paragraph, no design          | **deleted** when done, not struck through                        |
-| `docs/decisions.md`                                  | first decision is recorded                      | never                                                            |
+| `docs/plan/README.md` entry                          | idea occurs - one paragraph, no design          | **deleted** when done, not struck through                        |
+| `docs/decisions/README.md`                           | first decision is recorded                      | never                                                            |
 | `docs/decisions/*.md`                                | a choice a newcomer would question              | deprecated or deleted, with the owner's permission               |
 | `docs/research/*.md`                                 | a question is investigated                      | never - confidence is revised in place as evidence changes       |
 | `docs/testing.md`                                    | the second test approach appears (already true) | never                                                            |
@@ -142,9 +142,9 @@ incognito/src/test/resources/benchmarks/SOURCES.md  provenance/licensing of vend
 
 A change moves through the documents in this order:
 
-`docs/plan.md` entry -> (optional `docs/plan/` note) -> **ADR** if a real choice was made ->
-regenerate **`docs/decisions.md`** -> **`docs/spec.md`** or its member updated in present tense ->
-**`CHANGELOG.md`** line if user-visible -> `docs/plan.md` entry **deleted**.
+`docs/plan/README.md` entry -> (optional `docs/plan/` note) -> **ADR** if a real choice was made ->
+regenerate **`docs/decisions/README.md`** -> **`docs/spec/README.md`** or its member updated in
+present tense -> **`CHANGELOG.md`** line if user-visible -> `docs/plan/README.md` entry **deleted**.
 
 Most changes skip the ADR and the task note. Nothing skips the deletion.
 
@@ -180,13 +180,11 @@ Absent on purpose, so that adding any of them later is a decision rather than a 
 - **`RELEASING.md`.** The release ritual is in
   `docs/decisions/0028-publish-effigies-runnable-jar.md` and `.github/workflows/release.yml`; a
   second guide would restate them. **Runbooks** are absent because this is not a deployed service.
-- **Per-subproject `DOC-MAP.md`, `docs/spec.md`, `docs/plan.md`, `docs/decisions/` or
+- **Per-subproject `DOC-MAP.md`, `docs/spec/README.md`, `docs/plan/README.md`, `docs/decisions/` or
   `CHANGELOG.md`.** See `docs/decisions/0032-consolidate-documentation-at-repository-root.md`.
-- **A separate `DOC-MAP.md`/`docs/plan.md`/`docs/decisions/` instance inside
+- **A separate `DOC-MAP.md`/`docs/plan/README.md`/`docs/decisions/` instance inside
   `identigon.github.io`.** See
   `docs/decisions/0033-extend-documentation-coverage-to-identigon-github-io.md`.
-- **`docs/decisions/README.md`.** The generated index lives at `docs/decisions.md`, outside the
-  record directory, so the MADR-shape check does not sweep it.
 - **`docs/quirks.md`, `docs/glossary.md`.** Not adopted; each specification member states known
   limitations and non-goals inline. Revisit if that stops being enough.
 - **`docs/howto/`, `docs/sources/`.** No recurring operational procedures or externally pinned

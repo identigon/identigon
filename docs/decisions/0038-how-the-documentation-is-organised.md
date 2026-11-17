@@ -1,6 +1,6 @@
 ---
 status: "accepted"
-date: 2026-10-30
+date: 2026-11-17
 decision-makers: David Conneely
 ---
 
@@ -15,18 +15,18 @@ the map's property sets closed, and made accepted decision records amendable by 
 map and templates no longer matched the kit's current structure, and the old `AGENTS.md` rule that
 accepted records are immutable conflicted with the new record rules.
 
-The structure comes from doc-kit at commit `5312a15` (v0.6.0). Its decision records, which give the
-reasons for each rule, are at `https://github.com/dconneely/doc-kit/tree/5312a15/docs/decisions`.
+The structure comes from doc-kit v0.10.0. Its decision records, which give the reasons for each
+rule, are at `https://github.com/dconneely/doc-kit/tree/v0.10.0/docs/decisions`.
 
 ## Considered Options
 
-- Adopt doc-kit 0.6.0's structure, preserving this repository's documented deviations.
+- Adopt doc-kit 0.10.0's structure, preserving this repository's documented deviations.
 - Keep the pre-0.5.0 structure and the old map, plan, specification and record rules.
-- Adopt 0.6.0 and flatten the repository's custom structure into the kit's monorepo default.
+- Adopt 0.10.0 and flatten the repository's custom structure into the kit's monorepo default.
 
 ## Decision Outcome
 
-Chosen option: "Adopt doc-kit 0.6.0's structure, preserving this repository's documented
+Chosen option: "Adopt doc-kit 0.10.0's structure, preserving this repository's documented
 deviations", because repeated agent sessions need one map that matches the files on disk and one set
 of current record rules, while the repository's three-module documentation and specification tree
 are recorded in ADR-0032, its site coverage in ADR-0033, and its lockstep release model in ADR-0024.
@@ -35,8 +35,8 @@ Deviations from the kit:
 
 - Documentation stays consolidated at the repository root for the three Gradle modules, rather than
   split per module (ADR-0032).
-- The specification stays a tree at `docs/spec/`, indexed by `docs/spec.md`, with one member per
-  subproject (ADR-0032).
+- The specification stays a tree at `docs/spec/`, indexed by `docs/spec/README.md`, with one member
+  per subproject (ADR-0032).
 - The separate `identigon.github.io` repository (ADR-0034) keeps its decisions and backlog here
   (ADR-0033), and its `README.md` and `AGENTS.md` are named by the sibling paths
   `../identigon.github.io/README.md` and `../identigon.github.io/AGENTS.md`.
@@ -51,14 +51,11 @@ Deviations from the kit:
   removed as the template's guidance comments are.
 - The moves were ordinary file moves, not `git mv`, because Git operations belong to the owner; the
   commit records them as renames.
-- The generated decision index is `docs/decisions.md`, outside the record directory.
 - The `approval` field is not used. Acceptance is recorded by `status`, `decision-makers` and
   `date`; any change to the words of an accepted record, including a path or citation, reopens and
   re-accepts it, and only formatting applied by a tool is exempt.
 - The 36 accepted records keep their historical `date` values; the migration normalised the two
   refined statuses to `accepted` without changing those dates.
-- The local checker and index generator are modified to drop the `approval` check and to handle
-  templates, empty record sets and POSIX awk portability.
 
 ### Consequences
 
@@ -70,7 +67,7 @@ Deviations from the kit:
 - Good, because acceptance is recorded by the record's own status, decision-makers and date; there
   is no separate approval text to keep in sync.
 - Bad, because the owner's words at acceptance are not recorded.
-- Good, because the paths match doc-kit 0.6.0, so its checker and index generator apply directly.
+- Good, because the paths match doc-kit 0.10.0, so its checker and index generator apply directly.
 - Bad, because the map must name every documentation file, and someone has to keep it so.
 - Bad, because the site repository's README and AGENTS still link to the old paths until that
   repository is changed separately.

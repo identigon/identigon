@@ -19,6 +19,8 @@ Rules - absolute:
 
 - An agent may create a record as "proposed", by copying this file - never an existing record - to
   the next free number, and may change a "proposed" record.
+- After creating or changing a record, run "sh tools/doc-kit-index-decisions.sh" to regenerate the
+  decisions index, if the repository keeps one.
 - Every other change needs the owner's explicit permission, asked for first: proposed -> accepted
   (accepting), proposed -> rejected (rejecting), accepted -> proposed (reopening to change it),
   accepted -> deprecated (deprecating), and deleting a record of any status.
@@ -35,10 +37,10 @@ How records work:
 - Only `accepted` binds. An accepted record is the current answer to its question: reopen and amend
   it, even to reverse it. When it no longer applies, deprecate or delete it - deleting is usually
   simpler - and link from it to any record that replaces it. A later choice between real options is
-  its own record, linked from this one.
+  its own record, linked from this one. A record carries no revision log: git holds what it said
+  when.
 - Cite records as ADR-NNNN, and another repository's record by a link. A change, deletion included,
   fixes in the same commit every citation it makes untrue; commit messages are left alone.
-- Formatting applied by a tool is not a change.
 
 Write it when the decision is made, not later. A record reconstructed years afterwards is usually an
 argument for what you already do, and it dilutes the ones written contemporaneously.

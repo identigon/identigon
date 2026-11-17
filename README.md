@@ -13,11 +13,11 @@ independently usable, sharing one repository-wide documentation set:
 
 Each subproject's behavioural contract lives under root [`docs/spec/`](docs/spec/); design decisions
 for all three are in root [`docs/decisions/`](docs/decisions/), numbered across the whole monorepo;
-the single root [`docs/plan.md`](docs/plan.md) tracks the whole backlog (optionally tagged by
-subproject) - see [`DOC-MAP.md`](DOC-MAP.md) for the full map, and the subproject's own README for
-what it does and how to use it. Release history is split at the point the three merged: the root
-[`CHANGELOG.md`](CHANGELOG.md) covers pre-1.0.0 history too (project-prefixed version tags), as well
-as every shared release from 1.0.0 onward.
+the single root [`docs/plan/README.md`](docs/plan/README.md) tracks the whole backlog (optionally
+tagged by subproject) - see [`DOC-MAP.md`](DOC-MAP.md) for the full map, and the subproject's own
+README for what it does and how to use it. Release history is split at the point the three merged:
+the root [`CHANGELOG.md`](CHANGELOG.md) covers pre-1.0.0 history too (project-prefixed version
+tags), as well as every shared release from 1.0.0 onward.
 
 ## Try it in five minutes
 

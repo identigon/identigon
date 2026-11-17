@@ -10,8 +10,9 @@ references something real.
 
 See [`docs/spec/alterego.md`](../docs/spec/alterego.md) for the full behavioural contract, the root
 [`CHANGELOG.md`](../CHANGELOG.md) (`alterego-*` entries for pre-1.0.0 history, then every shared
-release) for what's changed between versions, and the root [`docs/plan.md`](../docs/plan.md)
-(`**Project:** alterego` entries) for the deferred backlog.
+release) for what's changed between versions, and the root
+[`docs/plan/README.md`](../docs/plan/README.md) (`**Project:** alterego` entries) for the deferred
+backlog.
 
 Every code sample below is compiled and run as part of the test suite
 (`src/test/java/org/identigon/alterego/ReadmeExamplesTest.java`), so they cannot silently rot out of

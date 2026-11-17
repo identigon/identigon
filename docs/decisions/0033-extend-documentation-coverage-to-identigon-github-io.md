@@ -1,6 +1,6 @@
 ---
 status: "accepted"
-date: 2026-09-02
+date: 2026-11-17
 decision-makers: David Conneely
 ---
 
@@ -13,11 +13,11 @@ project, built with VitePress (see ADR-0034 for why it's a separate repository a
 for the choice of VitePress). It never adopted this repo's doc-kit structure on its own - correctly,
 per doc-kit's own size threshold, since its entire documentable surface is a handful of hand-written
 guide pages plus two real decisions and a short backlog, well under where a full separate
-`DOC-MAP.md`/`docs/plan.md`/`docs/decisions/` instance would earn its keep. But those real decisions
-and that backlog didn't disappear - they ended up as informal prose in that repo's own `README.md`
-(`## Decisions`, `## Roadmap` sections), exactly the "rationale in the wrong tense, in the wrong
-file" pattern doc-kit's own migration guide flags as the highest-value split to make - identical to
-what ADR-0032 already corrected for this repo's own subproject documentation.
+`DOC-MAP.md`/`docs/plan/README.md`/`docs/decisions/` instance would earn its keep. But those real
+decisions and that backlog didn't disappear - they ended up as informal prose in that repo's own
+`README.md` (`## Decisions`, `## Roadmap` sections), exactly the "rationale in the wrong tense, in
+the wrong file" pattern doc-kit's own migration guide flags as the highest-value split to make -
+identical to what ADR-0032 already corrected for this repo's own subproject documentation.
 `identigon.github.io`'s own `AGENTS.md` already names this tension explicitly ("however
 doc-kit-shaped a `docs/` subtree might look").
 
@@ -27,11 +27,11 @@ doc-kit-shaped a `docs/` subtree might look").
   the tension its own `AGENTS.md` already names, on the reasoning that the repo is too small to earn
   a doc-kit structure of its own.
 - Stand up a full, separate doc-kit instance inside `identigon.github.io` (its own `DOC-MAP.md`,
-  `docs/plan.md`, `docs/decisions/`) - conformant, but a second parallel copy of the same rules for
-  a repository that, on its own, is well under doc-kit's own size threshold.
+  `docs/plan/README.md`, `docs/decisions/`) - conformant, but a second parallel copy of the same
+  rules for a repository that, on its own, is well under doc-kit's own size threshold.
 - Extend this repo's existing, already-consolidated documentation structure to cover
   `identigon.github.io` too - the site repo's decisions land in this repo's `docs/decisions/`, its
-  backlog in this repo's `docs/plan.md` (tagged), the same way the three Gradle subprojects'
+  backlog in this repo's `docs/plan/README.md` (tagged), the same way the three Gradle subprojects'
   documentation was already consolidated here rather than split three ways (ADR-0032).
 
 ## Decision Outcome
@@ -54,9 +54,9 @@ Aliases already use.
 ### Consequences
 
 - Good, because `identigon.github.io`'s genuine decisions and backlog get a real home
-  (`docs/decisions/`, `docs/plan.md`) instead of indefinitely living as under-specified README
-  prose, without standing up a second parallel doc-kit instance that would fail this repo's own size
-  test.
+  (`docs/decisions/`, `docs/plan/README.md`) instead of indefinitely living as under-specified
+  README prose, without standing up a second parallel doc-kit instance that would fail this repo's
+  own size test.
 - Good, because a decision already made about the site (its VitePress choice, ADR-0035) and a future
   decision about, say, publishing generated Javadoc from this repo's own CI and linking it in from
   the site, sit in the same ADR sequence as the decision on the CI side - no ambiguity about which

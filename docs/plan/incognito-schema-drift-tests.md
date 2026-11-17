@@ -44,5 +44,5 @@ source value of a fabricated column appears in the target.
   the column.
 - Where a row reads "pin", the spec may not say yet. Flag the gap (AGENTS.md: do not invent
   behaviour) and settle it in `docs/spec/incognito.md` before writing that test.
-- Any scenario that currently lets a value through is a `bug` entry in `docs/plan.md` of its own,
-  ranked at the top - not a test to mark as skipped.
+- Any scenario that currently lets a value through is a `bug` entry in `docs/plan/README.md` of its
+  own, ranked at the top - not a test to mark as skipped.

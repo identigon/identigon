@@ -1,7 +1,7 @@
 # Question being investigated
 
 <!--
-Copy to a descriptive filename. Keep this file as 0000; it is the template.
+Copy to the next free number, NNNN-kebab-case-title.md. Keep this file as 0000; it is the template.
 
 Confidence is one of:
 - high - verified directly against the thing itself: the source, the running system, a normative

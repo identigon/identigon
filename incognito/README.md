@@ -14,10 +14,10 @@ explicit non-goals - see [ADR-0014](../docs/decisions/0014-fabrication-not-k-ano
 > fictional data."_
 
 See [`docs/spec/incognito.md`](../docs/spec/incognito.md) for the full behavioural contract, the
-root [`docs/plan.md`](../docs/plan.md) (`**Project:** incognito` entries) for the backlog,
-[`docs/decisions/`](../docs/decisions/) for the key design decisions and why they were made, and the
-root [`CHANGELOG.md`](../CHANGELOG.md) (`incognito-1.0.0` for pre-1.0.0 history, then every shared
-release) for what has changed between versions.
+root [`docs/plan/README.md`](../docs/plan/README.md) (`**Project:** incognito` entries) for the
+backlog, [`docs/decisions/`](../docs/decisions/) for the key design decisions and why they were
+made, and the root [`CHANGELOG.md`](../CHANGELOG.md) (`incognito-1.0.0` for pre-1.0.0 history, then
+every shared release) for what has changed between versions.
 
 ## Relationship to `alterego`
 

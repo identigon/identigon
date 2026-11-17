@@ -32,11 +32,11 @@ tables:
         directIdStrategy: ALTEREGO_NINO  # guaranteed-fictional "QQ" prefix
       bank_account:
         role: DIRECT_ID
-        # No typed bank-account generator exists in alterego yet (tracked in docs/plan.md), so
-        # this falls back to the generic shape-preserving strategy: same length and digit/letter
-        # classes as the source value, but - unlike every strategy above - carries NO fictionality
-        # guarantee. Good enough to sever the link to the real account; don't rely on the *output*
-        # looking obviously fake the way the NI number above does.
+        # No typed bank-account generator exists in alterego yet (tracked in
+        # docs/plan/README.md), so this falls back to the generic shape-preserving strategy: same
+        # length and digit/letter classes as the source value, but - unlike every strategy above -
+        # carries NO fictionality guarantee. Good enough to sever the link to the real account;
+        # don't rely on the *output* looking obviously fake the way the NI number above does.
         directIdStrategy: ALTEREGO_GENERIC
 
       # --- Quasi-identifiers: always fabricated, several strategies on show (SPEC §4.2) ----------

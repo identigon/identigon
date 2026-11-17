@@ -25,12 +25,13 @@ Docs:
 - `quickstart/README.md` - "Point `effigies` at it", and every command runs
   `../effigies/build/libs/identigon.jar`, so a user has to build the repository and learn a
   subproject's directory layout. Better: a released `identigon.jar` (or the executable from the
-  self-contained-executable entry in `docs/plan.md`), with building from source as the fallback.
+  self-contained-executable entry in `docs/plan/README.md`), with building from source as the
+  fallback.
 - `.agents/skills/identigon-policy-author/SKILL.md` - describes itself as authoring
   "incognito/effigies anonymisation policies" and tells the agent to run `effigies validate` /
   `effigies run`. No `effigies` command exists: the user runs `java -jar identigon.jar validate`.
 - The site (`identigon.github.io`) - check Getting Started the same way. The existing
-  "Per-subproject pages on the site" entry in `docs/plan.md` should put those pages under a
+  "Per-subproject pages on the site" entry in `docs/plan/README.md` should put those pages under a
   library/contributor section, not on the getting-started path.
 
 CLI output (`effigies/src/main/java/org/identigon/effigies/`):

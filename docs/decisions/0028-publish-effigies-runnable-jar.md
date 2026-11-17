@@ -1,6 +1,6 @@
 ---
 status: "accepted"
-date: 2026-09-01
+date: 2026-11-17
 decision-makers: David Conneely
 ---
 
@@ -61,8 +61,8 @@ means there is exactly one artifact per version to reason about, not two.
   This is root's first buildable artifact - it otherwise applies no `java`/`application` plugin and
   produces nothing of its own, only a `subprojects { }` block that injects config _into_
   subprojects - but root is already this repo's established home for monorepo-wide facts
-  (`docs/plan.md`, `CHANGELOG.md`, `docs/decisions/`), and a monorepo-wide artifact is the same
-  shape of fact.
+  (`docs/plan/README.md`, `CHANGELOG.md`, `docs/decisions/`), and a monorepo-wide artifact is the
+  same shape of fact.
 - **effigies gains a `publishing {}` block for the thin jar** - a jar + POM under
   `org.identigon:effigies`, no javadoc/sources jars (ADR-0024's rationale for skipping those doesn't
   apply to a bare-jar publish), with an accurate POM (incognito/SnakeYAML/the Postgres driver
@@ -88,8 +88,8 @@ means there is exactly one artifact per version to reason about, not two.
   `gh attestation verify <file> -R identigon/identigon` verifies any of them. A plain `SHA256SUMS`
   file alongside the Release assets is a `gh`-CLI-free complement.
 - **Scope: the fat `identigon.jar` plus the two plain library jars, nothing else.** No native image,
-  no platform installer - a separate, independently-justified `docs/plan.md` item if that need
-  surfaces.
+  no platform installer - a separate, independently-justified `docs/plan/README.md` item if that
+  need surfaces.
 - **Trigger: a manually-dispatched release workflow that takes an existing tag as input, rather than
   creating one.** `.github/workflows/release.yml` (`workflow_dispatch`, a required `tag` input) runs
   once a release tag already exists and is pushed. Tag creation stays manual and local: every
@@ -125,7 +125,7 @@ standalone-jar assembly back into effigies.
   (`Xdoclint:all`/`Xwerror`) has to key on whether `withJavadocJar()` was actually called, not
   merely on `maven-publish` being applied - otherwise it would demand full doclint compliance across
   effigies' whole public API as a side effect of this decision, not a deliberate one. Getting
-  effigies' code to that bar (it isn't there today) is tracked separately in `docs/plan.md`.
+  effigies' code to that bar (it isn't there today) is tracked separately in `docs/plan/README.md`.
 - Bad, because tag creation staying manual keeps a publish-ordering hazard alive, mitigated by
   discipline rather than structurally prevented: if the tag is pushed before `main.yml`'s own run
   against the version-bump commit has checked out (or that run hasn't finished yet), `main.yml`'s

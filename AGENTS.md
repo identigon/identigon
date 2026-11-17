@@ -1,8 +1,8 @@
 # Identigon - Instructions for Implementation Agents
 
 **Read [`DOC-MAP.md`](DOC-MAP.md) before writing anything down.** It says which file a given fact
-belongs in - root `docs/spec.md` indexes `docs/spec/`, decisions live in `docs/decisions/`, and so
-on. This page is behavioural rules; the map decides where facts go.
+belongs in - root `docs/spec/README.md` indexes `docs/spec/`, decisions live in `docs/decisions/`,
+and so on. This page is behavioural rules; the map decides where facts go.
 
 Identigon is a monorepo of three subprojects forming a pipeline, each a sibling Gradle project of
 the others (`effigies` -> `incognito` -> `alterego`, via `project(...)` dependencies):
@@ -15,7 +15,7 @@ the others (`effigies` -> `incognito` -> `alterego`, via `project(...)` dependen
   discovers schemas, scaffolds declarative `policy.yaml` files, and drives the engine to anonymise
   databases.
 
-The root `docs/plan.md` tracks the whole monorepo's backlog (each entry optionally tagged
+The root `docs/plan/README.md` tracks the whole monorepo's backlog (each entry optionally tagged
 `**Project:**`); root `CHANGELOG.md` covers every release, pre-1.0.0 history included
 (project-prefixed version tags for each subproject's own past releases, then every shared release
 from `1.0.0` onward, entries tagged by subproject under Keep a Changelog's own categories). Each
@@ -23,10 +23,11 @@ subproject's specification now lives under root `docs/spec/` - read the relevant
 writing any code, for whichever subproject(s) you're touching:
 
 **This also covers `identigon.github.io`**, the separate repository holding the project's public
-site: its decisions live in this repo's `docs/decisions/`, and its backlog in this `docs/plan.md`
-(tagged `identigon.github.io`), rather than in a documentation structure of its own - see
-`docs/decisions/0033-extend-documentation-coverage-to-identigon-github-io.md`. Working in that repo?
-Its own `AGENTS.md` there covers site-specific hazards only and routes back here for the rest.
+site: its decisions live in this repo's `docs/decisions/`, and its backlog in this
+`docs/plan/README.md` (tagged `identigon.github.io`), rather than in a documentation structure of
+its own - see `docs/decisions/0033-extend-documentation-coverage-to-identigon-github-io.md`. Working
+in that repo? Its own `AGENTS.md` there covers site-specific hazards only and routes back here for
+the rest.
 
 ## alterego/
 
@@ -57,10 +58,10 @@ bind. The rules for changing one are in `docs/decisions/0000-template.md`.
 
 Tense settles disagreements:
 
-- `docs/spec.md` - present tense: what the system does now.
+- `docs/spec/README.md` - present tense: what the system does now.
 - `CHANGELOG.md` - past tense: what changed, never what's true today.
-- `docs/plan.md` - intent: nothing in it exists yet.
-- `docs/decisions.md` - why: index of decision records; only `accepted` records bind.
+- `docs/plan/README.md` - intent: nothing in it exists yet.
+- `docs/decisions/` - why: decision records; only `accepted` ones bind.
 
 Before you edit:
 
@@ -73,7 +74,9 @@ Before you edit:
 - On accepting, set `decision-makers` and `date`, then commit. A rejected change to a reopened
   record is undone by restoring its accepted version.
 - Cite records as `ADR-NNNN`, and fix every citation a change makes untrue in the same commit.
-- Delete finished `docs/plan.md` entries; don't mark them done.
+- After creating or changing a record, run `sh tools/doc-kit-index-decisions.sh` to regenerate
+  `docs/decisions/README.md`.
+- Delete finished `docs/plan/README.md` entries; don't mark them done.
 - **Write the least that is true.** No history or account of how you got there, in documents or code
   comments - the map says where those go.
 - Adding a document means updating `DOC-MAP.md` in the same commit.

@@ -28,7 +28,8 @@ dependencies {
     // is `api`, not `implementation` - consumers writing custom stages compile against its types.
     api(project(":alterego"))
 
-    // Declarative YAML policy parser - an internal detail (see docs/plan.md for splitting it out).
+    // Declarative YAML policy parser - an internal detail (see docs/plan/README.md for splitting it
+    // out).
     implementation(libs.snakeyaml)
 
     // Testing dependencies
